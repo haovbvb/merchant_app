@@ -70,7 +70,6 @@ class _BootstrapPageState extends ConsumerState<BootstrapPage> {
         AppRouter.goLogin();
       }
     } catch (_) {
-
       await _authNotifier.clearSession();
       AppRouter.goLogin();
     }
@@ -83,7 +82,7 @@ class _BootstrapPageState extends ConsumerState<BootstrapPage> {
     if (data is Map) {
       return AuthResult.fromJson(Map<String, dynamic>.from(data));
     }
-    throw NetworkExceptions('响应格式错误');
+    throw NetworkExceptions('响应格式错误!!!!!');
   }
 
   @override

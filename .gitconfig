@@ -1,0 +1,12 @@
+[alias]
+    pushdev = "!f() { \
+        git add .; \
+        git commit -m \"$1\"; \
+        git checkout dev; \
+        git pull origin dev; \
+        git merge dev_page; \
+        git push origin dev; \
+        git checkout dev_page; \
+        git merge dev; \
+        git push origin dev_page; \
+    }; f"

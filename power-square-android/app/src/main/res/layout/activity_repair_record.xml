@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="view"
+            type="Object" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FFF5F6F7">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nsc"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:fillViewport="true"
+            app:layout_constraintBottom_toTopOf="@+id/llBottom"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivBack">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="1dp">
+
+                <ImageView
+                    android:id="@+id/ivStationIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@mipmap/icon_repair_registration"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    app:layout_constraintTop_toBottomOf="@+id/ivStationIcon"
+                    android:id="@+id/tvStationTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="7dp"
+                    android:text="@string/repair_device_record"
+                    android:textColor="@color/color_e60c0c0d"
+                    android:textSize="18sp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent" />
+
+                <com.okla.ops.weight.SnSearchInfoView
+                    android:id="@+id/deviceInfoView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="62dp"
+                    app:layout_constraintTop_toBottomOf="@id/ivStationIcon" />
+
+                <View
+                    android:id="@+id/vLine"
+                    android:layout_width="0dp"
+                    android:layout_height="12dp"
+                    android:background="@android:color/transparent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/deviceInfoView" />
+
+                <View
+                    android:id="@+id/bgRepairInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="174dp"
+                    android:background="@color/white"
+                    app:layout_constraintTop_toBottomOf="@id/vLine" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvRepairProjectTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/repair_device_project"
+                    android:textColor="@color/color_b30c0c0d"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="@id/bgRepairInfo"
+                    app:layout_constraintTop_toTopOf="@id/bgRepairInfo" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvRepairProjectValue"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:drawableEnd="@drawable/icon_arrow_down1"
+                    android:gravity="center_vertical"
+                    android:hint="@string/repair_device_project_tips"
+                    android:textColor="@color/color_e6000000"
+                    android:textColorHint="@color/color_4d0c0c0d"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toTopOf="@id/vLine1"
+                    app:layout_constraintEnd_toEndOf="@id/bgRepairInfo"
+                    app:layout_constraintStart_toStartOf="@id/bgRepairInfo"
+                    app:layout_constraintTop_toBottomOf="@id/tvRepairProjectTitle" />
+
+                <View
+                    android:id="@+id/vLine1"
+                    android:layout_width="0dp"
+                    android:layout_height="0.5dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="@color/color_e6e6e6"
+                    app:layout_constraintBottom_toBottomOf="@id/bgRepairInfo"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/bgRepairInfo" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvRepairResultTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/repair_device_result"
+                    android:textColor="@color/color_b30c0c0d"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="@id/bgRepairInfo"
+                    app:layout_constraintTop_toBottomOf="@id/vLine1" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvRepairResultValue"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:drawableEnd="@drawable/icon_arrow_down1"
+                    android:gravity="center_vertical"
+                    android:hint="@string/repair_device_result_tips"
+                    android:textColor="@color/color_e6000000"
+                    android:textColorHint="@color/color_4d0c0c0d"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="@id/bgRepairInfo"
+                    app:layout_constraintEnd_toEndOf="@id/bgRepairInfo"
+                    app:layout_constraintStart_toStartOf="@id/bgRepairInfo"
+                    app:layout_constraintTop_toBottomOf="@id/tvRepairResultTitle" />
+
+                <View
+                    android:id="@+id/vLine2"
+                    android:layout_width="0dp"
+                    android:layout_height="12dp"
+                    android:background="@android:color/transparent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/bgRepairInfo" />
+
+                <View
+                    android:id="@+id/bgRepairRemark"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="@color/white"
+                    app:layout_constraintBottom_toBottomOf="@id/etRepairRemarkValue"
+                    app:layout_constraintTop_toBottomOf="@id/vLine2" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvRepairRemarkTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/repair_device_remark"
+                    android:textColor="@color/color_b30c0c0d"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="@id/bgRepairRemark"
+                    app:layout_constraintTop_toTopOf="@id/bgRepairRemark" />
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/etRepairRemarkValue"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="@android:color/transparent"
+                    android:ellipsize="end"
+                    android:gravity="top"
+                    android:hint="@string/repair_device_remark_tips"
+                    android:maxLength="500"
+                    android:minHeight="48dp"
+                    android:paddingVertical="10dp"
+                    android:textColor="@color/color_b30c0c0d"
+                    android:textColorHint="@color/color_4d0c0c0d"
+                    android:textSize="15sp"
+                    app:layout_constraintBottom_toBottomOf="@id/bgRepairRemark"
+                    app:layout_constraintEnd_toEndOf="@id/bgRepairRemark"
+                    app:layout_constraintStart_toStartOf="@id/bgRepairRemark"
+                    app:layout_constraintTop_toBottomOf="@id/tvRepairRemarkTitle" />
+
+<!--                <View-->
+<!--                    android:id="@+id/vLine3"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="12dp"-->
+<!--                    android:background="@android:color/transparent"-->
+<!--                    app:layout_constraintEnd_toEndOf="parent"-->
+<!--                    app:layout_constraintStart_toStartOf="parent"-->
+<!--                    app:layout_constraintTop_toBottomOf="@id/bgRepairRemark" />-->
+
+<!--                <View-->
+<!--                    android:id="@+id/bgPhoto"-->
+<!--                    android:layout_width="match_parent"-->
+<!--                    android:layout_height="0dp"-->
+<!--                    android:background="@color/white"-->
+<!--                    app:layout_constraintBottom_toBottomOf="@id/rvPhotos"-->
+<!--                    app:layout_constraintTop_toBottomOf="@id/vLine3" />-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/tvPhoto"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginStart="16dp"-->
+<!--                    android:layout_marginTop="16dp"-->
+<!--                    android:text="@string/str_photo"-->
+<!--                    android:textColor="@color/bg_484848"-->
+<!--                    android:textSize="14sp"-->
+<!--                    app:layout_constraintStart_toStartOf="parent"-->
+<!--                    app:layout_constraintTop_toBottomOf="@id/vLine3" />-->
+
+<!--                <TextView-->
+<!--                    android:id="@+id/tvPhotoNum"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginStart="5dp"-->
+<!--                    android:layout_marginEnd="16dp"-->
+<!--                    android:text="(0/10)"-->
+<!--                    android:textColor="@color/color_400c0c0d"-->
+<!--                    android:textSize="14sp"-->
+<!--                    app:layout_constraintBottom_toBottomOf="@id/tvPhoto"-->
+<!--                    app:layout_constraintLeft_toRightOf="@id/tvPhoto"-->
+<!--                    app:layout_constraintTop_toTopOf="@id/tvPhoto" />-->
+
+<!--                <androidx.recyclerview.widget.RecyclerView-->
+<!--                    android:id="@+id/rvPhotos"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_marginStart="16dp"-->
+<!--                    android:layout_marginTop="12dp"-->
+<!--                    android:layout_marginEnd="15dp"-->
+<!--                    app:layout_constraintBottom_toBottomOf="@id/bgPhoto"-->
+<!--                    app:layout_constraintEnd_toEndOf="parent"-->
+<!--                    app:layout_constraintStart_toStartOf="parent"-->
+<!--                    app:layout_constraintTop_toBottomOf="@id/tvPhoto" />-->
+
+<!--                <View-->
+<!--                    android:id="@+id/vLine4"-->
+<!--                    android:layout_width="0dp"-->
+<!--                    android:layout_height="20dp"-->
+<!--                    android:background="@android:color/transparent"-->
+<!--                    app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                    app:layout_constraintEnd_toEndOf="parent"-->
+<!--                    app:layout_constraintStart_toStartOf="parent"-->
+<!--                    app:layout_constraintTop_toBottomOf="@id/bgPhoto"-->
+<!--                    app:layout_constraintVertical_bias="0" />-->
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="50dp"
+            android:scaleType="center"
+            android:src="@mipmap/ic_back"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/llBottom"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_shade_top"
+            android:orientation="horizontal"
+            android:padding="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:enabled="false"
+                android:id="@+id/tvConfirm"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:background="@drawable/selector_confirm"
+                android:gravity="center"
+                android:text="@string/btn_confirm"
+                android:textColor="@color/white"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

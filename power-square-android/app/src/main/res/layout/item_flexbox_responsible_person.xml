@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="data"
+            type="com.okla.ops.beans.CabinetDetailBaseInfoBean.ManagerBean" />
+
+    </data>
+
+
+    <TextView
+        android:id="@+id/tvPersonLiable"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="4dp"
+        android:background="@drawable/bg_et_f8_r2"
+        android:ellipsize="end"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp"
+        android:singleLine="true"
+        android:text="@{data.name + ` (` + data.phone + `)`}"
+        android:textColor="@color/text_333"
+        android:textSize="13sp"
+        tools:text="Jackson(454654646)" />
+
+</layout>

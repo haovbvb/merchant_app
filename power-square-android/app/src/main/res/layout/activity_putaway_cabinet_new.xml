@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="com.base.library.utils.StringUtil" />
+
+        <variable
+            name="viewModel"
+            type="com.okla.ops.views.workbench.putawaycabinet.PutawayCabinetViewModelNew" />
+
+        <variable
+            name="view"
+            type="com.okla.ops.views.workbench.putawaycabinet.PutawayCabinetActivityNew" />
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/color_00f5f6f7">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nsc"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:fillViewport="true"
+            android:fitsSystemWindows="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivBack">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/ivStationIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@mipmap/icon_release_station"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvStationTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="7dp"
+                    android:text="@string/putaway_cabinet_new_title"
+                    android:textColor="@color/color_e60c0c0d"
+                    android:textSize="18sp"
+                    app:layout_constraintTop_toBottomOf="@id/ivStationIcon"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent" />
+
+                <com.okla.ops.custom.station.StationInfoView
+                    android:id="@+id/vStationInfo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="22dp"
+                    app:layout_constraintTop_toBottomOf="@id/tvStationTitle" />
+
+                <View
+                    android:id="@+id/addLine"
+                    android:layout_width="0dp"
+                    android:layout_height="10dp"
+                    android:background="@color/f8f8f8"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/vStationInfo" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="@color/white"
+                    app:layout_constraintBottom_toTopOf="@id/vLine5"
+                    app:layout_constraintTop_toTopOf="@id/tvCabinetName" />
+
+                <TextView
+                    android:id="@+id/tvCabinetName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="55dp"
+                    android:gravity="center_vertical"
+                    android:paddingStart="16dp"
+                    android:text="@string/putaway_cabinet_cabinet_name"
+                    android:textColor="@color/text_333"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/addLine" />
+
+                <EditText
+                    android:id="@+id/tvCabinetNameValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@null"
+                    android:ellipsize="end"
+                    android:textCursorDrawable="@drawable/bg_maincolor_cursor"
+                    android:gravity="center_vertical"
+                    android:hint="@string/putaway_cabinet_input_cabinet_name"
+                    android:imeOptions="actionDone"
+                    android:maxLength="50"
+                    android:maxLines="1"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="20dp"
+                    android:singleLine="true"
+                    android:text="@{viewModel.newCabinetBeanMutableLiveData.stationName}"
+                    android:textColor="@color/text_333"
+                    android:textColorHint="@color/color_4d0c0c0d"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toTopOf="@id/vLine11"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/tvCabinetName"
+                    app:layout_constraintTop_toBottomOf="@id/tvCabinetName"
+                    tools:text="STA6011171000007" />
+
+                <View
+                    android:id="@+id/vLine11"
+                    style="@style/septalLineMarginStyle"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvCabinetNameValue" />
+
+                <TextView
+                    android:id="@+id/tvBatteryCabinetAddressDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/putaway_cabinet_address"
+                    android:textColor="@color/text_333"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/vLine11" />
+
+                <EditText
+                    android:id="@+id/etBatteryCabinetAddress"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginEnd="5dp"
+                    android:background="@color/white"
+                    android:textCursorDrawable="@drawable/bg_maincolor_cursor"
+                    android:hint="@string/putaway_cabinet_input_cabinet_address"
+                    android:imeOptions="actionDone"
+                    android:inputType="text|textCapCharacters"
+                    android:paddingBottom="16dp"
+                    android:textColor="@color/text_333"
+                    android:textColorHint="@color/color_4d0c0c0d"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toStartOf="@id/vLineLocation"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvBatteryCabinetAddressDesc"
+                    tools:text="Room 501, unit 6, building 20, North Lane, east flower market, Beijing" />
+
+                <View
+                    android:id="@+id/vLineLocation"
+                    android:layout_width="1dp"
+                    android:layout_height="0dp"
+                    android:background="#e7e7e7"
+                    app:layout_constraintBottom_toBottomOf="@id/ivLocate"
+                    app:layout_constraintRight_toLeftOf="@id/ivLocate"
+                    app:layout_constraintTop_toTopOf="@id/ivLocate" />
+
+                <ImageView
+                    android:id="@+id/ivLocate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:onClick="@{view::onClickView}"
+                    android:padding="10dp"
+                    android:src="@mipmap/ic_lon_lat"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/etBatteryCabinetAddress" />
+
+                <View
+                    android:id="@+id/vLine4"
+                    android:layout_width="0dp"
+                    android:layout_height="1dp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@color/f0f0f0"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/ivLocate" />
+
+                <TextView
+                    android:id="@+id/tvBatteryCabinetLonAndLatDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/putaway_cabinet_lon_and_lat"
+                    android:textColor="@color/text_333"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/vLine4" />
+
+                <TextView
+                    android:id="@+id/tvBatteryCabinetLonAndLat"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginEnd="16dp"
+                    android:ellipsize="end"
+                    android:gravity="center_vertical"
+                    android:singleLine="true"
+                    android:text="--"
+                    android:textColor="@color/text_333"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="@id/tvBatteryCabinetLonAndLatDesc"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/tvBatteryCabinetLonAndLatDesc"
+                    app:layout_constraintTop_toTopOf="@id/tvBatteryCabinetLonAndLatDesc"
+                    tools:text="22.390 , 116.0f43242342423242324297" />
+
+                <View
+                    android:id="@+id/vLine5"
+                    android:layout_width="0dp"
+                    android:layout_height="10dp"
+                    android:layout_marginTop="16dp"
+                    android:background="@android:color/transparent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvBatteryCabinetLonAndLatDesc" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="@color/white"
+                    app:layout_constraintBottom_toTopOf="@id/vLine20"
+                    app:layout_constraintTop_toBottomOf="@id/vLine5" />
+
+                <TextView
+                    android:id="@+id/tvBatteryExchangeIndicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/putaway_cabinet_battery_exchange_indicator"
+                    android:textColor="@color/color_b30c0c0d"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/vLine5" />
+                <TextView
+                    app:layout_constraintBottom_toBottomOf="@+id/tvBatteryExchangeIndicator"
+                    app:layout_constraintStart_toEndOf="@+id/tvBatteryExchangeIndicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#66000000"
+                    android:textSize="14sp"
+                    android:text="@string/putawai_cabinet_times_day"/>
+                <EditText
+                    android:id="@+id/etBatteryExchangeIndicatorValue"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="16dp"
+                    android:background="@null"
+                    android:hint="@string/putaway_cabinet_input_swap_indicator"
+                    android:imeOptions="actionDone"
+                    android:inputType="number"
+                    android:paddingTop="12dp"
+                    android:maxLength="2"
+                    android:text="1"
+                    android:textCursorDrawable="@drawable/bg_maincolor_cursor"
+                    android:textColor="@color/color_e60c0c0d"
+                    android:textColorHint="@color/color_4d0c0c0d"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvBatteryExchangeIndicator"
+                    tools:text="12" />
+
+                <View
+                    android:id="@+id/vLine6"
+                    style="@style/septalLineMarginStyle"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/etBatteryExchangeIndicatorValue" />
+
+                <TextView
+                    android:id="@+id/tvBatteryCabinetPhotoDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/putaway_cabinet_photo_new"
+                    android:textColor="#484848"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/vLine6" />
+
+                <TextView
+                    android:id="@+id/tvBatteryCabinetPhotoNum"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginEnd="20dp"
+                    android:text="(0/5)"
+                    android:textColor="#400c0c0d"
+                    android:textSize="14sp"
+                    app:layout_constraintBottom_toBottomOf="@id/tvBatteryCabinetPhotoDesc"
+                    app:layout_constraintLeft_toRightOf="@id/tvBatteryCabinetPhotoDesc"
+                    app:layout_constraintTop_toTopOf="@id/tvBatteryCabinetPhotoDesc" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvPhotos"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="15dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvBatteryCabinetPhotoDesc" />
+
+                <View
+                    android:id="@+id/vLine20"
+                    android:layout_width="0dp"
+                    android:layout_height="10dp"
+                    android:layout_marginTop="20dp"
+                    android:background="@color/f8f8f8"
+                    app:layout_constraintBottom_toTopOf="@id/llBottom"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/rvPhotos" />
+
+                <LinearLayout
+                    android:id="@+id/llBottom"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_shade_top"
+                    android:onClick="@{view::onClickView}"
+                    android:orientation="horizontal"
+                    android:padding="20dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent">
+
+                    <TextView
+                        android:id="@+id/tvConfirm"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:enabled="false"
+                        android:background="@drawable/selector_confirm"
+                        android:gravity="center"
+                        android:text="@string/putaway_cabinet_confirm"
+                        android:textColor="@color/white"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="12dp"
+            android:onClick="@{view::onClickView}"
+            android:scaleType="center"
+            android:src="@mipmap/ic_back"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

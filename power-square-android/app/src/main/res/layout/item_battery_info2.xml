@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="78dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="0dp">
+
+        <ImageView
+            android:id="@+id/ivBattery"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvSn"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:textColor="@color/color_e60c0c0d"
+            android:textSize="15sp"
+            app:layout_constraintEnd_toStartOf="@id/imgDelete"
+            app:layout_constraintStart_toEndOf="@id/ivBattery"
+            app:layout_constraintTop_toTopOf="@id/ivBattery"
+            tools:text="SN: OB202306110001" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvModelName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:textColor="@color/color_66000000"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="@id/ivBattery"
+            app:layout_constraintEnd_toEndOf="@id/tvSn"
+            app:layout_constraintStart_toStartOf="@id/tvSn"
+            app:layout_constraintTop_toBottomOf="@id/tvSn"
+            tools:text="AG2 (60V 30A)" />
+
+        <ImageView
+            android:id="@+id/imgDelete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="0dp"
+            android:src="@drawable/icon_delete"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/tvSn"
+            app:layout_constraintTop_toTopOf="@id/ivBattery" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:background="@color/color_e6e6e6"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

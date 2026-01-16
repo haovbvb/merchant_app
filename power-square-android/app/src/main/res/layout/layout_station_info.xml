@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_ffffff_top_r16_bg">
+
+    <TextView
+        android:id="@+id/tvBatteryCabinetSNDesc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="16dp"
+        android:textColor="@color/text_333"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/ivScanSN"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:padding="10dp"
+        android:src="@mipmap/icon_black_scan"
+        app:layout_constraintBottom_toTopOf="@id/vLine1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvBatteryCabinetSNDesc" />
+
+    <EditText
+        android:id="@+id/etBatteryCabinetSN"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="14dp"
+        android:layout_marginEnd="20dp"
+        android:background="@color/white"
+        android:hint="@string/device_search_input_tip"
+        android:paddingBottom="5dp"
+        android:textCursorDrawable="@drawable/bg_maincolor_cursor"
+        android:textColorHint="@color/color_bfbfc8"
+        android:textSize="14sp"
+        android:lines="1"
+        android:singleLine="true"
+        android:imeOptions="actionDone"
+        app:layout_constraintEnd_toStartOf="@id/ivScanSN"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvBatteryCabinetSNDesc" />
+
+    <View
+        android:id="@+id/vLine1"
+        style="@style/septalLineMarginStyle"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etBatteryCabinetSN" />
+
+    <FrameLayout
+        android:id="@+id/ctStationInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_f5f8fb_r8"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/vLine1">
+
+        <TextView
+            android:id="@+id/tvStationNoInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="26dp"
+            android:layout_marginBottom="26dp"
+            android:text="@string/putaway_cabinet_new_no_info"
+            android:textColor="@color/color_330c0c0d"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

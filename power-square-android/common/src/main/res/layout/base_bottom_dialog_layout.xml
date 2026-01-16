@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/transparent"
+    android:orientation="vertical"
+    android:paddingBottom="10dp">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:background="@android:color/transparent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/cc_bg_ffffff_r10_bg"
+            android:orientation="vertical">
+
+
+            <LinearLayout
+                android:id="@+id/ll_action_1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_action_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="51.5dp"
+                    android:layout_gravity="center"
+                    android:ellipsize="end"
+                    android:gravity="center"
+                    android:lines="1"
+                    android:textColor="@color/cc_color_222222"
+                    android:textSize="@dimen/sp_14"
+                    tools:text="拍照" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="@color/cc_color_f1f2f6" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_action_2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_action_2"
+                    android:layout_width="match_parent"
+                    android:layout_height="51.5dp"
+                    android:gravity="center"
+                    android:textColor="@color/cc_color_222222"
+                    android:textSize="@dimen/sp_14"
+                    tools:text="从相册选择" />
+
+
+                <TextView
+                    android:id="@+id/tvLine2"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:background="@color/cc_color_f1f2f6" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_action_3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_action_3"
+                    android:layout_width="match_parent"
+                    android:layout_height="51.5dp"
+                    android:gravity="center"
+                    android:textColor="@color/cc_color_222222"
+                    android:textSize="@dimen/sp_14"
+                    tools:text="daddkkdd" />
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="10dp"
+            android:background="@android:color/transparent" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:background="@drawable/cc_bg_ffffff_r10_bg">
+
+            <TextView
+                android:id="@+id/tv_cancel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/cc_str_cancel"
+                android:textColor="@color/cc_color_fb6800"
+                android:textSize="@dimen/sp_14" />
+
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

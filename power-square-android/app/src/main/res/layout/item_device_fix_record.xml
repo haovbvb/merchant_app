@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_ffffff_r8"
+        android:padding="12dp">
+
+        <com.okla.ops.weight.CircleImageView
+            android:id="@+id/imArrow"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            app:civ_border_color="@color/white"
+            app:civ_border_width="1dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:scaleType="centerCrop"
+            android:src="@mipmap/icon_fix"
+            android:id="@+id/img_fix"
+            app:layout_constraintBottom_toBottomOf="@id/imArrow"
+            app:layout_constraintEnd_toEndOf="@id/imArrow" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="8dp"
+            android:textColor="@color/cc_color_e60c0c0d"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/imArrow"
+            app:layout_constraintEnd_toStartOf="@id/tvStatus"
+            app:layout_constraintStart_toEndOf="@id/imArrow"
+            app:layout_constraintTop_toTopOf="@id/imArrow"
+            tools:text="Louisa Lyons" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_e9f7f2_r4"
+            android:paddingHorizontal="4dp"
+            android:paddingVertical="2dp"
+            android:text="-"
+            android:textColor="@color/cc_color_00b88a"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="@id/imArrow"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/imArrow"
+            tools:text="Repair completed" />
+
+        <View
+            android:id="@+id/vLine"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginTop="12dp"
+            android:background="@color/color_e6e6e6"
+            app:layout_constraintTop_toBottomOf="@id/imArrow" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvFixName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textColor="@color/cc_color_e60c0c0d"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/vLine"
+            tools:text="Abnormal charger" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvFixDetail"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textColor="@color/cc_color_800c0c0d"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvFixName"
+            tools:text="The charger cannot be charged and replaced with a new charger." />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textColor="@color/cc_color_4d0c0c0d"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvFixDetail"
+            tools:text="2022-10-11  16:50:34" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

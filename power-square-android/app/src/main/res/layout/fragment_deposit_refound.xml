@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F5F6F7">
+
+        <!-- 底部确认按钮 (固定部分) -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_bottom"
+            android:layout_width="match_parent"
+            android:layout_height="78dp"
+            android:background="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/btnConfirm"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginHorizontal="16dp"
+                android:background="@drawable/selector_confirm"
+                android:enabled="false"
+                android:gravity="center"
+                android:text="@string/btn_submit"
+                android:textColor="@color/white"
+                android:textSize="17sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <!-- 中间可滚动区域 -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scrollContent"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:fillViewport="true"
+            app:layout_constraintBottom_toTopOf="@id/layout_bottom"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:id="@+id/ivRegisterIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="55dp"
+                    android:scaleType="center"
+                    android:src="@mipmap/icon_deposit_refund"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/text_deposit_refund"
+                    android:textColor="@color/color_e6000000"
+                    android:textSize="18sp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/ivRegisterIcon" />
+                <!-- 顶部用户信息 (固定部分) -->
+
+                <com.okla.ops.weight.SnSearchInfoView
+                    android:id="@+id/userinfo_view"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/album_dp_20"
+                    android:background="@drawable/bg_top_r16_ffffff"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/tvTitle" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_orders"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:background="@color/white"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="@dimen/dp_10"
+                    app:layout_constraintTop_toBottomOf="@+id/userinfo_view">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_title_selectable_orders"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_deposit_refund_order"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/tv_reselect"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_reselect"
+                        android:textColor="#ff0a5bcc"
+                        android:textSize="14sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/tv_title_selectable_orders" />
+
+                    <TextView
+                        android:id="@+id/tvEmptyOrder"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:paddingVertical="16dp"
+                        android:text="@string/str_select_the_refund_order"
+                        android:textColor="@color/color_999999"
+                        android:textSize="13sp"
+                        app:layout_constraintStart_toStartOf="@+id/tv_title_selectable_orders"
+                        app:layout_constraintTop_toBottomOf="@+id/tv_title_selectable_orders" />
+
+                    <ImageView
+                        android:id="@+id/img_select_order"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:paddingStart="16dp"
+                        android:paddingTop="16dp"
+                        android:paddingEnd="12dp"
+                        android:src="@drawable/icon_arrow_down1"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/tv_title_selectable_orders" />
+
+
+                    <!-- 订单列表 -->
+                    <!--                    <com.scwang.smartrefresh.layout.SmartRefreshLayout-->
+                    <!--                        app:layout_constraintTop_toBottomOf="@+id/tv_title_selectable_orders"-->
+                    <!--                        android:layout_width="match_parent"-->
+                    <!--                        android:layout_height="wrap_content"-->
+                    <!--                        app:srlEnableLoadMore="true"-->
+                    <!--                        app:srlEnableRefresh="false"-->
+                    <!--                        android:id="@+id/swipRefresh">-->
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvOrders"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:nestedScrollingEnabled="false"
+                        android:overScrollMode="never"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        app:layout_constraintTop_toBottomOf="@+id/tv_title_selectable_orders" />
+                    <!--                    </com.scwang.smartrefresh.layout.SmartRefreshLayout>-->
+
+                    <View
+                        android:id="@+id/line2"
+                        android:layout_width="0dp"
+                        android:layout_height="0.5dp"
+                        android:background="#e6e6e6"
+                        app:layout_constraintEnd_toEndOf="@+id/rvOrders"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/rvOrders" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_title_refund_amount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="@string/str_deposit_refund_amount"
+                        android:textColor="@color/color_999999"
+                        android:textSize="14sp"
+                        app:layout_constraintStart_toStartOf="@id/line2"
+                        app:layout_constraintTop_toBottomOf="@+id/line2" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_refund_amount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/color_f66700"
+                        android:textSize="18sp"
+                        app:layout_constraintBottom_toBottomOf="@+id/tv_title_refund_amount"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="@+id/tv_title_refund_amount" />
+
+                    <androidx.constraintlayout.widget.Group
+                        android:id="@+id/groupSelectOrder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:constraint_referenced_ids="tv_reselect,rvOrders,line2,tv_title_refund_amount,tv_refund_amount" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/layout_voucher"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginVertical="12dp"
+                    android:background="@color/white"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_orders">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_title_voucher"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/str_voucher"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <androidx.appcompat.widget.AppCompatCheckBox
+                        android:id="@+id/checkbox"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:background="@null"
+                        android:button="@drawable/checkbox_custom"
+                        android:checked="true"
+                        android:drawablePadding="8dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/text_recovery_confirmed"
+                        android:textSize="12sp"
+                        app:layout_constraintStart_toStartOf="@+id/tv_title_voucher"
+                        app:layout_constraintTop_toBottomOf="@+id/tv_title_voucher" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_see_receipt"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:paddingEnd="16dp"
+                        android:text="@string/text_view_receipt"
+                        android:textColor="#0A5BCC"
+                        app:layout_constraintBottom_toBottomOf="@id/checkbox"
+                        app:layout_constraintEnd_toEndOf="parent" />
+
+                    <View
+                        android:id="@+id/line3"
+                        android:layout_width="0dp"
+                        android:layout_height="0.5dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@color/color_e6e6e6"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@+id/checkbox"
+                        app:layout_constraintTop_toBottomOf="@+id/checkbox" />
+
+                    <androidx.constraintlayout.widget.Group
+                        android:id="@+id/group_voucher"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:constraint_referenced_ids="tv_title_voucher,checkbox,tv_see_receipt,line3" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tv_title_remark"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:paddingStart="16dp"
+                        android:text="@string/text_remark"
+                        android:textColor="#b3000000"
+                        android:textSize="14sp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/line3" />
+
+                    <androidx.appcompat.widget.AppCompatEditText
+                        android:id="@+id/edt_remark"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="16dp"
+                        android:background="@null"
+                        android:gravity="start"
+                        android:hint="@string/hint_enter_remark"
+                        android:minHeight="100dp"
+                        android:maxLength="200"
+                        android:paddingVertical="5dp"
+                        android:paddingEnd="5dp"
+                        android:textColor="@color/color_e6000000"
+                        android:textColorHint="#4d000000"
+                        android:textSize="15sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="@id/tv_title_remark"
+                        app:layout_constraintTop_toBottomOf="@+id/tv_title_remark" />
+
+                    <View
+                        android:layout_width="wrap_content"
+                        android:layout_height="25dp"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/edt_remark" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="50dp"
+            android:scaleType="center"
+            android:src="@mipmap/ic_back"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/color_f5f6f7">
+
+        <include
+            android:id="@+id/includeTitle"
+            layout="@layout/base_title_mvvm_layout"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clBatteryTypeInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="12dp"
+            android:background="@drawable/bg_gradient_eefaff_ffffff"
+            app:layout_constraintTop_toBottomOf="@id/includeTitle">
+
+            <ImageView
+                android:id="@+id/ivBattery"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="22dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvBatteryModel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="16dp"
+                android:textColor="@color/color_e6000000"
+                android:textSize="17sp"
+                app:layout_constraintBottom_toTopOf="@id/tvBatteryDetail"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ivBattery"
+                app:layout_constraintTop_toTopOf="@id/ivBattery"
+                tools:text="AG2 (60V 50A)" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvBatteryDetail"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:textColor="@color/color_99000000"
+                android:textSize="13sp"
+                app:layout_constraintBottom_toBottomOf="@id/ivBattery"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@id/tvBatteryModel"
+                app:layout_constraintTop_toBottomOf="@id/tvBatteryModel"
+                tools:text="4G/GPS/OTA optional" />
+
+            <View
+                android:id="@+id/vBatteryOther"
+                android:layout_width="match_parent"
+                android:layout_height="61dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/bg_f6f8fc_r6"
+                app:layout_constraintTop_toBottomOf="@id/ivBattery" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvBatteryDimension"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:text="@string/text_dimension"
+                android:textColor="@color/color_99000000"
+                android:textSize="13sp"
+                app:layout_constraintBottom_toTopOf="@id/tvDimension"
+                app:layout_constraintEnd_toEndOf="@id/vLine1"
+                app:layout_constraintStart_toStartOf="@id/vBatteryOther"
+                app:layout_constraintTop_toTopOf="@id/vBatteryOther" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvDimension"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:layout_marginStart="16dp"
+                android:text="@string/text_dimension"
+                android:textColor="@color/color_e6000000"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@id/vBatteryOther"
+                app:layout_constraintStart_toStartOf="@id/vBatteryOther"
+                app:layout_constraintTop_toBottomOf="@id/tvBatteryDimension"
+                tools:text="207mm * 129mm * 323mm" />
+
+            <View
+                android:id="@+id/vLine1"
+                android:layout_width="0.5dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginVertical="12dp"
+                android:background="@color/color_12000000"
+                app:layout_constraintBottom_toBottomOf="@id/vBatteryOther"
+                app:layout_constraintEnd_toStartOf="@id/tvBatteryWeight"
+                app:layout_constraintTop_toTopOf="@id/vBatteryOther" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvBatteryWeight"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="56dp"
+                android:layout_marginEnd="16dp"
+                android:gravity="center_vertical"
+                android:text="@string/text_net_weight"
+                android:textColor="@color/color_99000000"
+                android:textSize="13sp"
+                app:layout_constraintBottom_toTopOf="@id/tvWeight"
+                app:layout_constraintEnd_toEndOf="@id/vBatteryOther"
+                app:layout_constraintStart_toEndOf="@id/tvDimension"
+                app:layout_constraintTop_toTopOf="@id/vBatteryOther" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvWeight"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:text="@string/text_dimension"
+                android:textColor="@color/color_e6000000"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@id/vBatteryOther"
+                app:layout_constraintEnd_toEndOf="@id/tvBatteryWeight"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintStart_toStartOf="@id/tvBatteryWeight"
+                app:layout_constraintTop_toBottomOf="@id/tvBatteryWeight"
+                tools:text="13.5kg" />
+
+            <View
+                android:id="@+id/bg_manualentry"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_line_r8_99000000"
+                app:layout_constraintEnd_toStartOf="@+id/bg_scanentry"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/vBatteryOther" />
+
+            <View
+                android:id="@+id/bg_scanentry"
+                android:layout_width="0dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="12dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/bg_0f322c_r8"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toEndOf="@+id/bg_manualentry"
+                app:layout_constraintTop_toBottomOf="@id/vBatteryOther" />
+
+            <TextView
+                android:id="@+id/btnManualEntry"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_marginStart="16dp"
+                android:drawableStart="@drawable/icon_edit1"
+                android:drawablePadding="4dp"
+                android:gravity="center"
+                android:text="@string/str_manual_entry"
+                android:textColor="@color/color_e6000000"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="@+id/bg_manualentry"
+                app:layout_constraintEnd_toEndOf="@+id/bg_manualentry"
+                app:layout_constraintStart_toStartOf="@+id/bg_manualentry"
+                app:layout_constraintTop_toTopOf="@+id/bg_manualentry" />
+
+            <TextView
+                android:id="@+id/btnScanEntry"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:drawableStart="@mipmap/icon_scan"
+                android:drawablePadding="4dp"
+                android:gravity="center"
+                android:text="@string/btn_scan_entry"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                app:layout_constraintBottom_toBottomOf="@id/bg_scanentry"
+                app:layout_constraintEnd_toEndOf="@id/bg_scanentry"
+                app:layout_constraintStart_toStartOf="@id/bg_scanentry"
+                app:layout_constraintTop_toTopOf="@id/bg_scanentry" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvTotal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:textColor="@color/color_e6000000"
+            android:textSize="16sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/clBatteryTypeInfo"
+            tools:text="Battery: 190" />
+
+        <LinearLayout
+            android:id="@+id/layout_empty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/bg_ffffff_r8"
+            android:orientation="vertical"
+            app:layout_constraintTop_toBottomOf="@+id/tvTotal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="40dp"
+                android:layout_marginBottom="12dp"
+                android:src="@mipmap/icon_empty_battery" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:gravity="center"
+                android:paddingBottom="30dp"
+                android:text="@string/str_empty_device_letter" />
+        </LinearLayout>
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/layout_scrollview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/clBottom"
+            app:layout_constraintTop_toBottomOf="@id/tvTotal">
+
+
+            <LinearLayout
+                android:id="@+id/llBattery"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+        </androidx.core.widget.NestedScrollView>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clBottom"
+            android:layout_width="match_parent"
+            android:layout_height="78dp"
+           android:background="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/btnConfirm"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginHorizontal="16dp"
+                android:background="@drawable/selector_btn_enable"
+                android:enabled="false"
+                android:gravity="center"
+                android:text="@string/btn_submit"
+                android:textColor="@color/white"
+                android:textSize="17sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

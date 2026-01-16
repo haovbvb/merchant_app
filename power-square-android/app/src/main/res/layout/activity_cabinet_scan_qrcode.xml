@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="view"
+            type="com.okla.ops.views.workbench.cabinetopt.CabinetScanQrcodeActivity" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black">
+
+        <com.journeyapps.barcodescanner.DecoratedBarcodeView
+            android:id="@+id/view_finder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:layout_marginTop="-100dp"
+            android:background="@android:color/transparent"
+            app:zxing_framing_rect_height="300dp"
+            app:zxing_framing_rect_width="300dp"
+            app:zxing_preview_scaling_strategy="fitXY"
+            app:zxing_scanner_layout="@layout/barcode_scanner"
+            app:zxing_use_texture_view="true" />
+
+        <include
+            android:id="@+id/clHead"
+            layout="@layout/include_head_cl_alpha" />
+
+        <LinearLayout
+            android:id="@+id/control_area"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="35dp"
+            android:orientation="horizontal"
+            app:layout_constraintTop_toBottomOf="@id/desc_text_2">
+
+            <LinearLayout
+                android:id="@+id/manual_input"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:onClick="@{view::onClickView}"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@mipmap/qr_manual_input" />
+
+                <TextView
+                    android:id="@+id/manual_input_tv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/qr_manual_input"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/btn_switch"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:onClick="@{view::onClickView}"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:id="@+id/flash_image"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@mipmap/qr_unlight" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/qr_light"
+                    android:textColor="@color/white" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/desc_text_2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:alpha="0.6"
+            android:gravity="center"
+            android:paddingLeft="20dp"
+            android:paddingTop="265dp"
+            android:paddingRight="20dp"
+            android:text="@string/qr_scan_tip"
+            android:textColor="@color/white"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clEnterSn"
+            android:layout_width="match_parent"
+            android:layout_height="72dp"
+            android:background="@color/color_1e2126"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvEnterSn"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_margin="16dp"
+                android:background="@drawable/bg_1affffff_r8"
+                android:drawableStart="@drawable/icon_edit_grey"
+                android:drawablePadding="8dp"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:lines="1"
+                android:paddingStart="8dp"
+                android:paddingEnd="49dp"
+                android:singleLine="true"
+                android:text="@string/transport_manually_enter_sn"
+                android:textColor="@color/color_1affffff"
+                android:textSize="14sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

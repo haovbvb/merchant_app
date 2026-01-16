@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data></data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F5F6F7">
+
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/nsc"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:fillViewport="true"
+            app:layout_constraintBottom_toTopOf="@+id/llBottom"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivBack">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:paddingBottom="1dp">
+
+                <ImageView
+                    android:id="@+id/ivStationIcon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@mipmap/icon_manual_swap"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvStationTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:text="@string/user_manual_battery_exchange"
+                    android:textColor="@color/color_e60c0c0d"
+                    android:textSize="18sp"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintRight_toRightOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/ivStationIcon" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/bg_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="22dp"
+                    android:background="@drawable/bg_ffffff_top_r16_bg"
+                    app:layout_constraintBottom_toTopOf="@+id/layout_reason"
+                    app:layout_constraintTop_toBottomOf="@id/tvStationTitle">
+
+                    <com.okla.ops.custom.ScanOrInputView
+                        android:id="@+id/sivUserID"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:ScanAndInputHintValue="@string/hint_enter_userid_or_scan_qrcode"
+                        app:ScanAndInputIsEnabledInput="false"
+                        app:ScanAndInputName="@string/manual_replace_user_id"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="@id/bg_content" />
+
+                    <com.okla.ops.custom.ScanOrInputView
+                        android:id="@+id/sivBatterySN"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        app:ScanAndInputHintValue="@string/hint_enter_batterysn_or_scan_qrcode"
+                        app:ScanAndInputName="@string/str_bound_battery_sn"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/sivUserID" />
+
+                    <com.okla.ops.custom.ScanOrInputView
+                        android:id="@+id/sivBatteryNewSN"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        app:ScanAndInputHintValue="@string/hint_enter_batterysn_or_scan_qrcode"
+                        app:ScanAndInputName="@string/workbench_merchant_replac_offline_replace_new_battery"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/sivBatterySN" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_marginTop="10dp"
+                    android:id="@+id/layout_reason"
+                    app:layout_constraintTop_toBottomOf="@+id/bg_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:background="@color/white"
+                    android:paddingHorizontal="16dp"
+                    android:paddingVertical="20dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/str_reasons"
+                        android:textColor="#b30c0c0d"
+                        android:textSize="14sp"
+                        android:id="@+id/tv_title_reason"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                    <EditText
+                        android:id="@+id/etreason"
+                        android:textSize="15sp"
+                        android:maxLength="200"
+                        android:hint="@string/hint_enter_reason_for_battery_swap"
+                        android:textColor="@color/color_e6000000"
+                        android:textColorHint="#4d0c0c0d"
+                        android:background="@null"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintTop_toBottomOf="@+id/tv_title_reason"
+                        android:layout_marginTop="16dp"/>
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.core.widget.NestedScrollView>
+
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="50dp"
+            android:scaleType="center"
+            android:src="@mipmap/ic_back"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <LinearLayout
+            android:id="@+id/llBottom"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_shade_top"
+            android:orientation="horizontal"
+            android:padding="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:id="@+id/tvConfirm"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:background="@drawable/selector_confirm"
+                android:gravity="center"
+                android:enabled="false"
+                android:text="@string/btn_submit"
+                android:textColor="@color/white"
+                android:textSize="13sp" />
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

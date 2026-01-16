@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_ffffff_top_r10_bg">
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:gravity="center"
+        android:text="@string/inventory_create_new_inventory"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageView
+        android:id="@+id/iv_close"
+        android:layout_width="38dp"
+        android:layout_height="38dp"
+        android:layout_marginEnd="8dp"
+        android:scaleType="center"
+        android:src="@mipmap/icon_cancel_dialog"
+        app:layout_constraintBottom_toBottomOf="@id/tv_title"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvSelectInventory"
+        android:layout_width="0dp"
+        android:layout_height="44dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/bg_f5f8fb_r8"
+        android:drawableEnd="@drawable/icon_list_arrow_right"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:hint="@string/inventory_select_inventory"
+        android:lines="1"
+        android:maxLines="1"
+        android:paddingStart="12dp"
+        android:paddingEnd="8dp"
+        android:singleLine="true"
+        android:textColor="@color/color_e60c0c0d"
+        android:textColorHint="@color/color_4d0c0c0d"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tv_title" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvPosition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="25dp"
+        android:text="@string/inventory_position"
+        android:textColor="@color/color_e60c0c0d"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="@id/tvSelectInventory"
+        app:layout_constraintTop_toBottomOf="@id/tvSelectInventory" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvPositionValue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/color_800c0c0d"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="@id/tvSelectInventory"
+        app:layout_constraintTop_toTopOf="@id/tvPosition"
+        tools:text="City Warehouse" />
+
+    <View
+        android:id="@+id/vLine"
+        android:layout_width="0dp"
+        android:layout_height="0.5dp"
+        android:layout_marginTop="12dp"
+        android:background="@color/color_e6e6e6"
+        app:layout_constraintEnd_toEndOf="@id/tvPositionValue"
+        app:layout_constraintStart_toStartOf="@id/tvPosition"
+        app:layout_constraintTop_toBottomOf="@id/tvPosition" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/group_position"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="tvPosition,tvPositionValue,vLine" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvSelectDeviceType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:text="@string/inventory_select_device_type"
+        android:textColor="@color/color_e60c0c0d"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/vLine" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvStation"
+        android:layout_width="0dp"
+        android:layout_height="86dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="6dp"
+        android:background="@drawable/bg_f5f8fb_r8"
+        android:drawableTop="@drawable/icon_station_unselect"
+        android:gravity="center_horizontal|bottom"
+        android:paddingVertical="12dp"
+        android:text="@string/inventory_station"
+        android:textColor="@color/color_800c0c0d"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@id/tvBattery"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvSelectDeviceType" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvBattery"
+        android:layout_width="0dp"
+        android:layout_height="86dp"
+        android:layout_marginHorizontal="6dp"
+        android:background="@drawable/bg_f5f8fb_r8"
+        android:drawableTop="@drawable/icon_battery_unselect"
+        android:gravity="center_horizontal|bottom"
+        android:paddingVertical="12dp"
+        android:text="@string/inventory_battery"
+        android:textColor="@color/color_800c0c0d"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@id/tvVehicle"
+        app:layout_constraintStart_toEndOf="@id/tvStation"
+        app:layout_constraintTop_toTopOf="@id/tvStation" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/tvVehicle"
+        android:layout_width="0dp"
+        android:layout_height="86dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_f5f8fb_r8"
+        android:drawableTop="@drawable/icon_vehicle_unselect"
+        android:gravity="center_horizontal|bottom"
+        android:paddingVertical="12dp"
+        android:text="@string/inventory_vehicle"
+        android:textColor="@color/color_800c0c0d"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/tvBattery"
+        app:layout_constraintTop_toTopOf="@id/tvStation" />
+
+    <androidx.appcompat.widget.AppCompatTextView
+        android:id="@+id/btnConfirm"
+        android:layout_width="0dp"
+        android:layout_height="44dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_7accc1_r8"
+        android:gravity="center"
+        android:text="@string/inventory_start_inventory"
+        android:textColor="@color/white"
+        android:textSize="17sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvStation" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

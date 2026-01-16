@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_top_f3f4f5_r16">
+
+        <ImageView
+            android:id="@+id/ivPull"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/shape_rectangle_26000000"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clBatteryInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_ffffff_r8"
+            android:padding="12dp"
+            app:layout_constraintTop_toBottomOf="@id/ivPull">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/ivDevice"
+                android:layout_width="58dp"
+                android:layout_height="58dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvSn"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="30dp"
+                android:text="-"
+                android:textColor="@color/color_e6000000"
+                android:textSize="16sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/ivDevice"
+                app:layout_constraintTop_toTopOf="@id/ivDevice"
+                tools:text="SN: AS101FD23300018" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="3dp"
+                android:visibility="gone"
+                android:background="@drawable/bg_line_fa4332_r4"
+                android:paddingHorizontal="4dp"
+                android:paddingVertical="3dp"
+                android:text="@string/str_to_be_maintained"
+                android:textColor="#fa4332"
+                android:textSize="11sp"
+                app:layout_constraintBottom_toBottomOf="@+id/ivDevice"
+                app:layout_constraintStart_toStartOf="@id/tvSn"
+                tools:text="Urgent" />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/barrierStatusRight"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="end"
+                app:constraint_referenced_ids="tvStatus" />
+
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvBindid"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                app:layout_goneMarginStart="5dp"
+                android:layout_marginBottom="3dp"
+                android:background="@drawable/bg_line_29000000_r4"
+                android:gravity="center"
+                android:paddingHorizontal="4dp"
+                android:paddingVertical="3dp"
+                android:textColor="@color/color_99000000"
+                android:textSize="11sp"
+                app:layout_constraintBottom_toBottomOf="@id/ivDevice"
+                app:layout_constraintStart_toEndOf="@+id/barrierStatusRight"
+                tools:text="Urgent" />
+
+            <TextView
+                android:drawableStart="@mipmap/icon_grey_phone"
+                android:layout_marginTop="20dp"
+                android:drawablePadding="3dp"
+                android:id="@+id/tv_phone_pre"
+                android:textColor="#b3000000"
+                android:textSize="12sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="@+id/ivDevice"
+                app:layout_constraintTop_toBottomOf="@+id/ivDevice"
+                android:text="@string/str_user_phone_2"/>
+
+            <TextView
+                app:layout_constraintStart_toEndOf="@+id/tv_phone_pre"
+                app:layout_constraintTop_toTopOf="@+id/tv_phone_pre"
+                android:id="@+id/tv_phone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="-"
+                android:textSize="12sp"
+                android:textColor="#FF0A5BCC"
+              />
+
+            <ImageView
+                android:id="@+id/img_loc"
+                android:layout_marginTop="9dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/tv_phone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/icon_address_point1"/>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvAddress"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="10dp"
+                android:layout_marginStart="3dp"
+                android:textColor="@color/color_99000000"
+                android:textSize="12sp"
+                app:layout_constraintEnd_toStartOf="@id/tvDistance"
+                app:layout_constraintStart_toEndOf="@+id/img_loc"
+                app:layout_constraintTop_toTopOf="@id/img_loc"
+                tools:text="2604 Washington Rd, Augusta, GA 30904 " />
+
+            <View
+                android:id="@+id/vLine"
+                android:layout_width="0dp"
+                android:layout_height="0.5dp"
+                android:layout_marginTop="20dp"
+                android:background="@color/color_e6e6e6"
+                app:layout_constraintStart_toStartOf="@+id/tvAddress"
+                app:layout_constraintTop_toBottomOf="@+id/tvAddress" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/tvDistance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableTop="@drawable/icon_navigation1"
+                android:gravity="center"
+                android:paddingTop="5dp"
+                android:textColor="@color/color_e6000000"
+                android:textSize="12sp"
+                app:layout_constraintBottom_toBottomOf="@id/tvAddress"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/tvAddress"
+                tools:text="200m" />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/bg_gradient_324ea0_102564"
+                android:paddingHorizontal="16dp"
+                android:paddingVertical="14dp"
+                app:layout_constraintTop_toBottomOf="@id/vLine">
+
+                <TextView
+                    android:id="@+id/tvPlateNum"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/str_plate_number"
+                    android:textColor="#ffffffff"
+                    android:textSize="13sp"
+                    app:layout_constraintEnd_toStartOf="@+id/tvMileage"
+                    app:layout_constraintHorizontal_chainStyle="spread"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvPlateNumValue"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="-"
+                    android:textColor="#ffffffff"
+                    android:textSize="16sp"
+                    app:layout_constraintEnd_toEndOf="@+id/tvPlateNum"
+                    app:layout_constraintStart_toStartOf="@+id/tvPlateNum"
+                    app:layout_constraintTop_toBottomOf="@+id/tvPlateNum" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvMileage"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="@string/text_mileage"
+                    android:textColor="@color/white"
+                    android:textSize="13sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/tvPlateNum"
+                    app:layout_constraintTop_toTopOf="@+id/tvPlateNum" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvMileageValue"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:text="-"
+                    android:textColor="@color/white"
+                    android:textSize="17sp"
+                    app:layout_constraintEnd_toEndOf="@id/tvMileage"
+                    app:layout_constraintStart_toStartOf="@id/tvMileage"
+                    app:layout_constraintTop_toBottomOf="@id/tvMileage" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/btnMore"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_margin="12dp"
+            android:background="@drawable/bg_ffffff_r8"
+            android:gravity="center"
+            android:text="@string/str_view_more_bound_vehicles"
+            android:textColor="@color/color_e6000000"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/clBatteryInfo" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

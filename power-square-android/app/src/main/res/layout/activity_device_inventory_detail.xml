@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        android:background="@color/color_fff5f6f7">
+
+        <include
+            android:id="@+id/includeTitle"
+            layout="@layout/base_title_mvvm_layout"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+<!--        <androidx.core.widget.NestedScrollView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="0dp"-->
+<!--            app:layout_constraintBottom_toTopOf="@id/bgBottom"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/includeTitle">-->
+
+            <LinearLayout
+                app:layout_constraintBottom_toTopOf="@id/bgBottom"
+                app:layout_constraintTop_toBottomOf="@id/includeTitle"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:orientation="vertical">
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    >
+
+                    <View
+                        android:id="@+id/bgWarehouseNo"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:layout_marginHorizontal="12dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/bg_gradient_ffb56c_f24810_top_r8"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tvInventoryNo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        app:layout_constraintBottom_toTopOf="@id/bgWarehouseAddress"
+                        app:layout_constraintStart_toStartOf="@id/bgWarehouseNo"
+                        app:layout_constraintTop_toTopOf="@id/bgWarehouseNo"
+                        tools:text="OB202306110001" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tvInventoryDate"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="12dp"
+                        android:textColor="@color/color_bfffffff"
+                        android:textSize="12sp"
+                        app:layout_constraintBottom_toTopOf="@id/bgWarehouseAddress"
+                        app:layout_constraintEnd_toEndOf="@id/bgWarehouseNo"
+                        app:layout_constraintTop_toTopOf="@id/bgWarehouseNo"
+                        tools:text="2023-06-11 14:33" />
+
+                    <androidx.constraintlayout.widget.Group
+                        android:id="@+id/group_detail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        app:constraint_referenced_ids="bgWarehouseNo,tvInventoryNo,tvInventoryDate" />
+
+                    <View
+                        android:id="@+id/bgWarehouseAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="80dp"
+                        android:layout_marginHorizontal="12dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/bg_ffffff_r10"
+                        app:layout_constraintTop_toTopOf="@id/bgWarehouseNo" />
+
+                    <ImageView
+                        android:id="@+id/ivWarehouse"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginTop="15dp"
+                        android:scaleType="fitXY"
+                        android:src="@mipmap/icon_issue_warehouse"
+                        app:layout_constraintStart_toStartOf="@id/bgWarehouseAddress"
+                        app:layout_constraintTop_toTopOf="@id/bgWarehouseAddress" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tvWarehouseName"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_marginEnd="12dp"
+                        android:drawablePadding="10dp"
+                        android:ellipsize="end"
+                        android:singleLine="true"
+                        android:textColor="@color/color_e60c0c0d"
+                        android:textSize="14sp"
+                        app:layout_constraintEnd_toEndOf="@id/bgWarehouseAddress"
+                        app:layout_constraintStart_toEndOf="@id/ivWarehouse"
+                        app:layout_constraintTop_toTopOf="@id/ivWarehouse"
+                        tools:text="Nantou Community Service Point, Nanshan District, Shenzhen" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/tvAddress"
+                        android:layout_width="0dp"
+                        app:layout_constraintEnd_toEndOf="@+id/tvWarehouseName"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/color_800c0c0d"
+                        android:textSize="13sp"
+                        app:layout_constraintStart_toStartOf="@+id/tvWarehouseName"
+                        app:layout_constraintTop_toBottomOf="@+id/tvWarehouseName"
+                        tools:text="仓位：服务网点" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/bgInventory"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:paddingBottom="12dp"
+                        android:layout_marginHorizontal="12dp"
+                        android:layout_marginTop="12dp"
+                        android:background="@drawable/bg_ffffff_top_r10_bg"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/bgWarehouseAddress">
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/tvInventoryType"
+                            android:layout_width="wrap_content"
+                            android:layout_height="44dp"
+                            android:layout_marginStart="12dp"
+                            android:gravity="center_vertical"
+                            android:textColor="@color/color_e60c0c0d"
+                            android:textSize="16sp"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent"
+                            tools:text="电池" />
+
+                        <View
+                            android:id="@+id/bgInventoryData"
+                            android:layout_width="0dp"
+                            android:layout_height="68dp"
+                            android:layout_marginHorizontal="12dp"
+                            android:background="@drawable/bg_f5f8fb_r10_bg"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/tvInventoryType" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/tvStock"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:gravity="center"
+                            android:text="@string/inventory_stock_num"
+                            android:textColor="@color/color_800c0c0d"
+                            android:textSize="13sp"
+                            app:layout_constraintEnd_toStartOf="@id/tvInventory"
+                            app:layout_constraintStart_toStartOf="@id/bgInventoryData"
+                            app:layout_constraintTop_toTopOf="@id/bgInventoryData" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/tvInventory"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:gravity="center"
+                            android:text="@string/inventory_inventory_num"
+                            android:textColor="@color/color_800c0c0d"
+                            android:textSize="13sp"
+                            app:layout_constraintEnd_toEndOf="@id/bgInventoryData"
+                            app:layout_constraintStart_toEndOf="@id/tvStock"
+                            app:layout_constraintTop_toTopOf="@id/bgInventoryData" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/tvStockValue"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:textColor="@color/color_e60c0c0d"
+                            android:textSize="20sp"
+                            app:layout_constraintBottom_toBottomOf="@id/bgInventoryData"
+                            app:layout_constraintEnd_toStartOf="@id/tvInventory"
+                            app:layout_constraintStart_toStartOf="@id/bgInventoryData"
+                            app:layout_constraintTop_toBottomOf="@id/tvStock"
+                            tools:text="166" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/tvInventoryValue"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:textColor="@color/color_e60c0c0d"
+                            android:textSize="20sp"
+                            app:layout_constraintBottom_toBottomOf="@id/bgInventoryData"
+                            app:layout_constraintEnd_toEndOf="@id/bgInventoryData"
+                            app:layout_constraintStart_toEndOf="@id/tvStock"
+                            app:layout_constraintTop_toBottomOf="@id/tvInventory"
+                            tools:text="266" />
+
+                        <View
+                            android:id="@+id/btnScan"
+                            android:layout_width="match_parent"
+                            android:layout_height="44dp"
+                            android:layout_marginHorizontal="12dp"
+                            android:layout_marginTop="8dp"
+                            android:background="@drawable/bg_maincolor_r8"
+                            app:layout_constraintTop_toBottomOf="@id/bgInventoryData" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/tvScan"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:drawableStart="@mipmap/ic_scan_white"
+                            android:drawablePadding="4dp"
+                            android:text="@string/inventory_scan"
+                            android:textColor="@color/white"
+                            android:textSize="15sp"
+                            app:layout_constraintBottom_toBottomOf="@id/btnScan"
+                            app:layout_constraintEnd_toEndOf="@id/btnScan"
+                            app:layout_constraintStart_toStartOf="@id/btnScan"
+                            app:layout_constraintTop_toTopOf="@id/btnScan" />
+
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <com.scwang.smartrefresh.layout.SmartRefreshLayout
+                    android:id="@+id/swipRefresh"
+                    android:layout_marginBottom="12dp"
+                    android:layout_marginHorizontal="12dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:background="@drawable/bg_ffffff_bottom_r10_bg"
+                        android:id="@+id/recyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+            </LinearLayout>
+
+
+<!--        </androidx.core.widget.NestedScrollView>-->
+
+        <View
+            android:id="@+id/bgBottom"
+            android:layout_width="match_parent"
+            android:layout_height="68dp"
+            android:background="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/btnCancel"
+            android:layout_width="wrap_content"
+            android:layout_height="44dp"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/bg_fff_line_4d0c0c0d_r8"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:text="@string/inventory_cancel"
+            android:textColor="@color/color_e60c0c0d"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/bgBottom"
+            app:layout_constraintStart_toStartOf="@id/bgBottom"
+            app:layout_constraintTop_toTopOf="@id/bgBottom" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/btnConfirm"
+            android:layout_width="0dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/bg_line_maincolor_r8"
+            android:gravity="center"
+            android:text="@string/inventory_finish"
+            android:textColor="@color/main_color"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/bgBottom"
+            app:layout_constraintEnd_toEndOf="@id/bgBottom"
+            app:layout_constraintStart_toEndOf="@id/btnCancel"
+            app:layout_constraintTop_toTopOf="@id/bgBottom" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/groupBottom"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:constraint_referenced_ids="bgBottom,btnCancel,btnConfirm" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

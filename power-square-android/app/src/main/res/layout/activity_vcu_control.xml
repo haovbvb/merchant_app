@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/includeTitle"
+            layout="@layout/base_title_mvvm_layout"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clVcuInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            app:layout_constraintTop_toBottomOf="@id/includeTitle">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
+                android:src="@mipmap/icon_devicedetail_topbg"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/imDevice"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/bg_line_f2f2f2_r4"
+                android:padding="2dp"
+                android:src="@mipmap/img_vcu"
+                android:scaleType="fitXY"
+                app:civ_border_color="@color/white"
+                app:civ_border_width="1dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0" />
+
+            <TextView
+                android:id="@+id/tvDeviceInfo"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:textColor="@color/color_e60c0c0d"
+                android:textSize="19sp"
+                app:layout_constraintLeft_toRightOf="@id/imDevice"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="@id/imDevice"
+                tools:text="SN: A1903SADSFA00000" />
+
+            <TextView
+                android:id="@+id/tv4GStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="4dp"
+                android:background="@drawable/selector_line_fa4332_r4"
+                android:paddingHorizontal="6dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:textColor="@color/selector_text_fa4332_1"
+                android:textSize="13sp"
+                android:text="4G"
+                app:drawableStartCompat="@drawable/selector_wifi"
+                app:layout_constraintBottom_toBottomOf="@+id/imDevice"
+                app:layout_constraintLeft_toRightOf="@id/imDevice"
+                app:layout_constraintStart_toStartOf="@+id/tvDeviceInfo" />
+
+            <TextView
+                android:id="@+id/tvBleStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/selector_line_fa4332_r4"
+                android:paddingHorizontal="6dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="2dp"
+                android:textColor="@color/selector_text_fa4332_1"
+                android:textSize="13sp"
+                android:text="BT"
+                app:drawableStartCompat="@drawable/selector_ble"
+                app:layout_constraintBottom_toBottomOf="@+id/tv4GStatus"
+                app:layout_constraintStart_toEndOf="@id/tv4GStatus" />
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tablayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="10dp"
+                android:textSize="13sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/imDevice"
+                app:tabGravity="start"
+                app:tabIndicatorColor="#FF00B39B"
+                app:tabIndicatorFullWidth="false"
+                app:tabIndicatorHeight="2dp"
+                app:tabMode="fixed"
+                app:tabRippleColor="@android:color/transparent"
+                app:tabSelectedTextColor="@color/color_e6000000"
+                app:tabTextAppearance="@style/CustomTabTextAppearance"
+                app:tabTextColor="@color/color_66000000" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:overScrollMode="never"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/clVcuInfo" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

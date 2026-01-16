@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="310dp"
+    android:layout_height="wrap_content"
+    android:background="@drawable/cc_bg_ffffff_r8"
+    android:paddingHorizontal="16dp"
+    android:paddingBottom="20dp">
+
+    <ImageView
+        android:id="@+id/ivDialogCancel"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:scaleType="center"
+        android:src="@mipmap/icon_cancel_dialog"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/llContent"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingVertical="30dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/tvDialogTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="11dp"
+            android:text=""
+            android:textColor="@color/cc_color_e60c0c0d"
+            android:textSize="17sp"
+            android:visibility="gone"
+            tools:text="Confirm Submission?"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/tvDialogMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:scrollbars="vertical"
+            android:singleLine="false"
+            android:text=""
+            android:textColor="@color/cc_color_99000000"
+            android:textSize="14sp"
+            tools:text="You need to ship the batteries entered this time to the agent?" />
+    </LinearLayout>
+
+    <View
+        android:visibility="gone"
+        android:id="@+id/vLineDialogIKnow"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_marginLeft="22dp"
+        android:layout_marginRight="22dp"
+        android:background="#f0f0f0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/llContent" />
+
+    <TextView
+        android:id="@+id/tvDialogIKnow"
+        android:layout_width="0dp"
+        android:layout_height="44dp"
+        android:layout_marginHorizontal="24dp"
+        android:background="@drawable/bg_maincolor_r8"
+        android:gravity="center"
+        android:text="@string/dialog_i_see"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/llContent" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/gGroupDialogForIKnowToHide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:constraint_referenced_ids="vLineDialogIKnow,tvDialogIKnow"
+        tools:visibility="visible" />
+
+    <View
+        android:id="@+id/vLineDialogForTwoBtn"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/llContent" />
+
+    <View
+        android:id="@+id/vLineDialogMiddle"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/vLineDialogForTwoBtn" />
+
+    <TextView
+        android:id="@+id/tvDialogCancel"
+        android:layout_width="129dp"
+        android:layout_height="44dp"
+        android:background="@drawable/cc_bg_line_r8_e6e6e6"
+        android:gravity="center"
+        android:text="@string/cc_str_cancel"
+        android:textColor="@color/cc_color_e60c0c0d"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@id/vLineDialogMiddle"
+        app:layout_constraintTop_toTopOf="@id/vLineDialogForTwoBtn" />
+
+    <TextView
+        android:id="@+id/tvDialogConfirm"
+        android:layout_width="129dp"
+        android:layout_height="44dp"
+        android:background="@drawable/bg_eb1a13_r8"
+        android:gravity="center"
+        android:text="@string/cc_str_confirm"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/vLineDialogMiddle"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@id/vLineDialogForTwoBtn" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/gGroupDialogForTwoBtnToHide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="vLineDialogForTwoBtn,vLineDialogMiddle,tvDialogCancel,tvDialogConfirm"
+        tools:visibility="gone" />
+</androidx.constraintlayout.widget.ConstraintLayout>

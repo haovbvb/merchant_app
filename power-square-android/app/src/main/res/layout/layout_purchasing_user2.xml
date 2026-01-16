@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <View
+            android:id="@+id/vGap1"
+            android:layout_width="match_parent"
+            android:layout_height="12dp"
+            android:background="@color/color_f5f6f7"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/vBgUserInfo"
+            android:layout_width="0dp"
+            android:layout_height="62dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_f6f8fc_r6"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/vGap1" />
+
+        <com.okla.ops.weight.CircleImageView
+            android:id="@+id/ivAvatar"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="13dp"
+            android:src="@mipmap/icon_def_avatar"
+            app:layout_constraintBottom_toBottomOf="@id/vBgUserInfo"
+            app:layout_constraintStart_toStartOf="@id/vBgUserInfo"
+            app:layout_constraintTop_toTopOf="@id/vBgUserInfo" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvId"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="13dp"
+            android:ellipsize="end"
+            android:lines="1"
+            android:singleLine="true"
+            android:textColor="@color/color_e6000000"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/ivAvatar"
+            app:layout_constraintEnd_toEndOf="@id/vBgUserInfo"
+            app:layout_constraintStart_toEndOf="@id/ivAvatar"
+            app:layout_constraintTop_toTopOf="@id/ivAvatar"
+            tools:text="ID: 1234567890" />
+
+        <com.okla.ops.weight.InputTextView
+            android:id="@+id/itAccount"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/vBgUserInfo" />
+
+        <com.okla.ops.weight.InputTextView
+            android:id="@+id/itFirstName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/itAccount" />
+
+        <com.okla.ops.weight.InputTextView
+            android:id="@+id/itLastName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/itFirstName" />
+
+        <com.okla.ops.weight.InputTextView
+            android:id="@+id/itPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/itLastName" />
+
+        <View
+            android:id="@+id/vGap2"
+            android:layout_width="match_parent"
+            android:layout_height="12dp"
+            android:background="@color/color_f5f6f7"
+            app:layout_constraintTop_toBottomOf="@id/itPhone" />
+
+        <com.okla.ops.weight.InputTextView
+            android:id="@+id/itIdNumber"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/vGap2" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvUploadPhoto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/title_upload_photo"
+            android:textColor="@color/color_b30c0c0d"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/itIdNumber" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvUploadPhotoDes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="@string/text_front_and_back_id_photo"
+            android:textColor="@color/color_66000000"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="@id/tvUploadPhoto"
+            app:layout_constraintTop_toBottomOf="@id/tvUploadPhoto" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvPhotos"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tvUploadPhotoDes"
+            app:layout_constraintTop_toBottomOf="@id/tvUploadPhotoDes" />
+
+        <View
+            android:id="@+id/vGap3"
+            android:layout_width="match_parent"
+            android:layout_height="0.5dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/color_e6e6e6"
+            app:layout_constraintTop_toBottomOf="@id/rvPhotos" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/tvPersonalPhoto"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/title_personal_photo"
+            android:textColor="@color/color_b30c0c0d"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/vGap3" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/clPersonalPhoto"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintStart_toStartOf="@id/tvPersonalPhoto"
+            app:layout_constraintTop_toBottomOf="@id/tvPersonalPhoto">
+
+            <ImageView
+                android:id="@+id/ivPhoto"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@drawable/bg_f5f8fb_r4"
+                android:scaleType="center"
+                android:src="@drawable/img_camera"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/ivDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/img_delete"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <View
+            android:id="@+id/vGap4"
+            android:layout_width="match_parent"
+            android:layout_height="12dp"
+            android:layout_marginTop="16dp"
+            android:background="@color/color_f5f6f7"
+            app:layout_constraintTop_toBottomOf="@id/clPersonalPhoto" />
+
+        <com.okla.ops.weight.InputTextView
+            android:id="@+id/itBirthday"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/vGap4" />
+
+        <com.okla.ops.weight.InputTextView
+            android:id="@+id/itEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/itBirthday" />
+
+        <com.okla.ops.weight.InputTextView
+            android:id="@+id/itAddress"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/itEmail" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

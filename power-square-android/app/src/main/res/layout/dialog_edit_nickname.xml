@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/bg_top_r16_ffffff">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="@string/text_change_nickname"
+            android:textColor="@color/color_e60c0c0d"
+            android:textSize="17sp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/btnClose"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="修改昵称" />
+
+        <ImageView
+            android:id="@+id/btnClose"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:src="@drawable/icon_close"
+            app:layout_constraintBottom_toBottomOf="@id/tvTitle"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/etInput"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="32dp"
+            android:background="@drawable/bg_f2f4f7_r8"
+            android:ellipsize="end"
+            android:hint="@string/tips_enter_nickname"
+            android:imeOptions="actionDone"
+            android:lines="1"
+            android:maxLength="15"
+            android:paddingStart="12dp"
+            android:paddingEnd="40dp"
+            android:singleLine="true"
+            android:textColor="@color/color_e60c0c0d"
+            android:textColorHint="@color/color_4d0c0c0d"
+            android:textSize="15sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@id/btnConfirm"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle" />
+
+        <ImageView
+            android:id="@+id/imClear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:src="@mipmap/icon_clear"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@id/etInput"
+            app:layout_constraintEnd_toEndOf="@id/etInput"
+            app:layout_constraintTop_toTopOf="@id/etInput" />
+
+        <TextView
+            android:id="@+id/btnConfirm"
+            android:layout_width="70dp"
+            android:layout_height="40dp"
+            android:layout_marginEnd="16dp"
+            android:background="@drawable/bg_00bf00_r8"
+            android:gravity="center"
+            android:text="@string/Confirm"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/etInput"
+            app:layout_constraintHorizontal_bias="1"
+            app:layout_constraintLeft_toRightOf="@id/etInput"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@id/etInput" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="Object" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/color_fff5f6f7">
+
+        <include
+            android:id="@+id/includeTitle"
+            layout="@layout/base_title_mvvm_layout"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/bg_bluetooth_switch"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_ffffff_r8"
+            app:layout_constraintTop_toBottomOf="@id/includeTitle" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:text="@string/cabinet_opt_bluetooth"
+            android:textColor="@color/color_e60c0c0d"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toBottomOf="@id/bg_bluetooth_switch"
+            app:layout_constraintLeft_toLeftOf="@id/bg_bluetooth_switch"
+            app:layout_constraintTop_toTopOf="@id/bg_bluetooth_switch" />
+
+        <com.okla.ops.custom.SwitchButton
+            android:id="@+id/sb_bluetooth_state"
+            style="@style/new_switch_button"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginEnd="12dp"
+            app:layout_constraintBottom_toBottomOf="@id/bg_bluetooth_switch"
+            app:layout_constraintRight_toRightOf="@id/bg_bluetooth_switch"
+            app:layout_constraintTop_toTopOf="@id/bg_bluetooth_switch" />
+
+        <LinearLayout
+            android:id="@+id/bg_bluetooth_device"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="17dp"
+            android:layout_marginEnd="12dp"
+            android:layout_marginBottom="17dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/bg_bluetooth_switch">
+
+            <TextView
+                android:id="@+id/tvBluetoothConnectableDevices"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:background="@drawable/bg_top_r8_ffffff"
+                android:paddingStart="12dp"
+                android:paddingTop="10dp"
+                android:paddingEnd="12dp"
+                android:paddingBottom="10dp"
+                android:text="@string/cabinet_opt_authorization_connectable_devices_desc"
+                android:textColor="@color/color_e60c0c0d"
+                android:textSize="14sp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/vLine2" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/color_fff5f6f7" />
+
+            <com.scwang.smartrefresh.layout.SmartRefreshLayout
+                android:id="@+id/swipRefresh"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="5dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvBluetoothConnectableDevices"
+                app:srlEnableHeaderTranslationContent="false"
+                app:srlEnableLoadMore="true">
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvBluetooth"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_ffffff_r8"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp" />
+
+            </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+        </LinearLayout>
+
+        <ViewStub
+            android:id="@+id/netErrorViewSub"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/white"
+            android:inflatedId="@+id/netErrorViewSub"
+            android:layout="@layout/view_net_error_layout"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/includeTitle" />
+
+        <ViewStub
+            android:id="@+id/dataErrorViewSub"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/white"
+            android:inflatedId="@+id/dataErrorViewSub"
+            android:layout="@layout/view_data_error_layout"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/includeTitle" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

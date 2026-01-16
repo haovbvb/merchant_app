@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.base.common.utils.DateTimeUtils"/>
+        <import type="com.base.common.utils.LanguageUtils"/>
+        <variable
+            name="data"
+            type="com.okla.ops.beans.LayoutCabinetInfoBean.ListBean" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/white">
+
+        <TextView
+            android:id="@+id/tvDate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/f8f8f8"
+            android:paddingStart="20dp"
+            android:paddingTop="13dp"
+            android:paddingBottom="10dp"
+            android:textColor="@color/bg_959595"
+            android:textSize="12sp"
+            android:text="@{DateTimeUtils.utc2Local(data.createTime,`yyyy/MM/dd HH:mm:ss`,LanguageUtils.LanguageUtil.INSTANCE.getLocalByLanguage())}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="2018/01/17 16:16:34" />
+
+        <View
+            android:id="@+id/vDot"
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="24dp"
+            android:background="@color/color_ff6b00"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvDate" />
+
+        <TextView
+            android:id="@+id/tvOperator"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="20dp"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:textColor="@color/text_333"
+            android:textSize="14sp"
+            android:text="@{String.format(@string/layout_cabinet_info_operator,data.opPhone,data.opName)}"
+            app:layout_constraintBottom_toBottomOf="@id/vDot"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/vDot"
+            app:layout_constraintTop_toTopOf="@id/vDot"
+            tools:text="@string/layout_cabinet_info_operator" />
+
+        <TextView
+            android:id="@+id/tvAddress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="20dp"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="@color/text_333"
+            android:textSize="14sp"
+            android:text="@{String.format(@string/layout_cabinet_info_address,data.address)}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tvOperator"
+            app:layout_constraintTop_toBottomOf="@id/tvOperator"
+            tools:text="@string/layout_cabinet_info_address" />
+
+        <TextView
+            android:id="@+id/tvCoordinate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="20dp"
+            android:ellipsize="end"
+            android:paddingBottom="14dp"
+            android:singleLine="true"
+            android:textColor="@color/text_333"
+            android:textSize="14sp"
+            android:text="@{String.format(@string/layout_cabinet_info_coordinate,data.latitude,data.longitude)}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tvOperator"
+            app:layout_constraintTop_toBottomOf="@id/tvAddress"
+            tools:text="@string/layout_cabinet_info_coordinate" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

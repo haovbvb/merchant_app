@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.core.widget.NestedScrollView
+        android:background="#F5F6F7"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:id="@+id/layout_device"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_ffffff_r8"
+                android:orientation="vertical">
+
+                <com.okla.ops.weight.KeyValueTextView
+                    android:id="@+id/kvVehicle"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp" />
+
+                <com.okla.ops.weight.KeyValueTextView
+                    android:id="@+id/kvBattery"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp" />
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_ffffff_r8"
+                android:orientation="vertical">
+
+
+                <com.okla.ops.weight.KeyValueTextView
+                    android:id="@+id/kvRegisterTime"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp" />
+
+                <com.okla.ops.weight.KeyValueTextView
+                    android:id="@+id/kvUserType"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp" />
+
+                <com.okla.ops.weight.KeyValueTextView
+                    android:id="@+id/kvBirthday"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp" />
+
+                <com.okla.ops.weight.KeyValueTextView
+                    android:id="@+id/kvPhoneNumber"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp" />
+
+                <com.okla.ops.weight.KeyValueTextView
+                    android:id="@+id/kvEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp" />
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/clPhoto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_ffffff_r8">
+
+                <TextView
+                    android:id="@+id/tvPhoto"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="16dp"
+                    android:text="@string/text_photo"
+                    android:textColor="@color/color_e6000000"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvPhotos"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginEnd="12dp"
+                    android:layout_marginBottom="16dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvPhoto" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.appcompat.widget.LinearLayoutCompat
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_ffffff_r8"
+                android:orientation="vertical"
+                android:paddingHorizontal="12dp">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="44dp"
+                    android:gravity="center"
+                    android:text="@string/text_remark"
+                    android:textColor="@color/color_e6000000"
+                    android:textSize="15sp" />
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:id="@+id/tvRemark"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="16dp"
+                    android:textColor="@color/color_80000000"
+                    android:textSize="15sp"
+                    tools:text="This user is a paying user and needs special attion. Service should be active lkajdfoaisjdflkajsdflkjsadlkfjas;lkdjf;laksjdf;lasj lkjdsflajsdfljasqqqqqqqqqqqqqqqqqqqqqqqqqqqqq" />
+
+            </androidx.appcompat.widget.LinearLayoutCompat>
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+
+    </androidx.core.widget.NestedScrollView>
+
+</layout>

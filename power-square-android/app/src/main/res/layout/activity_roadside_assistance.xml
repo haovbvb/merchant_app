@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:background="#FFF5F6F7"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cl_title"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:background="@color/white"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <include
+                android:id="@+id/includeTitle"
+                layout="@layout/base_title_mvvm_layout"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+<!--            <View-->
+<!--                android:id="@+id/vBackground"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="36dp"-->
+<!--                android:layout_marginEnd="15dp"-->
+<!--                android:background="@drawable/bg_et_f8_r4"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintRight_toRightOf="parent"-->
+<!--                app:layout_constraintStart_toStartOf="parent"-->
+<!--                app:layout_constraintTop_toTopOf="parent" />-->
+
+<!--            <EditText-->
+<!--                android:id="@+id/etInput"-->
+<!--                android:layout_width="0dp"-->
+<!--                android:layout_height="36dp"-->
+<!--                android:layout_weight="1"-->
+<!--                android:background="@android:color/transparent"-->
+<!--                android:drawableStart="@mipmap/ic_et_search"-->
+<!--                android:drawablePadding="10dp"-->
+<!--                android:gravity="center_vertical"-->
+<!--                android:hint="@string/work_task_search_hint"-->
+<!--                android:imeOptions="actionSearch"-->
+<!--                android:paddingStart="14dp"-->
+<!--                android:paddingEnd="14dp"-->
+<!--                android:scrollHorizontally="true"-->
+<!--                android:singleLine="true"-->
+<!--                android:textColor="@color/color_e60c0c0d"-->
+<!--                android:textColorHint="@color/color_4d0c0c0d"-->
+<!--                android:textSize="14sp"-->
+<!--                app:layout_constraintBottom_toBottomOf="@id/vBackground"-->
+<!--                app:layout_constraintLeft_toLeftOf="@id/vBackground"-->
+<!--                app:layout_constraintRight_toLeftOf="@id/imClear"-->
+<!--                app:layout_constraintTop_toTopOf="@id/vBackground"-->
+<!--                app:layout_constraintVertical_bias="0.0" />-->
+
+<!--            <ImageView-->
+<!--                android:id="@+id/imClear"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="0dp"-->
+<!--                android:layout_gravity="center"-->
+<!--                android:padding="5dp"-->
+<!--                android:scaleType="center"-->
+<!--                android:src="@mipmap/icon_clear"-->
+<!--                app:layout_constraintLeft_toRightOf="@id/etInput"-->
+<!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintTop_toBottomOf="@id/tabLayout" />-->
+
+<!--            <androidx.constraintlayout.widget.Group-->
+<!--                android:id="@+id/group_search"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:visibility="gone"-->
+<!--                app:constraint_referenced_ids="etInput,imClear" />-->
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.tabs.TabLayout
+            android:layout_marginStart="6dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cl_title"
+            android:id="@+id/tabLayout"
+            app:tabSelectedTextColor="@color/main_color"
+            app:tabTextColor="@color/color_99000000"
+            app:tabPaddingStart="6dp"
+            app:tabPaddingEnd="6dp"
+            app:tabPaddingTop="3dp"
+            app:tabPaddingBottom="3dp"
+            android:textSize="13sp"
+            app:tabIndicatorHeight="0dp"
+            app:tabIndicatorColor="@android:color/transparent"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginVertical="12dp"
+            app:tabIndicator="@null"
+            app:tabRippleColor="@android:color/transparent"
+            app:tabMode="scrollable" />
+
+
+        <com.scwang.smartrefresh.layout.SmartRefreshLayout
+            android:id="@+id/swipRefresh"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:paddingBottom="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tabLayout"
+            app:srlEnableHeaderTranslationContent="true">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp" />
+
+        </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+        <ViewStub
+            android:id="@+id/netErrorViewSub"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/white"
+            android:inflatedId="@+id/netErrorViewSub"
+            android:layout="@layout/layout_no_data_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tabLayout" />
+
+        <ViewStub
+            android:id="@+id/dataErrorViewSub"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:background="@color/white"
+            android:inflatedId="@+id/dataErrorViewSub"
+            android:layout="@layout/layout_no_data_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tabLayout" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

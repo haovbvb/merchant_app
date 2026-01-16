@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_cabinet_authorization"
+    app:startDestination="@id/fragmentOne">
+
+    <fragment
+        android:id="@+id/fragmentOne"
+        android:name="com.okla.ops.views.workbench.cabinetopt.CabinetAuthorizationOperateFragment"
+        android:label="One"
+        tools:layout="@layout/fragment_cabinet_authorization_opt">
+        <action
+            android:id="@+id/action_one_to_two"
+            app:destination="@id/fragmentTwo" />
+        <action
+            android:id="@+id/action_one_to_three"
+            app:destination="@id/fragmentThree" />
+        <action
+            android:id="@+id/action_one_to_four"
+            app:destination="@id/fragmentFour" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentTwo"
+        android:name="com.okla.ops.views.workbench.cabinetopt.CabinetAuthorizationListFragment"
+        android:label="Two"
+        tools:layout="@layout/fragment_cabinet_authorization_list" />
+
+    <fragment
+        android:id="@+id/fragmentThree"
+        android:name="com.okla.ops.views.workbench.cabinetopt.CabinetAuthorizationUserFragment"
+        android:label="Three"
+        tools:layout="@layout/fragment_user_authorization_list" />
+
+    <fragment
+        android:id="@+id/fragmentFour"
+        android:name="com.okla.ops.views.workbench.cabinetopt.CabinetAuthorizationRecordFragment"
+        android:label="Four"
+        tools:layout="@layout/fragment_authorization_record_list" />
+
+</navigation>

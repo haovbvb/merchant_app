@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/us_bg_top_r16_ffffff"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/imgclose"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:src="@drawable/icon_close"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_margin="6dp"/>
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:text="@string/str_choose_package"
+        android:textColor="#e6000000"
+        android:textSize="17sp"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/edtSearch"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_f0f2f5_r8"
+        android:drawableStart="@drawable/icon_search"
+        android:drawablePadding="3dp"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:hint="@string/hint_enter_service_name"
+        android:imeOptions="actionSearch"
+        android:lines="1"
+        android:paddingStart="8dp"
+        android:paddingEnd="40dp"
+        android:singleLine="true"
+        android:textColor="@color/color_e60c0c0d"
+        android:textColorHint="@color/color_4d0c0c0d"
+        android:textSize="14sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_title" />
+<View
+    android:id="@+id/viewbg"
+    app:layout_constraintTop_toBottomOf="@+id/edtSearch"
+    android:layout_width="match_parent"
+    android:layout_height="12dp"/>
+    <com.scwang.smartrefresh.layout.SmartRefreshLayout
+        android:id="@+id/refreshlayout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#F5F6F7"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/viewbg"
+        app:srlEnableLoadMore="false"
+        app:srlEnableRefresh="false">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_servers_info"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+    <FrameLayout
+        android:visibility="gone"
+        android:id="@+id/fl_empty_package"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_f6f8fc_r6"
+        app:layout_constraintTop_toBottomOf="@id/edtSearch">
+
+        <TextView
+            android:id="@+id/tvNoInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="26dp"
+            android:layout_marginBottom="26dp"
+            android:text="@string/text_no_service_info"
+            android:textColor="@color/color_330c0c0d"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="No Battery Parameters Available" />
+
+
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

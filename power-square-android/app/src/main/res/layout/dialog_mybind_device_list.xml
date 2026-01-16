@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="500dp"
+        android:background="@drawable/bg_top_r16_ffffff">
+
+        <TextView
+            android:id="@+id/tv_title_devicetype"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:text="-"
+            android:textColor="#e6000000"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <net.lucode.hackware.magicindicator.MagicIndicator
+            android:id="@+id/magic_indicator"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_title_devicetype"
+            app:layout_constraintVertical_bias="1" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvList"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:background="#F3F4F5"
+            android:nestedScrollingEnabled="false"
+            android:paddingHorizontal="12dp"
+            android:paddingTop="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/magic_indicator"
+            app:layout_constraintVertical_bias="0" />
+
+        <include
+            android:id="@+id/emptyLayout"
+            layout="@layout/view_data_empty_layout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/magic_indicator" />
+
+        <!--        <View-->
+        <!--            android:id="@+id/vLine1"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="8dp"-->
+        <!--            android:background="@color/color_f0f2f5"-->
+        <!--            app:layout_constraintBottom_toTopOf="@id/btnCancel" />-->
+
+        <!--        <androidx.appcompat.widget.AppCompatTextView-->
+        <!--            android:id="@+id/btnCancel"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="56dp"-->
+        <!--            android:gravity="center"-->
+        <!--            android:text="@string/Cancel"-->
+        <!--            android:textColor="@color/color_e6000000"-->
+        <!--            android:textSize="17sp"-->
+        <!--            app:layout_constraintBottom_toBottomOf="parent" />-->
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

@@ -1,0 +1,1166 @@
+<resources>
+    <!--  应用名及导航  -->
+    <string name="app_name">OKLA Merchant</string>
+    <string name="tab_monitor">监控</string>
+    <string name="tab_workbench">工作台</string>
+    <string name="tab_mine">我的</string>
+    <!--  提示信息  -->
+    <string name="tips_account_not_empty">用户名不能为空</string>
+    <string name="tips_psw_not_empty">密码不能为空</string>
+    <string name="tips_agree_agreement">请详细阅读用户协议和隐私政策</string>
+    <string name="tips_enter_current_psw">请输入当前密码</string>
+    <string name="tips_enter_new_psw">请输入新密码</string>
+    <string name="tips_enter_new_psw_confirm">请重新输入新密码</string>
+    <string name="tips_enter_psw_not_match">两次输入的密码不一致，请重新输入</string>
+    <string name="tips_psw_update">密码已更新</string>
+    <string name="tips_enter_new_psw_error">新密码格式不符合要求，请检查</string>
+    <string name="tips_enter_nickname">请输入昵称</string>
+    <string name="tips_battery_exist">电池已存在</string>
+    <string name="tips_device_exist">设备已存在</string>
+    <string name="tips_qrcode_same_as_preone">二维码与上一个相同。</string>
+    <string name="tips_vehicle_not_empty">车辆不能为空</string>
+    <string name="tips_battery_not_empty">电池不能为空</string>
+    <string name="tips_station_not_empty">电柜不能为空</string>
+    <string name="tips_copid_to_clipboard">文本已复制到剪贴板</string>
+    <string name="tips_enter_correct_email">请输入正确格式的邮箱</string>
+    <string name="tips_end_time_cannot_less_start_time">结束时间不能早于开始时间</string>
+    <string name="tips_please_select_time">请选择时间</string>
+    <string name="tips_no_data">暂无数据</string>
+    <!--  登录界面文本  -->
+    <string name="text_username">用户名</string>
+    <string name="text_password">密码</string>
+    <string name="text_sign_in">登录</string>
+    <string name="text_agreement_pre">我已阅读并同意</string>
+    <string name="text_privacy_policy">隐私政策</string>
+    <string name="text_agreement_and"> 和 </string>
+    <string name="text_user_agreement">用户协议</string>
+    <!--  角色/类型  -->
+    <string name="text_platform">平台</string>
+    <string name="text_agent">经销商</string>
+    <string name="text_shop">门店</string>
+    <!--  通知与操作  -->
+    <string name="text_ids">ID：%s</string>
+    <string name="text_msg_center">消息</string>
+    <string name="text_psw_change">修改密码</string>
+    <string name="text_psw_current">当前密码</string>
+    <string name="text_psw_new">新密码</string>
+    <string name="text_psw_confirm">确认新密码</string>
+    <string name="text_language">语言</string>
+    <string name="text_about_app">关于此应用</string>
+    <string name="text_psw_enter_tip">密码需为 8–16 位，包含数字和字母/特殊字符</string>
+    <string name="text_change_nickname">修改昵称</string>
+    <!--  数据标签  -->
+    <string name="text_dimension">尺寸</string>
+    <string name="text_net_weight">净重</string>
+    <string name="text_battery">电池</string>
+    <string name="text_station">电柜</string>
+    <string name="text_batteries">电池</string>
+    <string name="text_stations">电柜</string>
+    <string name="text_vehicle">车辆</string>
+    <string name="text_vehicles">车辆</string>
+    <string name="text_battery_sn">电池 SN</string>
+    <string name="text_vehicle_sn">车辆 SN</string>
+    <string name="text_station_sn">电柜 SN</string>
+    <string name="text_imei">IMEI</string>
+    <string name="text_vin">VIN</string>
+    <string name="text_iccid">ICCID</string>
+    <string name="text_vcu">VCU</string>
+    <string name="text_lockdevid">LOCKDEVID</string>
+    <!--  统计  -->
+    <string name="text_battery_total">电池：%d</string>
+    <string name="text_vehicle_total">车辆：%d</string>
+    <string name="text_station_total">电柜: %d</string>
+    <!--  订单与备注  -->
+    <string name="text_tracking_number">运单号</string>
+    <string name="text_remark">备注</string>
+    <!--  提交与成功提示  -->
+    <string name="text_submit_success">提交成功</string>
+    <string name="text_ship_success_detail">详细分配信息请查看管理系统</string>
+    <!--  文档与参数  -->
+    <string name="text_document_number">单据编号</string>
+    <string name="text_no_user_param">暂无用户参数</string>
+    <string name="text_no_device_param">暂无设备参数</string>
+    <string name="text_no_userinfo_param">暂无用户信息</string>
+    <!--  状态  -->
+    <string name="text_soc">SOC</string>
+    <string name="text_soh">SOH</string>
+    <string name="text_cycle">循环</string>
+    <string name="text_online">在线</string>
+    <string name="text_annual_rate">年利率</string>
+    <string name="text_payment_plan_periods">%s 期</string>
+    <string name="text_rate_plan">%s 年利率</string>
+    <!--  证件与店铺信息  -->
+    <string name="text_front_and_back_id_photo">身份证正反面照片</string>
+    <string name="text_all_city">所有城市</string>
+    <!--  单据与操作  -->
+    <string name="text_search_history">搜索历史</string>
+    <string name="text_navigation">导航</string>
+    <string name="text_mileage">里程</string>
+    <string name="text_all">全部</string>
+    <string name="text_rider">骑手</string>
+    <string name="text_period_num">期数: %d</string>
+    <string name="text_user_id">用户 ID</string>
+    <string name="text_device_sn">设备 SN</string>
+    <string name="text_payment_success">收款成功！</string>
+    <string name="text_yesterday">昨天</string>
+    <string name="text_this_month">本月</string>
+    <string name="text_other_date">其他日期</string>
+    <string name="text_today">今天</string>
+    <string name="text_sn_str">SN：%s</string>
+    <string name="text_coordinates_str">坐标：%s</string>
+    <string name="text_start_time">开始时间</string>
+    <string name="text_end_time">结束时间</string>
+    <string name="text_user_type">用户类型</string>
+    <string name="text_full_payment">全款</string>
+    <string name="text_paid_up">结清</string>
+    <string name="text_installment">分期付款</string>
+    <string name="text_dishonest">失信</string>
+    <string name="text_overdue">逾期</string>
+    <string name="text_full_amount">全额</string>
+    <string name="text_userdetail_installment">分期</string>
+    <string name="text_personal_info">个人信息</string>
+    <string name="text_payment_record">支付记录</string>
+    <string name="text_battery_swap_record">换电记录</string>
+    <string name="text_manual_battery_swap">人工换电</string>
+    <string name="text_operator_id">操作员 ID</string>
+    <string name="text_old_battery_sn">旧电池 SN</string>
+    <string name="text_new_battery_sn">新电池 SN</string>
+    <string name="text_photo">照片</string>
+    <string name="text_registration_time">注册时间</string>
+    <string name="text_birthday">生日</string>
+    <string name="text_phone_number">电话号码</string>
+    <string name="text_cash">现金</string>
+    <string name="text_email">邮箱</string>
+    <string name="title_language">语言</string>
+    <string name="title_change_psw">修改密码</string>
+    <!--  设备查询 - 电池详情  -->
+    <string name="textBatteryDetail">电池详情</string>
+    <!--  地图  -->
+    <string name="online">在线</string>
+    <string name="offline">离线</string>
+    <string name="monitor_battery_info_navi">导航</string>
+    <string name="invalid_qr_code">无效二维码</string>
+    <string name="invalid_station_qr_code">无效电柜二维码</string>
+    <string name="title_message">消息</string>
+    <string name="title_edit_info">编辑信息</string>
+    <string name="title_battery_entry">电池入库</string>
+    <string name="title_station_entry">电柜入库</string>
+    <string name="title_vehicle_entry">车辆入库</string>
+    <string name="title_battery_ship">电池发货</string>
+    <string name="title_ship">发货</string>
+    <string name="title_select_agent">选择代理</string>
+    <string name="title_payment_method">选择支付方式</string>
+    <string name="title_select_applicant">选择申请人</string>
+    <string name="title_account">账户</string>
+    <string name="title_first_name">名</string>
+    <string name="title_last_name">姓</string>
+    <string name="title_phone">电话</string>
+    <string name="title_birthday">生日</string>
+    <string name="title_email">邮箱</string>
+    <string name="title_id_number">身份证号</string>
+    <string name="title_address">地址</string>
+    <string name="title_upload_photo">上传身份证照片</string>
+    <string name="title_personal_photo">个人照片</string>
+    <string name="title_lat_log">经纬度</string>
+    <string name="title_select_shop">选择门店</string>
+    <string name="title_date">日期</string>
+    <string name="title_user">用户</string>
+    <string name="title_user_detail">用户详情</string>
+    <string name="dialog_confirm_submit">确认提交？</string>
+    <string name="dialog_battery_content">共 %s将被入库，入库后将同步至系统且无法修改。</string>
+    <string name="dialog_submit_completed">提交完成</string>
+    <string name="dialog_submit_completed_2">提交完成！</string>
+    <string name="dialog_go_to_ship">是否将本次入库的电池发往代理？</string>
+    <string name="dialog_go_to_ship_vehicles">是否将本次入库的车辆发往代理？</string>
+    <string name="dialog_go_to_ship_stations">是否将本次入库的电柜发往代理？</string>
+    <string name="btn_submit">提交</string>
+    <string name="btn_confirm">确认</string>
+    <string name="btn_manual_entry">手动入库</string>
+    <string name="btn_scan_entry">扫码入库</string>
+    <string name="btn_manual_add">手动添加</string>
+    <string name="btn_scan_add">扫码添加</string>
+    <string name="btn_edit">编辑</string>
+    <string name="btn_delete">删除</string>
+    <string name="btn_return_workbench">返回工作台</string>
+    <string name="hint_enter_battery_sn">请输入电池 SN</string>
+    <string name="hint_enter_vehicle_sn">请输入车辆 SN</string>
+    <string name="hint_enter_station_sn">请输入电柜 SN</string>
+    <string name="hint_enter_imei_code">请输入 IMEI 码（可选）</string>
+    <string name="hint_enter_vehicle_vin">请输入 VIN 码</string>
+    <string name="hint_enter_iccid_code">请输入 ICCID 码（可选）</string>
+    <string name="hint_enter_vcu">请输入 VCU 序列号（可选）</string>
+    <string name="hint_enter_lockdevid">请输入 LOCK DEVID (可选)</string>
+    <string name="hint_enter_tracking_number">请输入运单号</string>
+    <string name="hint_enter_device_or_scan_qr_code">请输入设备 SN 或扫码</string>
+    <string name="hint_enter_userid_or_scan_qr_code">请输入用户 ID 或扫码</string>
+    <string name="hint_enter_first_name">请输入名</string>
+    <string name="hint_enter_last_name">请输入姓</string>
+    <string name="hint_enter_phone">请输入电话</string>
+    <string name="hint_enter_id_number">请输入身份证号</string>
+    <string name="hint_enter_birthday">请输入生日</string>
+    <string name="hint_enter_email">请输入邮箱</string>
+    <string name="hint_enter_address">请输入地址</string>
+    <string name="hint_enter_shop_name">请输入门店名称</string>
+    <string name="hint_enter_remark">请输入备注</string>
+    <string name="hint_enter_agent_name">请输入代理名称</string>
+    <string name="hint_enter_user_id_or_scan_qr_code">请输入用户 ID 或扫码</string>
+    <string name="hint_enter_station_sn_or_scan_qr_code">请输入电柜 SN 或扫码</string>
+    <string name="hint_enter_device_sn_or_scan_qr_code">请输入设备 SN 或扫码</string>
+    <string name="hint_enter_user_id_or_phone">输入用户ID/用户名/手机号</string>
+    <string name="details_of_central_control">车辆详情</string>
+    <!--  用户注册  -->
+    <string name="title_offline_user_register">线下用户注册</string>
+    <string name="us_text_code_number">验证码</string>
+    <string name="us_text_phone">电话</string>
+    <string name="us_text_pwd">密码</string>
+    <string name="us_text_first_name">名</string>
+    <string name="us_text_last_name">姓</string>
+    <string name="us_text_account">账户</string>
+    <string name="us_text_birthday">生日</string>
+    <string name="us_text_referrer">推荐人</string>
+    <string name="us_text_confirm">确认</string>
+    <string name="us_input_phone">请输入电话号码</string>
+    <string name="us_hint_used_for_logging">用于登录</string>
+    <string name="us_hint_select_birthday">请选择生日</string>
+    <string name="us_hint_input_referrer">输入推荐人 ID 或扫码</string>
+    <string name="us_hint_input_mail">请输入邮箱</string>
+    <string name="us_hint_input_fist_name">请输入名</string>
+    <string name="us_hint_input_last_name">请输入姓</string>
+    <string name="us_tips_input_correct_mail">请输入有效的邮箱</string>
+    <string name="us_text_mail">邮箱</string>
+    <string name="us_hint_input_account">请输入账户</string>
+    <string name="us_input_pwd">请输入密码</string>
+    <string name="us_input_code_number">请输入验证码</string>
+    <string name="us_title_select_country_area">选择国家/地区</string>
+    <string name="us_tips_input_pwd_length">请输入 8–16 位密码</string>
+    <string name="workbench_role_om">运维</string>
+    <string name="workbench_role_warehouse">仓库管理员</string>
+    <string name="workbench_role_Sales">销售</string>
+    <string name="workbench_choose_role">选择角色</string>
+    <!--  出货设备录入  -->
+    <string name="str_manual_entry">手动录入</string>
+    <!--  设备发出接收  -->
+    <string name="transport_all">全部</string>
+    <string name="transport_receive">接收</string>
+    <string name="transport_receive_part">部分接收</string>
+    <string name="transport_in_transit">运输中</string>
+    <string name="transport_number">数量</string>
+    <string name="transport_battery">电池</string>
+    <string name="transport_vehicle">车辆</string>
+    <string name="transport_station">电柜</string>
+    <string name="transport_edit">编辑</string>
+    <string name="transport_recall">撤回</string>
+    <string name="transport_withdraw">已撤回</string>
+    <string name="transport_select_send_device_type">选择设备类型</string>
+    <string name="transport_create_device_issue">创建%s发出</string>
+    <string name="transport_issue_warehouse">发货仓库</string>
+    <string name="transport_issue_platfomr_name">南山前海湾门店</string>
+    <string name="transport_issue_platfomr_address">深圳</string>
+    <string name="transport_receiving_warehouse">接收仓库</string>
+    <string name="str_choose_warehouse">仓库</string>
+    <string name="transport_select_warehouse">请选择仓库</string>
+    <string name="transport_max_device">最多%d台设备</string>
+    <string name="transport_tracking_number">运单号</string>
+    <string name="transport_enter_tracking_number">请输入运单号</string>
+    <string name="transport_manually_enter_sn">手动输入设备SN</string>
+    <string name="transport_manually_enter__vehicle_vin">手动输入车辆VIN</string>
+    <string name="transport_select_device">选择%s</string>
+    <string name="transport_enter_device_sn">请输入设备SN</string>
+    <string name="transport_scan_qr_code">扫描二维码</string>
+    <string name="transport_cabinet_confirm">确认</string>
+    <string name="transport_total_issued">发出总数</string>
+    <string name="transport_enter_sn">请输入SN</string>
+    <string name="transport_status_on">在途中</string>
+    <string name="transport_status_receive">全部接收</string>
+    <string name="transport_status_create">创建</string>
+    <string name="transport_status_send_empty">暂无发货信息</string>
+    <string name="transport_status_receive_empty">暂无接收信息</string>
+    <string name="transport_main_warehouse">主仓库</string>
+    <string name="transport_city_warehouse">城市仓库</string>
+    <string name="transport_service_warehouse">服务中心</string>
+    <string name="transport_enter_warehouse_name_tosearch">输入仓库名称搜索</string>
+    <string name="transport_choose_warehouse">选择%s</string>
+    <string name="transport_issue_detail">发货详情</string>
+    <string name="transport_reception_detail">接收详情</string>
+    <string name="str_bind_vehicle">绑定车辆</string>
+    <string name="str_bind_battery">绑定电池</string>
+    <string name="hint_select_vehicle_to_bind">选择要绑定的车辆</string>
+    <string name="hint_select_battery_to_bind">选择要绑定的电池</string>
+    <string name="hint_select_swap_package">选择换电套餐</string>
+    <string name="str_package">套餐</string>
+    <!--  设备盘点  -->
+    <string name="inventory_inventory">库存盘点</string>
+    <string name="inventory_device">设备</string>
+    <string name="inventory_stock">库存</string>
+    <string name="inventory_num">盘点数量</string>
+    <string name="inventory_list_empty">暂无盘点信息</string>
+    <string name="inventory_create_new_inventory">创建新盘点</string>
+    <string name="inventory_select_inventory">请选择盘点仓库</string>
+    <string name="inventory_position">位置</string>
+    <string name="inventory_select_device_type">选择设备类型</string>
+    <string name="inventory_station">电柜</string>
+    <string name="inventory_battery">电池</string>
+    <string name="inventory_vehicle">车辆</string>
+    <string name="inventory_complete">已完成</string>
+    <string name="inventory_start_inventory">开始盘点</string>
+    <string name="inventory_detail">盘点详情</string>
+    <string name="inventory_stock_num">库存</string>
+    <string name="inventory_inventory_num">盘点</string>
+    <string name="inventory_scan">扫码盘点</string>
+    <string name="inventory_iventoried">已盘点</string>
+    <string name="inventory_not_counted">未盘点</string>
+    <string name="inventory_in_stock">盘盈</string>
+    <string name="inventory_cancel">撤销</string>
+    <string name="inventory_finish">盘点完成</string>
+    <string name="inventory_cancel_tips">确定要取消此次盘点吗？</string>
+    <string name="sucess">成功</string>
+    <!--  扫描页面  -->
+    <string name="qr_title">扫描</string>
+    <string name="qr_manual_input">手动输入</string>
+    <string name="qr_light">手电筒</string>
+    <string name="qr_scan_tip">请确保二维码/条码在框内</string>
+    <!--  工作任务搜索提示  -->
+    <!--  工作任务  -->
+    <!--  工作任务结束  -->
+    <string name="work_task_finish_completed">已完成</string>
+    <string name="work_task_finish_desc">描述</string>
+    <string name="work_task_finish_desc_enter_prompt">请输入描述</string>
+    <string name="work_task_finish_submit">提交</string>
+    <!--  工作任务列表  -->
+    <string name="user_device_sn">设备SN</string>
+    <string name="workbench_device_send">设备发出</string>
+    <string name="workbench_device_receive">设备接收</string>
+    <!--  工作任务详细  -->
+    <string name="work_task_detail_description">描述：</string>
+    <!--  通用  -->
+    <string name="vehicle_sn">车辆 SN/VIN/用户 ID</string>
+    <string name="vehicle_sn_hint">请输入 车辆 SN/VIN/用户 ID</string>
+    <string name="vehicle_info_tips">暂无车辆参数信息</string>
+    <!--  解绑  -->
+    <string name="unbind_reasons">解绑原因/备注</string>
+    <string name="unbind_reasons_hint">请输入解绑原因/备注</string>
+    <string name="unbind_common_reasons_1">用户注销，设备正常</string>
+    <string name="tip_unbind_car_has_unfinished_service">骑手仍有未完成的预约保养服务。确认解绑后，将视为保养已完成。是否解绑？</string>
+    <string name="unbind_device_enter_user_id_or_qr_tip">请输入用户 ID 或扫描二维码</string>
+    <string name="str_unbind_device">设备解绑</string>
+    <string name="unbind_device_check_status">检查状态</string>
+    <string name="unbind_device_check_status_hint">输入设备状态</string>
+    <string name="unbind_device_reason_equip_failure">设备故障</string>
+    <!--  下架  -->
+    <string name="stop_cabinet_unshelve_common_reasons">常见原因：</string>
+    <!--  出货设备录入  -->
+    <string name="text_engine_model">发动机型号</string>
+    <string name="text_made_date">生产日期</string>
+    <string name="hint_enter_traking_number">请输入运单号</string>
+    <!--  预约保养  -->
+    <string name="maintenance_appointemnt">保养预约</string>
+    <string name="maintenance_vehicle_scan_sn_or_qr_tips">请输入车辆编号 / 车架号 或扫描二维码</string>
+    <string name="maintenance_notes_title">保养备注</string>
+    <string name="maintenance_notes_hint">请输入备注</string>
+    <string name="maintenance_vehicle_book_no">预约编号</string>
+    <string name="maintenance_vehicle_book_date">预约日期</string>
+    <string name="maintenance_vehicle_avg_mileage">日均里程</string>
+    <string name="maintenance_vehicle_avg_speed">日均速度</string>
+    <string name="maintenance_vehicle_avg_swap">日均换电次数</string>
+    <string name="maintenance_repair_record">维修记录</string>
+    <string name="maintenance_rider_title">过去 30 天骑行行为</string>
+    <string name="maintenance_view_detail">查看详情</string>
+    <string name="maintenance_repair_record_detail">维修记录详情</string>
+    <string name="maintenance_repair_record_operator">维修操作员</string>
+    <string name="maintenance_repair_record_finish">完成</string>
+    <string name="maintenance_repair_record_lack">缺失</string>
+    <string name="maintenance_repair_record_discard">报废</string>
+    <string name="cc_str_success">成功</string>
+    <string name="str_photo">照片</string>
+    <string name="manual_replace_user_id">用户ID</string>
+    <string name="permission_location">位置权限</string>
+    <!--  Google 地图安装提示  -->
+    <string name="google_map_install_tip">请先安装 Google 地图后再进行此操作。</string>
+    <string name="putaway_cabinet_new_no_info">暂无站点参数可用</string>
+    <!--  设备查询  -->
+    <string name="device_search_input_tip">输入设备 SN 或扫描二维码</string>
+    <string name="device_detail_base_info">基本信息</string>
+    <string name="device_detail_Maintenance_record">保养记录</string>
+    <string name="device_detail_location_info">位置信息</string>
+    <string name="device_detail_repair_info">维修记录</string>
+    <string name="device_detail_device_status">状态</string>
+    <string name="device_detail_device_format">规格</string>
+    <string name="device_detail_device_model">型号</string>
+    <string name="device_detail_device_bind_user">已绑定用户</string>
+    <string name="device_detail_device_user_name">用户名</string>
+    <string name="device_detail_device_user_phone">用户电话</string>
+    <string name="device_detail_device_bind_time">绑定时间</string>
+    <string name="device_detail_device_bind_state">上架状态</string>
+    <string name="device_detail_device_onboard_time">上架时间</string>
+    <string name="device_detail_resonsible">负责人</string>
+    <string name="device_detail_status_onboarded">已上架</string>
+    <string name="device_detail_status_not_boarded">未上架</string>
+    <!--  维修设备登记  -->
+    <string name="repair_device_record">维修登记</string>
+    <string name="repair_device_no_data_tips">暂无设备参数信息</string>
+    <string name="repair_device_sn">设备 SN</string>
+    <string name="repair_station_sn">电柜 SN</string>
+    <string name="repair_device_project">维护项目</string>
+    <string name="repair_device_project_tips">请选择维护项目</string>
+    <string name="repair_device_result">维护结果</string>
+    <string name="repair_device_result_tips">请选择维护结果</string>
+    <string name="repair_device_remark">备注</string>
+    <string name="repair_device_remark_tips">请输入备注</string>
+    <!--  绑定设备  -->
+    <string name="bind_device_scan_user_id_or_qr_tip">扫描用户二维码或输入用户 ID</string>
+    <string name="bind_device_remark_tip">请补充说明</string>
+    <string name="putaway_cabinet_serial_num">相机 SN</string>
+    <string name="putaway_cabinet_serial_num_hint">请输入相机 SN</string>
+    <string name="str_plate_number">车牌号</string>
+    <!--  电池绑定  -->
+    <string name="bind_device_add_battery_new">添加电池</string>
+    <!--  人工换电  -->
+    <string name="workbench_merchant_replac_offline_replace_new_battery">新电池</string>
+    <string name="user_manual_battery_exchange">人工换电</string>
+    <!--  用户查询  -->
+    <string name="user_search_history">搜索历史</string>
+    <string name="user_search_not_bind_device">该用户暂无绑定设备</string>
+    <!--  道路救援  -->
+    <string name="title_roadside_assistant">道路救援</string>
+    <string name="text_maintenance_record">保养记录</string>
+    <string name="str_all">全部</string>
+    <string name="str_waiting_for_rescue">等待救援</string>
+    <string name="str_in_progress">进行中</string>
+    <string name="str_completed">已完成</string>
+    <string name="str_return_to_factory">已返厂</string>
+    <string name="str_founder">创建人</string>
+    <string name="str_creation_time">创建时间</string>
+    <string name="str_report_source">上报来源</string>
+    <string name="str_processing_result">处理结果</string>
+    <string name="str_payment">付款</string>
+    <string name="str_rescue_result">救援结果</string>
+    <!--  售后绑定  -->
+    <string name="title_aftersale">售后绑定</string>
+    <string name="text_aftersale_bind_success">售后绑定成功</string>
+    <string name="title_selectable_orders">可绑定的售后订单</string>
+    <string name="text_no_order_to_bind">请选择要绑定的售后订单</string>
+    <string name="tip_there_no_order">没有可绑定的订单</string>
+    <!--  销售绑定  -->
+    <string name="title_salebind">销售绑定</string>
+    <string name="text_support_device">适用机型：</string>
+    <string name="hint_enter_service_name">输入套餐名称以搜索</string>
+    <string name="hint_select_installment_plan">请选择分期方案</string>
+    <string name="text_no_service_info">暂无套餐信息</string>
+    <!--  租赁绑定  -->
+    <string name="str_servie_period">服务周期</string>
+    <string name="title_rentbind">租赁绑定</string>
+    <string name="title_selectable_services">套餐</string>
+    <string name="str_depoist">押金</string>
+    <string name="str_applicable_models">适用机型：</string>
+    <string name="str_reselect">重新选择</string>
+    <string name="hint_select_lease_package">请选择租赁套餐</string>
+    <string name="str_tip_paysuccess_online">请在用户端App中完成支付,限时24小时内</string>
+    <string name="str_tip_paysuccess_cash">请进入订单记录并提交合同凭证,限时24小时内</string>
+    <string name="title_swapbind">换电绑定</string>
+    <!--  押金退还  -->
+    <string name="text_deposit_refund">押金退还</string>
+    <string name="text_select_refund_order">请选择退还订单</string>
+    <string name="text_deposit_refund_success">押金退还成功！</string>
+    <string name="text_recovery_confirmed">已回收</string>
+    <string name="text_view_receipt">查看凭证</string>
+    <string name="str_deposit_refund_amount">退还押金金额</string>
+    <string name="text_cannot_load_pdf_file">无法加载 PDF 文件</string>
+    <string name="str_deposit_refund_order">押金退还订单</string>
+    <string name="str_select_the_refund_order">请选择退还订单</string>
+    <string name="str_tip_voucher_not_confirmed">押金凭证尚未确认回收，是否继续退还？</string>
+    <string name="str_select_battery">选择电池</string>
+    <string name="str_select_vehicle">选择车辆</string>
+    <string name="str_swapbind_select_battery_tip">最多可选两个，且型号须一致</string>
+    <!--  分期缴纳  -->
+    <string name="title_installmentpay">分期付款</string>
+    <string name="str_the_latest_due_date">最近应还款日期</string>
+    <string name="full_calendar_month">整月</string>
+    <string name="fixed_cycle">固定周期</string>
+    <!--  销售数据统计  -->
+    <string name="str_sales_performance_statistics">销售业绩统计</string>
+    <!--  道路救援  -->
+    <string name="hint_device_issue_search_input_tip">输入出入库编号以搜索</string>
+    <string name="str_shipping_entry">发货入库</string>
+    <string name="str_select_device_to_entered">选择要入库的设备型号</string>
+    <string name="str_this_month_sale">本月销售</string>
+    <string name="str_Order_Quantity">订单数量</string>
+    <string name="str_empty_device_letter">暂无设备编号，请扫码或输入设备 SN</string>
+    <string name="title_create_entry">创建%s发出</string>
+    <string name="press_back_again">再次点击将退出APP</string>
+    <string name="str_device">设备</string>
+    <string name="str_the_latest_duedate">最近应还日期</string>
+    <string name="str_monthly_repayment_amount">每月还款金额</string>
+    <string name="str_payment_order">付款订单</string>
+    <string name="str_select_payment_order">请选择付款订单</string>
+    <string name="str_payment_success">请前往订单记录页面查看</string>
+    <!--  销售数据统计  -->
+    <string name="str_ok">确定</string>
+    <string name="str_rate_order_value">成交率 &amp; 订单金额</string>
+    <string name="str_sales_amount">销售金额</string>
+    <string name="str_sale_statistics_totalsale_tip">所选时段已执行订单累计金额</string>
+    <string name="str_transaction_order">成交订单</string>
+    <string name="str_sale_statistics_order_tip">所选时段成交订单数量</string>
+    <string name="str_order_signing_rate">订单签约率</string>
+    <string name="str_order_sining_rate_tip">订单签约率 =(成交订单数/总订单数)×100%</string>
+    <string name="str_average_order_price">平均订单金额</string>
+    <string name="str_average_order_price_tip">平均订单金额 = 总销售额 ÷ 成交订单数</string>
+    <string name="tips_selecttime_in_30days">时间范围须在30天内</string>
+    <string name="str_in_installments">分期中</string>
+    <string name="str_cash_installment">现金分期</string>
+    <string name="str_online_installment">线上分期</string>
+    <string name="str_order">订单</string>
+    <string name="str_total_consumption">消费总额</string>
+    <string name="str_assets">资产</string>
+    <string name="str_total_sales_amount">销售总额</string>
+    <string name="str_store_ranking">门店排名</string>
+    <string name="str_sales_data">销售数据</string>
+    <!--  人工换电  -->
+    <string name="str_bound_battery_sn">已绑定电池 SN</string>
+    <string name="hint_enter_userid_or_scan_qrcode">请输入用户 ID 或扫码</string>
+    <string name="hint_enter_batterysn_or_scan_qrcode">请输入电池 SN 或扫码</string>
+    <string name="hint_enter_reason_for_battery_swap">请输入换电原因</string>
+    <string name="str_remaining_amount">剩余金额</string>
+    <string name="str_remaining_installments">剩余期数</string>
+    <string name="str_payment_voucher">付款凭证</string>
+    <string name="str_receiving_warehouse">接收仓库</string>
+    <string name="str_payment_methods">支付方式</string>
+    <string name="str_total">总计</string>
+    <string name="str_financial">金融方案</string>
+    <string name="str_select_package">选择套餐</string>
+    <string name="str_choose_package">选择套餐</string>
+    <string name="str_allcity">所有城市</string>
+    <string name="str_view_voucher">查看凭证</string>
+    <string name="str_available_battery">可用电池</string>
+    <string name="str_available_vehicles">可用车辆</string>
+    <string name="str_swap_time">换电次数</string>
+    <string name="str_transaction_amount">成交金额</string>
+    <string name="hint_enter_inventory_number_search">请输入盘点单号以搜索</string>
+    <string name="tip_no_package_available">暂无匹配套餐信息</string>
+    <string name="tip_no_vehicle_available">暂无匹配车辆信息</string>
+    <string name="tip_no_battery_available">暂无匹配电池信息</string>
+    <string name="tip_select_vehicle_battery">请先选择车辆和电池</string>
+    <string name="tip_no_order_canbe_deposit">暂无可退还押金的订单</string>
+    <string name="str_maintenance_log">维护日志</string>
+    <string name="str_input_time">录入时间</string>
+    <string name="device_detail_device_insurance_number">保险编号</string>
+    <string name="device_detail_device_number_plate">车牌号</string>
+    <string name="str_bound">已绑定</string>
+    <string name="str_unbound">未绑定</string>
+    <string name="str_sale">销售</string>
+    <string name="str_lease">租赁</string>
+    <string name="str_empty_record">暂无记录</string>
+    <string name="str_empty_search_tip">未找到相关信息</string>
+    <!--  订单状态提示  -->
+    <string name="str_status_fully_paid">全款订单，无分期</string>
+    <string name="str_status_settled">已结清订单，无逾期</string>
+    <string name="str_status_in_installments">有分期中订单，无逾期</string>
+    <string name="str_status_overdue">存在逾期订单</string>
+    <string name="str_status_defaulted">存在失信订单</string>
+    <!--  仓管  -->
+    <string name="str_device_record">设备入库登记</string>
+    <string name="str_device_send">设备发出</string>
+    <string name="str_device_receive">设备接收</string>
+    <string name="str_inventory_audit">库存盘点</string>
+    <!--  运维  -->
+    <string name="str_maintenance_schedule">预约保养</string>
+    <string name="str_repair_registration">维修登记</string>
+    <string name="str_road_assistance">道路救援</string>
+    <string name="str_device_unbind">设备解绑</string>
+    <string name="str_after_sale_bind">售后绑定</string>
+    <string name="str_select_after_sale_order">选择售后订单</string>
+    <!--  销售  -->
+    <string name="str_sale_bind">销售绑定</string>
+    <string name="str_lease_bind">租赁绑定</string>
+    <string name="str_battery_swap_bind">换电绑定</string>
+    <string name="str_depost_refund">押金退还</string>
+    <string name="str_battery_swap">人工换电</string>
+    <string name="str_installment_payment">分期缴纳</string>
+    <string name="str_offline_user_register">线下用户注册</string>
+    <string name="str_sale_statistics">销售业绩统计</string>
+    <!--电柜-->
+    <string name="str_release_station">上架电柜</string>
+    <string name="str_retire_station">下架电柜</string>
+    <string name="str_station_operation">电柜操作</string>
+    <string name="str_station_query">电柜查询</string>
+
+    <!--  共用权限  -->
+    <string name="str_device_query">设备查询</string>
+    <string name="str_user_query">用户查询</string>
+    <string name="title_create_inventory">创建盘点</string>
+    <string name="title_inventory_detail">盘点详情</string>
+    <string name="str_payment_period">还款期数</string>
+    <string name="str_principal">本金</string>
+    <string name="str_total_interest">总利息</string>
+    <string name="str_lease_amount">租赁金额</string>
+    <string name="str_annual_interest_rate">年利率</string>
+    <string name="str_userinfo_salebind_account">出售绑定%d</string>
+    <string name="str_userinfo_rentbind_account">租赁绑定%d</string>
+    <string name="str_empty_payrecord">暂无支付记录</string>
+    <string name="str_empty_swaprecord">暂无换电记录</string>
+    <string name="str_price">价格</string>
+    <string name="str_installment_term">分期期限</string>
+    <string name="str_monthly_installment">每月分期金额</string>
+    <string name="str_upload_voucher">上传凭证</string>
+    <string name="str_vehicle_sn_vin">车辆编号 / 车架号</string>
+    <string name="hint_enter_amount">请输入金额（无费用请填写 0）</string>
+    <string name="title_maintenance_costs">保养费用</string>
+    <string name="title_roadside_costs">费用</string>
+    <string name="str_maintenance_succ">保养成功</string>
+    <string name="hint_search_for_bound_vehicles">搜索已绑定车辆</string>
+    <string name="str_view_more_bound_vehicles">查看更多已绑定车辆</string>
+    <string name="str_no_maintenance_required">无需维护</string>
+    <string name="str_to_be_maintained">待维护</string>
+    <string name="str_sales_order">销售订单</string>
+    <string name="str_rental_order">租赁订单</string>
+    <string name="str_swap_order">换电订单</string>
+    <string name="tip_newbattery_cannot_same_old">新电池不能与旧电池相同</string>
+    <string name="str_no_order_yet">暂无订单</string>
+    <string name="str_order_records">订单记录</string>
+    <string name="str_scan_to_receive">扫码领取</string>
+    <string name="str_processiong_result">处理结果</string>
+    <string name="str_total_dollar">总计（$）</string>
+    <string name="str_not_paying_yet">不支付</string>
+    <string name="str_confirm_payment">确认支付</string>
+    <string name="str_unbinding_time">解绑时间</string>
+    <string name="str_completion_time">完成时间</string>
+    <string name="str_order_type">订单类型</string>
+    <string name="str_order_status">订单状态</string>
+    <string name="str_applicable_devices">适用设备</string>
+    <string name="str_specification">规格</string>
+    <string name="str_rental_day">租赁天数</string>
+    <string name="str_remaining_day">剩余天数</string>
+    <string name="str_service_expiration_date">服务到期日</string>
+    <string name="str_service_day">服务天数</string>
+    <string name="str_remaining_time">剩余换电次数</string>
+    <string name="str_bind_user">绑定用户</string>
+    <string name="str_binding_user_id">绑定用户 ID</string>
+    <string name="str_entry_time">录入时间</string>
+    <string name="str_replace_success">更换成功</string>
+
+    <string name="str_unfinished">未完成</string>
+    <string name="str_revoked">已撤销</string>
+    <string name="str_reasons">原因</string>
+
+    <string name="str_days">天</string>
+
+    <string name="scan_input_tip_sn">请输入设备序列号</string>
+    <string name="scan_input_tip_vin">请输入车辆VIN</string>
+    <string name="tip_no_chinese">不支持中文</string>
+
+    <string name="str_phone_colon">电话: </string>
+
+    <string name="status_overdue">逾期</string>
+
+    <string name="str_withdraw_all">全部撤回</string>
+
+    <string name="sale">出售</string>
+    <string name="lease">租赁</string>
+    <string name="paid">已支付</string>
+    <string name="in_progress">进行中</string>
+
+    <string name="str_order_no">订单号:</string>
+
+    <string name="str_model">型号</string>
+    <string name="str_vin_is_required">VIN 为必填项，存在未填写 VIN 的条目</string>
+
+    <string name="str_payment_pending">待支付</string>
+    <string name="str_ended">已结束</string>
+    <string name="str_times">次</string>
+    <string name="str_bind">绑定</string>
+    <string name="empty_user_bind_device">尚未绑定设备</string>
+    <string name="str_select_repair_project">选择维修项目</string>
+
+    <string name="str_normal">正常</string>
+
+    <string name="str_binding_id">绑定人ID: %s</string>
+    <string name="str_loading">加载中…</string>
+
+    <string name="str_swap_battery">换电</string>
+    <string name="str_road_rescue">道路救援</string>
+    <string name="str_select_data">选择数据</string>
+    <string name="str_after_sale_data">售后数据</string>
+
+    <string name="str_voucher">凭证</string>
+
+
+    <string name="user_status_all_normal">该用户的所有订单均正常运行</string>
+    <string name="user_status_has_overdue">该用户存在逾期订单</string>
+    <string name="user_status_has_defaulted">该用户存在失信订单</string>
+    <string name="user_status_all_completed">该用户的所有订单均已结束</string>
+
+    <string name="str_installment">分期</string>
+
+    <string name="str_have_closed">已关闭</string>
+    <string name="str_full_payment">全款</string>
+    <string name="str_in_use">使用中</string>
+    <string name="str_admin_console">管理后台</string>
+    <string name="str_occurrence">发生</string>
+    <string name="str_unbinding">解绑</string>
+
+    <string name="str_user_phone_2">用户手机号: </string>
+
+    <string name="str_open_location_service">开启定位服务</string>
+    <string name="tip_open_location_service">请在系统设置中打开定位服务，以便使用定位功能。</string>
+    <string name="str_go_to_settings">去设置</string>
+
+    <!--仓-->
+    <string name="cabin_charge_current">充电电流</string>
+    <string name="cabin_battery_bid">BID</string>
+    <string name="cabin_battery_sn">电池SN</string>
+    <string name="cabin_cabin_serial">仓 %d</string>
+    <string name="cabin_cabin_occupy">占用</string>
+    <string name="cabin_cabin_free">空闲</string>
+    <string name="cabin_cabin_disable">禁仓</string>
+    <string name="cabin_cabin_overvoltage">电压过压</string>
+    <string name="cabin_cabin_overcurrent">电压过流</string>
+    <string name="cabin_cabin_all">全部</string>
+    <string name="cabin_detail_remote_disable_cabin">远程禁仓</string>
+    <string name="cabin_detail_remote_disable_cabin_tips">确认要禁用该仓门?</string>
+    <string name="user_state_enable">启用</string>
+
+    <!--选择责任人-->
+    <string name="person_liable_title">选择责任人</string>
+    <string name="person_liable_enter_tip">输入名称或手机号码搜索处理人</string>
+    <string name="person_liable_selected">已选择 %d/5</string>
+
+<!--    电池搜索-->
+    <string name="battery_search_search">搜索</string>
+
+
+    <!--蓝牙操作-->
+    <string name="bluetooth_connect_state">蓝牙密钥已连接</string>
+    <string name="switch_cabinet_authorization">换电柜授权</string>
+    <string name="enter_battery_cabinet_sn">输入换电柜序列号</string>
+    <string name="add_authorization">增加授权</string>
+    <string name="str_tips">温馨提示</string>
+    <string name="reset_authorization">重置有效期</string>
+    <string name="factory_authorized_entrance">工厂授权入口</string>
+    <string name="clear_authorization">清空授权</string>
+    <string name="notifyTitle">提示</string>
+    <string name="gpsNotifyMsg">当前手机扫描蓝牙需要打开定位功能。</string>
+    <string name="nearbyNotifyMsg">当前手机扫描蓝牙需要打开附件设备权限。</string>
+    <string name="setting">前往设置</string>
+    <string name="cancel">取消</string>
+    <string name="please_open_blue">请先打开蓝牙</string>
+    <string name="connect_fail">连接失败</string>
+    <string name="active_disconnected">断开了</string>
+    <string name="disconnected">连接断开</string>
+    <string name="bluetooth_operate_tip">• 请确保蓝牙钥匙在连接状态，钥匙显示屏上有蓝牙标志；\n• 新增授权前，建议先清空授权一次，把不需要的记录清空；\n• 授权成功后，即可关闭手机蓝牙；\n• 按一下钥匙蓝色按键，指示灯进入快闪状态，即可开锁；\n• 授权有效期为授权成功后24小时内；</string>
+    <string name="factory_authorized_tip">• 请确保蓝牙钥匙在连接状态，钥匙显示屏上有蓝牙标志；\n• 设置工厂授权前，先清空授权一次；\n• 授权时间以天为单位，如授权10天，填数字10；</string>
+    <string name="factory_authorized">工厂授权</string>
+    <string name="factory_authorized_time">工厂授权时间</string>
+    <string name="input_factory_authorized_days">输入需要授权的天数</string>
+    <string name="str_days_unit">天</string>
+    <string name="str_sure">确认</string>
+    <string name="bluetooth_authorization">蓝牙钥匙授权</string>
+    <string name="repeat_authorization">重复授权</string>
+    <string name="reset_authorization_tip">该操作会设置钥匙有效期为10年，你确定要设置吗？</string>
+    <string name="open_cabinet_authorization_tip">授权后于24小时内可开柜门，确定授权？</string>
+    <string name="clear_authorization_tip">确定清空该蓝牙钥匙授权？</string>
+    <string name="authorization_success">清除授权成功</string>
+    <string name="authorization_fail">清除授权失败</string>
+    <string name="reset_authorization_time_success">设置有效期成功</string>
+    <string name="reset_authorization_time_fail">设置有效期失败</string>
+    <string name="add_authorization_days_tip">有效时间不能超过1年</string>
+    <string name="sn_not_null">SN码为空，请扫描贴在柜子上的SN码</string>
+    <string name="factory_authorized_success">工厂授权成功</string>
+    <string name="factory_authorized_fail">工厂授权失败</string>
+    <string name="add_authorized_success">新增授权成功</string>
+    <string name="add_authorized_fail">新增授权失败</string>
+    <string name="please_connect_device">请连接设备</string>
+    <string name="cabin_cabin_enable">启用</string>
+    <string name="cabin_cabin_open_the_box">开仓</string>
+    <string name="cabin_cabin_check_the_fault">查看故障</string>
+    <string name="cabin_cabin_enter_disable_box">禁仓</string>
+    <string name="cabin_cabin_enter_disable_reason">请输入禁仓原因</string>
+    <string name="cabin_cabin_enter_charging_current">设置充电电流</string>
+    <string name="cabin_cabin_enter_current">请输入电流：%s-%s</string>
+    <!--故障列表-->
+    <string name="fault_list_title">故障列表</string>
+    <string name="fault_list_fault_type">Fault %d</string>
+
+    <!--详情 搜索-->
+    <string name="detail_search_local_status">本机状态</string>
+    <string name="detail_search_local_time">时间</string>
+    <string name="detail_search_local_edition">版本</string>
+
+    <!--详情 搜索-->
+    <string name="putaway_camera_binded">摄像头已经绑定了换电柜%s，是否要解绑并绑定到当前换电柜？</string>
+    <string name="putaway_cabinet_binded">换电柜已经绑定了其他摄像头，是否要解绑并绑定到当前摄像头？</string>
+
+    <!--地址选择-->
+    <string name="select_address_title">地址</string>
+    <string name="select_address_search">搜索</string>
+    <string name="select_address_distance_address">%sm | %s</string>
+    <string name="select_address_coordinate">经纬度：%s,%s</string>
+
+    <!--地址搜索-->
+    <string name="search_address_title">搜索地址</string>
+    <string name="search_address_hint">搜索地址</string>
+    <string name="search_address_search_place_not_found">没有找到该地址！</string>
+
+    <!--中控搜索-->
+    <string name="center_control_search_sid">SID: %s</string>
+
+    <!--本机状态-->
+    <string name="local_status_title">本机状态</string>
+    <!--换电柜版本-->
+    <string name="cabinet_version_title">换电柜版本</string>
+    <!--操作页面-->
+    <string name="operation_shutdown_complete_machine_tip">确认关机-整机吗？</string>
+    <string name="operation_restart_complete_machine_tip">确认重启-整机吗？</string>
+    <string name="operation_restart_android_machine_tip">确认重启-Android机吗？</string>
+    <string name="operation_restart_charger_power_supply_tip">确认重启-充电器电源吗？</string>
+    <string name="operation_open_electronic_lock">开电子锁</string>
+    <string name="operation_shutdown_restart">关机/重启命令</string>
+    <string name="operation_shutdown_complete_machine">关机-整机</string>
+    <string name="operation_restart_complete_machine">重启-整机</string>
+    <string name="operation_restart_android_machine">重启-Android机</string>
+    <string name="operation_restart_charger_power_supply">重启-充电器电源</string>
+    <string name="operation_undo">撤销</string>
+    <string name="operation_undo_shutdown_complete_machine">撤销整机关机</string>
+    <string name="operation_undo_restart_complete_machine">撤销整机重启</string>
+    <string name="operation_undo_restart_charger_power_supply">撤销重启充电器电源</string>
+    <string name="operation_undo_restart_android_machine">撤销重启Android机</string>
+    <string name="operation_configration_files">配置文件</string>
+    <string name="operation_set">设置</string>
+    <string name="operation_tempory_psw">临时密码</string>
+    <string name="operation_tempory_user_name">用户名: %s\n\n密码: %s</string>
+    <string name="operation_tempory_psw_value">密码: 862872</string>
+    <string name="operation_is_confirm_open_electronic_lock">确认开启换电柜的电子锁吗？</string>
+
+    <!--操作设置-->
+    <string name="operation_setting_title">设置</string>
+    <string name="operation_setting_empty_cabin_check_tip">空仓检测：连续检测 %d 次没有电池则判断为空仓</string>
+    <string name="operation_setting_empty_cabin_check_tip_prefix">空仓检测：连续检测</string>
+    <string name="operation_setting_empty_cabin_check_tip_suffix">次没有电池则判断为空仓</string>
+    <string name="operation_setting_forbidden_charge">禁止充电</string>
+    <string name="operation_setting_power_outage_time">停电时间</string>
+    <string name="operation_setting_power_outage_time_desc">指定换电柜每天停止给电池充电的时间</string>
+    <string name="operation_setting_charging_time">充电时间</string>
+    <string name="operation_setting_charging_time_desc">指定换电柜每天开始给电池充电的时间</string>
+    <string name="operation_setting_restart_charger">定时重启充电器</string>
+    <string name="operation_setting_restart_time">重启时间</string>
+    <string name="operation_setting_restart_time_desc">指定换电柜每天重启充电器的时间</string>
+    <string name="operation_setting_set_restart_time">设置时间</string>
+    <string name="operation_setting_heating_control">加热控制</string>
+    <string name="operation_setting_heating_auto">安卓屏自动控制加热</string>
+    <string name="operation_setting_heating_auto_under_value">所有电池低于%d℃时，自动加热</string>
+    <string name="operation_setting_stop_heating_above_value">当有1个电池高于%d℃时，禁止加热</string>
+    <string name="operation_setting_allow_pms_heating_auto">允许PMS自动加热</string>
+    <string name="operation_setting_show_home_detail">显示主页详情</string>
+    <string name="operation_setting_micro_swith_check">微动开关检测</string>
+    <string name="operation_setting_battery_connetor_check">电池连接器检测</string>
+    <string name="operation_setting_charging_strategy">充电策略</string>
+    <string name="operation_setting_low_battery_preferred">低电量优先</string>
+    <string name="operation_setting_preset_power_value">预设电量值</string>
+    <string name="operation_setting_lower_value_preferred">优先给低于低于%s电量的电池充电</string>
+    <string name="operation_setting_value_can_be_borrowed">电池充至%s时可外借</string>
+    <!--上架电柜-->
+    <string name="putaway_cabinet_pid_tip">请输入正确的电池柜SN码</string>
+    <string name="putaway_cabinet_address_tip">请选择换电柜地址</string>
+    <string name="putaway_cabinet_coordinate_tip">请选择电池柜经纬度</string>
+    <string name="putaway_cabinet_city_tip">请选择电池柜所在城市</string>
+    <string name="putaway_cabinet_current_tip">请选择电池柜充电电流</string>
+    <string name="putaway_cabinet_title">添加换电柜</string>
+    <string name="putaway_cabinet_id">换电柜ID</string>
+    <string name="putaway_cabinet_sn">换电柜SN</string>
+    <string name="putaway_cabinet_verification_code">摄像头验证码</string>
+    <string name="putaway_cabinet_verification_code_hint">请输入摄像头验证码</string>
+    <string name="putaway_cabinet_id_hint">请扫描屏幕二维码或输入电柜ID</string>
+    <string name="putaway_cabinet_sn_hint">请扫描柜身二维码或输入电柜SN</string>
+    <string name="putaway_cabinet_id_toast_tip">请扫描电柜屏幕二维码</string>
+    <string name="putaway_cabinet_sn_toast_tip">请扫描柜身二维码</string>
+    <string name="putaway_cabinet_address">地址</string>
+    <string name="putaway_cabinet_lon_and_lat">经纬度</string>
+    <string name="putaway_cabinet_choose_city">选择城市</string>
+    <string name="putaway_cabinet_charging_current">充电电流</string>
+    <string name="putaway_cabinet_point_type">点位类型</string>
+    <string name="putaway_cabinet_please_select">请选择</string>
+    <string name="putaway_cabinet_photo">换电柜照片（可多选最多5张）</string>
+    <string name="putaway_cabinet_confirm">确定</string>
+    <string name="putaway_cabinet_sn_tip">请输入正确的电池柜SN码</string>
+
+
+
+    <!-- 电柜操作 -->
+    <string name="cabinet_opt_title">电柜操作</string>
+    <string name="cabinet_opt_input_sn">输入电柜SN</string>
+    <string name="cabinet_opt_scan_code">扫二维码</string>
+    <string name="cabinet_opt_cabinet_authorization">电柜操作授权</string>
+    <string name="cabinet_opt_cabinet_offline">离线电柜O&#038;M</string>
+    <string name="cabinet_opt_cabinet_offline_ble_connected">蓝牙已连接</string>
+    <string name="cabinet_opt_cabinet_offline_ble_disconnect">蓝牙已断开</string>
+    <string name="cabinet_opt_cabinet_offline_restart">重启</string>
+    <string name="cabinet_opt_cabinet_offline_restart_tips">是否重启电柜？</string>
+    <string name="cabinet_opt_cabinet_offline_open_door">开门</string>
+    <string name="cabinet_opt_cabinet_offline_open_door_tips">是否打开柜门?</string>
+    <string name="cabinet_opt_cabinet_offline_device_info">电柜信息</string>
+    <string name="cabinet_opt_cabinet_offline_real_time">实时数据</string>
+    <string name="cabinet_opt_cabinet_offline_version">软件版本</string>
+    <string name="cabinet_opt_cabinet_offline_status">备用电源状态</string>
+    <string name="cabinet_opt_cabinet_offline_slot">仓门</string>
+    <string name="slot_d">仓门 %d</string>
+    <string name="cabinet_opt_cabinet_offline_battery_in_slot">仓内电池数</string>
+    <string name="cabinet_opt_cabinet_offline_swap_threshold">换电阈值</string>
+    <string name="cabinet_opt_cabinet_offline_apn">APN</string>
+    <string name="cabinet_opt_cabinet_offline_volume">音量</string>
+    <string name="cabinet_opt_cabinet_offline_platform_url">平台地址</string>
+    <string name="cabinet_opt_cabinet_offline_gsm_signal">GSM 信号</string>
+    <string name="cabinet_opt_cabinet_offline_charger">电池充电状态</string>
+    <string name="cabinet_opt_cabinet_offline_ctrl_sys">主控与柜控通信状态</string>
+    <string name="cabinet_opt_cabinet_offline_on_door">O&#038;M door</string>
+    <string name="cabinet_opt_cabinet_offline_total_voltage">电柜总电压</string>
+    <string name="cabinet_opt_cabinet_offline_total_current">电柜总电流</string>
+    <string name="cabinet_opt_cabinet_offline_temperature">温度</string>
+    <string name="cabinet_opt_cabinet_offline_meter">电表</string>
+    <string name="cabinet_opt_cabinet_offline_smoke_alarm">烟雾告警</string>
+    <string name="cabinet_opt_cabinet_offline_water_alarm">浸水告警</string>
+    <string name="cabinet_opt_cabinet_offline_fan_status">机柜风扇状态</string>
+    <string name="cabinet_opt_cabinet_offline_enter_apn">输入 ANP</string>"
+    <string name="cabinet_opt_cabinet_offline_enter_swap_threshold">输入换电阈值</string>
+    <string name="cabinet_opt_cabinet_offline_enter_swap_threshold_error_d">最大值是 %d</string>
+    <string name="cabinet_opt_cabinet_offline_enter_volume">输入音量</string>
+    <string name="cabinet_opt_cabinet_offline_enter_url">输入平台地址</string>
+    <string name="cabinet_opt_cabinet_offline_enter_url_error">请填写端口，中间用 :</string>
+    <string name="cabinet_opt_cabinet_offline_enter_format_error">输入格式错误</string>
+    <string name="cabinet_opt_cabinet_offline_enter_max_len_d">输入最大长度为: %d</string>
+    <string name="cabinet_opt_cabinet_open">开电柜门</string>
+    <string name="cabinet_opt_check_fault">检查故障</string>
+    <string name="cabinet_opt_not_manager_tips">你不是该电柜负责人，请联系负责人获取操作权限</string>
+    <string name="cabinet_opt_not_manager_phone">联系电话</string>
+    <string name="cabinet_opt_box_no_use">禁仓</string>
+    <string name="cabinet_opt_box_can_use">可换电</string>
+    <string name="cabinet_opt_box_open">开仓</string>
+    <string name="cabinet_opt_box_opened">仓门已打开</string>
+    <string name="cabinet_opt_box_empty">空闲</string>
+    <string name="cabinet_opt_box_remote_enable">确认启动该仓门？</string>
+    <string name="cabinet_opt_box_open_confirm_tips">确定要打开%d号仓吗？打开仓位后，只能线下关闭。</string>
+    <string name="cabinet_opt_cabinet_open_confirm_tips">确定要打开电柜门？</string>
+    <string name="cabinet_opt_cabinet_open_confirm">打开</string>
+    <string name="cabinet_opt_cabinet_open_success">电柜门打开成功</string>
+    <!-- 蓝牙授权 -->
+    <string name="cabinet_opt_bluetooth">蓝牙</string>
+    <string name="cabinet_opt_bluetooth_find">查找蓝牙钥匙</string>
+    <string name="cabinet_opt_bluetooth_input_tips">请输入电柜SN或扫描二维码</string>
+    <string name="cabinet_opt_authorization_connectable_devices_desc">可用设备</string>
+    <string name="cabinet_opt_open_authorization">开柜授权</string>
+    <!-- 操作授权 -->
+    <string name="cabinet_opt_cabinet_authorization_title">电柜操作授权</string>
+    <string name="cabinet_opt_switch_cabinet">换电柜</string>
+    <string name="cabinet_opt_select_cabinet">请选择换电柜</string>
+    <string name="cabinet_opt_switch_authorization">被授权人</string>
+    <string name="cabinet_opt_select_authorization">请选择被授权人</string>
+    <string name="cabinet_opt_authorization_date">授权可操作时间</string>
+    <string name="cabinet_opt_authorization_confirm">确定授权</string>
+    <string name="cabinet_opt_authorization_record">已授权记录</string>
+    <string name="cabinet_opt_cabinet_select_title">选择换电柜</string>
+    <string name="cabinet_opt_authorization_detail_cabinet_num">仓位数</string>
+    <string name="cabinet_opt_authorization_detail_cabinet_fault_num">故障仓数</string>
+    <string name="cabinet_opt_authorization_detail_cabinet_lost_num">失联仓数</string>
+    <string name="cabinet_opt_authorization_detail_replace_battery_count">换电标准</string><!-- 需要翻译 -->
+    <string name="cabinet_opt_authorization_detail_seven_day">近七日平均换电次数</string>
+    <string name="cabinet_opt_user_select_title">选择被授权人</string>
+    <string name="cabinet_opt_authorization_time">授权时间: %s</string>
+    <string name="cabinet_opt_authorization_person">被授权人</string>
+    <string name="cabinet_opt_validity_period">有效期</string>
+    <string name="cabinet_opt_cancel_authorization_tips">确认取消电柜授权？</string>
+    <string name="cabinet_opt_box_scan_user_id_or_phone">输入用户姓名或手机号</string>
+    <string name="cabinet_opt_end_time_error">结束时间不能早于开始时间</string>
+
+    <!--服务网点信息 -->
+    <string name="service_outlet_name">网点名称</string>
+    <string name="device_full">满仓</string>
+    <string name="battery_station_out_of_contact">已失联</string>
+    <string name="battery_detail_in_station">在电柜</string>
+    <string name="service_network_input_tip">搜索服务网点ID、名称或地址关键字</string>
+    <string name="service_network_photo">服务网点照片（可多选最多5张）</string>
+    <string name="my_service_central_control">中控</string>
+    <string name="user_deposit_amount_value">$%d</string>
+    <string name="user_allow_one_batteries">允许一颗电池</string>
+    <string name="user_no_deposit">无押金</string>
+    <string name="user_available_days">%d天</string>
+    <string name="qr_code_error">二维码不符合规范</string>
+    <string name="liable_tips_error">请至少设置一个责任人</string>
+    <string name="user_state_disable">已禁用</string>
+    <string name="user_state_delete">已删除</string>
+    <string name="search_address_input_tip">可搜索地址关键字</string>
+    <!--柜子详情-->
+    <string name="cabinet_detail_title">设备主页</string>
+    <string name="cabinet_detail_base_info">基本信息</string>
+    <string name="cabinet_detail_cabin">仓</string>
+    <string name="cabinet_detail_person_liable">%s (%s)</string>
+    <string name="cabinet_detail_search">查询</string>
+    <string name="cabinet_detail_operation">操作</string>
+    <string name="cabinet_detail_person_in_charge">责任人</string>
+    <string name="cabinet_detail_sn">SN</string>
+    <string name="cabinet_detail_pid">PID</string>
+    <string name="cabinet_detail_address">地址</string>
+    <string name="cabinet_detail_coordinate">坐标</string>
+    <string name="cabinet_detail_photos">照片</string>
+    <string name="cabinet_detail_layout_time">布柜时间</string>
+    <string name="cabinet_detail_address_type">类型</string>
+    <string name="cabinet_detail_photo_edit">编辑</string>
+    <string name="cabinet_detail_photo_save">保存</string>
+    <string name="cabinet_detail_photo_num">%d/5</string>
+
+    <!--下架电柜-->
+    <string name="stop_cabinet_unshelve_desc">下架原因</string>
+    <string name="stop_cabinet_unshelve_reason">输入下架原因</string>
+    <string name="tip_please_select_storage_status">请选择仓储状态</string>
+    <string name="stop_cabinet_submit_tips">停用后，电柜的营业时间将被清除。如需重新上线，请在管理门户中修改营业时间。</string>
+
+    <string name="putaway_cabinet_more_than_one_picture_tip">请上传至少一张图片</string>
+    <string name="textCopySuccess">复制成功</string>
+    <string name="txt_opne_locker_hint">您确定要打开电池仓的门?打开后需要现场手动关闭仓门</string>
+    <string name="txt_cabinet_lost_time">失联时间</string>
+    <!-- 下架 -->
+    <string name="stop_cabinet_unshelve_title">换电柜下架</string>
+    <string name="stop_cabinet_unshelve_reasons">下架原因</string>
+    <string name="stop_cabinet_unshelve_reasons_hint">输入下架原因</string>
+    <string name="stop_cabinet_unshelve_common_reasons_1">点位商不续约</string>
+    <string name="stop_cabinet_unshelve_common_reasons_2">效率不符要求</string>
+    <string name="stop_cabinet_unshelve_common_reasons_3">设备损坏下架维修</string>
+    <string name="title_confirm_retire">确定下架?</string>
+
+    <!--布柜信息-->
+    <string name="layout_cabinet_info_titile">布柜信息</string>
+    <string name="layout_cabinet_info_operator">操作者:%s %s</string>
+    <string name="layout_cabinet_info_address">地址:%s</string>
+    <string name="layout_cabinet_info_coordinate">coordinate:%s,%s</string>
+    <!--换电柜版本-->
+    <string name="exchange_battery_cabinet_title">换电柜版本</string>
+    <string name="exchange_battery_cabinet_apk_version_name">apk版本</string>
+    <string name="exchange_battery_cabinet_apk_version_code">apk版本数字</string>
+    <string name="exchange_battery_cabinet_smart_version_name">控制板版本</string>
+    <string name="exchange_battery_cabinet_pms_version_name">pms版本</string>
+    <string name="exchange_battery_cabinet_charger_version_name">充电器版本</string>
+
+    <!--下架电柜-->
+    <string name="stop_cabinet_title">换电柜下架</string>
+    <string name="stop_cabinet_scan_tip">请输入换电柜ID</string>
+    <!--蓝牙授权-->
+    <string name="bluetooth_authorization_title">蓝牙授权</string>
+    <string name="bluetooth_authorization_switch_open">蓝牙授权</string>
+    <string name="bluetooth_authorization_switch_close">蓝牙授权</string>
+    <string name="bluetooth_authorization_switch_tip">请确认手机蓝牙已打开，再开启设备搜索</string>
+    <string name="bluetooth_authorization_connectable_devices_desc">可连接设备</string>
+    <string name="bluetooth_devices_not_find">未发现可连接设备</string>
+
+    <string name="str_not_match_lock_id">电柜SN对应锁ID为空</string>
+
+    <string name="text_alarm">警告</string>
+    <string name="text_no_alarm">未警告</string>
+    <string name="text_open">打开</string>
+    <string name="text_close">关闭</string>
+    <string name="text_yes">是</string>
+    <string name="text_no">否</string>
+    <string name="text_running">运行中</string>
+    <string name="text_unknown">未知</string>
+    <string name="text_exception">异常</string>
+
+    <string name="device_detail_storehouse_info">仓位详情</string>
+    <string name="text_success">成功</string>
+    <string name="text_failure">失败</string>
+
+
+    <!--查看故障列表-->
+    <string name="cabin_fault_list_title">故障列表</string>
+    <!--设备详情-->
+    <string name="device_detail_mainframe">主柜 %d</string>
+    <string name="device_detail_deputy_ark">副柜 %d</string>
+
+
+    <string name="device_detail_device_manager">负责人</string>
+
+    <string name="txt_cabinet_type">换电柜规格</string>
+    <string name="txt_cabinet_name">换电柜名称</string>
+    <string name="txt_cabinet_state">换电柜状态</string>
+    <string name="txt_cabinet_type_one">一代</string>
+    <string name="txt_cabinet_type_two">二代</string>
+    <string name="txt_cabinet_type_three">三代</string>
+
+    <!--  电柜上架  -->
+    <string name="putaway_cabinet_new_title">换电柜上架</string>
+    <string name="putaway_cabinet_battery_exchange_indicator">换电次数标准</string>
+    <string name="putawai_cabinet_times_day"> (次/天)</string>
+    <string name="putaway_cabinet_photo_new">照片</string>
+    <string name="putaway_cabinet_input_cabinet_name">输入电柜名称</string>
+    <string name="putaway_cabinet_battery_exchange_tip">请输入正确的换电次数</string>
+    <string name="putaway_cabinet_input_cabinet_address">输入电柜地址</string>
+    <string name="putaway_cabinet_input_swap_indicator">输入换电次数标准</string>
+    <string name="putaway_cabinet_cabinet_name">电柜名称</string>
+    <string name="putaway_cabinet_confirm_title">确定上架？</string>
+    <string name="putaway_cabinet_submit_tip">若本电柜需要配合场馆时间表营运，请在管理处修改营业时间。</string>
+
+    <string name="text_copy">复制</string>
+    <string name="text_sn">SN</string>
+    <string name="save_successfully">保存成功</string>
+    <string name="title_select_address">选择地址</string>
+
+    <string name="str_exchange_in_sn">原电池编号</string>
+    <string name="str_exchange_out_sn">新电池编号</string>
+    <string name="str_exchange_success">换电成功</string>
+    <string name="str_exchange_fail">换电失败</string>
+    <string name="str_exchange_part_success">部分成功</string>
+    <string name="str_exchange_system_reject">系统拒绝</string>
+    <string name="str_exchange_order_detail">订单详情</string>
+    <string name="str_exchange_order_record_id">订单编号</string>
+    <string name="str_exchange_time">换电时间</string>
+    <string name="str_exchange_switch_cabinet_sn">换电站编号</string>
+    <string name="str_exchange_order_state">订单状态</string>
+    <string name="str_exchange_order_fail_reason">失败原因</string>
+    <string name="str_exchange_order_note">备注</string>
+    <string name="user_scan_code_replace_battery">扫码换电</string>
+    <string name="user_bluetooth_battery_exchange">蓝牙换电</string>
+    <string name="user_remote_battery_exchange">远程换电</string>
+    <string name="str_exchange_handler">操作</string>
+    <!-- VCU -->
+    <string name="str_vcu_testing">VCU测试</string>
+    <string name="tips_vcu_not_found">VCU 不存在.</string>
+    <string name="str_test_operation">测试操作</string>
+    <string name="str_req_history">请求历史</string>
+    <string name="str_vehicle_sn">车辆 SN</string>
+    <string name="str_bluetooth">蓝牙</string>
+    <string name="str_vcu_control">VCU 控制</string>
+    <string name="str_vcu_configuration">VCU 配置(通过蓝牙)</string>
+    <string name="str_platform_url">平台地址</string>
+    <string name="str_apn">APN</string>
+    <string name="hint_enter_apn">请输入 APN</string>
+    <string name="str_gps_query_frequency">GPS 查询频率</string>
+    <string name="hint_enter_gps_query_frequency">请输入 GPS 查询频率</string>
+    <string name="str_vehicle_upload_frequency">车辆数据上报频率</string>
+    <string name="hint_enter_vehicle_upload_frequency">请输入车辆数据上报频率</string>
+    <string name="str_ota">OTA</string>
+    <string name="str_onclick_start">启动</string>
+    <string name="str_lock">锁车</string>
+    <string name="str_anti_theft">防盗</string>
+    <string name="str_find_vehicle">找车</string>
+    <string name="str_remote_lock">远程锁车</string>
+    <string name="str_remote_unlock">远程解锁</string>
+    <string name="str_scanning">扫描中&#8230;&#8230;&#8230;</string>
+    <string name="str_scan_timeout">扫描超时</string>
+    <string name="str_start_connecting">开始连接</string>
+    <string name="str_connected">已连接</string>
+    <string name="str_disconnected">已断开连接</string>
+    <string name="str_send">发送</string>
+    <string name="str_secs">秒</string>
+    <string name="str_invalid_data">无效数据</string>
+    <string name="str_production_server">生产环境</string>
+    <string name="str_testing_server">测试环境</string>
+    <string name="tips_selected_method">选择信号传输方式</string>
+    <string name="tips_ble_failed_to_send">发送失败。请重新连接蓝牙！</string>
+    <string name="tips_ble_failed_to_send_s">发送失败.原因：%s</string>
+    <string name="tips_ble_failed_to_read_s">读取失败.原因：%s</string>
+    <string name="str_response">响应</string>
+    <string name="str_request">请求</string>
+    <string name="tips_sent_successfully">发送成功</string>
+    <string name="tips_set_successfully">设置成功</string>
+    <string name="tips_ble_failed_to_ota">OTA失败</string>
+    <string name="tips_ota_completed_successfully">OTA更新已成功完成</string>
+    <string name="tips_ble_failed_to_verify">校验失败</string>
+    <string name="tips_ble_failed_to_verify_s">失败.原因: %s</string>
+    <string name="tips_ota_reject_ver_too_low">OTA版本低于当前版本拒绝升级</string>
+    <string name="tips_ota_reject_other">其他原因拒绝升级</string>
+    <string name="str_unknow">未知</string>
+</resources>

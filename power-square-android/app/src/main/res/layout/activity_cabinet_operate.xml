@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/color_fff5f6f7"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/includeTitle"
+            layout="@layout/base_title_mvvm_layout" />
+
+        <!--<com.thailand.ops.custom.cabinetopt.ScanQRCabinetView
+            android:id="@+id/vScanOpenBox"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="12dp"
+            app:icon="@drawable/icon_scan_box"
+            app:title="@string/cabinet_opt_scan_open_box" />
+
+        <com.thailand.ops.custom.cabinetopt.ScanQRCabinetView
+            android:id="@+id/vScanOpenDoor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="12dp"
+            app:icon="@drawable/icon_scan_door"
+            app:title="@string/cabinet_opt_scan_open_door" />-->
+
+        <TextView
+            android:id="@+id/btnCabinetOpt"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_ffffff_r8"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="@string/cabinet_opt_title"
+            android:textColor="@color/color_e60c0c0d"
+            android:textSize="16sp"
+            app:drawableEndCompat="@drawable/icon_list_arrow_right"
+            app:drawableStartCompat="@drawable/icon_scan_box"
+            tools:text="电柜操作" />
+
+        <TextView
+            android:id="@+id/btnBluetooth"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_ffffff_r8"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="@string/bluetooth_authorization"
+            android:textColor="@color/color_e60c0c0d"
+            android:textSize="16sp"
+            app:drawableEndCompat="@drawable/icon_list_arrow_right"
+            app:drawableStartCompat="@mipmap/icon_blue_key_autho"
+            tools:text="蓝牙钥匙授权" />
+
+        <TextView
+            android:id="@+id/btnCabinetAuthorization"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_ffffff_r8"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="@string/cabinet_opt_cabinet_authorization"
+            android:textColor="@color/color_e60c0c0d"
+            android:textSize="16sp"
+            app:drawableEndCompat="@drawable/icon_list_arrow_right"
+            app:drawableStartCompat="@drawable/icon_list_authorize"
+            tools:text="电柜操作授权" />
+
+        <TextView
+            android:id="@+id/btnCabinetOpenDoor"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_ffffff_r8"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="@string/cabinet_opt_cabinet_open"
+            android:textColor="@color/color_e60c0c0d"
+            android:textSize="16sp"
+            android:visibility="gone"
+            app:drawableEndCompat="@drawable/icon_list_arrow_right"
+            app:drawableStartCompat="@drawable/icon_list_cabinet_door"
+            tools:text="开电柜门" />
+
+        <TextView
+            android:id="@+id/btnCabinetOffline"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_ffffff_r8"
+            android:drawablePadding="8dp"
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:text="@string/cabinet_opt_cabinet_offline"
+            android:textColor="@color/color_e60c0c0d"
+            android:textSize="16sp"
+            app:drawableEndCompat="@drawable/icon_list_arrow_right"
+            app:drawableStartCompat="@drawable/icon_list_o_m"
+            tools:text="离线电柜O&#038;M" />
+
+    </LinearLayout>
+
+</layout>

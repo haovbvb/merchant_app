@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="index"
+            type="Integer" />
+
+<!--        <variable-->
+<!--            name="data"-->
+<!--            type="com.thailand.ops.beans.CurrentAndPointBean.ElectricsBean" />-->
+        <variable
+            name="data"
+            type="com.okla.ops.beans.CurrentPointBean" />
+    </data>
+
+    <LinearLayout
+        android:id="@+id/llContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:paddingLeft="20dp"
+        android:orientation="horizontal">
+
+      <!--  <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@+id/voltage_48_pop_tv"
+            android:background="#ECECEC"
+            android:visibility="@{index==0? View.GONE :View.VISIBLE}" />-->
+        <ImageView
+            android:id="@+id/ivHook"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/hook_unselected"
+            android:layout_gravity="center"
+            />
+
+        <TextView
+            android:id="@+id/tvValue"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:gravity="center"
+            android:layout_marginLeft="11dp"
+            android:text="@{data.value}"
+            android:textColor="#ff333333"
+            android:textSize="14sp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            tools:text="bankok" />
+    </LinearLayout>
+</layout>

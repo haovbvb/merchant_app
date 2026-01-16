@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="Object" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/f8f8f8"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/includeTitle"
+            layout="@layout/base_title_mvvm_layout" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_10"
+                    android:background="@color/white"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp"
+                    android:paddingBottom="20dp">
+
+                    <TextView
+                        android:id="@+id/tv_authorize"
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:drawableLeft="@mipmap/img_operate_factory_time"
+                        android:drawablePadding="5dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/switch_cabinet_authorization"
+                        android:textColor="@color/text_333"
+                        android:textSize="16sp"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <EditText
+                        android:id="@+id/et_sn"
+                        android:layout_width="0dp"
+                        android:layout_height="50dp"
+                        android:background="@drawable/bg_f6f7f8_r5"
+                        android:hint="@string/input_factory_authorized_days"
+                        android:imeOptions="actionSearch"
+                        android:inputType="number"
+                        android:maxLength="8"
+                        android:paddingLeft="10dp"
+                        android:singleLine="true"
+                        android:textColor="@color/text_333"
+                        android:textColorHint="@color/bfbfc8"
+                        android:textSize="14sp"
+                        app:layout_constraintHorizontal_weight="1"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintRight_toRightOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/tv_authorize" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="14dp"
+                        android:text="@string/str_days_unit"
+                        android:textColor="@color/text_333"
+                        android:textSize="14sp"
+                        app:layout_constraintBottom_toBottomOf="@id/et_sn"
+                        app:layout_constraintRight_toRightOf="@id/et_sn"
+                        app:layout_constraintTop_toTopOf="@id/et_sn" />
+
+                    <TextView
+                        android:id="@+id/tv_sure"
+                        android:layout_width="match_parent"
+                        android:layout_height="44dp"
+                        android:layout_marginTop="20dp"
+                        android:background="@drawable/bg_0e0f11_r4"
+                        android:gravity="center"
+                        android:text="@string/str_sure"
+                        android:textColor="@color/white"
+                        android:textSize="14sp"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toBottomOf="@id/et_sn" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/dp_10"
+                    android:orientation="vertical"
+                    android:paddingLeft="20dp"
+                    android:paddingRight="20dp">
+
+                    <TextView
+
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp"
+                        android:drawableLeft="@mipmap/img_bluetooth_operate_icon_tip"
+                        android:drawablePadding="5dp"
+                        android:gravity="center_vertical"
+                        android:text="@string/str_tips"
+                        android:textColor="@color/text_333"
+                        android:textSize="16sp"
+                        app:layout_constraintLeft_toLeftOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/factory_authorized_tip"
+                        android:textColor="@color/bg_959595"
+                        android:textSize="12sp" />
+
+                </LinearLayout>
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
+</layout>

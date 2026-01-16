@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="index"
+            type="Integer" />
+
+        <variable
+            name="data"
+            type="com.okla.ops.beans.DeputyCabinetBean" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_below="@+id/voltage_48_pop_tv"
+            android:background="@color/bg_5f5f5f"
+            android:visibility="@{index==0? View.GONE :View.VISIBLE}" />
+
+        <TextView
+            android:id="@+id/voltageTv"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="@{index == 0 ? String.format(@string/device_detail_mainframe,data.nodeId):String.format(@string/device_detail_deputy_ark,data.nodeId)}"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            tools:text="Enable" />
+    </LinearLayout>
+</layout>

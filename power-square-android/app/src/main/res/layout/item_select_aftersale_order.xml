@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_ffffff_r8"
+        android:padding="12dp">
+
+        <ImageView
+            android:id="@+id/img_check"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginTop="10dp"
+            android:src="@mipmap/icon_grey_unchecked"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_order_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="9dp"
+            android:drawableStart="@mipmap/icon_dialog_select_refundorder"
+            android:drawablePadding="5dp"
+            android:text="-"
+            android:textColor="#e6000000"
+            android:textSize="15sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/line1"
+            android:layout_width="0dp"
+            android:layout_height="0.5dp"
+            android:layout_marginTop="11dp"
+            android:background="@color/color_e6e6e6"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@+id/tv_order_no"
+            app:layout_constraintTop_toBottomOf="@+id/tv_order_no" />
+
+        <TextView
+            android:id="@+id/tv_title_ordertype"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
+            android:text="@string/str_order_type"
+            android:textColor="#99000000"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@+id/line1"
+            app:layout_constraintTop_toBottomOf="@+id/line1" />
+
+        <TextView
+            android:id="@+id/tv_ordertype"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:gravity="center_vertical"
+            android:text="-"
+            android:textColor="#e6000000"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_title_ordertype" />
+
+        <TextView
+            android:id="@+id/tv_title_orderStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:layout_marginTop="10dp"
+            android:text="@string/str_order_status"
+            android:textColor="#99000000"
+            android:textSize="15sp"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toStartOf="@+id/tv_title_ordertype"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title_ordertype" />
+
+        <TextView
+            android:id="@+id/tv_orderStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:gravity="center_vertical"
+            android:text="-"
+            android:textColor="#e6000000"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_title_orderStatus" />
+
+        <TextView
+            android:id="@+id/tv_title_device"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:gravity="center_vertical"
+            android:text="@string/str_applicable_devices"
+            android:textColor="#99000000"
+            android:textSize="13sp"
+            app:layout_constraintStart_toStartOf="@+id/tv_title_orderStatus"
+            app:layout_constraintTop_toBottomOf="@+id/tv_title_orderStatus" />
+
+        <TextView
+            android:id="@+id/tv_device"
+            android:layout_width="wrap_content"
+            android:layout_height="30dp"
+            android:gravity="center_vertical"
+            android:text="-"
+            android:textColor="#e6000000"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_title_device" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

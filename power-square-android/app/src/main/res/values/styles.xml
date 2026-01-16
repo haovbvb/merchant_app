@@ -1,0 +1,61 @@
+<resources>
+    <!-- Base application theme. -->
+
+
+    <declare-styleable name="ScanOrInputView">
+        <attr name="ScanAndInputName" format="string" />
+        <attr name="ScanAndInputValue" format="string" />
+        <attr name="ScanAndInputHintValue" format="string" />
+        <attr name="ScanAndInputTopRight" format="string" />
+        <attr name="ScanAndInputTopRightImg" format="reference" />
+        <attr name="ScanAndInputTopRightVisible" format="boolean" />
+        <attr name="ScanAndInputTopRightTwoVisible" format="boolean" />
+        <attr name="ScanAndInputBottomVisible" format="boolean" />
+        <attr name="ScanAndInputBottomLineVisible" format="boolean" />
+        <attr name="ScanAndInputIsEnabledInput" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="SearchNoDataView">
+        <attr name="SearchNoDataTips" format="reference" />
+        <attr name="SearchNoDataImg" format="reference" />
+    </declare-styleable>
+
+    <declare-styleable name="DeviceInfoView">
+        <attr name="DeviceInfoTitle" format="string" />
+        <attr name="isShowLine" format="boolean" />
+        <attr name="addRightArrow" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="ScanQRCabinetView">
+        <attr name="title" format="string" />
+        <attr name="icon" format="reference" />
+    </declare-styleable>
+
+
+    <declare-styleable name="SelectCabinetAndAuthorizationView">
+        <attr name="SelectCabinetAndAuthorizationTitle" format="string" />
+        <attr name="SelectCabinetAndAuthorizationHint" format="string" />
+        <attr name="SelectCabinetAndAuthorizationIsShowLine" format="boolean" />
+    </declare-styleable>
+
+    <!--     BottomSheetDialog-->
+
+    <style name="CustomTabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="textAllCaps">false</item>
+    </style>
+
+    <style name="new_switch_button">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">0dp</item>
+        <item name="kswBackColor">@color/ksw_back_color</item>
+        <item name="kswThumbMarginLeft">2dp</item>
+        <item name="kswThumbMarginTop">2dp</item>
+        <item name="kswThumbMarginRight">2dp</item>
+        <item name="kswThumbMarginBottom">2dp</item>
+        <item name="kswThumbWidth">18dp</item>
+        <item name="kswThumbHeight">18dp</item>
+        <item name="kswThumbColor">@color/white</item>
+        <item name="kswThumbRangeRatio">2.2</item>
+    </style>
+</resources>

@@ -1,0 +1,5 @@
+<resources>
+    <declare-styleable name="StationInfoView">
+        <attr name="type" format="string"/>
+    </declare-styleable>
+</resources>

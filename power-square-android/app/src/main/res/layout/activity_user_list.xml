@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/color_f5f6f7">
+
+        <include
+            android:id="@+id/includeTitle"
+            layout="@layout/base_title_mvvm_layout" />
+
+<!--        <androidx.appcompat.widget.AppCompatTextView-->
+<!--            android:id="@+id/tvType"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="46dp"-->
+<!--            android:layout_marginStart="12dp"-->
+<!--            android:drawableEnd="@drawable/icon_arrow_down1"-->
+<!--            android:drawablePadding="4dp"-->
+<!--            android:gravity="center"-->
+<!--            android:textColor="@color/color_99000000"-->
+<!--            android:textSize="14sp"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/includeTitle"-->
+<!--            tools:text="All User" />-->
+        <com.google.android.material.tabs.TabLayout
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/includeTitle"
+            android:id="@+id/tabLayout"
+            app:tabSelectedTextColor="@color/main_color"
+            app:tabTextColor="@color/color_99000000"
+            app:tabPaddingStart="6dp"
+            app:tabPaddingEnd="6dp"
+            app:tabPaddingTop="3dp"
+            app:tabPaddingBottom="3dp"
+            android:textSize="13sp"
+            app:tabGravity="center"
+            android:layout_marginStart="12dp"
+            app:tabIndicatorHeight="0dp"
+            app:tabIndicatorColor="@android:color/transparent"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_marginVertical="12dp"
+            app:tabIndicator="@null"
+            app:tabRippleColor="@android:color/transparent"
+            app:tabMode="scrollable" />
+        <com.scwang.smartrefresh.layout.SmartRefreshLayout
+            android:id="@+id/swipRefresh"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="12dp"
+            android:layout_marginBottom="12dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tabLayout"
+            app:srlEnableHeaderTranslationContent="true"
+            app:srlEnableLoadMore="true">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvUser"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+        </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+        <ViewStub
+            android:id="@+id/dataErrorViewSub"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:inflatedId="@+id/dataErrorViewSub"
+            android:layout="@layout/layout_no_data_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tabLayout" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="data"
+            type="com.okla.ops.beans.CabinetVersionBean" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white">
+
+        <include
+            android:id="@+id/includeTitle"
+            layout="@layout/base_title_mvvm_layout"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/vLine1"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:background="@color/f0f0f0"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/includeTitle" />
+
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/vLine1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            >
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/tvAPKVersionNameDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="23dp"
+                    android:text="@string/exchange_battery_cabinet_apk_version_name"
+                    android:textColor="@color/text_333"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvAPKVersionName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@{data.apkVer}"
+                    android:textColor="@color/text_333"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="@id/tvAPKVersionNameDesc"
+                    app:layout_constraintTop_toBottomOf="@id/tvAPKVersionNameDesc"
+                    tools:text="1.1.40" />
+
+                <TextView
+                    android:id="@+id/tvVersionCodeDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/exchange_battery_cabinet_apk_version_code"
+                    android:textColor="@color/text_333"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvAPKVersionName" />
+
+                <TextView
+                    android:id="@+id/tvAPKVersionCode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@{data.apkCode + ``}"
+                    android:textColor="@color/text_333"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="@id/tvVersionCodeDesc"
+                    app:layout_constraintTop_toBottomOf="@id/tvVersionCodeDesc"
+                    tools:text="40" />
+
+                <TextView
+                    android:id="@+id/tvSmartVersionNameDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/exchange_battery_cabinet_smart_version_name"
+                    android:textColor="@color/text_333"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvAPKVersionCode" />
+
+                <TextView
+                    android:id="@+id/tvSmartVersionName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@{data.ctrl}"
+                    android:textColor="@color/text_333"
+                    android:textSize="14sp"
+                    app:layout_constraintStart_toStartOf="@id/tvSmartVersionNameDesc"
+                    app:layout_constraintTop_toBottomOf="@id/tvSmartVersionNameDesc"
+                    tools:text="1.0.0" />
+
+                <TextView
+                    android:id="@+id/tvPMSVersionNameDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/exchange_battery_cabinet_pms_version_name"
+                    android:textColor="@color/text_333"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvSmartVersionName" />
+
+                <TextView
+                    android:id="@+id/tvPMSVersionName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:paddingEnd="20dp"
+                    android:text="@{data.pms}"
+                    android:textColor="@color/text_333"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/tvPMSVersionNameDesc"
+                    app:layout_constraintTop_toBottomOf="@id/tvPMSVersionNameDesc"
+                    tools:text="1.0.0" />
+
+                <TextView
+                    android:id="@+id/tvChargerVersionNameDesc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/exchange_battery_cabinet_charger_version_name"
+                    android:textColor="@color/text_333"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tvPMSVersionName" />
+
+                <TextView
+                    android:id="@+id/tvChargerVersionName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:paddingEnd="20dp"
+                    android:text="@{data.charge}"
+                    android:textColor="@color/text_333"
+                    android:textSize="14sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/tvChargerVersionNameDesc"
+                    app:layout_constraintTop_toBottomOf="@id/tvChargerVersionNameDesc"
+                    tools:text="1.0.0" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.core.widget.NestedScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

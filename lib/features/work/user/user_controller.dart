@@ -1,0 +1,412 @@
+// ignore_for_file: uri_does_not_exist, undefined_identifier
+
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/data/models/user_detail.dart';
+import 'package:merchant_app/data/models/user_info.dart';
+import 'package:merchant_app/data/models/user_order_response.dart';
+import 'package:merchant_app/network/api_path.dart';
+import 'package:merchant_app/network/api_service.dart';
+
+const _pageSize = 20;
+
+class UserListState {
+  final bool loading;
+  final bool loadingMore;
+  final int page;
+  final String keyword;
+  final List<UserInfo> items;
+  final int total;
+
+  const UserListState({
+    this.loading = false,
+    this.loadingMore = false,
+    this.page = 1,
+    this.keyword = '',
+    this.items = const [],
+    this.total = 0,
+  });
+
+  bool get hasMore => items.length < total;
+
+  UserListState copyWith({
+    bool? loading,
+    bool? loadingMore,
+    int? page,
+    String? keyword,
+    List<UserInfo>? items,
+    int? total,
+  }) {
+    return UserListState(
+      loading: loading ?? this.loading,
+      loadingMore: loadingMore ?? this.loadingMore,
+      page: page ?? this.page,
+      keyword: keyword ?? this.keyword,
+      items: items ?? this.items,
+      total: total ?? this.total,
+    );
+  }
+}
+
+final userListProvider =
+    NotifierProvider<UserListNotifier, UserListState>(UserListNotifier.new);
+
+class UserListNotifier extends Notifier<UserListState> {
+  final ApiService _api = ApiService();
+
+  @override
+  UserListState build() => const UserListState();
+
+  Future<void> refresh({String? keyword}) async {
+    final nextKeyword = keyword ?? state.keyword;
+    state = state.copyWith(loading: true, page: 1, keyword: nextKeyword);
+
+    final response = await _api.get<_UserListResponse>(
+      _endpointForKeyword(nextKeyword),
+      queryParameters: {
+        'pageNum': 1,
+        'pageSize': _pageSize,
+        if (nextKeyword.trim().isNotEmpty) 'keyword': nextKeyword.trim(),
+      },
+      parser: (json) =>
+          _UserListResponse.fromJson(Map<String, dynamic>.from(json as Map)),
+    );
+
+    final result = response.result;
+    state = state.copyWith(
+      loading: false,
+      items: result?.list ?? const [],
+      total: result?.total ?? 0,
+    );
+  }
+
+  Future<void> loadMore() async {
+    if (state.loadingMore || state.loading || !state.hasMore) return;
+    final nextPage = state.page + 1;
+    state = state.copyWith(loadingMore: true);
+
+    final response = await _api.get<_UserListResponse>(
+      _endpointForKeyword(state.keyword),
+      queryParameters: {
+        'pageNum': nextPage,
+        'pageSize': _pageSize,
+        if (state.keyword.trim().isNotEmpty) 'keyword': state.keyword.trim(),
+      },
+      parser: (json) =>
+          _UserListResponse.fromJson(Map<String, dynamic>.from(json as Map)),
+    );
+
+    final result = response.result;
+    state = state.copyWith(
+      loadingMore: false,
+      page: nextPage,
+      items: [...state.items, ...?result?.list],
+      total: result?.total ?? state.total,
+    );
+  }
+
+  String _endpointForKeyword(String keyword) {
+    return keyword.trim().isEmpty
+        ? ApiPath.userQueryList
+        : ApiPath.userSearchList;
+  }
+}
+
+class UserDetailState {
+  final bool loading;
+  final String cardNum;
+  final UserDetail? detail;
+  final List<OrderItem> orders;
+  final int total;
+
+  const UserDetailState({
+    this.loading = false,
+    this.cardNum = '',
+    this.detail,
+    this.orders = const [],
+    this.total = 0,
+  });
+
+  UserDetailState copyWith({
+    bool? loading,
+    String? cardNum,
+    UserDetail? detail,
+    List<OrderItem>? orders,
+    int? total,
+  }) {
+    return UserDetailState(
+      loading: loading ?? this.loading,
+      cardNum: cardNum ?? this.cardNum,
+      detail: detail ?? this.detail,
+      orders: orders ?? this.orders,
+      total: total ?? this.total,
+    );
+  }
+}
+
+final userDetailProvider =
+    NotifierProvider<UserDetailNotifier, UserDetailState>(UserDetailNotifier.new);
+
+class UserDetailNotifier extends Notifier<UserDetailState> {
+  final ApiService _api = ApiService();
+
+  @override
+  UserDetailState build() => const UserDetailState();
+
+  Future<void> loadDetail(String cardNum) async {
+    if (cardNum.trim().isEmpty) return;
+    state = state.copyWith(loading: true, cardNum: cardNum);
+
+    final detailResponse = await _api.get<UserDetail>(
+      ApiPath.userGetDetail,
+      queryParameters: {'cardNum': cardNum},
+      parser: (json) => UserDetail.fromJson(Map<String, dynamic>.from(json)),
+    );
+
+    final orderResponse = await _api.get<UserOrderResponse>(
+      ApiPath.userQueryOrderList,
+      queryParameters: {
+        'cardNum': cardNum,
+        'pageNum': 1,
+        'pageSize': _pageSize,
+      },
+      parser: (json) =>
+          UserOrderResponse.fromJson(Map<String, dynamic>.from(json as Map)),
+    );
+
+    state = state.copyWith(
+      loading: false,
+      detail: detailResponse.result,
+      orders: orderResponse.result?.list ?? const [],
+      total: orderResponse.result?.total ?? 0,
+    );
+  }
+
+  Future<_UploadResult> uploadOrderVouchers(
+    List<String> filePaths, {
+    void Function(double progress)? onProgress,
+  }) async {
+    final urls = <String>[];
+    final failed = <String>[];
+    final total = filePaths.length;
+    for (var index = 0; index < total; index++) {
+      final path = filePaths[index];
+      final base = index / total;
+      final result = await _uploadVoucherWithRetry(
+        path,
+        onProgress: (sent, totalBytes) {
+          if (totalBytes <= 0) return;
+          final fraction = sent / totalBytes;
+          onProgress?.call((base + fraction / total).clamp(0.0, 1.0));
+        },
+      );
+      if (result == null || result.isEmpty) {
+        failed.add(path);
+      } else {
+        urls.add(result);
+      }
+      onProgress?.call(((index + 1) / total).clamp(0.0, 1.0));
+    }
+    return _UploadResult(urls: urls, failed: failed);
+  }
+
+  Future<bool> confirmPayOrder({
+    required String orderNo,
+    required String attachment,
+  }) async {
+    if (state.cardNum.trim().isEmpty) return false;
+    final response = await _api.post<Object>(
+      ApiPath.userConfirmPayOrder,
+      data: {
+        'attachment': attachment,
+        'cardNum': state.cardNum,
+        'orderNo': orderNo,
+      },
+      parser: (json) => json ?? Object(),
+    );
+    return response.isSuccess;
+  }
+
+  void updateOrderAttachment({
+    required String orderNo,
+    required int orderType,
+    required String attachment,
+    int? newStatus,
+  }) {
+    final nextOrders = state.orders.map((order) {
+      if (order.orderNo != orderNo || order.orderType != orderType) {
+        return order;
+      }
+      return _copyOrderWithAttachment(order, attachment, newStatus);
+    }).toList();
+    state = state.copyWith(orders: nextOrders);
+  }
+
+  OrderItem _copyOrderWithAttachment(
+    OrderItem order,
+    String attachment,
+    int? newStatus,
+  ) {
+    SaleOrder? saleOrder = order.saleOrder;
+    RentOrder? rentOrder = order.rentOrder;
+    OtherOrder? otherOrder = order.otherOrder;
+
+    if (order.orderType == 1 && saleOrder != null) {
+      saleOrder = SaleOrder(
+        deviceImg: saleOrder.deviceImg,
+        deviceModel: saleOrder.deviceModel,
+        deviceSn: saleOrder.deviceSn,
+        deviceType: saleOrder.deviceType,
+        payType: saleOrder.payType,
+        perAmount: saleOrder.perAmount,
+        period: saleOrder.period,
+        rate: saleOrder.rate,
+        status: newStatus ?? saleOrder.status,
+        attachment: attachment,
+        createTime: saleOrder.createTime,
+        orderAmount: saleOrder.orderAmount,
+        orderNo: saleOrder.orderNo,
+        payWay: saleOrder.payWay,
+      );
+    }
+
+    if (order.orderType == 2 && rentOrder != null) {
+      rentOrder = RentOrder(
+        depositAmount: rentOrder.depositAmount,
+        deviceImg: rentOrder.deviceImg,
+        deviceModel: rentOrder.deviceModel,
+        deviceSn: rentOrder.deviceSn,
+        deviceType: rentOrder.deviceType,
+        duration: rentOrder.duration,
+        expireDate: rentOrder.expireDate,
+        remainDuration: rentOrder.remainDuration,
+        serviceAmount: rentOrder.serviceAmount,
+        status: newStatus ?? rentOrder.status,
+        attachment: attachment,
+        createTime: rentOrder.createTime,
+        orderAmount: rentOrder.orderAmount,
+        orderNo: rentOrder.orderNo,
+        payWay: rentOrder.payWay,
+        payType: rentOrder.payType,
+        infoName: rentOrder.infoName,
+      );
+    }
+
+    if (order.orderType == 3 && otherOrder != null) {
+      otherOrder = OtherOrder(
+        batteryNum: otherOrder.batteryNum,
+        batteryType: otherOrder.batteryType,
+        carType: otherOrder.carType,
+        duration: otherOrder.duration,
+        expireDate: otherOrder.expireDate,
+        remainDuration: otherOrder.remainDuration,
+        remainTime: otherOrder.remainTime,
+        serviceAmount: otherOrder.serviceAmount,
+        status: newStatus ?? otherOrder.status,
+        times: otherOrder.times,
+        attachment: attachment,
+        createTime: otherOrder.createTime,
+        orderAmount: otherOrder.orderAmount,
+        orderNo: otherOrder.orderNo,
+        payWay: otherOrder.payWay,
+        payType: otherOrder.payType,
+        infoName: otherOrder.infoName,
+      );
+    }
+
+    return OrderItem(
+      attachment: attachment,
+      createTime: order.createTime,
+      orderAmount: order.orderAmount,
+      orderNo: order.orderNo,
+      payWay: order.payWay,
+      orderType: order.orderType,
+      otherOrder: otherOrder,
+      rentOrder: rentOrder,
+      saleOrder: saleOrder,
+    );
+  }
+
+  Future<String?> _uploadVoucherWithRetry(
+    String path, {
+    required void Function(int sent, int totalBytes) onProgress,
+  }) async {
+    const maxAttempts = 3;
+    for (var attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        final data = await _compressImage(path);
+        if (data == null || data.isEmpty) {
+          return null;
+        }
+        final fileName = _buildFileName(path);
+        final formData = FormData.fromMap({
+          'file': MultipartFile.fromBytes(data, filename: fileName),
+        });
+        final response = await _api.postForm<String>(
+          ApiPath.userUploadAttachment,
+          data: formData,
+          parser: (json) => json?.toString() ?? '',
+          onSendProgress: onProgress,
+        );
+        if (response.isSuccess && (response.result?.isNotEmpty ?? false)) {
+          return response.result;
+        }
+      } catch (_) {
+        if (attempt == maxAttempts) {
+          return null;
+        }
+      }
+    }
+    return null;
+  }
+
+  Future<Uint8List?> _compressImage(String path) async {
+    return FlutterImageCompress.compressWithFile(
+      path,
+      quality: 80,
+      minWidth: 612,
+      minHeight: 816,
+      format: CompressFormat.jpeg,
+    );
+  }
+
+  String _buildFileName(String path) {
+    final segments = path.split('/');
+    final last = segments.isEmpty ? '' : segments.last;
+    final extIndex = last.lastIndexOf('.');
+    final ext = extIndex == -1 ? 'jpg' : last.substring(extIndex + 1);
+    return '${DateTime.now().millisecondsSinceEpoch}.$ext';
+  }
+}
+
+class _UploadResult {
+  const _UploadResult({required this.urls, required this.failed});
+
+  final List<String> urls;
+  final List<String> failed;
+}
+
+class _UserListResponse {
+  final List<UserInfo> list;
+  final int total;
+
+  const _UserListResponse({
+    required this.list,
+    required this.total,
+  });
+
+  factory _UserListResponse.fromJson(Map<String, dynamic> json) {
+    return _UserListResponse(
+      list: (json['list'] as List<dynamic>?)
+              ?.map((item) => UserInfo.fromJson(
+                    Map<String, dynamic>.from(item as Map),
+                  ))
+              .toList() ??
+          const <UserInfo>[],
+      total: (json['total'] as num?)?.toInt() ?? 0,
+    );
+  }
+}

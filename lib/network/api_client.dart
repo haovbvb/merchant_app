@@ -167,6 +167,28 @@ class ApiClient {
     }
   }
 
+  Future<Response> postForm(
+    String path, {
+    required FormData data,
+    ProgressCallback? onSendProgress,
+    bool showHud = true,
+    bool notifyOnError = true,
+  }) async {
+    try {
+      return await dio.post(
+        path,
+        data: data,
+        onSendProgress: onSendProgress,
+        options: Options(
+          contentType: 'multipart/form-data',
+          extra: {'showHud': showHud, 'notifyOnError': notifyOnError},
+        ),
+      );
+    } catch (e) {
+      throw NetworkExceptions.fromDioException(e);
+    }
+  }
+
   void setAuthToken(String? token) {
     _authToken = token;
     if (token != null && token.isNotEmpty) {

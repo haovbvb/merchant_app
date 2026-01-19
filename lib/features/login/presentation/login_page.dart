@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/styles/colors.dart';
-import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/login/providers/auth_controller.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -30,7 +29,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     ref.watch(authNotifierProvider);
 
     return Scaffold(

@@ -10,7 +10,7 @@ import 'package:merchant_app/features/login/providers/auth_controller.dart';
 import 'package:merchant_app/features/me/about_page.dart';
 import 'package:merchant_app/features/me/language.dart';
 import 'package:merchant_app/features/me/message.dart';
-import 'package:merchant_app/features/me/user_agreement_page.dart';
+import 'package:merchant_app/features/work/work_module_page.dart';
 
 class AppRouter {
   AppRouter._();
@@ -25,6 +25,7 @@ class AppRouter {
   static const String aboutPath = '/profile/about';
   static const String messagePath = '/profile/messages';
   static const String languagePath = '/profile/language';
+  static const String workModulePath = '/work/module';
 
   static final GoRouter router = GoRouter(
     navigatorKey: navigatorKey,
@@ -64,6 +65,11 @@ class AppRouter {
         path: languagePath,
         name: 'language',
         builder: (context, state) => const LanguageSelectionPage(),
+      ),
+      GoRoute(
+        path: '$workModulePath/:moduleKey',
+        name: 'work_module',
+        builder: (context, state) => WorkModulePage.fromState(state),
       ),
     ],
     redirect: (context, state) {

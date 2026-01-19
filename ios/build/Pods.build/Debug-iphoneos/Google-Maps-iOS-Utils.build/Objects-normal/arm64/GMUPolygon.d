@@ -7,4 +7,4 @@ dependencies: \
   /Users/ping/Desktop/work/merchant_app/ios/Pods/Google-Maps-iOS-Utils/Sources/GoogleMapsUtilsObjC/include/GMUPolygon.h \
   /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk/System/Library/Frameworks/CoreLocation.framework/Modules/module.modulemap \
   /Users/ping/Desktop/work/merchant_app/ios/Pods/Google-Maps-iOS-Utils/Sources/GoogleMapsUtilsObjC/include/GMUGeometry.h \
-  /Users/ping/Desktop/work/merchant_app/ios/build/Debug-iphoneos/XCFrameworkIntermediates/GoogleMaps/Maps/GoogleMaps.framework/Modules/module.modulemap
+  /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/XCFrameworkIntermediates/GoogleMaps/Maps/GoogleMaps.framework/Modules/module.modulemap

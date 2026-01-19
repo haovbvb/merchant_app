@@ -27,11 +27,13 @@ dependencies:
   pull_to_refresh: ^2.0.0 # 下拉刷新列表
   google_maps_flutter: ^2.9.0 # 地图
   apple_maps_flutter: ^1.4.0 # iOS 原生地图
+  mobile_scanner: ^5.2.3 # 扫码
+  image_picker: ^1.1.2 # 图片选择
+  flutter_image_compress: ^2.3.0 # 图片压缩
 
   # 本地组件
   jui:
     path: ./jui
-
 
 dev_dependencies:
   flutter_test:
@@ -46,6 +48,7 @@ flutter:
   assets:
     - assets/images/
     - assets/images/3.0x/
+    - assets/android/mipmap-xxhdpi/
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a

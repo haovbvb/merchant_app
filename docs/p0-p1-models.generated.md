@@ -1,0 +1,42 @@
+# P0/P1 页面模型清单（建议优先）
+
+> 来源：页面 → 接口映射（P0/P1）与 API 详情表自动抽取。
+
+- AfterSaleCanBindOrderBean
+- AuthorizationRecordList
+- BatterOrVehicleInfo
+- BatteryDetail
+- BatteryType
+- Cabin
+- CabinetDetailBaseInfoBean
+- CabinetVersionBean
+- CarType
+- ChargeHistory
+- DepositRefundInfoBean
+- DeviceFixRecordResponse
+- DeviceInventoryDetail
+- DeviceInventoryResp
+- DeviceInventoryScanResult
+- DeviceTransportResp
+- InstallmentPaymentResponse
+- MessageListResponse
+- NearByVehicle
+- Pack
+- Personal
+- PolylinePoints
+- PolylinePointsBean
+- PurchasingUser
+- RentDeviceInfoBean
+- SNBean
+- SaleData
+- SalesBarData
+- SellDataListResponse
+- SettingInfoBean
+- Shop1Num
+- StationType
+- SwapBindInfo
+- User
+- UserDetail
+- UserInfo
+- UserOrderResponse
+- VehicleRepairListResp

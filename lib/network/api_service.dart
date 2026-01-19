@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/app_router.dart';
@@ -66,6 +67,39 @@ class ApiService {
     final response = await _client.post(
       path,
       data: data,
+      showHud: showHud,
+      notifyOnError: notifyOnError,
+    );
+    final payload = response.data;
+
+    if (payload is Map<String, dynamic> && payload.containsKey('code')) {
+      final result = BaseResponse.fromJson(payload, parser);
+      await _handleBusinessError(result, toastOnBusinessError && notifyOnError);
+      return result;
+    }
+
+    final result = BaseResponse.fromJson({
+      'code': response.statusCode ?? 0,
+      'msg': response.statusMessage ?? '',
+      'result': payload,
+    }, parser);
+    await _handleBusinessError(result, toastOnBusinessError && notifyOnError);
+    return result;
+  }
+
+  Future<BaseResponse<T>> postForm<T>(
+    String path, {
+    required FormData data,
+    required T Function(dynamic json) parser,
+    ProgressCallback? onSendProgress,
+    bool showHud = true,
+    bool notifyOnError = true,
+    bool toastOnBusinessError = true,
+  }) async {
+    final response = await _client.postForm(
+      path,
+      data: data,
+      onSendProgress: onSendProgress,
       showHud: showHud,
       notifyOnError: notifyOnError,
     );

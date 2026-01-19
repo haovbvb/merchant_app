@@ -5,11 +5,12 @@ import 'styles/typography.dart';
 
 class BaseTheme {
   // Brand colors
-  static const Color primaryColor = Color(0xFF56B327); // 主色
-  static const Color hiveBrown = Color(0xFF8D6E63); // 辅助色
-  static const Color energyOrange = Color(0xFF56B327); // 点缀色
-  static const Color paperIvory = Color(0xFFFFFFFF); // 背景
-  static const Color textDark = Color(0xFF333333); // 文字
+  static const Color primaryColor = Color(0xFF56B327); // main_color
+  static const Color hiveBrown = Color(0xFF61729D); // color_61729d
+  static const Color energyOrange = Color(0xFFFFA034); // color_ffa034
+  static const Color paperIvory = Color(0xFFF5F6F7); // color_f5f6f7
+  static const Color textDark = Color(0xFF1E2126); // color_1e2126
+  static const Color textMuted = Color(0xFF6C7180); // color_6c7180
 
   static ThemeData lightTheme({TargetPlatform? platform}) {
     final base = ThemeData.light();
@@ -25,6 +26,8 @@ class BaseTheme {
         primary: primaryColor,
         secondary: energyOrange,
         surface: Colors.white,
+        onPrimary: Colors.white,
+        onSurface: textDark,
       ),
       primaryColor: primaryColor,
       scaffoldBackgroundColor: paperIvory,
@@ -41,8 +44,8 @@ class BaseTheme {
         foregroundColor: Colors.white,
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        selectedItemColor: energyOrange,
-        unselectedItemColor: Colors.grey,
+        selectedItemColor: primaryColor,
+        unselectedItemColor: textMuted,
         showUnselectedLabels: true,
         backgroundColor: Colors.white,
         elevation: 8,

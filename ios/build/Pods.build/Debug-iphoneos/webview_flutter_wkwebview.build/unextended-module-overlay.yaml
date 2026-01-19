@@ -4,7 +4,7 @@
   "case-sensitive": false,
   "roots": [{
     "type": "directory",
-    "name": "/Users/ping/Desktop/work/merchant_app/ios/build/Debug-iphoneos/webview_flutter_wkwebview/webview_flutter_wkwebview.framework/Modules",
+    "name": "/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/webview_flutter_wkwebview/webview_flutter_wkwebview.framework/Modules",
     "contents": [{
       "type": "file",
       "name": "module.modulemap",
@@ -13,7 +13,7 @@
     },
     {
     "type": "directory",
-    "name": "/Users/ping/Desktop/work/merchant_app/ios/build/Debug-iphoneos/webview_flutter_wkwebview/webview_flutter_wkwebview.framework/Headers",
+    "name": "/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/webview_flutter_wkwebview/webview_flutter_wkwebview.framework/Headers",
     "contents": [{
       "type": "file",
       "name": "webview_flutter_wkwebview-Swift.h",

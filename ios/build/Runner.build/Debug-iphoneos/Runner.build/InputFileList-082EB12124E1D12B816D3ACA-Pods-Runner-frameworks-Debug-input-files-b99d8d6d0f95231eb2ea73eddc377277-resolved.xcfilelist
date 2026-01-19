@@ -1,4 +1,16 @@
 /Users/ping/Desktop/work/merchant_app/ios/Pods/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh
-/Users/ping/Desktop/work/merchant_app/ios/build/Debug-iphoneos/apple_maps_flutter/apple_maps_flutter.framework
-/Users/ping/Desktop/work/merchant_app/ios/build/Debug-iphoneos/shared_preferences_foundation/shared_preferences_foundation.framework
-/Users/ping/Desktop/work/merchant_app/ios/build/Debug-iphoneos/webview_flutter_wkwebview/webview_flutter_wkwebview.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/GTMSessionFetcher/GTMSessionFetcher.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/GoogleDataTransport/GoogleDataTransport.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/GoogleToolboxForMac/GoogleToolboxForMac.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/GoogleUtilities/GoogleUtilities.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/Mantle/Mantle.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/PromisesObjC/FBLPromises.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/SDWebImage/SDWebImage.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/SDWebImageWebPCoder/SDWebImageWebPCoder.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/apple_maps_flutter/apple_maps_flutter.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/flutter_image_compress_common/flutter_image_compress_common.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/image_picker_ios/image_picker_ios.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/libwebp/libwebp.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/nanopb/nanopb.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/shared_preferences_foundation/shared_preferences_foundation.framework
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/webview_flutter_wkwebview/webview_flutter_wkwebview.framework

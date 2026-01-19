@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/widgets/common_webview_page.dart';
 
 class UserAgreementPage extends StatelessWidget {

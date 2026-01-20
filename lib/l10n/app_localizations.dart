@@ -140,6 +140,36 @@ abstract class AppLocalizations {
   /// **'Overview'**
   String get homeTitle;
 
+  /// No description provided for @homeSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for bound vehicles'**
+  String get homeSearchHint;
+
+  /// No description provided for @homeFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get homeFilterAll;
+
+  /// No description provided for @homeFilterNeedMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'To be maintained'**
+  String get homeFilterNeedMaintenance;
+
+  /// No description provided for @homeFilterNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get homeFilterNormal;
+
+  /// No description provided for @homeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No nearby vehicles'**
+  String get homeEmpty;
+
   /// Title displayed in the app bar when the work tab is active.
   ///
   /// In en, this message translates to:
@@ -218,11 +248,89 @@ abstract class AppLocalizations {
   /// **'Message'**
   String get profileMessage;
 
+  /// No description provided for @messageEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages yet'**
+  String get messageEmpty;
+
   /// Menu label for changing the account password.
   ///
   /// In en, this message translates to:
   /// **'Change Password'**
   String get profileChangePassword;
+
+  /// No description provided for @changePasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePasswordTitle;
+
+  /// No description provided for @changePasswordOldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Current password'**
+  String get changePasswordOldLabel;
+
+  /// No description provided for @changePasswordOldHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter current password'**
+  String get changePasswordOldHint;
+
+  /// No description provided for @changePasswordNewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get changePasswordNewLabel;
+
+  /// No description provided for @changePasswordNewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter new password'**
+  String get changePasswordNewHint;
+
+  /// No description provided for @changePasswordConfirmLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get changePasswordConfirmLabel;
+
+  /// No description provided for @changePasswordConfirmHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter new password'**
+  String get changePasswordConfirmHint;
+
+  /// No description provided for @changePasswordSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get changePasswordSubmit;
+
+  /// No description provided for @changePasswordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required'**
+  String get changePasswordRequired;
+
+  /// No description provided for @changePasswordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get changePasswordTooShort;
+
+  /// No description provided for @changePasswordNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get changePasswordNotMatch;
+
+  /// No description provided for @changePasswordSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated'**
+  String get changePasswordSuccess;
 
   /// Menu label for selecting the application language.
   ///
@@ -236,11 +344,23 @@ abstract class AppLocalizations {
   /// **'User Agreement'**
   String get profileUserAgreement;
 
+  /// Menu label for viewing the privacy policy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get profilePrivacyPolicy;
+
   /// Menu label for viewing the application information.
   ///
   /// In en, this message translates to:
   /// **'About'**
   String get profileAbout;
+
+  /// Label prefix for app version on About page.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get aboutVersionLabel;
 
   /// No description provided for @login.
   ///
@@ -265,6 +385,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter card number or keyword'**
   String get userSearchHint;
+
+  /// No description provided for @userSearchHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search History'**
+  String get userSearchHistoryTitle;
+
+  /// No description provided for @userSearchHistoryClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get userSearchHistoryClear;
 
   /// No description provided for @userDetailTitle.
   ///
@@ -739,6 +871,114 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Repair Records'**
   String get repairRecordTitle;
+
+  /// No description provided for @repairRecordAddTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Repair Record'**
+  String get repairRecordAddTitle;
+
+  /// No description provided for @repairRecordDeviceSnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Device SN'**
+  String get repairRecordDeviceSnLabel;
+
+  /// No description provided for @repairRecordDeviceSnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter or scan device SN'**
+  String get repairRecordDeviceSnHint;
+
+  /// No description provided for @repairRecordFetchDeviceInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch device info'**
+  String get repairRecordFetchDeviceInfo;
+
+  /// No description provided for @repairRecordDeviceInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Device Info'**
+  String get repairRecordDeviceInfoTitle;
+
+  /// No description provided for @repairRecordDeviceInfoEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No device info'**
+  String get repairRecordDeviceInfoEmpty;
+
+  /// No description provided for @repairRecordProjectLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repair item'**
+  String get repairRecordProjectLabel;
+
+  /// No description provided for @repairRecordProjectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select repair item'**
+  String get repairRecordProjectHint;
+
+  /// No description provided for @repairRecordResultLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Repair result'**
+  String get repairRecordResultLabel;
+
+  /// No description provided for @repairRecordResultHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select repair result'**
+  String get repairRecordResultHint;
+
+  /// No description provided for @repairRecordRemarkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Remark'**
+  String get repairRecordRemarkLabel;
+
+  /// No description provided for @repairRecordRemarkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter remark'**
+  String get repairRecordRemarkHint;
+
+  /// No description provided for @repairRecordSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get repairRecordSubmit;
+
+  /// No description provided for @repairRecordSubmitSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get repairRecordSubmitSuccess;
+
+  /// No description provided for @repairRecordDeviceModelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get repairRecordDeviceModelLabel;
+
+  /// No description provided for @repairRecordDeviceSpecLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Spec'**
+  String get repairRecordDeviceSpecLabel;
+
+  /// No description provided for @repairRecordDeviceCardNumLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Card number'**
+  String get repairRecordDeviceCardNumLabel;
+
+  /// No description provided for @repairRecordDeviceNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get repairRecordDeviceNameLabel;
 
   /// No description provided for @repairRecordSnHint.
   ///
@@ -1237,6 +1477,12 @@ abstract class AppLocalizations {
   /// **'Scan failed'**
   String get warehouseInventoryScanFailed;
 
+  /// No description provided for @warehouseInventoryBatchComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch scan completed'**
+  String get warehouseInventoryBatchComplete;
+
   /// No description provided for @warehouseInventoryRevokeConfirmTitle.
   ///
   /// In en, this message translates to:
@@ -1447,6 +1693,12 @@ abstract class AppLocalizations {
   /// **'Edit Tracking'**
   String get warehouseTransportEditTrackingNumber;
 
+  /// No description provided for @warehouseTransportBatchReceiveComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch receive completed'**
+  String get warehouseTransportBatchReceiveComplete;
+
   /// No description provided for @warehouseTransportSearchTitle.
   ///
   /// In en, this message translates to:
@@ -1522,17 +1774,95 @@ abstract class AppLocalizations {
   /// **'Confirm'**
   String get scanConfirm;
 
+  /// No description provided for @scanCameraPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission required'**
+  String get scanCameraPermissionTitle;
+
+  /// No description provided for @scanCameraPermissionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Please allow camera access in system settings to scan QR codes.'**
+  String get scanCameraPermissionDesc;
+
+  /// No description provided for @scanPermissionRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get scanPermissionRetry;
+
+  /// No description provided for @scanOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get scanOpenSettings;
+
+  /// No description provided for @bluetoothPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth permission required'**
+  String get bluetoothPermissionTitle;
+
+  /// No description provided for @bluetoothPermissionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Please allow Bluetooth permissions in system settings to connect devices.'**
+  String get bluetoothPermissionDesc;
+
+  /// No description provided for @bluetoothPermissionRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get bluetoothPermissionRetry;
+
+  /// No description provided for @bluetoothOpenSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open settings'**
+  String get bluetoothOpenSettings;
+
+  /// No description provided for @scanNoChinese.
+  ///
+  /// In en, this message translates to:
+  /// **'Chinese characters are not supported'**
+  String get scanNoChinese;
+
   /// No description provided for @qrcodeListTitle.
   ///
   /// In en, this message translates to:
   /// **'QR Code List'**
   String get qrcodeListTitle;
 
+  /// No description provided for @qrcodeListConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get qrcodeListConfirm;
+
+  /// No description provided for @qrcodeBatchScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Batch Scan'**
+  String get qrcodeBatchScan;
+
   /// No description provided for @qrcodeListEmpty.
   ///
   /// In en, this message translates to:
   /// **'No device SNs yet. Please scan or enter a device SN.'**
   String get qrcodeListEmpty;
+
+  /// No description provided for @qrcodeSameAsPrevious.
+  ///
+  /// In en, this message translates to:
+  /// **'Same as the previous code.'**
+  String get qrcodeSameAsPrevious;
+
+  /// No description provided for @qrcodeMaxDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum device count reached.'**
+  String get qrcodeMaxDevice;
 
   /// No description provided for @qrcodeDeviceTypeTitle.
   ///
@@ -1593,6 +1923,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Device Search'**
   String get deviceSearchTitle;
+
+  /// No description provided for @deviceSearchHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search History'**
+  String get deviceSearchHistoryTitle;
+
+  /// No description provided for @deviceSearchHistoryClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get deviceSearchHistoryClear;
 
   /// No description provided for @deviceSearchHint.
   ///
@@ -1696,6 +2038,12 @@ abstract class AppLocalizations {
   /// **'Location'**
   String get deviceDetailLocation;
 
+  /// No description provided for @deviceDetailViewMap.
+  ///
+  /// In en, this message translates to:
+  /// **'View Map'**
+  String get deviceDetailViewMap;
+
   /// No description provided for @deviceDetailToggleDischarge.
   ///
   /// In en, this message translates to:
@@ -1743,6 +2091,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Vehicle Search'**
   String get vehicleSearchTitle;
+
+  /// No description provided for @vehicleSearchDistanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Distance'**
+  String get vehicleSearchDistanceLabel;
+
+  /// No description provided for @vehicleSearchBindIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind ID'**
+  String get vehicleSearchBindIdLabel;
 
   /// No description provided for @vehicleSearchHint.
   ///
@@ -2259,6 +2619,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Submit failed'**
   String get roadsideDealFailed;
+
+  /// No description provided for @bluetoothAuthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Authorization'**
+  String get bluetoothAuthTitle;
+
+  /// No description provided for @bluetoothAuthSn.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet SN'**
+  String get bluetoothAuthSn;
+
+  /// No description provided for @bluetoothAuthPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get bluetoothAuthPhone;
+
+  /// No description provided for @bluetoothAuthKeyId.
+  ///
+  /// In en, this message translates to:
+  /// **'Key ID'**
+  String get bluetoothAuthKeyId;
+
+  /// No description provided for @bluetoothAuthDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization Days'**
+  String get bluetoothAuthDays;
+
+  /// No description provided for @bluetoothAuthQueryLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Query Lock ID'**
+  String get bluetoothAuthQueryLock;
+
+  /// No description provided for @bluetoothAuthQueryUid.
+  ///
+  /// In en, this message translates to:
+  /// **'Query UID'**
+  String get bluetoothAuthQueryUid;
+
+  /// No description provided for @bluetoothAuthLockInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock Info'**
+  String get bluetoothAuthLockInfo;
+
+  /// No description provided for @bluetoothAuthUid.
+  ///
+  /// In en, this message translates to:
+  /// **'User UID'**
+  String get bluetoothAuthUid;
+
+  /// No description provided for @bluetoothAuthSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Authorization'**
+  String get bluetoothAuthSubmit;
+
+  /// No description provided for @bluetoothAuthSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization submitted'**
+  String get bluetoothAuthSuccess;
+
+  /// No description provided for @bluetoothAuthFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization failed'**
+  String get bluetoothAuthFailed;
+
+  /// No description provided for @bluetoothAuthMissingInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill SN, phone, and key ID'**
+  String get bluetoothAuthMissingInput;
+
+  /// No description provided for @bluetoothOperateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Operations'**
+  String get bluetoothOperateTitle;
+
+  /// No description provided for @bluetoothOperateTip.
+  ///
+  /// In en, this message translates to:
+  /// **'This version only includes basic authorization APIs. Bluetooth scan and commands will be added later.'**
+  String get bluetoothOperateTip;
+
+  /// No description provided for @bluetoothOperateTodoList.
+  ///
+  /// In en, this message translates to:
+  /// **'• Scan/connect Bluetooth devices (todo)\n• Authorize/clear authorization/set validity (todo)\n• Read device info/logs (todo)'**
+  String get bluetoothOperateTodoList;
 
   /// No description provided for @offlineRegisterTitle.
   ///
@@ -3231,6 +3687,564 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pay Way'**
   String get saleSummaryPayWay;
+
+  /// No description provided for @cabinetPutawayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet Putaway'**
+  String get cabinetPutawayTitle;
+
+  /// No description provided for @cabinetPutawaySn.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet SN'**
+  String get cabinetPutawaySn;
+
+  /// No description provided for @cabinetPutawayInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet Info'**
+  String get cabinetPutawayInfoTitle;
+
+  /// No description provided for @cabinetPutawayInfoEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No cabinet info'**
+  String get cabinetPutawayInfoEmpty;
+
+  /// No description provided for @cabinetPutawayName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get cabinetPutawayName;
+
+  /// No description provided for @cabinetPutawayModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get cabinetPutawayModel;
+
+  /// No description provided for @cabinetPutawaySpec.
+  ///
+  /// In en, this message translates to:
+  /// **'Spec'**
+  String get cabinetPutawaySpec;
+
+  /// No description provided for @cabinetPutawayAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get cabinetPutawayAddress;
+
+  /// No description provided for @cabinetPutawayLatitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude'**
+  String get cabinetPutawayLatitude;
+
+  /// No description provided for @cabinetPutawayLongitude.
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude'**
+  String get cabinetPutawayLongitude;
+
+  /// No description provided for @cabinetPutawaySwapTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap Times'**
+  String get cabinetPutawaySwapTime;
+
+  /// No description provided for @cabinetPutawayStoreNum.
+  ///
+  /// In en, this message translates to:
+  /// **'Slots'**
+  String get cabinetPutawayStoreNum;
+
+  /// No description provided for @cabinetPutawayImages.
+  ///
+  /// In en, this message translates to:
+  /// **'Images'**
+  String get cabinetPutawayImages;
+
+  /// No description provided for @cabinetPutawayAddImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Add Image'**
+  String get cabinetPutawayAddImage;
+
+  /// No description provided for @cabinetPutawayImageLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Up to 4 images'**
+  String get cabinetPutawayImageLimit;
+
+  /// No description provided for @cabinetPutawaySubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get cabinetPutawaySubmit;
+
+  /// No description provided for @cabinetPutawaySuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get cabinetPutawaySuccess;
+
+  /// No description provided for @cabinetPutawayFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit failed'**
+  String get cabinetPutawayFailed;
+
+  /// No description provided for @cabinetUnshelveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet Unshelve'**
+  String get cabinetUnshelveTitle;
+
+  /// No description provided for @cabinetUnshelveSn.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet SN'**
+  String get cabinetUnshelveSn;
+
+  /// No description provided for @cabinetUnshelveInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet Info'**
+  String get cabinetUnshelveInfoTitle;
+
+  /// No description provided for @cabinetUnshelveInfoEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No cabinet info'**
+  String get cabinetUnshelveInfoEmpty;
+
+  /// No description provided for @cabinetUnshelveName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get cabinetUnshelveName;
+
+  /// No description provided for @cabinetUnshelveModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get cabinetUnshelveModel;
+
+  /// No description provided for @cabinetUnshelveReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get cabinetUnshelveReason;
+
+  /// No description provided for @cabinetUnshelveSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get cabinetUnshelveSubmit;
+
+  /// No description provided for @cabinetUnshelveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Submitted'**
+  String get cabinetUnshelveSuccess;
+
+  /// No description provided for @cabinetUnshelveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit failed'**
+  String get cabinetUnshelveFailed;
+
+  /// No description provided for @cabinetAuthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet Authorization'**
+  String get cabinetAuthTitle;
+
+  /// No description provided for @cabinetAuthSn.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet SN'**
+  String get cabinetAuthSn;
+
+  /// No description provided for @cabinetAuthQueryCabinet.
+  ///
+  /// In en, this message translates to:
+  /// **'Query Cabinets'**
+  String get cabinetAuthQueryCabinet;
+
+  /// No description provided for @cabinetAuthQueryRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Query Records'**
+  String get cabinetAuthQueryRecord;
+
+  /// No description provided for @cabinetAuthCabinetList.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet List'**
+  String get cabinetAuthCabinetList;
+
+  /// No description provided for @cabinetAuthUserSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorized Users'**
+  String get cabinetAuthUserSection;
+
+  /// No description provided for @cabinetAuthUserKeyword.
+  ///
+  /// In en, this message translates to:
+  /// **'User Keyword'**
+  String get cabinetAuthUserKeyword;
+
+  /// No description provided for @cabinetAuthQueryUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Query Users'**
+  String get cabinetAuthQueryUser;
+
+  /// No description provided for @cabinetAuthAuthorizeSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorize'**
+  String get cabinetAuthAuthorizeSection;
+
+  /// No description provided for @cabinetAuthAccountNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Account No'**
+  String get cabinetAuthAccountNo;
+
+  /// No description provided for @cabinetAuthBeginTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Begin Time'**
+  String get cabinetAuthBeginTime;
+
+  /// No description provided for @cabinetAuthEndTime.
+  ///
+  /// In en, this message translates to:
+  /// **'End Time'**
+  String get cabinetAuthEndTime;
+
+  /// No description provided for @cabinetAuthSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorize'**
+  String get cabinetAuthSubmit;
+
+  /// No description provided for @cabinetAuthSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorized'**
+  String get cabinetAuthSuccess;
+
+  /// No description provided for @cabinetAuthFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization failed'**
+  String get cabinetAuthFailed;
+
+  /// No description provided for @cabinetAuthCancelSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Authorization'**
+  String get cabinetAuthCancelSection;
+
+  /// No description provided for @cabinetAuthPermissionId.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission ID'**
+  String get cabinetAuthPermissionId;
+
+  /// No description provided for @cabinetAuthCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cabinetAuthCancel;
+
+  /// No description provided for @cabinetAuthCancelSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled'**
+  String get cabinetAuthCancelSuccess;
+
+  /// No description provided for @cabinetAuthCancelFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel failed'**
+  String get cabinetAuthCancelFailed;
+
+  /// No description provided for @cabinetAuthRecordSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization Records'**
+  String get cabinetAuthRecordSection;
+
+  /// No description provided for @cabinetOperateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet Operations'**
+  String get cabinetOperateTitle;
+
+  /// No description provided for @cabinetOperateAuthorization.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet Authorization'**
+  String get cabinetOperateAuthorization;
+
+  /// No description provided for @cabinetOperateOfflineDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Detail'**
+  String get cabinetOperateOfflineDetail;
+
+  /// No description provided for @cabinetOfflineDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet Offline Detail'**
+  String get cabinetOfflineDetailTitle;
+
+  /// No description provided for @cabinetOfflineFaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet Offline Fault'**
+  String get cabinetOfflineFaultTitle;
+
+  /// No description provided for @cabinetOfflinePlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Coming soon'**
+  String get cabinetOfflinePlaceholder;
+
+  /// No description provided for @cabinetOfflineSnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet SN'**
+  String get cabinetOfflineSnLabel;
+
+  /// No description provided for @cabinetOfflinePidLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet PID'**
+  String get cabinetOfflinePidLabel;
+
+  /// No description provided for @cabinetOfflineName.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet Name'**
+  String get cabinetOfflineName;
+
+  /// No description provided for @cabinetOfflineAddressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get cabinetOfflineAddressLabel;
+
+  /// No description provided for @cabinetOfflineStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get cabinetOfflineStatusLabel;
+
+  /// No description provided for @cabinetOfflineLastHbLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Heartbeat'**
+  String get cabinetOfflineLastHbLabel;
+
+  /// No description provided for @cabinetOfflineLockDevId.
+  ///
+  /// In en, this message translates to:
+  /// **'lockDevId'**
+  String get cabinetOfflineLockDevId;
+
+  /// No description provided for @cabinetOfflineLockIcId.
+  ///
+  /// In en, this message translates to:
+  /// **'lockIcId'**
+  String get cabinetOfflineLockIcId;
+
+  /// No description provided for @cabinetOfflineSecretKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Secret Key'**
+  String get cabinetOfflineSecretKey;
+
+  /// No description provided for @cabinetOfflineQueryAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Query'**
+  String get cabinetOfflineQueryAction;
+
+  /// No description provided for @cabinetOfflineEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No offline info'**
+  String get cabinetOfflineEmpty;
+
+  /// No description provided for @cabinetOfflineFaultEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'View Faults'**
+  String get cabinetOfflineFaultEntry;
+
+  /// No description provided for @cabinetOfflinePortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Port'**
+  String get cabinetOfflinePortLabel;
+
+  /// No description provided for @cabinetOfflineFaultEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No fault records'**
+  String get cabinetOfflineFaultEmpty;
+
+  /// No description provided for @cabinetOfflineFaultSnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'SN'**
+  String get cabinetOfflineFaultSnLabel;
+
+  /// No description provided for @cabinetOfflineFaultPortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Port'**
+  String get cabinetOfflineFaultPortLabel;
+
+  /// No description provided for @cabinetOfflineFaultTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time'**
+  String get cabinetOfflineFaultTimeLabel;
+
+  /// No description provided for @cabinetOfflineFaultSiteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Site'**
+  String get cabinetOfflineFaultSiteLabel;
+
+  /// No description provided for @vcuSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'VCU Search'**
+  String get vcuSearchTitle;
+
+  /// No description provided for @vcuControlTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'VCU Control'**
+  String get vcuControlTitle;
+
+  /// No description provided for @vcuVinLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'VIN'**
+  String get vcuVinLabel;
+
+  /// No description provided for @vcuCommandLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Command'**
+  String get vcuCommandLabel;
+
+  /// No description provided for @vcuSendCommand.
+  ///
+  /// In en, this message translates to:
+  /// **'Send Command'**
+  String get vcuSendCommand;
+
+  /// No description provided for @vcuSendSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Command sent'**
+  String get vcuSendSuccess;
+
+  /// No description provided for @vcuSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Command failed'**
+  String get vcuSendFailed;
+
+  /// No description provided for @vcuLoadVersions.
+  ///
+  /// In en, this message translates to:
+  /// **'Load Versions'**
+  String get vcuLoadVersions;
+
+  /// No description provided for @vcuVersionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get vcuVersionLabel;
+
+  /// No description provided for @promoteWebTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Promote Web'**
+  String get promoteWebTitle;
+
+  /// No description provided for @promoteWebUrlLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'URL'**
+  String get promoteWebUrlLabel;
+
+  /// No description provided for @promoteWebParseMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Parse Mode'**
+  String get promoteWebParseMode;
+
+  /// No description provided for @promoteWebOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get promoteWebOpen;
+
+  /// No description provided for @batteryLocationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery Location'**
+  String get batteryLocationTitle;
+
+  /// No description provided for @batteryLocationSn.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery SN'**
+  String get batteryLocationSn;
+
+  /// No description provided for @batteryLocationQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'Query Location'**
+  String get batteryLocationQuery;
+
+  /// No description provided for @batteryLocationEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No location data'**
+  String get batteryLocationEmpty;
+
+  /// No description provided for @addressPickerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Address'**
+  String get addressPickerTitle;
+
+  /// No description provided for @addressPickerConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get addressPickerConfirm;
+
+  /// No description provided for @addressPickerEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Move map to pick a location'**
+  String get addressPickerEmpty;
 }
 
 class _AppLocalizationsDelegate

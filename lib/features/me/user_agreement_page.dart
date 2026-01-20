@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/core/constants/legal_urls.dart';
+import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/widgets/common_webview_page.dart';
 
 class UserAgreementPage extends StatelessWidget {
   const UserAgreementPage({super.key});
 
-  static const String agreementUrl = 'https://book.flutterchina.club/';
-
   @override
   Widget build(BuildContext context) {
     return CommonWebViewPage(
-      initialUrl: agreementUrl,
+      initialUrl: userAgreementUrl,
+      title: context.l10n.profileUserAgreement,
     );
   }
 }

@@ -4,11 +4,14 @@ import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/battery_detail.dart';
 import 'package:merchant_app/data/models/charge_history.dart';
 import 'package:merchant_app/features/work/device/device_detail_controller.dart';
+import 'package:merchant_app/features/work/map/battery_location_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
 class DeviceDetailPage extends ConsumerStatefulWidget {
-  const DeviceDetailPage({super.key});
+  const DeviceDetailPage({super.key, this.initialSn});
+
+  final String? initialSn;
 
   @override
   ConsumerState<DeviceDetailPage> createState() => _DeviceDetailPageState();
@@ -16,6 +19,23 @@ class DeviceDetailPage extends ConsumerStatefulWidget {
 
 class _DeviceDetailPageState extends ConsumerState<DeviceDetailPage> {
   final TextEditingController _controller = TextEditingController();
+  bool _autoSearched = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final initial = widget.initialSn?.trim() ?? '';
+    if (initial.isNotEmpty) {
+      _controller.text = initial;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || _autoSearched) return;
+        final value = _controller.text.trim();
+        if (value.isEmpty) return;
+        ref.read(deviceDetailProvider.notifier).searchBattery(value);
+        _autoSearched = true;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -91,7 +111,12 @@ class _DeviceDetailPageState extends ConsumerState<DeviceDetailPage> {
 
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
+      MaterialPageRoute(
+        builder: (_) => const QrScanPage(
+          parseDeviceSn: true,
+          deviceType: 1,
+        ),
+      ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _controller.text = result;
@@ -213,6 +238,22 @@ class _DeviceDetailBody extends StatelessWidget {
                   _formatLocation(detail.latitude, detail.longitude),
                 ),
                 const SizedBox(height: 12),
+                if (detail.deviceSn != null &&
+                    detail.deviceSn!.isNotEmpty &&
+                    detail.latitude != null &&
+                    detail.longitude != null)
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () => _openLocation(context, detail),
+                      child: Text(l10n.deviceDetailViewMap),
+                    ),
+                  ),
+                if (detail.deviceSn != null &&
+                    detail.deviceSn!.isNotEmpty &&
+                    detail.latitude != null &&
+                    detail.longitude != null)
+                  const SizedBox(height: 8),
                 SizedBox(
                   width: double.infinity,
                   child: OutlinedButton(
@@ -255,6 +296,16 @@ class _DeviceDetailBody extends StatelessWidget {
   String _formatValue(Object? value) {
     if (value == null) return '-';
     return value.toString();
+  }
+
+  void _openLocation(BuildContext context, BatteryDetail detail) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => BatteryLocationPage(
+          initialSn: detail.deviceSn ?? '',
+        ),
+      ),
+    );
   }
 
   String _formatLocation(double? lat, double? lng) {

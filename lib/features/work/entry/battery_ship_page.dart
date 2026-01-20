@@ -148,7 +148,12 @@ class _BatteryShipPageState extends State<BatteryShipPage> {
 
   Future<void> _scanAndAdd() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
+      MaterialPageRoute(
+        builder: (_) => const QrScanPage(
+          parseDeviceSn: true,
+          deviceType: 1,
+        ),
+      ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     if (!_sns.contains(result)) {

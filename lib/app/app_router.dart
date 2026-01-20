@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:merchant_app/app/root_tab_scaffold.dart';
+import 'package:merchant_app/core/constants/legal_urls.dart';
+import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/widgets/common_webview_page.dart';
 import 'package:merchant_app/features/login/models/user_state.dart';
 import 'package:merchant_app/features/login/presentation/bootstrap_page.dart';
 import 'package:merchant_app/features/login/presentation/login_page.dart';
 import 'package:merchant_app/features/login/providers/auth_controller.dart';
 import 'package:merchant_app/features/me/about_page.dart';
+import 'package:merchant_app/features/me/change_password_page.dart';
 import 'package:merchant_app/features/me/language.dart';
 import 'package:merchant_app/features/me/message.dart';
+import 'package:merchant_app/features/me/service_agreement_page.dart';
+import 'package:merchant_app/features/me/user_agreement_page.dart';
 import 'package:merchant_app/features/work/work_module_page.dart';
 
 class AppRouter {
@@ -22,8 +27,11 @@ class AppRouter {
   static const String loginPath = '/login';
   static const String splashPath = '/splash';
   static const String userAgreementPath = '/profile/user-agreement';
+  static const String serviceAgreementPath = '/profile/service-agreement';
+  static const String privacyPolicyPath = '/profile/privacy-policy';
   static const String aboutPath = '/profile/about';
   static const String messagePath = '/profile/messages';
+  static const String changePasswordPath = '/profile/change-password';
   static const String languagePath = '/profile/language';
   static const String workModulePath = '/work/module';
 
@@ -49,7 +57,20 @@ class AppRouter {
       GoRoute(
         path: userAgreementPath,
         name: 'user_agreement',
-        builder: (context, state) => const CommonWebViewPage(initialUrl: 'https://book.flutterchina.club/'),
+        builder: (context, state) => const UserAgreementPage(),
+      ),
+      GoRoute(
+        path: serviceAgreementPath,
+        name: 'service_agreement',
+        builder: (context, state) => const ServiceAgreementPage(),
+      ),
+      GoRoute(
+        path: privacyPolicyPath,
+        name: 'privacy_policy',
+        builder: (context, state) => CommonWebViewPage(
+          initialUrl: privacyPolicyUrl,
+          title: context.l10n.profilePrivacyPolicy,
+        ),
       ),
       GoRoute(
         path: aboutPath,
@@ -60,6 +81,11 @@ class AppRouter {
         path: messagePath,
         name: 'messages',
         builder: (context, state) => const MessagePage(),
+      ),
+      GoRoute(
+        path: changePasswordPath,
+        name: 'change_password',
+        builder: (context, state) => const ChangePasswordPage(),
       ),
       GoRoute(
         path: languagePath,

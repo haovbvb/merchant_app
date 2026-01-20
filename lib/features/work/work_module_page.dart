@@ -3,6 +3,14 @@ import 'package:go_router/go_router.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/after_sale/after_sale_bind_page.dart';
 import 'package:merchant_app/features/work/after_sale/unbind_device_page.dart';
+import 'package:merchant_app/features/work/bluetooth/bluetooth_auth_page.dart';
+import 'package:merchant_app/features/work/bluetooth/bluetooth_operate_page.dart';
+import 'package:merchant_app/features/work/cabinet/cabinet_authorization_page.dart';
+import 'package:merchant_app/features/work/cabinet/cabinet_offline_detail_page.dart';
+import 'package:merchant_app/features/work/cabinet/cabinet_offline_fault_page.dart';
+import 'package:merchant_app/features/work/cabinet/cabinet_operate_page.dart';
+import 'package:merchant_app/features/work/cabinet/cabinet_putaway_page.dart';
+import 'package:merchant_app/features/work/cabinet/cabinet_unshelve_page.dart';
 import 'package:merchant_app/features/work/device/device_detail_page.dart';
 import 'package:merchant_app/features/work/device/device_search_page.dart';
 import 'package:merchant_app/features/work/device/vehicle_search_page.dart';
@@ -12,7 +20,9 @@ import 'package:merchant_app/features/work/entry/station_entry_page.dart';
 import 'package:merchant_app/features/work/entry/vehicle_entry_page.dart';
 import 'package:merchant_app/features/work/maintenance/maintenance_book_page.dart';
 import 'package:merchant_app/features/work/maintenance/repair_record_page.dart';
-import 'package:merchant_app/features/work/qrcode/qr_code_list_page.dart';
+import 'package:merchant_app/features/work/map/battery_location_page.dart';
+import 'package:merchant_app/features/work/promote/promote_web_page.dart';
+import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/roadside/roadside_deal_page.dart';
 import 'package:merchant_app/features/work/roadside/roadside_detail_page.dart';
@@ -27,6 +37,8 @@ import 'package:merchant_app/features/work/sales/sell_bind_page.dart';
 import 'package:merchant_app/features/work/sales/swap_bind_page.dart';
 import 'package:merchant_app/features/work/user/user_detail_page.dart';
 import 'package:merchant_app/features/work/user/user_list_page.dart';
+import 'package:merchant_app/features/work/vcu/vcu_control_page.dart';
+import 'package:merchant_app/features/work/vcu/vcu_search_page.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_detail_page.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_list_page.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_search_page.dart';
@@ -63,6 +75,7 @@ class WorkModulePage extends StatelessWidget {
       case 'after_sale_bind':
         return const AfterSaleBindPage();
       case 'after_sale_unbind':
+      case 'unbind_device':
         return const UnbindDevicePage();
       case 'battery_entry':
         return const BatteryEntryPage();
@@ -77,9 +90,9 @@ class WorkModulePage extends StatelessWidget {
       case 'user_search':
         return const UserListPage();
       case 'user_detail':
-        return const UserDetailPage(cardNum: '');
+        return UserDetailPage(cardNum: recordNo ?? '');
       case 'device_detail':
-        return const DeviceDetailPage();
+        return DeviceDetailPage(initialSn: recordNo);
       case 'device_search':
         return const DeviceSearchPage();
       case 'vehicle_search':
@@ -113,13 +126,29 @@ class WorkModulePage extends StatelessWidget {
       case 'qrcode_scan':
         return const QrScanPage();
       case 'qrcode_list':
-        return const QrCodeListPage();
+        return const QrBatchScanPage();
       case 'cabinet_scan':
         return const QrScanPage();
+      case 'cabinet_putaway':
+        return const CabinetPutawayPage();
+      case 'cabinet_unshelve':
+        return const CabinetUnshelvePage();
+      case 'cabinet_operate':
+        return const CabinetOperatePage();
+      case 'cabinet_auth_operate':
+        return const CabinetAuthorizationPage();
+      case 'cabinet_offline_detail':
+        return const CabinetOfflineDetailPage();
+      case 'cabinet_offline_fault':
+        return const CabinetOfflineFaultPage();
+      case 'bluetooth_auth':
+        return const BluetoothAuthPage();
+      case 'bluetooth_operate':
+        return const BluetoothOperatePage();
       case 'device_inventory':
         return const InventoryListPage();
       case 'device_inventory_detail':
-        return const InventoryDetailPage();
+        return InventoryDetailPage(inventoryNo: recordNo ?? '');
       case 'device_inventory_search':
         return const InventorySearchPage();
       case 'device_transport_issue':
@@ -138,7 +167,15 @@ class WorkModulePage extends StatelessWidget {
           mode: TransportMode.receive,
         );
       case 'device_transport_detail':
-        return const TransportDetailPage();
+        return TransportDetailPage(transferNo: recordNo ?? '');
+      case 'vcu_search':
+        return const VcuSearchPage();
+      case 'vcu_control':
+        return const VcuControlPage();
+      case 'promote_web':
+        return const PromoteWebPage();
+      case 'battery_loc':
+        return const BatteryLocationPage();
       default:
         final title = moduleTitle ?? moduleKey;
         return Scaffold(

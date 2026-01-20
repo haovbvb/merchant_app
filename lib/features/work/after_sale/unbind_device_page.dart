@@ -201,7 +201,9 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
 
   Future<void> _scanCardNum() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
+      MaterialPageRoute(
+        builder: (_) => const QrScanPage(parseDeviceSn: true),
+      ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     ref.read(unbindDeviceProvider.notifier).updateCardNum(result);

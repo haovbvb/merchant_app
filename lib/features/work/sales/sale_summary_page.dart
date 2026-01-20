@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
@@ -14,6 +15,8 @@ class SaleSummaryPage extends ConsumerStatefulWidget {
 }
 
 class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage> {
+  bool _showAmount = true;
+
   @override
   void initState() {
     super.initState();
@@ -51,7 +54,12 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage> {
           const SizedBox(height: 16),
           _SummaryCard(l10n: l10n, summary: state.summary),
           const SizedBox(height: 16),
-          _ChartHint(l10n: l10n, data: state.chartData),
+          _ChartSection(
+            l10n: l10n,
+            data: state.chartData,
+            showAmount: _showAmount,
+            onToggle: (value) => setState(() => _showAmount = value),
+          ),
           const SizedBox(height: 16),
           _SectionTitle(title: l10n.saleSummaryListSection),
           const SizedBox(height: 8),
@@ -189,11 +197,18 @@ class _SummaryCard extends StatelessWidget {
   }
 }
 
-class _ChartHint extends StatelessWidget {
-  const _ChartHint({required this.l10n, required this.data});
+class _ChartSection extends StatelessWidget {
+  const _ChartSection({
+    required this.l10n,
+    required this.data,
+    required this.showAmount,
+    required this.onToggle,
+  });
 
   final AppLocalizations l10n;
   final SalesBarData? data;
+  final bool showAmount;
+  final ValueChanged<bool> onToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -201,11 +216,172 @@ class _ChartHint extends StatelessWidget {
     if (chartData == null || chartData.timeList.isEmpty) {
       return const SizedBox.shrink();
     }
-    return Text(
-      '${l10n.saleSummaryChartHint}: ${chartData.timeList.length}',
-      style: const TextStyle(color: Colors.grey),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(l10n.saleSummarySummarySection,
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+            ToggleButtons(
+              isSelected: [showAmount, !showAmount],
+              onPressed: (index) => onToggle(index == 0),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(l10n.saleSummaryIncome),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Text(l10n.saleSummaryOrderCount),
+                ),
+              ],
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          height: 220,
+          child: showAmount
+              ? _AmountLineChart(data: chartData)
+              : _OrderBarChart(data: chartData),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${l10n.saleSummaryChartHint}: ${chartData.timeList.length}',
+          style: const TextStyle(color: Colors.grey),
+        ),
+      ],
     );
   }
+}
+
+class _AmountLineChart extends StatelessWidget {
+  const _AmountLineChart({required this.data});
+
+  final SalesBarData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final spots = <FlSpot>[];
+    for (var i = 0; i < data.amountList.length; i++) {
+      spots.add(FlSpot(i.toDouble(), data.amountList[i]));
+    }
+    return LineChart(
+      LineChartData(
+        gridData: const FlGridData(show: false),
+        titlesData: FlTitlesData(
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: true, reservedSize: 36),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: _bottomInterval(data.timeList.length),
+              getTitlesWidget: (value, meta) {
+                final index = value.toInt();
+                if (index < 0 || index >= data.timeList.length) {
+                  return const SizedBox.shrink();
+                }
+                final text = data.timeList[index];
+                return SideTitleWidget(
+                  axisSide: meta.axisSide,
+                  child: Text(
+                    _formatDateLabel(text),
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                );
+              },
+            ),
+          ),
+          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        lineBarsData: [
+          LineChartBarData(
+            spots: spots,
+            isCurved: true,
+            color: Theme.of(context).colorScheme.primary,
+            barWidth: 3,
+            dotData: const FlDotData(show: false),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OrderBarChart extends StatelessWidget {
+  const _OrderBarChart({required this.data});
+
+  final SalesBarData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final bars = <BarChartGroupData>[];
+    for (var i = 0; i < data.numList.length; i++) {
+      bars.add(
+        BarChartGroupData(
+          x: i,
+          barRods: [
+            BarChartRodData(
+              toY: data.numList[i].toDouble(),
+              color: Theme.of(context).colorScheme.secondary,
+              width: 8,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ],
+        ),
+      );
+    }
+    return BarChart(
+      BarChartData(
+        gridData: const FlGridData(show: false),
+        titlesData: FlTitlesData(
+          leftTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: true, reservedSize: 36),
+          ),
+          bottomTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              interval: _bottomInterval(data.timeList.length),
+              getTitlesWidget: (value, meta) {
+                final index = value.toInt();
+                if (index < 0 || index >= data.timeList.length) {
+                  return const SizedBox.shrink();
+                }
+                final text = data.timeList[index];
+                return SideTitleWidget(
+                  axisSide: meta.axisSide,
+                  child: Text(
+                    _formatDateLabel(text),
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                );
+              },
+            ),
+          ),
+          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+        ),
+        barGroups: bars,
+      ),
+    );
+  }
+}
+
+double _bottomInterval(int length) {
+  if (length <= 6) return 1;
+  if (length <= 12) return 2;
+  return (length / 6).ceilToDouble();
+}
+
+String _formatDateLabel(String raw) {
+  if (raw.length >= 10) {
+    return raw.substring(5, 10);
+  }
+  return raw;
 }
 
 class _SectionTitle extends StatelessWidget {

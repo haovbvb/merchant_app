@@ -28,7 +28,7 @@ class AuthNotifier extends Notifier<UserState> {
   }
 
   /// 执行登录流程，并在成功后保存 token。
-  Future<void> login({required String name, required String password}) async {
+  Future<bool> login({required String name, required String password}) async {
     try {
       final hashedPassword = HashUtils.md5Lower32(password);
       final response = await _apiService.post<AuthResult>(
@@ -38,19 +38,21 @@ class AuthNotifier extends Notifier<UserState> {
       );
 
       if (!response.isSuccess) {
-        return;
+        return false;
       }
 
       final authResult = response.result;
       if (authResult == null || authResult.token.isEmpty) {
         showToast('缺少 token');
-        return;
+        return false;
       }
 
       await updateSession(authResult);
       Future.microtask(AppRouter.goHome);
+      return true;
     } catch (e) {
       // 全局已处理提示，这里仅确保状态不变。
+      return false;
     }
   }
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/warehouse_info.dart';
+import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/warehouse/transport_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
@@ -106,6 +107,14 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
               ),
             ],
           ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton.icon(
+              onPressed: () => _openBatchScan(context, notifier),
+              icon: const Icon(Icons.playlist_add),
+              label: Text(l10n.qrcodeBatchScan),
+            ),
+          ),
           const SizedBox(height: 12),
           if (state.sns.isNotEmpty)
             Wrap(
@@ -151,10 +160,34 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
     TransportCreateNotifier notifier,
   ) async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
+      MaterialPageRoute(
+        builder: (_) => QrScanPage(
+          parseDeviceSn: true,
+          deviceType: widget.deviceType,
+        ),
+      ),
     );
     if (result == null || result.isEmpty) return;
     await notifier.addSn(result);
+  }
+
+  Future<void> _openBatchScan(
+    BuildContext context,
+    TransportCreateNotifier notifier,
+  ) async {
+    final existing = ref.read(transportCreateProvider).sns;
+    final result = await Navigator.of(context).push<List<String>>(
+      MaterialPageRoute(
+        builder: (_) => QrBatchScanPage(
+          initialItems: existing,
+          fixedDeviceType: widget.deviceType,
+        ),
+      ),
+    );
+    if (!mounted || result == null || result.isEmpty) return;
+    for (final sn in result) {
+      await notifier.addSn(sn);
+    }
   }
 
   String _warehouseDisplayName(AppLocalizations l10n, WarehouseInfo? info) {

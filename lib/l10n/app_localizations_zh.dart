@@ -31,6 +31,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeTitle => '概览';
 
   @override
+  String get homeSearchHint => '搜索已绑定车辆';
+
+  @override
+  String get homeFilterAll => '全部';
+
+  @override
+  String get homeFilterNeedMaintenance => '待保养';
+
+  @override
+  String get homeFilterNormal => '正常';
+
+  @override
+  String get homeEmpty => '附近暂无车辆';
+
+  @override
   String get workTitle => '工作台';
 
   @override
@@ -70,7 +85,46 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileMessage => '消息';
 
   @override
+  String get messageEmpty => '暂无消息';
+
+  @override
   String get profileChangePassword => '修改密码';
+
+  @override
+  String get changePasswordTitle => '修改密码';
+
+  @override
+  String get changePasswordOldLabel => '当前密码';
+
+  @override
+  String get changePasswordOldHint => '输入当前密码';
+
+  @override
+  String get changePasswordNewLabel => '新密码';
+
+  @override
+  String get changePasswordNewHint => '输入新密码';
+
+  @override
+  String get changePasswordConfirmLabel => '确认密码';
+
+  @override
+  String get changePasswordConfirmHint => '再次输入新密码';
+
+  @override
+  String get changePasswordSubmit => '提交';
+
+  @override
+  String get changePasswordRequired => '请输入密码';
+
+  @override
+  String get changePasswordTooShort => '密码至少 6 位';
+
+  @override
+  String get changePasswordNotMatch => '两次输入的密码不一致';
+
+  @override
+  String get changePasswordSuccess => '密码已更新';
 
   @override
   String get profileLanguage => '语言';
@@ -79,7 +133,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileUserAgreement => '用户协议';
 
   @override
+  String get profilePrivacyPolicy => '隐私政策';
+
+  @override
   String get profileAbout => '关于';
+
+  @override
+  String get aboutVersionLabel => '版本';
 
   @override
   String get login => '登录';
@@ -92,6 +152,11 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get userSearchHint => '请输入卡号或关键词';
+  @override
+  String get userSearchHistoryTitle => '搜索历史';
+
+  @override
+  String get userSearchHistoryClear => '清空';
 
   @override
   String get userDetailTitle => '用户详情';
@@ -329,6 +394,60 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get repairRecordTitle => '维修记录';
+
+  @override
+  String get repairRecordAddTitle => '新增维修记录';
+
+  @override
+  String get repairRecordDeviceSnLabel => '设备SN';
+
+  @override
+  String get repairRecordDeviceSnHint => '输入或扫码设备SN';
+
+  @override
+  String get repairRecordFetchDeviceInfo => '获取设备信息';
+
+  @override
+  String get repairRecordDeviceInfoTitle => '设备信息';
+
+  @override
+  String get repairRecordDeviceInfoEmpty => '暂无设备信息';
+
+  @override
+  String get repairRecordProjectLabel => '维修项目';
+
+  @override
+  String get repairRecordProjectHint => '请选择维修项目';
+
+  @override
+  String get repairRecordResultLabel => '维修结果';
+
+  @override
+  String get repairRecordResultHint => '请选择维修结果';
+
+  @override
+  String get repairRecordRemarkLabel => '维修备注';
+
+  @override
+  String get repairRecordRemarkHint => '填写维修备注';
+
+  @override
+  String get repairRecordSubmit => '提交';
+
+  @override
+  String get repairRecordSubmitSuccess => '提交成功';
+
+  @override
+  String get repairRecordDeviceModelLabel => '型号';
+
+  @override
+  String get repairRecordDeviceSpecLabel => '规格';
+
+  @override
+  String get repairRecordDeviceCardNumLabel => '卡号';
+
+  @override
+  String get repairRecordDeviceNameLabel => '名称';
 
   @override
   String get repairRecordSnHint => '请输入车辆SN';
@@ -580,6 +699,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get warehouseInventoryScanFailed => '扫码失败';
 
   @override
+  String get warehouseInventoryBatchComplete => '批量扫码完成';
+
+  @override
   String get warehouseInventoryRevokeConfirmTitle => '撤销盘点';
 
   @override
@@ -685,6 +807,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get warehouseTransportEditTrackingNumber => '修改物流单号';
 
   @override
+  String get warehouseTransportBatchReceiveComplete => '批量接收完成';
+
+  @override
   String get warehouseTransportSearchTitle => '调拨搜索';
 
   @override
@@ -724,10 +849,49 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scanConfirm => '确认';
 
   @override
+  String get scanCameraPermissionTitle => '需要相机权限';
+
+  @override
+  String get scanCameraPermissionDesc => '请在系统设置中允许相机权限后继续扫码。';
+
+  @override
+  String get scanPermissionRetry => '重试';
+
+  @override
+  String get scanOpenSettings => '去设置';
+
+  @override
+  String get bluetoothPermissionTitle => '需要蓝牙权限';
+
+  @override
+  String get bluetoothPermissionDesc => '请在系统设置中允许蓝牙权限后继续连接设备。';
+
+  @override
+  String get bluetoothPermissionRetry => '重试';
+
+  @override
+  String get bluetoothOpenSettings => '去设置';
+
+  @override
+  String get scanNoChinese => '不支持中文二维码';
+
+  @override
   String get qrcodeListTitle => '二维码列表';
 
   @override
+  String get qrcodeListConfirm => '完成';
+
+  @override
+  String get qrcodeBatchScan => '批量扫码';
+
+  @override
   String get qrcodeListEmpty => '暂无设备编号，请扫码或输入设备 SN';
+
+  @override
+  String get qrcodeSameAsPrevious => '与上一条二维码相同';
+
+  @override
+  String get qrcodeMaxDevice => '已达到最大数量';
 
   @override
   String get qrcodeDeviceTypeTitle => '设备类型';
@@ -758,6 +922,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get deviceSearchTitle => '设备搜索';
+
+  @override
+  String get deviceSearchHistoryTitle => '搜索历史';
+
+  @override
+  String get deviceSearchHistoryClear => '清空';
 
   @override
   String get deviceSearchHint => '输入设备 SN 或关键字';
@@ -811,6 +981,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceDetailLocation => '定位';
 
   @override
+  String get deviceDetailViewMap => '查看地图';
+
+  @override
   String get deviceDetailToggleDischarge => '切换放电状态';
 
   @override
@@ -833,6 +1006,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vehicleSearchTitle => '车辆搜索';
+
+  @override
+  String get vehicleSearchDistanceLabel => '距离';
+
+  @override
+  String get vehicleSearchBindIdLabel => '绑定ID';
 
   @override
   String get vehicleSearchHint => '输入车辆 SN 或关键字';
@@ -1453,6 +1632,285 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saleSummaryPayWay => '支付方式';
 
   @override
+  String get cabinetPutawayTitle => '柜机上架';
+
+  @override
+  String get cabinetPutawaySn => '电柜SN';
+
+  @override
+  String get cabinetPutawayInfoTitle => '电柜信息';
+
+  @override
+  String get cabinetPutawayInfoEmpty => '暂无电柜信息';
+
+  @override
+  String get cabinetPutawayName => '名称';
+
+  @override
+  String get cabinetPutawayModel => '型号';
+
+  @override
+  String get cabinetPutawaySpec => '规格';
+
+  @override
+  String get cabinetPutawayAddress => '地址';
+
+  @override
+  String get cabinetPutawayLatitude => '纬度';
+
+  @override
+  String get cabinetPutawayLongitude => '经度';
+
+  @override
+  String get cabinetPutawaySwapTime => '换电次数';
+
+  @override
+  String get cabinetPutawayStoreNum => '仓数';
+
+  @override
+  String get cabinetPutawayImages => '图片';
+
+  @override
+  String get cabinetPutawayAddImage => '添加图片';
+
+  @override
+  String get cabinetPutawayImageLimit => '最多上传4张';
+
+  @override
+  String get cabinetPutawaySubmit => '提交';
+
+  @override
+  String get cabinetPutawaySuccess => '提交成功';
+
+  @override
+  String get cabinetPutawayFailed => '提交失败';
+
+  @override
+  String get cabinetUnshelveTitle => '柜机下架';
+
+  @override
+  String get cabinetUnshelveSn => '电柜SN';
+
+  @override
+  String get cabinetUnshelveInfoTitle => '电柜信息';
+
+  @override
+  String get cabinetUnshelveInfoEmpty => '暂无电柜信息';
+
+  @override
+  String get cabinetUnshelveName => '名称';
+
+  @override
+  String get cabinetUnshelveModel => '型号';
+
+  @override
+  String get cabinetUnshelveReason => '原因';
+
+  @override
+  String get cabinetUnshelveSubmit => '提交';
+
+  @override
+  String get cabinetUnshelveSuccess => '提交成功';
+
+  @override
+  String get cabinetUnshelveFailed => '提交失败';
+
+  @override
+  String get cabinetAuthTitle => '柜机授权';
+
+  @override
+  String get cabinetAuthSn => '电柜SN';
+
+  @override
+  String get cabinetAuthQueryCabinet => '查询电柜';
+
+  @override
+  String get cabinetAuthQueryRecord => '查询记录';
+
+  @override
+  String get cabinetAuthCabinetList => '电柜列表';
+
+  @override
+  String get cabinetAuthUserSection => '授权用户';
+
+  @override
+  String get cabinetAuthUserKeyword => '用户关键词';
+
+  @override
+  String get cabinetAuthQueryUser => '查询用户';
+
+  @override
+  String get cabinetAuthAuthorizeSection => '授权操作';
+
+  @override
+  String get cabinetAuthAccountNo => '账号号';
+
+  @override
+  String get cabinetAuthBeginTime => '开始时间';
+
+  @override
+  String get cabinetAuthEndTime => '结束时间';
+
+  @override
+  String get cabinetAuthSubmit => '授权';
+
+  @override
+  String get cabinetAuthSuccess => '授权成功';
+
+  @override
+  String get cabinetAuthFailed => '授权失败';
+
+  @override
+  String get cabinetAuthCancelSection => '取消授权';
+
+  @override
+  String get cabinetAuthPermissionId => '权限ID';
+
+  @override
+  String get cabinetAuthCancel => '取消授权';
+
+  @override
+  String get cabinetAuthCancelSuccess => '取消成功';
+
+  @override
+  String get cabinetAuthCancelFailed => '取消失败';
+
+  @override
+  String get cabinetAuthRecordSection => '授权记录';
+
+  @override
+  String get cabinetOperateTitle => '柜机运维';
+
+  @override
+  String get cabinetOperateAuthorization => '柜机授权';
+
+  @override
+  String get cabinetOperateOfflineDetail => '离线详情';
+
+  @override
+  String get cabinetOfflineDetailTitle => '离线详情';
+
+  @override
+  String get cabinetOfflineFaultTitle => '离线故障';
+
+  @override
+  String get cabinetOfflinePlaceholder => '功能开发中';
+
+  @override
+  String get cabinetOfflineSnLabel => '柜机SN';
+
+  @override
+  String get cabinetOfflinePidLabel => '柜机PID';
+
+  @override
+  String get cabinetOfflineName => '柜机名称';
+
+  @override
+  String get cabinetOfflineAddressLabel => '地址';
+
+  @override
+  String get cabinetOfflineStatusLabel => '在线状态';
+
+  @override
+  String get cabinetOfflineLastHbLabel => '最后心跳';
+
+  @override
+  String get cabinetOfflineLockDevId => 'lockDevId';
+
+  @override
+  String get cabinetOfflineLockIcId => 'lockIcId';
+
+  @override
+  String get cabinetOfflineSecretKey => '蓝牙秘钥';
+
+  @override
+  String get cabinetOfflineQueryAction => '查询';
+
+  @override
+  String get cabinetOfflineEmpty => '暂无离线信息';
+
+  @override
+  String get cabinetOfflineFaultEntry => '查看离线故障';
+
+  @override
+  String get cabinetOfflinePortLabel => '仓门号';
+
+  @override
+  String get cabinetOfflineFaultEmpty => '暂无故障记录';
+
+  @override
+  String get cabinetOfflineFaultSnLabel => 'SN';
+
+  @override
+  String get cabinetOfflineFaultPortLabel => '仓门';
+
+  @override
+  String get cabinetOfflineFaultTimeLabel => '时间';
+
+  @override
+  String get cabinetOfflineFaultSiteLabel => '地址';
+
+  @override
+  String get vcuSearchTitle => 'VCU 搜索';
+
+  @override
+  String get vcuControlTitle => 'VCU 控制';
+
+  @override
+  String get vcuVinLabel => 'VIN';
+
+  @override
+  String get vcuCommandLabel => '指令';
+
+  @override
+  String get vcuSendCommand => '下发指令';
+
+  @override
+  String get vcuSendSuccess => '下发成功';
+
+  @override
+  String get vcuSendFailed => '下发失败';
+
+  @override
+  String get vcuLoadVersions => '加载版本';
+
+  @override
+  String get vcuVersionLabel => '版本';
+
+  @override
+  String get promoteWebTitle => '推广页面';
+
+  @override
+  String get promoteWebUrlLabel => '链接';
+
+  @override
+  String get promoteWebParseMode => '解析模式';
+
+  @override
+  String get promoteWebOpen => '打开';
+
+  @override
+  String get batteryLocationTitle => '电池定位';
+
+  @override
+  String get batteryLocationSn => '电池SN';
+
+  @override
+  String get batteryLocationQuery => '查询定位';
+
+  @override
+  String get batteryLocationEmpty => '暂无定位信息';
+
+  @override
+  String get addressPickerTitle => '选择地址';
+
+  @override
+  String get addressPickerConfirm => '确认';
+
+  @override
+  String get addressPickerEmpty => '拖动地图选择位置';
+
+  @override
   String get roadsideTitle => '道路救援';
 
   @override
@@ -1577,4 +2035,53 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get roadsideDealFailed => '提交失败';
+
+  @override
+  String get bluetoothAuthTitle => '蓝牙授权';
+
+  @override
+  String get bluetoothAuthSn => '柜机SN';
+
+  @override
+  String get bluetoothAuthPhone => '手机号';
+
+  @override
+  String get bluetoothAuthKeyId => '钥匙ID';
+
+  @override
+  String get bluetoothAuthDays => '授权天数';
+
+  @override
+  String get bluetoothAuthQueryLock => '查询锁ID';
+
+  @override
+  String get bluetoothAuthQueryUid => '查询UID';
+
+  @override
+  String get bluetoothAuthLockInfo => '锁信息';
+
+  @override
+  String get bluetoothAuthUid => '用户UID';
+
+  @override
+  String get bluetoothAuthSubmit => '提交授权';
+
+  @override
+  String get bluetoothAuthSuccess => '授权成功';
+
+  @override
+  String get bluetoothAuthFailed => '授权失败';
+
+  @override
+  String get bluetoothAuthMissingInput => '请填写SN、手机号与钥匙ID';
+
+  @override
+  String get bluetoothOperateTitle => '蓝牙运维';
+
+  @override
+    String get bluetoothOperateTip => '支持蓝牙扫描/连接与授权相关指令，请在靠近设备并开启蓝牙后操作。';
+
+  @override
+  String get bluetoothOperateTodoList =>
+      '• 扫描并连接蓝牙设备\n• 读取钥匙ID、授权/清空授权/设置有效期\n• 支持发送HEX指令并查看日志';
 }

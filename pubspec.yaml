@@ -27,9 +27,15 @@ dependencies:
   pull_to_refresh: ^2.0.0 # 下拉刷新列表
   google_maps_flutter: ^2.9.0 # 地图
   apple_maps_flutter: ^1.4.0 # iOS 原生地图
+  geolocator: ^13.0.2 # 定位
+  geocoding: ^3.0.0 # 反向地理编码
   mobile_scanner: ^5.2.3 # 扫码
   image_picker: ^1.1.2 # 图片选择
   flutter_image_compress: ^2.3.0 # 图片压缩
+  fl_chart: ^0.69.0 # 图表
+  flutter_blue_plus: ^1.35.3 # BLE
+  permission_handler: ^11.3.1 # 权限管理
+  package_info_plus: ^8.0.2 # 应用版本信息
 
   # 本地组件
   jui:

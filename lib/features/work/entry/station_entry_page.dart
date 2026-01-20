@@ -144,7 +144,12 @@ class _StationEntryPageState extends State<StationEntryPage> {
 
   Future<void> _addByScan() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
+      MaterialPageRoute(
+        builder: (_) => const QrScanPage(
+          parseDeviceSn: true,
+          deviceType: 3,
+        ),
+      ),
     );
     if (result == null || result.isEmpty) return;
     setState(() => _items.add(_StationItem(sn: result)));

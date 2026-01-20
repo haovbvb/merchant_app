@@ -18,7 +18,12 @@
 /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/SDWebImage/SDWebImage.framework/Metadata.appintents/extract.actionsdata
 /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/SDWebImageWebPCoder/SDWebImageWebPCoder.framework/Metadata.appintents/extract.actionsdata
 /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/apple_maps_flutter/apple_maps_flutter.framework/Metadata.appintents/extract.actionsdata
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/flutter_blue_plus_darwin/flutter_blue_plus_darwin.framework/Metadata.appintents/extract.actionsdata
 /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/flutter_image_compress_common/flutter_image_compress_common.framework/Metadata.appintents/extract.actionsdata
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/geocoding_ios/geocoding_ios.framework/Metadata.appintents/extract.actionsdata
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/geocoding_ios/geocoding_ios_privacy.bundle/Metadata.appintents/extract.actionsdata
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/geolocator_apple/geolocator_apple.framework/Metadata.appintents/extract.actionsdata
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/geolocator_apple/geolocator_apple_privacy.bundle/Metadata.appintents/extract.actionsdata
 /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/google_maps_flutter_ios/google_maps_flutter_ios.framework/Metadata.appintents/extract.actionsdata
 /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/google_maps_flutter_ios/google_maps_flutter_ios_privacy.bundle/Metadata.appintents/extract.actionsdata
 /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/image_picker_ios/image_picker_ios.framework/Metadata.appintents/extract.actionsdata
@@ -28,6 +33,8 @@
 /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/mobile_scanner/mobile_scanner_privacy.bundle/Metadata.appintents/extract.actionsdata
 /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/nanopb/nanopb.framework/Metadata.appintents/extract.actionsdata
 /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/nanopb/nanopb_Privacy.bundle/Metadata.appintents/extract.actionsdata
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/permission_handler_apple/permission_handler_apple.framework/Metadata.appintents/extract.actionsdata
+/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/permission_handler_apple/permission_handler_apple_privacy.bundle/Metadata.appintents/extract.actionsdata
 /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/shared_preferences_foundation/shared_preferences_foundation.framework/Metadata.appintents/extract.actionsdata
 /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/shared_preferences_foundation/shared_preferences_foundation_privacy.bundle/Metadata.appintents/extract.actionsdata
 /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/webview_flutter_wkwebview/webview_flutter_wkwebview.framework/Metadata.appintents/extract.actionsdata

@@ -116,7 +116,12 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
 
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
+      MaterialPageRoute(
+        builder: (_) => const QrScanPage(
+          parseDeviceSn: true,
+          deviceType: 2,
+        ),
+      ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;

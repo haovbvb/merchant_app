@@ -5,6 +5,8 @@ import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/payment_plan.dart';
 import 'package:merchant_app/data/models/service_plan.dart';
+import 'package:merchant_app/features/work/map/address_picker_page.dart';
+import 'package:merchant_app/features/work/map/address_result.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/sell_bind_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
@@ -161,6 +163,10 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
           _buildTextField(
             controller: _addressController,
             label: l10n.sellBindAddress,
+            suffixIcon: IconButton(
+              icon: const Icon(Icons.map_outlined),
+              onPressed: () => _selectAddress(context),
+            ),
           ),
           const SizedBox(height: 16),
           _SectionTitle(title: l10n.sellBindAttachment),
@@ -254,6 +260,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
     required TextEditingController controller,
     required String label,
     TextInputType? keyboardType,
+    Widget? suffixIcon,
   }) {
     return TextField(
       controller: controller,
@@ -263,13 +270,24 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
         ),
+        suffixIcon: suffixIcon,
       ),
     );
   }
 
+  Future<void> _selectAddress(BuildContext context) async {
+    final result = await Navigator.of(context).push<AddressResult>(
+      MaterialPageRoute(builder: (_) => const AddressPickerPage()),
+    );
+    if (!mounted || result == null || result.address.isEmpty) return;
+    _addressController.text = result.address;
+  }
+
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
+      MaterialPageRoute(
+        builder: (_) => const QrScanPage(parseDeviceSn: true),
+      ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;

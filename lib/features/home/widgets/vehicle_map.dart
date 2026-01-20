@@ -9,10 +9,20 @@ class VehicleMap extends StatelessWidget {
     super.key,
     this.latitude = 22.543099,
     this.longitude = 114.057868,
+    this.markers = const <gmaps.Marker>{},
+    this.annotations = const <amaps.Annotation>{},
+    this.onGoogleMapCreated,
+    this.onAppleMapCreated,
   });
 
   final double latitude;
   final double longitude;
+  final Set<gmaps.Marker> markers;
+  final Set<amaps.Annotation> annotations;
+  final void Function(gmaps.GoogleMapController controller)?
+      onGoogleMapCreated;
+  final void Function(amaps.AppleMapController controller)?
+      onAppleMapCreated;
 
   @override
   Widget build(BuildContext context) {
@@ -22,11 +32,19 @@ class VehicleMap extends StatelessWidget {
 
     final platform = defaultTargetPlatform;
     if (platform == TargetPlatform.android) {
-      return _AndroidVehicleMap(position: gmaps.LatLng(latitude, longitude));
+      return _AndroidVehicleMap(
+        position: gmaps.LatLng(latitude, longitude),
+        markers: markers,
+        onMapCreated: onGoogleMapCreated,
+      );
     }
 
     if (platform == TargetPlatform.iOS) {
-      return _IosVehicleMap(position: amaps.LatLng(latitude, longitude));
+      return _IosVehicleMap(
+        position: amaps.LatLng(latitude, longitude),
+        annotations: annotations,
+        onMapCreated: onAppleMapCreated,
+      );
     }
 
     return const Center(child: Text('当前平台暂不支持地图展示'));
@@ -34,9 +52,15 @@ class VehicleMap extends StatelessWidget {
 }
 
 class _AndroidVehicleMap extends StatelessWidget {
-  const _AndroidVehicleMap({required this.position});
+  const _AndroidVehicleMap({
+    required this.position,
+    required this.markers,
+    this.onMapCreated,
+  });
 
   final gmaps.LatLng position;
+  final Set<gmaps.Marker> markers;
+  final void Function(gmaps.GoogleMapController controller)? onMapCreated;
   static const double _defaultZoom = 14;
 
   @override
@@ -48,19 +72,28 @@ class _AndroidVehicleMap extends StatelessWidget {
           target: position,
           zoom: _defaultZoom,
         ),
+        markers: markers,
+        myLocationEnabled: true,
         myLocationButtonEnabled: false,
         mapToolbarEnabled: false,
         compassEnabled: false,
         zoomControlsEnabled: false,
+        onMapCreated: onMapCreated,
       ),
     );
   }
 }
 
 class _IosVehicleMap extends StatelessWidget {
-  const _IosVehicleMap({required this.position});
+  const _IosVehicleMap({
+    required this.position,
+    required this.annotations,
+    this.onMapCreated,
+  });
 
   final amaps.LatLng position;
+  final Set<amaps.Annotation> annotations;
+  final void Function(amaps.AppleMapController controller)? onMapCreated;
   static const double _defaultZoom = 14;
 
   @override
@@ -72,9 +105,12 @@ class _IosVehicleMap extends StatelessWidget {
           target: position,
           zoom: _defaultZoom,
         ),
+        annotations: annotations,
         compassEnabled: false,
+        myLocationEnabled: true,
         myLocationButtonEnabled: false,
         mapType: amaps.MapType.standard,
+        onMapCreated: onMapCreated,
       ),
     );
   }

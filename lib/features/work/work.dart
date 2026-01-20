@@ -4,6 +4,8 @@ import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/sale_data.dart';
 import 'package:merchant_app/data/models/shop1_num.dart';
+import 'package:merchant_app/features/work/device/device_detail_page.dart';
+import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/work_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
@@ -329,6 +331,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
           l10n: l10n,
           loading: state.loading,
           onRefresh: notifier.refresh,
+          onScan: _scanAndOpenDetail,
           saleData: state.saleData,
           shopNum: state.shopNum,
         ),
@@ -344,6 +347,22 @@ class _WorkTabState extends ConsumerState<WorkTab> {
       ],
     );
   }
+
+  Future<void> _scanAndOpenDetail() async {
+    final result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => const QrScanPage(
+          parseDeviceSn: true,
+        ),
+      ),
+    );
+    if (!mounted || result == null || result.isEmpty) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => DeviceDetailPage(initialSn: result),
+      ),
+    );
+  }
 }
 
 class _WorkbenchHeader extends StatelessWidget {
@@ -351,6 +370,7 @@ class _WorkbenchHeader extends StatelessWidget {
     required this.l10n,
     required this.loading,
     required this.onRefresh,
+    required this.onScan,
     required this.saleData,
     required this.shopNum,
   });
@@ -358,6 +378,7 @@ class _WorkbenchHeader extends StatelessWidget {
   final AppLocalizations l10n;
   final bool loading;
   final VoidCallback onRefresh;
+  final VoidCallback onScan;
   final SaleData? saleData;
   final Shop1Num? shopNum;
 
@@ -375,6 +396,11 @@ class _WorkbenchHeader extends StatelessWidget {
                 l10n.workbenchMonthlyIncomeTitle,
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
+            ),
+            IconButton(
+              onPressed: onScan,
+              icon: const Icon(Icons.qr_code_scanner),
+              tooltip: l10n.scanPageTitle,
             ),
             TextButton.icon(
               onPressed: loading ? null : onRefresh,

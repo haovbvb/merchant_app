@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:merchant_app/network/api_path.dart';
-import 'package:merchant_app/network/api_service.dart';
+import 'package:merchant_app/core/utils/scan_utils.dart';
 
 class QrCodeListState {
   final bool loading;
@@ -32,34 +31,37 @@ final qrCodeListProvider =
 );
 
 class QrCodeListNotifier extends Notifier<QrCodeListState> {
-  final ApiService _api = ApiService();
-
   @override
   QrCodeListState build() => const QrCodeListState();
+
+  void reset() {
+    state = const QrCodeListState();
+  }
 
   void setDeviceType(int? value) {
     state = state.copyWith(deviceType: value);
   }
 
+  void setInitialItems(List<String> items) {
+    if (items.isEmpty) return;
+    final merged = <String>{...state.items, ...items}.toList();
+    state = state.copyWith(items: merged);
+  }
+
+  void addItem(String sn) {
+    if (sn.trim().isEmpty || state.items.contains(sn)) return;
+    state = state.copyWith(items: [...state.items, sn]);
+  }
+
   Future<String?> resolveDeviceSn(String content) async {
     if (content.trim().isEmpty) return null;
     state = state.copyWith(loading: true);
-    final response = await _api.post<String>(
-      ApiPath.deviceGetDeviceSn,
-      data: {
-        if (state.deviceType != null) 'type': state.deviceType,
-        'content': content.trim(),
-      },
-      parser: (json) => json?.toString() ?? '',
-      showHud: false,
-    );
+    final sn = ScanUtils.parseSnByDeviceType(
+      content.trim(),
+      state.deviceType,
+    ).trim();
     state = state.copyWith(loading: false);
-    if (!response.isSuccess) return null;
-    final sn = response.result?.trim() ?? '';
     if (sn.isEmpty) return null;
-    if (!state.items.contains(sn)) {
-      state = state.copyWith(items: [...state.items, sn]);
-    }
     return sn;
   }
 

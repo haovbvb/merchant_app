@@ -8,6 +8,7 @@ class ApiPath {
   static const String login = '/admin/sys/user/login';
   static const String logout = '/admin/sys/user/logout';
   static const String refreshToken = '/admin/sys/account/refreshToken';
+    static const String changePassword = '/admin/sys/account/changePassword';
 
   // 入库/登记
   static const String batteryModelList = '/admin/battery/getModelList';
@@ -16,6 +17,25 @@ class ApiPath {
   static const String vehicleRegister = '/admin/vehicle/register';
   static const String stationModelList = '/admin/station/getModelList';
   static const String stationRegister = '/admin/station/register';
+  static const String stationGetTypeBySource =
+      '/admin/station/getStationType';
+  static const String stationInstall = '/admin/station/install';
+  static const String stationTakeOff = '/admin/station/takeOff';
+  static const String stationUploadImage = '/admin/station/upload';
+  static const String stationPermission = '/admin/station/stationPermission';
+  static const String stationCancelPermission = '/admin/station/cancelPermission';
+  static const String stationQueryPermission = '/admin/station/queryStationPermission';
+  static const String stationQueryListBySn = '/admin/station/queryListBySn';
+  static const String accountQueryBePermissionList =
+      '/admin/sys/account/queryBePermissionList';
+    static const String bluetoothGetLockIdBySn = '/admin/blueTooth/getLockIdBySn';
+    static const String bluetoothAuthAdd = '/admin/blueTooth/authAdd';
+    static const String bluetoothGetUidByPhone = '/admin/blueTooth/getUidByPhone';
+    static const String bluetoothEnOrDecrypt = '/admin/blueTooth/enOrDecrypt';
+    static const String cabinetBaseInfo = '/admin/station/queryStationDetail';
+    static const String cabinetSecretKey = '/admin/station/queryStationSecretKey';
+    static const String cabinetConfig = '/admin/station/config';
+    static const String cabinetFaultList = '/admin/faultReport/queryBySnAndPort';
 
   // 售后绑定
   static const String afterSaleQueryUserForBindOrder =
@@ -31,6 +51,8 @@ class ApiPath {
   static const String userSearchList = '/admin/user/searchList';
   static const String userGetDetail = '/admin/user/getDetail';
   static const String userQueryOrderList = '/admin/user/queryUserOrderList';
+    static const String messageGetSysList = '/admin/sys/msg/getSysMessage';
+    static const String messageUpdateFlag = '/admin/sys/msg/updateMsgFlag';
   static const String userUploadAttachment = '/admin/user/uploadAttachment';
   static const String tradeUploadAttachment = '/admin/trade/uploadAttachment';
   static const String userConfirmPayOrder = '/admin/trade/confirmPayOrder';
@@ -41,6 +63,11 @@ class ApiPath {
   static const String maintenanceQueryFixList =
       '/admin/maintenance/queryFixList';
   static const String maintenanceAddRecord = '/admin/maintenance/addRecord';
+  static const String repairRecordQueryDeviceForFix =
+      '/admin/op/queryDeviceForFix';
+  static const String repairRecordAddFixRecord =
+      '/admin/op/saveDeviceFixRecord';
+  static const String repairRecordUploadImg = '/admin/op/uploadImg';
 
   // 设备/二维码
   static const String deviceGetDeviceSn = '/admin/device/getDeviceSn';
@@ -49,6 +76,8 @@ class ApiPath {
       '/admin/battery/queryDeviceChargeRecord';
   static const String batteryTurnDischargeStatus =
       '/admin/battery/turnDischargeStatus';
+  static const String monitorNearByVehicle =
+      '/admin/monitor/vehicle/monitorOnMap';
 
   // 工作台
   static const String workbenchMonthlyIncome =
@@ -131,4 +160,8 @@ class ApiPath {
       '/admin/transfer/editTrackingNumber';
   static const String transportCheckDeviceSn =
       '/admin/transfer/checkDeviceSn';
+
+  // VCU
+  static const String vcuSendCommand = '/admin/car/ctrlVehicle';
+  static const String vcuVersionList = '/admin/car/queryVceVersionList';
 }

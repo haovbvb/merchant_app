@@ -143,7 +143,12 @@ class _BatteryEntryPageState extends State<BatteryEntryPage> {
 
   Future<void> _addByScan() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
+      MaterialPageRoute(
+        builder: (_) => const QrScanPage(
+          parseDeviceSn: true,
+          deviceType: 1,
+        ),
+      ),
     );
     if (result == null || result.isEmpty) return;
     setState(() => _items.add(_BatteryItem(sn: result)));

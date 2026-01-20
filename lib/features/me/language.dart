@@ -9,26 +9,28 @@ class LanguageSelectionPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final currentLocale = ref.watch(languageNotifierProvider);
-    final theme = Theme.of(context);
     final options = _buildOptions(context);
 
     return Scaffold(
-      appBar: AppBar(title: Text(context.l10n.tabMe)),
+      appBar: AppBar(title: Text(context.l10n.profileLanguage)),
       body: ListView.separated(
         itemBuilder: (context, index) {
           final option = options[index];
           final isSelected = option.locale == currentLocale;
           return ListTile(
-            leading: Icon(option.icon, color: theme.colorScheme.primary),
-            title: Text(option.title),
-            subtitle: Text(option.subtitle),
-            trailing: Radio<Locale>(
-              value: option.locale,
-              groupValue: currentLocale,
-              onChanged: (_) => _onSelect(ref, option.locale, context),
+            title: Text(
+              option.title,
+              style: TextStyle(
+                color: isSelected
+                    ? Theme.of(context).colorScheme.primary
+                    : const Color(0xE60C0C0D),
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              ),
             ),
+            trailing: isSelected
+                ? const Icon(Icons.check, color: Color(0xFF56B327))
+                : null,
             onTap: () => _onSelect(ref, option.locale, context),
-            selected: isSelected,
           );
         },
         separatorBuilder: (_, __) => const Divider(height: 1),
@@ -46,14 +48,10 @@ class LanguageSelectionPage extends ConsumerWidget {
     _LanguageOption(
       locale: const Locale('en'),
       title: 'English',
-      subtitle: 'English (US)',
-      icon: Icons.language,
     ),
     _LanguageOption(
       locale: const Locale('zh'),
       title: '简体中文',
-      subtitle: 'Chinese (Simplified)',
-      icon: Icons.translate,
     ),
   ];
 }
@@ -62,12 +60,8 @@ class _LanguageOption {
   const _LanguageOption({
     required this.locale,
     required this.title,
-    required this.subtitle,
-    required this.icon,
   });
 
   final Locale locale;
   final String title;
-  final String subtitle;
-  final IconData icon;
 }

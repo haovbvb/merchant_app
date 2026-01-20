@@ -31,6 +31,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTitle => 'Overview';
 
   @override
+  String get homeSearchHint => 'Search for bound vehicles';
+
+  @override
+  String get homeFilterAll => 'All';
+
+  @override
+  String get homeFilterNeedMaintenance => 'To be maintained';
+
+  @override
+  String get homeFilterNormal => 'Normal';
+
+  @override
+  String get homeEmpty => 'No nearby vehicles';
+
+  @override
   String get workTitle => 'Workbench';
 
   @override
@@ -70,7 +85,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileMessage => 'Message';
 
   @override
+  String get messageEmpty => 'No messages yet';
+
+  @override
   String get profileChangePassword => 'Change Password';
+
+  @override
+  String get changePasswordTitle => 'Change Password';
+
+  @override
+  String get changePasswordOldLabel => 'Current password';
+
+  @override
+  String get changePasswordOldHint => 'Enter current password';
+
+  @override
+  String get changePasswordNewLabel => 'New password';
+
+  @override
+  String get changePasswordNewHint => 'Enter new password';
+
+  @override
+  String get changePasswordConfirmLabel => 'Confirm password';
+
+  @override
+  String get changePasswordConfirmHint => 'Re-enter new password';
+
+  @override
+  String get changePasswordSubmit => 'Submit';
+
+  @override
+  String get changePasswordRequired => 'Password is required';
+
+  @override
+  String get changePasswordTooShort => 'Password must be at least 6 characters';
+
+  @override
+  String get changePasswordNotMatch => 'Passwords do not match';
+
+  @override
+  String get changePasswordSuccess => 'Password updated';
 
   @override
   String get profileLanguage => 'Language';
@@ -79,7 +133,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileUserAgreement => 'User Agreement';
 
   @override
+  String get profilePrivacyPolicy => 'Privacy Policy';
+
+  @override
   String get profileAbout => 'About';
+
+  @override
+  String get aboutVersionLabel => 'Version';
 
   @override
   String get login => 'Sign In';
@@ -92,6 +152,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get userSearchHint => 'Enter card number or keyword';
+
+  @override
+  String get userSearchHistoryTitle => 'Search History';
+
+  @override
+  String get userSearchHistoryClear => 'Clear';
 
   @override
   String get userDetailTitle => 'User Detail';
@@ -329,6 +395,60 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repairRecordTitle => 'Repair Records';
+
+  @override
+  String get repairRecordAddTitle => 'Add Repair Record';
+
+  @override
+  String get repairRecordDeviceSnLabel => 'Device SN';
+
+  @override
+  String get repairRecordDeviceSnHint => 'Enter or scan device SN';
+
+  @override
+  String get repairRecordFetchDeviceInfo => 'Fetch device info';
+
+  @override
+  String get repairRecordDeviceInfoTitle => 'Device Info';
+
+  @override
+  String get repairRecordDeviceInfoEmpty => 'No device info';
+
+  @override
+  String get repairRecordProjectLabel => 'Repair item';
+
+  @override
+  String get repairRecordProjectHint => 'Select repair item';
+
+  @override
+  String get repairRecordResultLabel => 'Repair result';
+
+  @override
+  String get repairRecordResultHint => 'Select repair result';
+
+  @override
+  String get repairRecordRemarkLabel => 'Remark';
+
+  @override
+  String get repairRecordRemarkHint => 'Enter remark';
+
+  @override
+  String get repairRecordSubmit => 'Submit';
+
+  @override
+  String get repairRecordSubmitSuccess => 'Submitted';
+
+  @override
+  String get repairRecordDeviceModelLabel => 'Model';
+
+  @override
+  String get repairRecordDeviceSpecLabel => 'Spec';
+
+  @override
+  String get repairRecordDeviceCardNumLabel => 'Card number';
+
+  @override
+  String get repairRecordDeviceNameLabel => 'Name';
 
   @override
   String get repairRecordSnHint => 'Enter vehicle SN';
@@ -582,6 +702,9 @@ class AppLocalizationsEn extends AppLocalizations {
     String get warehouseInventoryScanFailed => 'Scan failed';
 
     @override
+    String get warehouseInventoryBatchComplete => 'Batch scan completed';
+
+    @override
     String get warehouseInventoryRevokeConfirmTitle => 'Revoke inventory';
 
     @override
@@ -690,6 +813,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warehouseTransportEditTrackingNumber => 'Edit Tracking';
 
   @override
+  String get warehouseTransportBatchReceiveComplete =>
+      'Batch receive completed';
+
+  @override
   String get warehouseTransportSearchTitle => 'Transfer Search';
 
   @override
@@ -729,11 +856,52 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanConfirm => 'Confirm';
 
   @override
+  String get scanCameraPermissionTitle => 'Camera permission required';
+
+  @override
+  String get scanCameraPermissionDesc =>
+      'Please allow camera access in system settings to scan QR codes.';
+
+  @override
+  String get scanPermissionRetry => 'Retry';
+
+  @override
+  String get scanOpenSettings => 'Open settings';
+
+  @override
+  String get bluetoothPermissionTitle => 'Bluetooth permission required';
+
+  @override
+  String get bluetoothPermissionDesc =>
+      'Please allow Bluetooth permissions in system settings to connect devices.';
+
+  @override
+  String get bluetoothPermissionRetry => 'Retry';
+
+  @override
+  String get bluetoothOpenSettings => 'Open settings';
+
+  @override
+  String get scanNoChinese => 'Chinese characters are not supported';
+
+  @override
   String get qrcodeListTitle => 'QR Code List';
+
+  @override
+  String get qrcodeListConfirm => 'Done';
+
+  @override
+  String get qrcodeBatchScan => 'Batch Scan';
 
   @override
   String get qrcodeListEmpty =>
       'No device SNs yet. Please scan or enter a device SN.';
+
+  @override
+  String get qrcodeSameAsPrevious => 'Same as the previous code.';
+
+  @override
+  String get qrcodeMaxDevice => 'Maximum device count reached.';
   @override
   String get qrcodeDeviceTypeTitle => 'Device Type';
 
@@ -763,6 +931,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
     @override
     String get deviceSearchTitle => 'Device Search';
+
+    @override
+    String get deviceSearchHistoryTitle => 'Search History';
+
+    @override
+    String get deviceSearchHistoryClear => 'Clear';
 
     @override
     String get deviceSearchHint => 'Enter device SN or keyword';
@@ -815,6 +989,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceDetailLocation => 'Location';
 
   @override
+  String get deviceDetailViewMap => 'View Map';
+
+  @override
   String get deviceDetailToggleDischarge => 'Toggle Discharge';
 
   @override
@@ -837,6 +1014,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
     @override
     String get vehicleSearchTitle => 'Vehicle Search';
+
+    @override
+    String get vehicleSearchDistanceLabel => 'Distance';
+
+    @override
+    String get vehicleSearchBindIdLabel => 'Bind ID';
 
     @override
     String get vehicleSearchHint => 'Enter vehicle SN or keyword';
@@ -1457,6 +1640,285 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saleSummaryPayWay => 'Pay Way';
 
   @override
+  String get cabinetPutawayTitle => 'Cabinet Putaway';
+
+  @override
+  String get cabinetPutawaySn => 'Cabinet SN';
+
+  @override
+  String get cabinetPutawayInfoTitle => 'Cabinet Info';
+
+  @override
+  String get cabinetPutawayInfoEmpty => 'No cabinet info';
+
+  @override
+  String get cabinetPutawayName => 'Name';
+
+  @override
+  String get cabinetPutawayModel => 'Model';
+
+  @override
+  String get cabinetPutawaySpec => 'Spec';
+
+  @override
+  String get cabinetPutawayAddress => 'Address';
+
+  @override
+  String get cabinetPutawayLatitude => 'Latitude';
+
+  @override
+  String get cabinetPutawayLongitude => 'Longitude';
+
+  @override
+  String get cabinetPutawaySwapTime => 'Swap Times';
+
+  @override
+  String get cabinetPutawayStoreNum => 'Slots';
+
+  @override
+  String get cabinetPutawayImages => 'Images';
+
+  @override
+  String get cabinetPutawayAddImage => 'Add Image';
+
+  @override
+  String get cabinetPutawayImageLimit => 'Up to 4 images';
+
+  @override
+  String get cabinetPutawaySubmit => 'Submit';
+
+  @override
+  String get cabinetPutawaySuccess => 'Submitted';
+
+  @override
+  String get cabinetPutawayFailed => 'Submit failed';
+
+  @override
+  String get cabinetUnshelveTitle => 'Cabinet Unshelve';
+
+  @override
+  String get cabinetUnshelveSn => 'Cabinet SN';
+
+  @override
+  String get cabinetUnshelveInfoTitle => 'Cabinet Info';
+
+  @override
+  String get cabinetUnshelveInfoEmpty => 'No cabinet info';
+
+  @override
+  String get cabinetUnshelveName => 'Name';
+
+  @override
+  String get cabinetUnshelveModel => 'Model';
+
+  @override
+  String get cabinetUnshelveReason => 'Reason';
+
+  @override
+  String get cabinetUnshelveSubmit => 'Submit';
+
+  @override
+  String get cabinetUnshelveSuccess => 'Submitted';
+
+  @override
+  String get cabinetUnshelveFailed => 'Submit failed';
+
+  @override
+  String get cabinetAuthTitle => 'Cabinet Authorization';
+
+  @override
+  String get cabinetAuthSn => 'Cabinet SN';
+
+  @override
+  String get cabinetAuthQueryCabinet => 'Query Cabinets';
+
+  @override
+  String get cabinetAuthQueryRecord => 'Query Records';
+
+  @override
+  String get cabinetAuthCabinetList => 'Cabinet List';
+
+  @override
+  String get cabinetAuthUserSection => 'Authorized Users';
+
+  @override
+  String get cabinetAuthUserKeyword => 'User Keyword';
+
+  @override
+  String get cabinetAuthQueryUser => 'Query Users';
+
+  @override
+  String get cabinetAuthAuthorizeSection => 'Authorize';
+
+  @override
+  String get cabinetAuthAccountNo => 'Account No';
+
+  @override
+  String get cabinetAuthBeginTime => 'Begin Time';
+
+  @override
+  String get cabinetAuthEndTime => 'End Time';
+
+  @override
+  String get cabinetAuthSubmit => 'Authorize';
+
+  @override
+  String get cabinetAuthSuccess => 'Authorized';
+
+  @override
+  String get cabinetAuthFailed => 'Authorization failed';
+
+  @override
+  String get cabinetAuthCancelSection => 'Cancel Authorization';
+
+  @override
+  String get cabinetAuthPermissionId => 'Permission ID';
+
+  @override
+  String get cabinetAuthCancel => 'Cancel';
+
+  @override
+  String get cabinetAuthCancelSuccess => 'Canceled';
+
+  @override
+  String get cabinetAuthCancelFailed => 'Cancel failed';
+
+  @override
+  String get cabinetAuthRecordSection => 'Authorization Records';
+
+  @override
+  String get cabinetOperateTitle => 'Cabinet Operations';
+
+  @override
+  String get cabinetOperateAuthorization => 'Cabinet Authorization';
+
+  @override
+  String get cabinetOperateOfflineDetail => 'Offline Detail';
+
+  @override
+  String get cabinetOfflineDetailTitle => 'Cabinet Offline Detail';
+
+  @override
+  String get cabinetOfflineFaultTitle => 'Cabinet Offline Fault';
+
+  @override
+  String get cabinetOfflinePlaceholder => 'Coming soon';
+
+  @override
+  String get cabinetOfflineSnLabel => 'Cabinet SN';
+
+  @override
+  String get cabinetOfflinePidLabel => 'Cabinet PID';
+
+  @override
+  String get cabinetOfflineName => 'Cabinet Name';
+
+  @override
+  String get cabinetOfflineAddressLabel => 'Address';
+
+  @override
+  String get cabinetOfflineStatusLabel => 'Status';
+
+  @override
+  String get cabinetOfflineLastHbLabel => 'Last Heartbeat';
+
+  @override
+  String get cabinetOfflineLockDevId => 'lockDevId';
+
+  @override
+  String get cabinetOfflineLockIcId => 'lockIcId';
+
+  @override
+  String get cabinetOfflineSecretKey => 'Secret Key';
+
+  @override
+  String get cabinetOfflineQueryAction => 'Query';
+
+  @override
+  String get cabinetOfflineEmpty => 'No offline info';
+
+  @override
+  String get cabinetOfflineFaultEntry => 'View Faults';
+
+  @override
+  String get cabinetOfflinePortLabel => 'Port';
+
+  @override
+  String get cabinetOfflineFaultEmpty => 'No fault records';
+
+  @override
+  String get cabinetOfflineFaultSnLabel => 'SN';
+
+  @override
+  String get cabinetOfflineFaultPortLabel => 'Port';
+
+  @override
+  String get cabinetOfflineFaultTimeLabel => 'Time';
+
+  @override
+  String get cabinetOfflineFaultSiteLabel => 'Site';
+
+  @override
+  String get vcuSearchTitle => 'VCU Search';
+
+  @override
+  String get vcuControlTitle => 'VCU Control';
+
+  @override
+  String get vcuVinLabel => 'VIN';
+
+  @override
+  String get vcuCommandLabel => 'Command';
+
+  @override
+  String get vcuSendCommand => 'Send Command';
+
+  @override
+  String get vcuSendSuccess => 'Command sent';
+
+  @override
+  String get vcuSendFailed => 'Command failed';
+
+  @override
+  String get vcuLoadVersions => 'Load Versions';
+
+  @override
+  String get vcuVersionLabel => 'Version';
+
+  @override
+  String get promoteWebTitle => 'Promote Web';
+
+  @override
+  String get promoteWebUrlLabel => 'URL';
+
+  @override
+  String get promoteWebParseMode => 'Parse Mode';
+
+  @override
+  String get promoteWebOpen => 'Open';
+
+  @override
+  String get batteryLocationTitle => 'Battery Location';
+
+  @override
+  String get batteryLocationSn => 'Battery SN';
+
+  @override
+  String get batteryLocationQuery => 'Query Location';
+
+  @override
+  String get batteryLocationEmpty => 'No location data';
+
+  @override
+  String get addressPickerTitle => 'Select Address';
+
+  @override
+  String get addressPickerConfirm => 'Confirm';
+
+  @override
+  String get addressPickerEmpty => 'Move map to pick a location';
+
+  @override
   String get roadsideTitle => 'Roadside Assistance';
 
   @override
@@ -1581,4 +2043,54 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get roadsideDealFailed => 'Submit failed';
+
+  @override
+  String get bluetoothAuthTitle => 'Bluetooth Authorization';
+
+  @override
+  String get bluetoothAuthSn => 'Cabinet SN';
+
+  @override
+  String get bluetoothAuthPhone => 'Phone';
+
+  @override
+  String get bluetoothAuthKeyId => 'Key ID';
+
+  @override
+  String get bluetoothAuthDays => 'Authorization Days';
+
+  @override
+  String get bluetoothAuthQueryLock => 'Query Lock ID';
+
+  @override
+  String get bluetoothAuthQueryUid => 'Query UID';
+
+  @override
+  String get bluetoothAuthLockInfo => 'Lock Info';
+
+  @override
+  String get bluetoothAuthUid => 'User UID';
+
+  @override
+  String get bluetoothAuthSubmit => 'Submit Authorization';
+
+  @override
+  String get bluetoothAuthSuccess => 'Authorization submitted';
+
+  @override
+  String get bluetoothAuthFailed => 'Authorization failed';
+
+  @override
+  String get bluetoothAuthMissingInput => 'Please fill SN, phone, and key ID';
+
+  @override
+  String get bluetoothOperateTitle => 'Bluetooth Operations';
+
+  @override
+  String get bluetoothOperateTip =>
+      'Supports BLE scan/connect and authorization commands. Please stay near the device and keep Bluetooth on.';
+
+  @override
+  String get bluetoothOperateTodoList =>
+      '• Scan and connect a device\n• Read Key ID / authorize / clear / set validity\n• Send HEX commands and view logs';
 }

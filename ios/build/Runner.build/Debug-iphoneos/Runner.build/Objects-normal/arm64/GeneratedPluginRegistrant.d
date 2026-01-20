@@ -7,9 +7,17 @@ dependencies: \
   /Users/ping/Desktop/work/merchant_app/ios/Runner/GeneratedPluginRegistrant.h \
   /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/Flutter.framework/Modules/module.modulemap \
   /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/apple_maps_flutter/apple_maps_flutter.framework/Headers/AppleMapsFlutterPlugin.h \
+  /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/flutter_blue_plus_darwin/flutter_blue_plus_darwin.framework/Modules/module.modulemap \
+  /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/flutter_blue_plus_darwin/flutter_blue_plus_darwin.framework/Headers/FlutterBluePlusPlugin.h \
   /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/flutter_image_compress_common/flutter_image_compress_common.framework/Modules/module.modulemap \
   /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/flutter_image_compress_common/flutter_image_compress_common.framework/Headers/ImageCompressPlugin.h \
+  /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/geocoding_ios/geocoding_ios.framework/Modules/module.modulemap \
+  /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/geocoding_ios/geocoding_ios.framework/Headers/GeocodingPlugin.h \
+  /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/geolocator_apple/geolocator_apple.framework/Modules/module.modulemap \
+  /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/geolocator_apple/geolocator_apple.framework/Headers/GeolocatorPlugin.h \
   /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/google_maps_flutter_ios/google_maps_flutter_ios.framework/Modules/module.modulemap \
   /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FLTGoogleMapsPlugin.h \
   /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/image_picker_ios/image_picker_ios.framework/Modules/module.modulemap \
-  /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/image_picker_ios/image_picker_ios.framework/Headers/FLTImagePickerPlugin.h
+  /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/image_picker_ios/image_picker_ios.framework/Headers/FLTImagePickerPlugin.h \
+  /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/permission_handler_apple/permission_handler_apple.framework/Modules/module.modulemap \
+  /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/permission_handler_apple/permission_handler_apple.framework/Headers/PermissionHandlerPlugin.h

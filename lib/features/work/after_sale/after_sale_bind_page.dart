@@ -195,7 +195,9 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
 
   Future<void> _scanCardNum() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
+      MaterialPageRoute(
+        builder: (_) => const QrScanPage(parseDeviceSn: true),
+      ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _cardController.text = result;

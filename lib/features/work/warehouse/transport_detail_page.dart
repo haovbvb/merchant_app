@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/device_transport_resp.dart';
+import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/warehouse/transport_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
@@ -53,6 +54,12 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
             IconButton(
               icon: const Icon(Icons.qr_code_scanner),
               onPressed: () => _scanAndReceive(context, notifier),
+            ),
+          if (widget.mode == TransportMode.receive)
+            IconButton(
+              icon: const Icon(Icons.playlist_add),
+              tooltip: l10n.qrcodeBatchScan,
+              onPressed: () => _openBatchReceive(context, notifier),
             ),
           if (canEditTracking)
             IconButton(
@@ -167,10 +174,39 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
     TransportDetailNotifier notifier,
   ) async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
+      MaterialPageRoute(
+        builder: (_) => QrScanPage(
+          parseDeviceSn: true,
+          deviceType: ref.read(transportDetailProvider).detail?.deviceType,
+        ),
+      ),
     );
     if (result == null || result.isEmpty) return;
     await notifier.receiveDevice(result);
+  }
+
+  Future<void> _openBatchReceive(
+    BuildContext context,
+    TransportDetailNotifier notifier,
+  ) async {
+    final state = ref.read(transportDetailProvider);
+    final existing = state.items.map((item) => item.deviceSn).toList();
+    final result = await Navigator.of(context).push<List<String>>(
+      MaterialPageRoute(
+        builder: (_) => QrBatchScanPage(
+          initialItems: existing,
+          fixedDeviceType: state.detail?.deviceType,
+        ),
+      ),
+    );
+    if (result == null || result.isEmpty) return;
+    for (final sn in result) {
+      await notifier.receiveDevice(sn);
+    }
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(context.l10n.warehouseTransportBatchReceiveComplete)),
+    );
   }
 
   String _deviceTypeLabel(AppLocalizations l10n, int? type) {

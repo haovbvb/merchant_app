@@ -5,6 +5,8 @@ import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/login/providers/auth_controller.dart';
+import 'package:merchant_app/features/me/message_controller.dart';
+import 'package:merchant_app/features/me/providers/language_notifier.dart';
 
 class _ProfileAction {
   const _ProfileAction({
@@ -24,11 +26,24 @@ class _ProfileAction {
   final VoidCallback? onTap;
 }
 
-class ProfileTab extends ConsumerWidget {
+class ProfileTab extends ConsumerStatefulWidget {
   const ProfileTab({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileTab> createState() => _ProfileTabState();
+}
+
+class _ProfileTabState extends ConsumerState<ProfileTab> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(messageListProvider.notifier).refresh();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     ref.watch(authNotifierProvider);
     final session = AuthSession.instance.current;
     final rawName = session != null ? session.name.trim() : '';
@@ -36,20 +51,25 @@ class ProfileTab extends ConsumerWidget {
     final name = rawName.isNotEmpty ? rawName : context.l10n.tabMe;
     final phone = rawPhone.isNotEmpty ? rawPhone : context.l10n.profileGreeting;
     final avatarUrl = session?.avatar.trim();
+    final messageState = ref.watch(messageListProvider);
+    final unreadCount = messageState.items
+        .where((item) => item.isRead != 1)
+        .length;
+    final currentLocale = ref.watch(languageNotifierProvider);
 
     final actionsPrimary = [
       _ProfileAction(
         icon: Icons.message_outlined,
         iconBg: const Color(0xFFFFD54F),
         label: context.l10n.profileMessage,
-        badgeText: '8',
+        badgeText: _badgeText(unreadCount),
         onTap: () => AppRouter.router.push(AppRouter.messagePath),
       ),
       _ProfileAction(
         icon: Icons.lock_outline,
         iconBg: const Color(0xFF9575CD),
         label: context.l10n.profileChangePassword,
-        onTap: () {},
+        onTap: () => AppRouter.router.push(AppRouter.changePasswordPath),
       ),
     ];
 
@@ -58,14 +78,14 @@ class ProfileTab extends ConsumerWidget {
         icon: Icons.language,
         iconBg: const Color(0xFF64B5F6),
         label: context.l10n.profileLanguage,
-        trailingText: 'EN',
+        trailingText: _localeLabel(currentLocale),
         onTap: () => AppRouter.router.push(AppRouter.languagePath),
       ),
       _ProfileAction(
         icon: Icons.verified_user_outlined,
         iconBg: const Color(0xFF66BB6A),
         label: context.l10n.profileUserAgreement,
-        onTap: () => AppRouter.router.push(AppRouter.userAgreementPath),
+        onTap: () => AppRouter.router.push(AppRouter.serviceAgreementPath),
       ),
       _ProfileAction(
         icon: Icons.info_outline,
@@ -102,6 +122,18 @@ class ProfileTab extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  String? _badgeText(int count) {
+    if (count <= 0) return null;
+    return count > 99 ? '99+' : count.toString();
+  }
+
+  String _localeLabel(Locale locale) {
+    if (locale.languageCode.toLowerCase().startsWith('zh')) {
+      return '简体中文';
+    }
+    return 'English';
   }
 }
 
@@ -141,7 +173,7 @@ class _ProfileHeader extends StatelessWidget {
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                child: const Text('Sign out'),
+                child: Text(context.l10n.logout),
               ),
             ),
             const SizedBox(height: 12),

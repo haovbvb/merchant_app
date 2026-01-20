@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/maintenance/maintenance_controller.dart';
+import 'package:merchant_app/features/work/maintenance/repair_record_create_page.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class RepairRecordPage extends ConsumerStatefulWidget {
@@ -30,7 +31,25 @@ class _RepairRecordPageState extends ConsumerState<RepairRecordPage> {
     final notifier = ref.read(repairRecordProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.repairRecordTitle)),
+      appBar: AppBar(
+        title: Text(l10n.repairRecordTitle),
+        actions: [
+          IconButton(
+            tooltip: l10n.repairRecordAddTitle,
+            icon: const Icon(Icons.add),
+            onPressed: () async {
+              final result = await Navigator.of(context).push<bool>(
+                MaterialPageRoute(
+                  builder: (_) => const RepairRecordCreatePage(),
+                ),
+              );
+              if (result == true && mounted) {
+                notifier.refresh(_snController.text.trim());
+              }
+            },
+          ),
+        ],
+      ),
       body: Column(
         children: [
           Padding(

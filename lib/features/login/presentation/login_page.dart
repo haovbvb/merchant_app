@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/styles/colors.dart';
+import 'package:merchant_app/core/constants/storage_keys.dart';
 import 'package:merchant_app/features/login/providers/auth_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -19,6 +21,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   bool _obscurePassword = true;
   bool _isSubmitting = false;
   bool _agreedToTerms = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedCredentials();
+  }
 
   @override
   void dispose() {
@@ -72,7 +80,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'TINBOT Merchant',
+                    'OKLA Merchant',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       color: AppColors.black09Text,
@@ -130,12 +138,33 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
     setState(() => _isSubmitting = true);
     try {
-      await notifier.login(name: name, password: password);
+      final success = await notifier.login(name: name, password: password);
+      if (success) {
+        await _saveCredentials(name, password);
+      }
     } finally {
       if (mounted) {
         setState(() => _isSubmitting = false);
       }
     }
+  }
+
+  Future<void> _loadSavedCredentials() async {
+    final prefs = await SharedPreferences.getInstance();
+    final account = prefs.getString(StorageKeys.loginAccount) ?? '';
+    final password = prefs.getString(StorageKeys.loginPassword) ?? '';
+    if (account.isNotEmpty) {
+      _nameController.text = account;
+    }
+    if (password.isNotEmpty) {
+      _passwordController.text = password;
+    }
+  }
+
+  Future<void> _saveCredentials(String account, String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(StorageKeys.loginAccount, account);
+    await prefs.setString(StorageKeys.loginPassword, password);
   }
 }
 
@@ -347,7 +376,7 @@ class _TermsCheckbox extends StatelessWidget {
                   ),
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
-                      // Navigate to privacy policy
+                      AppRouter.router.push(AppRouter.privacyPolicyPath);
                     },
                 ),
               ],

@@ -211,7 +211,7 @@ class _PermissionView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.camera_alt_off, size: 64, color: Colors.grey),
+            const Icon(Icons.no_photography_outlined, size: 64, color: Colors.grey),
             const SizedBox(height: 16),
             Text(
               title,

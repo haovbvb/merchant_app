@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/data/models/cabin_fault.dart';
 import 'package:merchant_app/data/models/cabinet_detail_base_info_bean.dart';
+import 'package:merchant_app/data/models/layout_cabinet_info.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
@@ -8,22 +9,30 @@ class CabinetOfflineState {
   final bool loading;
   final CabinetDetailBaseInfoBean? baseInfo;
   final String? secretKey;
+  final bool layoutLoading;
+  final LayoutCabinetInfo? layoutInfo;
 
   const CabinetOfflineState({
     this.loading = false,
     this.baseInfo,
     this.secretKey,
+    this.layoutLoading = false,
+    this.layoutInfo,
   });
 
   CabinetOfflineState copyWith({
     bool? loading,
     CabinetDetailBaseInfoBean? baseInfo,
     String? secretKey,
+    bool? layoutLoading,
+    LayoutCabinetInfo? layoutInfo,
   }) {
     return CabinetOfflineState(
       loading: loading ?? this.loading,
       baseInfo: baseInfo ?? this.baseInfo,
       secretKey: secretKey ?? this.secretKey,
+      layoutLoading: layoutLoading ?? this.layoutLoading,
+      layoutInfo: layoutInfo ?? this.layoutInfo,
     );
   }
 }
@@ -58,6 +67,23 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
       loading: false,
       baseInfo: baseResponse.result,
       secretKey: secretResponse.result,
+    );
+  }
+
+  Future<void> loadLayout(String sn) async {
+    if (sn.isEmpty) return;
+    state = state.copyWith(layoutLoading: true);
+    final path = ApiPath.cabinetLayoutHistory.replaceAll('{sn}', sn);
+    final response = await _api.get<LayoutCabinetInfo>(
+      path,
+      queryParameters: {'sn': sn},
+      parser: (json) => LayoutCabinetInfo.fromJson(
+        Map<String, dynamic>.from(json as Map),
+      ),
+    );
+    state = state.copyWith(
+      layoutLoading: false,
+      layoutInfo: response.result,
     );
   }
 }

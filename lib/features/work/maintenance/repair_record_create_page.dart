@@ -82,7 +82,7 @@ class _RepairRecordCreatePageState
           ),
           const SizedBox(height: 16),
           DropdownButtonFormField<DeviceFixProject>(
-            value: state.selectedProject,
+            initialValue: state.selectedProject,
             items: state.deviceFix?.itemList
                     .map(
                       (item) => DropdownMenuItem<DeviceFixProject>(
@@ -105,7 +105,7 @@ class _RepairRecordCreatePageState
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<DeviceFixResult>(
-            value: state.selectedResult,
+            initialValue: state.selectedResult,
             items: state.deviceFix?.resultList
                     .map(
                       (item) => DropdownMenuItem<DeviceFixResult>(
@@ -234,3 +234,4 @@ class _InfoCard extends StatelessWidget {
     );
   }
 }
+

@@ -62,8 +62,7 @@ import 'app_localizations_zh.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale)
-    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -71,8 +70,7 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate =
-      _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -84,18 +82,17 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
-      <LocalizationsDelegate<dynamic>>[
-        delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
+    delegate,
+    GlobalMaterialLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+  ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('zh'),
+    Locale('zh')
   ];
 
   /// No description provided for @appTitle.
@@ -242,6 +239,90 @@ abstract class AppLocalizations {
   /// **'Manage your personal settings here.'**
   String get profileGreeting;
 
+  /// No description provided for @login.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign In'**
+  String get login;
+
+  /// No description provided for @loginBrandTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'OKLA Merchant'**
+  String get loginBrandTitle;
+
+  /// No description provided for @loginHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your username and password to continue.'**
+  String get loginHint;
+
+  /// No description provided for @loginAccountHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter account'**
+  String get loginAccountHint;
+
+  /// No description provided for @loginPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter password'**
+  String get loginPasswordHint;
+
+  /// No description provided for @loginAgreeTermsToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Please agree to the terms first'**
+  String get loginAgreeTermsToast;
+
+  /// No description provided for @loginButtonConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get loginButtonConfirm;
+
+  /// No description provided for @loginAgreePrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'I have read, and agree to '**
+  String get loginAgreePrefix;
+
+  /// No description provided for @loginAgreeAnd.
+  ///
+  /// In en, this message translates to:
+  /// **' and '**
+  String get loginAgreeAnd;
+
+  /// No description provided for @nameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Username'**
+  String get nameLabel;
+
+  /// No description provided for @nameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Username is required'**
+  String get nameRequired;
+
+  /// No description provided for @passwordLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get passwordLabel;
+
+  /// No description provided for @passwordRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password is required'**
+  String get passwordRequired;
+
+  /// No description provided for @passwordTooShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Password must be at least 6 characters'**
+  String get passwordTooShort;
+
   /// Menu label for viewing messages in the profile tab.
   ///
   /// In en, this message translates to:
@@ -350,7 +431,7 @@ abstract class AppLocalizations {
   /// **'Privacy Policy'**
   String get profilePrivacyPolicy;
 
-  /// Menu label for viewing the application information.
+  /// Menu label for viewing information about the application.
   ///
   /// In en, this message translates to:
   /// **'About'**
@@ -361,12 +442,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Version'**
   String get aboutVersionLabel;
-
-  /// No description provided for @login.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign In'**
-  String get login;
 
   /// No description provided for @userListTitle.
   ///
@@ -991,41 +1066,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No repair records'**
   String get repairRecordEmpty;
-  /// No description provided for @loginHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Enter your username and password to continue.'**
-  String get loginHint;
-
-  /// No description provided for @nameLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Username'**
-  String get nameLabel;
-
-  /// No description provided for @nameRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Username is required'**
-  String get nameRequired;
-
-  /// No description provided for @passwordLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Password'**
-  String get passwordLabel;
-
-  /// No description provided for @passwordRequired.
-  ///
-  /// In en, this message translates to:
-  /// **'Password is required'**
-  String get passwordRequired;
-
-  /// No description provided for @passwordTooShort.
-  ///
-  /// In en, this message translates to:
-  /// **'Password must be at least 6 characters'**
-  String get passwordTooShort;
 
   /// No description provided for @afterSaleBindTitle.
   ///
@@ -1717,23 +1757,26 @@ abstract class AppLocalizations {
   /// **'No results'**
   String get warehouseTransportSearchEmpty;
 
-  /// No description provided for @scanPageTitle.
-  ///
-
   /// No description provided for @warehouseTransportCountLabel.
   ///
+  /// In en, this message translates to:
   /// **'Quantity'**
   String get warehouseTransportCountLabel;
 
   /// No description provided for @warehouseTransportReceivedLabel.
   ///
+  /// In en, this message translates to:
   /// **'Receive'**
   String get warehouseTransportReceivedLabel;
 
   /// No description provided for @warehouseTransportWithdrawLabel.
   ///
+  /// In en, this message translates to:
   /// **'Withdraw'**
   String get warehouseTransportWithdrawLabel;
+
+  /// No description provided for @scanPageTitle.
+  ///
   /// In en, this message translates to:
   /// **'Scan'**
   String get scanPageTitle;
@@ -1864,6 +1907,24 @@ abstract class AppLocalizations {
   /// **'Maximum device count reached.'**
   String get qrcodeMaxDevice;
 
+  /// No description provided for @deviceSearchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Device Search'**
+  String get deviceSearchTitle;
+
+  /// No description provided for @deviceSearchHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search History'**
+  String get deviceSearchHistoryTitle;
+
+  /// No description provided for @deviceSearchHistoryClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get deviceSearchHistoryClear;
+
   /// No description provided for @qrcodeDeviceTypeTitle.
   ///
   /// In en, this message translates to:
@@ -1917,24 +1978,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Resolve failed'**
   String get qrcodeResolveFailed;
-
-  /// No description provided for @deviceSearchTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Device Search'**
-  String get deviceSearchTitle;
-
-  /// No description provided for @deviceSearchHistoryTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Search History'**
-  String get deviceSearchHistoryTitle;
-
-  /// No description provided for @deviceSearchHistoryClear.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear'**
-  String get deviceSearchHistoryClear;
 
   /// No description provided for @deviceSearchHint.
   ///
@@ -2085,6 +2128,300 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Operation failed'**
   String get deviceDetailToggleFailed;
+
+  /// No description provided for @deviceDetailTabBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery'**
+  String get deviceDetailTabBattery;
+
+  /// No description provided for @deviceDetailTabVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get deviceDetailTabVehicle;
+
+  /// No description provided for @deviceDetailTabCabinet.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet'**
+  String get deviceDetailTabCabinet;
+
+  /// No description provided for @deviceDetailBatteryBaseInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery Info'**
+  String get deviceDetailBatteryBaseInfoTitle;
+
+  /// No description provided for @deviceDetailVehicleBaseInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Info'**
+  String get deviceDetailVehicleBaseInfoTitle;
+
+  /// No description provided for @deviceDetailCabinetBaseInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet Info'**
+  String get deviceDetailCabinetBaseInfoTitle;
+
+  /// No description provided for @deviceDetailFixRecordsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix Records'**
+  String get deviceDetailFixRecordsTitle;
+
+  /// No description provided for @deviceDetailFixRecordsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No fix records'**
+  String get deviceDetailFixRecordsEmpty;
+
+  /// No description provided for @deviceDetailFixResultLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix Result'**
+  String get deviceDetailFixResultLabel;
+
+  /// No description provided for @deviceDetailFixManLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixer'**
+  String get deviceDetailFixManLabel;
+
+  /// No description provided for @deviceDetailFixRemarkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix Remark'**
+  String get deviceDetailFixRemarkLabel;
+
+  /// No description provided for @deviceDetailFixTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Fix Time'**
+  String get deviceDetailFixTimeLabel;
+
+  /// No description provided for @deviceDetailMaintenanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance Records'**
+  String get deviceDetailMaintenanceTitle;
+
+  /// No description provided for @deviceDetailMaintenanceEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No maintenance records'**
+  String get deviceDetailMaintenanceEmpty;
+
+  /// No description provided for @deviceDetailMaintenanceUserLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintainer'**
+  String get deviceDetailMaintenanceUserLabel;
+
+  /// No description provided for @deviceDetailMaintenanceLogLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance Log'**
+  String get deviceDetailMaintenanceLogLabel;
+
+  /// No description provided for @deviceDetailMaintenanceTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance Time'**
+  String get deviceDetailMaintenanceTimeLabel;
+
+  /// No description provided for @deviceDetailCabinPortTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabin Ports'**
+  String get deviceDetailCabinPortTitle;
+
+  /// No description provided for @deviceDetailCabinPortEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No cabin port info'**
+  String get deviceDetailCabinPortEmpty;
+
+  /// No description provided for @deviceDetailCabinOpenDoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Door'**
+  String get deviceDetailCabinOpenDoor;
+
+  /// No description provided for @deviceDetailCabinOpenBackDoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Back Door'**
+  String get deviceDetailCabinOpenBackDoor;
+
+  /// No description provided for @deviceDetailCabinOpenDoorSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Door opened'**
+  String get deviceDetailCabinOpenDoorSuccess;
+
+  /// No description provided for @deviceDetailCabinOpenDoorFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to open door'**
+  String get deviceDetailCabinOpenDoorFailed;
+
+  /// No description provided for @deviceDetailCabinOpenBackDoorSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Back door opened'**
+  String get deviceDetailCabinOpenBackDoorSuccess;
+
+  /// No description provided for @deviceDetailCabinOpenBackDoorFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to open back door'**
+  String get deviceDetailCabinOpenBackDoorFailed;
+
+  /// No description provided for @deviceDetailSnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'SN'**
+  String get deviceDetailSnLabel;
+
+  /// No description provided for @deviceDetailVinLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'VIN'**
+  String get deviceDetailVinLabel;
+
+  /// No description provided for @deviceDetailCarNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Plate'**
+  String get deviceDetailCarNumberLabel;
+
+  /// No description provided for @deviceDetailModelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Model'**
+  String get deviceDetailModelLabel;
+
+  /// No description provided for @deviceDetailSpecLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Spec'**
+  String get deviceDetailSpecLabel;
+
+  /// No description provided for @deviceDetailOwnerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner'**
+  String get deviceDetailOwnerLabel;
+
+  /// No description provided for @deviceDetailPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get deviceDetailPhoneLabel;
+
+  /// No description provided for @deviceDetailMotorNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Motor No.'**
+  String get deviceDetailMotorNumberLabel;
+
+  /// No description provided for @deviceDetailControllerSnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Controller SN'**
+  String get deviceDetailControllerSnLabel;
+
+  /// No description provided for @deviceDetailBatterySnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery SN'**
+  String get deviceDetailBatterySnLabel;
+
+  /// No description provided for @deviceDetailStationNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet Name'**
+  String get deviceDetailStationNameLabel;
+
+  /// No description provided for @deviceDetailStationStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet Status'**
+  String get deviceDetailStationStatusLabel;
+
+  /// No description provided for @deviceDetailStationAddressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet Address'**
+  String get deviceDetailStationAddressLabel;
+
+  /// No description provided for @deviceDetailStationOnlineLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Online Status'**
+  String get deviceDetailStationOnlineLabel;
+
+  /// No description provided for @deviceDetailPortNoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Port No.'**
+  String get deviceDetailPortNoLabel;
+
+  /// No description provided for @deviceDetailPortNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Port Name'**
+  String get deviceDetailPortNameLabel;
+
+  /// No description provided for @deviceDetailCabinBatterySn.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabin Battery'**
+  String get deviceDetailCabinBatterySn;
+
+  /// No description provided for @deviceDetailCabinSoc.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabin SOC'**
+  String get deviceDetailCabinSoc;
+
+  /// No description provided for @deviceDetailCabinPortStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Port Status'**
+  String get deviceDetailCabinPortStatus;
+
+  /// No description provided for @deviceDetailDoorStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Door Status'**
+  String get deviceDetailDoorStatusLabel;
+
+  /// No description provided for @deviceDetailLockStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock Status'**
+  String get deviceDetailLockStatusLabel;
+
+  /// No description provided for @deviceDetailChargeStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Charge Status'**
+  String get deviceDetailChargeStatusLabel;
+
+  /// No description provided for @deviceDetailVoltageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Voltage'**
+  String get deviceDetailVoltageLabel;
+
+  /// No description provided for @deviceDetailTemperatureLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature'**
+  String get deviceDetailTemperatureLabel;
 
   /// No description provided for @vehicleSearchTitle.
   ///
@@ -2619,102 +2956,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Submit failed'**
   String get roadsideDealFailed;
-
-  /// No description provided for @bluetoothAuthTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Bluetooth Authorization'**
-  String get bluetoothAuthTitle;
-
-  /// No description provided for @bluetoothAuthSn.
-  ///
-  /// In en, this message translates to:
-  /// **'Cabinet SN'**
-  String get bluetoothAuthSn;
-
-  /// No description provided for @bluetoothAuthPhone.
-  ///
-  /// In en, this message translates to:
-  /// **'Phone'**
-  String get bluetoothAuthPhone;
-
-  /// No description provided for @bluetoothAuthKeyId.
-  ///
-  /// In en, this message translates to:
-  /// **'Key ID'**
-  String get bluetoothAuthKeyId;
-
-  /// No description provided for @bluetoothAuthDays.
-  ///
-  /// In en, this message translates to:
-  /// **'Authorization Days'**
-  String get bluetoothAuthDays;
-
-  /// No description provided for @bluetoothAuthQueryLock.
-  ///
-  /// In en, this message translates to:
-  /// **'Query Lock ID'**
-  String get bluetoothAuthQueryLock;
-
-  /// No description provided for @bluetoothAuthQueryUid.
-  ///
-  /// In en, this message translates to:
-  /// **'Query UID'**
-  String get bluetoothAuthQueryUid;
-
-  /// No description provided for @bluetoothAuthLockInfo.
-  ///
-  /// In en, this message translates to:
-  /// **'Lock Info'**
-  String get bluetoothAuthLockInfo;
-
-  /// No description provided for @bluetoothAuthUid.
-  ///
-  /// In en, this message translates to:
-  /// **'User UID'**
-  String get bluetoothAuthUid;
-
-  /// No description provided for @bluetoothAuthSubmit.
-  ///
-  /// In en, this message translates to:
-  /// **'Submit Authorization'**
-  String get bluetoothAuthSubmit;
-
-  /// No description provided for @bluetoothAuthSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Authorization submitted'**
-  String get bluetoothAuthSuccess;
-
-  /// No description provided for @bluetoothAuthFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Authorization failed'**
-  String get bluetoothAuthFailed;
-
-  /// No description provided for @bluetoothAuthMissingInput.
-  ///
-  /// In en, this message translates to:
-  /// **'Please fill SN, phone, and key ID'**
-  String get bluetoothAuthMissingInput;
-
-  /// No description provided for @bluetoothOperateTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Bluetooth Operations'**
-  String get bluetoothOperateTitle;
-
-  /// No description provided for @bluetoothOperateTip.
-  ///
-  /// In en, this message translates to:
-  /// **'This version only includes basic authorization APIs. Bluetooth scan and commands will be added later.'**
-  String get bluetoothOperateTip;
-
-  /// No description provided for @bluetoothOperateTodoList.
-  ///
-  /// In en, this message translates to:
-  /// **'• Scan/connect Bluetooth devices (todo)\n• Authorize/clear authorization/set validity (todo)\n• Read device info/logs (todo)'**
-  String get bluetoothOperateTodoList;
 
   /// No description provided for @offlineRegisterTitle.
   ///
@@ -4090,6 +4331,66 @@ abstract class AppLocalizations {
   /// **'View Faults'**
   String get cabinetOfflineFaultEntry;
 
+  /// No description provided for @cabinetOfflineRealtimeTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Realtime'**
+  String get cabinetOfflineRealtimeTab;
+
+  /// No description provided for @cabinetOfflineWarehouseTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Warehouse'**
+  String get cabinetOfflineWarehouseTab;
+
+  /// No description provided for @cabinetOfflineWarehouseEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No warehouse info'**
+  String get cabinetOfflineWarehouseEmpty;
+
+  /// No description provided for @cabinetOfflineWarehouseTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get cabinetOfflineWarehouseTotal;
+
+  /// No description provided for @cabinetOfflineWarehouseCityCodeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'City code'**
+  String get cabinetOfflineWarehouseCityCodeLabel;
+
+  /// No description provided for @cabinetOfflineWarehouseLatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Latitude'**
+  String get cabinetOfflineWarehouseLatLabel;
+
+  /// No description provided for @cabinetOfflineWarehouseLngLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Longitude'**
+  String get cabinetOfflineWarehouseLngLabel;
+
+  /// No description provided for @cabinetOfflineWarehouseOpPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Operator phone'**
+  String get cabinetOfflineWarehouseOpPhoneLabel;
+
+  /// No description provided for @cabinetOfflineWarehouseOpNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Operator name'**
+  String get cabinetOfflineWarehouseOpNameLabel;
+
+  /// No description provided for @cabinetOfflineWarehouseCreateTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Created time'**
+  String get cabinetOfflineWarehouseCreateTimeLabel;
+
   /// No description provided for @cabinetOfflinePortLabel.
   ///
   /// In en, this message translates to:
@@ -4180,6 +4481,54 @@ abstract class AppLocalizations {
   /// **'Version'**
   String get vcuVersionLabel;
 
+  /// No description provided for @vcuControlTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Control'**
+  String get vcuControlTab;
+
+  /// No description provided for @vcuHistoryTab.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get vcuHistoryTab;
+
+  /// No description provided for @vcuHistoryFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get vcuHistoryFilterAll;
+
+  /// No description provided for @vcuHistoryFilterRequest.
+  ///
+  /// In en, this message translates to:
+  /// **'Request'**
+  String get vcuHistoryFilterRequest;
+
+  /// No description provided for @vcuHistoryFilterResponse.
+  ///
+  /// In en, this message translates to:
+  /// **'Response'**
+  String get vcuHistoryFilterResponse;
+
+  /// No description provided for @vcuHistoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No history yet'**
+  String get vcuHistoryEmpty;
+
+  /// No description provided for @vcuHistoryStatusSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get vcuHistoryStatusSuccess;
+
+  /// No description provided for @vcuHistoryStatusFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed'**
+  String get vcuHistoryStatusFailed;
+
   /// No description provided for @promoteWebTitle.
   ///
   /// In en, this message translates to:
@@ -4245,10 +4594,105 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Move map to pick a location'**
   String get addressPickerEmpty;
+
+  /// No description provided for @bluetoothAuthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Authorization'**
+  String get bluetoothAuthTitle;
+
+  /// No description provided for @bluetoothAuthSn.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet SN'**
+  String get bluetoothAuthSn;
+
+  /// No description provided for @bluetoothAuthPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get bluetoothAuthPhone;
+
+  /// No description provided for @bluetoothAuthKeyId.
+  ///
+  /// In en, this message translates to:
+  /// **'Key ID'**
+  String get bluetoothAuthKeyId;
+
+  /// No description provided for @bluetoothAuthDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization Days'**
+  String get bluetoothAuthDays;
+
+  /// No description provided for @bluetoothAuthQueryLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Query Lock ID'**
+  String get bluetoothAuthQueryLock;
+
+  /// No description provided for @bluetoothAuthQueryUid.
+  ///
+  /// In en, this message translates to:
+  /// **'Query UID'**
+  String get bluetoothAuthQueryUid;
+
+  /// No description provided for @bluetoothAuthLockInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock Info'**
+  String get bluetoothAuthLockInfo;
+
+  /// No description provided for @bluetoothAuthUid.
+  ///
+  /// In en, this message translates to:
+  /// **'User UID'**
+  String get bluetoothAuthUid;
+
+  /// No description provided for @bluetoothAuthSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Authorization'**
+  String get bluetoothAuthSubmit;
+
+  /// No description provided for @bluetoothAuthSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization submitted'**
+  String get bluetoothAuthSuccess;
+
+  /// No description provided for @bluetoothAuthFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization failed'**
+  String get bluetoothAuthFailed;
+
+  /// No description provided for @bluetoothAuthMissingInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill SN, phone, and key ID'**
+  String get bluetoothAuthMissingInput;
+
+  /// No description provided for @bluetoothOperateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Operations'**
+  String get bluetoothOperateTitle;
+
+  /// No description provided for @bluetoothOperateTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Supports BLE scan/connect and authorization commands. Please stay near the device and keep Bluetooth on.'**
+  String get bluetoothOperateTip;
+
+  /// No description provided for @bluetoothOperateTodoList.
+  ///
+  /// In en, this message translates to:
+  /// **'• Scan and connect a device\n• Read Key ID / authorize / clear / set validity\n• Send HEX commands and view logs'**
+  String get bluetoothOperateTodoList;
 }
 
-class _AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -4257,26 +4701,25 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>['en', 'zh'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+
+
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en':
-      return AppLocalizationsEn();
-    case 'zh':
-      return AppLocalizationsZh();
+    case 'en': return AppLocalizationsEn();
+    case 'zh': return AppLocalizationsZh();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.',
+    'that was used.'
   );
 }

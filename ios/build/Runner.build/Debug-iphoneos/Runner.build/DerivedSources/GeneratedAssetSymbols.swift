@@ -31,9 +31,6 @@ extension ColorResource {
 @available(iOS 11.0, macOS 10.7, tvOS 11.0, *)
 extension ImageResource {
 
-    /// The "LaunchImage" asset catalog image resource.
-    static let launch = ImageResource(name: "LaunchImage", bundle: resourceBundle)
-
 }
 
 // MARK: - Color Symbol Extensions -
@@ -73,15 +70,6 @@ extension SwiftUI.ShapeStyle where Self == SwiftUI.Color {
 @available(macCatalyst, unavailable)
 extension AppKit.NSImage {
 
-    /// The "LaunchImage" asset catalog image.
-    static var launch: AppKit.NSImage {
-#if !targetEnvironment(macCatalyst)
-        .init(resource: .launch)
-#else
-        .init()
-#endif
-    }
-
 }
 #endif
 
@@ -89,15 +77,6 @@ extension AppKit.NSImage {
 @available(iOS 11.0, tvOS 11.0, *)
 @available(watchOS, unavailable)
 extension UIKit.UIImage {
-
-    /// The "LaunchImage" asset catalog image.
-    static var launch: UIKit.UIImage {
-#if !os(watchOS)
-        .init(resource: .launch)
-#else
-        .init()
-#endif
-    }
 
 }
 #endif
@@ -199,26 +178,6 @@ extension ImageResource {
     }
 
 }
-
-#if canImport(AppKit)
-@available(macOS 10.7, *)
-@available(macCatalyst, unavailable)
-extension AppKit.NSImage {
-
-    private convenience init?(thinnableResource: ImageResource?) {
-#if !targetEnvironment(macCatalyst)
-        if let resource = thinnableResource {
-            self.init(resource: resource)
-        } else {
-            return nil
-        }
-#else
-        return nil
-#endif
-    }
-
-}
-#endif
 
 #if canImport(UIKit)
 @available(iOS 11.0, tvOS 11.0, *)

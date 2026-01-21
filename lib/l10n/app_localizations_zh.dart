@@ -82,6 +82,48 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileGreeting => '在这里管理你的个人信息。';
 
   @override
+  String get login => '登录';
+
+  @override
+  String get loginBrandTitle => 'OKLA 商家端';
+
+  @override
+  String get loginHint => '请输入用户名和密码继续。';
+
+  @override
+  String get loginAccountHint => '请输入账号';
+
+  @override
+  String get loginPasswordHint => '请输入密码';
+
+  @override
+  String get loginAgreeTermsToast => '请先同意协议';
+
+  @override
+  String get loginButtonConfirm => '确认';
+
+  @override
+  String get loginAgreePrefix => '我已阅读并同意';
+
+  @override
+  String get loginAgreeAnd => '及';
+
+  @override
+  String get nameLabel => '用户名';
+
+  @override
+  String get nameRequired => '请输入用户名';
+
+  @override
+  String get passwordLabel => '密码';
+
+  @override
+  String get passwordRequired => '请输入密码';
+
+  @override
+  String get passwordTooShort => '密码长度至少 6 位';
+
+  @override
   String get profileMessage => '消息';
 
   @override
@@ -142,16 +184,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get aboutVersionLabel => '版本';
 
   @override
-  String get login => '登录';
-
-  @override
   String get userListTitle => '用户列表';
 
   @override
   String get userListEmpty => '暂无用户';
 
   @override
-  String get userSearchHint => '请输入卡号或关键词';
+  String get userSearchHint => '输入卡号或关键字';
+
   @override
   String get userSearchHistoryTitle => '搜索历史';
 
@@ -165,10 +205,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get userDetailCardNum => '卡号';
 
   @override
-  String get userDetailPhone => '手机号';
+  String get userDetailPhone => '手机';
 
   @override
-  String get userDetailIdNumber => '身份证号';
+  String get userDetailIdNumber => '证件号';
 
   @override
   String get userDetailBindDevicesTitle => '绑定设备';
@@ -183,10 +223,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get userDetailBindEmpty => '暂无绑定设备';
 
   @override
-  String get userDetailOrderList => '订单记录';
+  String get userDetailOrderList => '订单';
 
   @override
-  String get userDetailOrderEmpty => '暂无订单记录';
+  String get userDetailOrderEmpty => '暂无订单';
 
   @override
   String get userDetailOrderAmount => '金额';
@@ -351,22 +391,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get maintenanceSnLabel => '车辆SN';
 
   @override
-  String get maintenanceSnHint => '请输入或扫描车辆SN';
+  String get maintenanceSnHint => '输入或扫码车辆SN';
 
   @override
-  String get maintenanceFetchInfo => '查询信息';
+  String get maintenanceFetchInfo => '获取信息';
 
   @override
   String get maintenanceVehicleInfo => '车辆信息';
 
   @override
-  String get maintenanceEmptyInfo => '暂无维修信息';
+  String get maintenanceEmptyInfo => '暂无保养信息';
 
   @override
-  String get maintenanceNoteLabel => '维修说明';
+  String get maintenanceNoteLabel => '维修备注';
 
   @override
-  String get maintenanceNoteHint => '请输入维修说明';
+  String get maintenanceNoteHint => '填写备注';
 
   @override
   String get maintenanceSubmit => '提交';
@@ -384,10 +424,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get maintenanceVehicleOwner => '车主';
 
   @override
-  String get maintenanceVehiclePhone => '手机号';
+  String get maintenanceVehiclePhone => '手机';
 
   @override
-  String get maintenanceSuccessTitle => '预约成功';
+  String get maintenanceSuccessTitle => '维修成功';
 
   @override
   String get maintenanceSuccessBack => '返回';
@@ -450,28 +490,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get repairRecordDeviceNameLabel => '名称';
 
   @override
-  String get repairRecordSnHint => '请输入车辆SN';
+  String get repairRecordSnHint => '输入车辆SN';
 
   @override
   String get repairRecordEmpty => '暂无维修记录';
-
-  @override
-  String get loginHint => '请输入用户名和密码继续。';
-
-  @override
-  String get nameLabel => '用户名';
-
-  @override
-  String get nameRequired => '请输入用户名';
-
-  @override
-  String get passwordLabel => '密码';
-
-  @override
-  String get passwordRequired => '请输入密码';
-
-  @override
-  String get passwordTooShort => '密码长度至少 6 位';
 
   @override
   String get afterSaleBindTitle => '售后绑定';
@@ -555,7 +577,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get afterSaleBindOrderStatusInstallment => '分期中';
 
   @override
-  String get afterSaleBindOrderStatusLease => '租赁中';
+  String get afterSaleBindOrderStatusLease => '租赁';
 
   @override
   String get unbindDeviceTitle => '设备解绑';
@@ -894,6 +916,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get qrcodeMaxDevice => '已达到最大数量';
 
   @override
+  String get deviceSearchTitle => '设备搜索';
+
+  @override
+  String get deviceSearchHistoryTitle => '搜索历史';
+
+  @override
+  String get deviceSearchHistoryClear => '清空';
+
+  @override
   String get qrcodeDeviceTypeTitle => '设备类型';
 
   @override
@@ -919,15 +950,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get qrcodeResolveFailed => '解析失败';
-
-  @override
-  String get deviceSearchTitle => '设备搜索';
-
-  @override
-  String get deviceSearchHistoryTitle => '搜索历史';
-
-  @override
-  String get deviceSearchHistoryClear => '清空';
 
   @override
   String get deviceSearchHint => '输入设备 SN 或关键字';
@@ -1003,6 +1025,153 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get deviceDetailToggleFailed => '操作失败';
+
+  @override
+  String get deviceDetailTabBattery => '电池';
+
+  @override
+  String get deviceDetailTabVehicle => '车辆';
+
+  @override
+  String get deviceDetailTabCabinet => '电柜';
+
+  @override
+  String get deviceDetailBatteryBaseInfoTitle => '电池信息';
+
+  @override
+  String get deviceDetailVehicleBaseInfoTitle => '车辆信息';
+
+  @override
+  String get deviceDetailCabinetBaseInfoTitle => '电柜信息';
+
+  @override
+  String get deviceDetailFixRecordsTitle => '维修记录';
+
+  @override
+  String get deviceDetailFixRecordsEmpty => '暂无维修记录';
+
+  @override
+  String get deviceDetailFixResultLabel => '维修结果';
+
+  @override
+  String get deviceDetailFixManLabel => '维修人员';
+
+  @override
+  String get deviceDetailFixRemarkLabel => '维修备注';
+
+  @override
+  String get deviceDetailFixTimeLabel => '维修时间';
+
+  @override
+  String get deviceDetailMaintenanceTitle => '保养记录';
+
+  @override
+  String get deviceDetailMaintenanceEmpty => '暂无保养记录';
+
+  @override
+  String get deviceDetailMaintenanceUserLabel => '保养人员';
+
+  @override
+  String get deviceDetailMaintenanceLogLabel => '保养内容';
+
+  @override
+  String get deviceDetailMaintenanceTimeLabel => '保养时间';
+
+  @override
+  String get deviceDetailCabinPortTitle => '仓位列表';
+
+  @override
+  String get deviceDetailCabinPortEmpty => '暂无仓位信息';
+
+  @override
+  String get deviceDetailCabinOpenDoor => '开仓门';
+
+  @override
+  String get deviceDetailCabinOpenBackDoor => '开后门';
+
+  @override
+  String get deviceDetailCabinOpenDoorSuccess => '开仓门成功';
+
+  @override
+  String get deviceDetailCabinOpenDoorFailed => '开仓门失败';
+
+  @override
+  String get deviceDetailCabinOpenBackDoorSuccess => '开后门成功';
+
+  @override
+  String get deviceDetailCabinOpenBackDoorFailed => '开后门失败';
+
+  @override
+  String get deviceDetailSnLabel => 'SN';
+
+  @override
+  String get deviceDetailVinLabel => 'VIN';
+
+  @override
+  String get deviceDetailCarNumberLabel => '车牌';
+
+  @override
+  String get deviceDetailModelLabel => '型号';
+
+  @override
+  String get deviceDetailSpecLabel => '规格';
+
+  @override
+  String get deviceDetailOwnerLabel => '车主';
+
+  @override
+  String get deviceDetailPhoneLabel => '手机';
+
+  @override
+  String get deviceDetailMotorNumberLabel => '电机编号';
+
+  @override
+  String get deviceDetailControllerSnLabel => '控制器SN';
+
+  @override
+  String get deviceDetailBatterySnLabel => '电池SN';
+
+  @override
+  String get deviceDetailStationNameLabel => '电柜名称';
+
+  @override
+  String get deviceDetailStationStatusLabel => '电柜状态';
+
+  @override
+  String get deviceDetailStationAddressLabel => '电柜地址';
+
+  @override
+  String get deviceDetailStationOnlineLabel => '在线状态';
+
+  @override
+  String get deviceDetailPortNoLabel => '仓位';
+
+  @override
+  String get deviceDetailPortNameLabel => '仓位名称';
+
+  @override
+  String get deviceDetailCabinBatterySn => '仓内电池';
+
+  @override
+  String get deviceDetailCabinSoc => '仓内SOC';
+
+  @override
+  String get deviceDetailCabinPortStatus => '仓位状态';
+
+  @override
+  String get deviceDetailDoorStatusLabel => '门状态';
+
+  @override
+  String get deviceDetailLockStatusLabel => '锁状态';
+
+  @override
+  String get deviceDetailChargeStatusLabel => '充电状态';
+
+  @override
+  String get deviceDetailVoltageLabel => '电压';
+
+  @override
+  String get deviceDetailTemperatureLabel => '温度';
 
   @override
   String get vehicleSearchTitle => '车辆搜索';
@@ -1144,6 +1313,132 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get warehouseTransportStatusWithdrawn => '已撤销';
+
+  @override
+  String get roadsideTitle => '道路救援';
+
+  @override
+  String get roadsideTabAll => '全部';
+
+  @override
+  String get roadsideTabWaiting => '待处理';
+
+  @override
+  String get roadsideTabProcessing => '处理中';
+
+  @override
+  String get roadsideTabCompleted => '已完成';
+
+  @override
+  String get roadsideEmpty => '暂无救援订单';
+
+  @override
+  String get roadsideStatusWaiting => '待处理';
+
+  @override
+  String get roadsideStatusProcessing => '处理中';
+
+  @override
+  String get roadsideStatusCompleted => '已完成';
+
+  @override
+  String get roadsideResultReturnFactory => '返厂';
+
+  @override
+  String get roadsideResultCompleted => '已处理';
+
+  @override
+  String get roadsideTimeLabel => '报修时间';
+
+  @override
+  String get roadsideResultLabel => '处理结果';
+
+  @override
+  String get roadsideDetailTitle => '救援订单详情';
+
+  @override
+  String get roadsideDetailEmpty => '暂无详情';
+
+  @override
+  String get roadsideDealAction => '去处理';
+
+  @override
+  String get roadsidePayAction => '确认支付';
+
+  @override
+  String get roadsidePayFeeLabel => '费用';
+
+  @override
+  String get roadsidePayTypeLabel => '支付方式';
+
+  @override
+  String get roadsidePayTypeCash => '现金';
+
+  @override
+  String get roadsidePayTypeOnline => '线上';
+
+  @override
+  String get roadsideAttachmentLabel => '附件';
+
+  @override
+  String get roadsideUploadAction => '上传';
+
+  @override
+  String get roadsidePaySuccess => '支付成功';
+
+  @override
+  String get roadsidePayFailed => '支付失败';
+
+  @override
+  String get roadsideConfirm => '确认';
+
+  @override
+  String get roadsideStatusLabel => '状态';
+
+  @override
+  String get roadsideDeviceSnLabel => '设备SN';
+
+  @override
+  String get roadsideDescLabel => '描述';
+
+  @override
+  String get roadsideReporterLabel => '报修人';
+
+  @override
+  String get roadsideReportTimeLabel => '报修时间';
+
+  @override
+  String get roadsideLocationLabel => '位置';
+
+  @override
+  String get roadsideProcessTitle => '处理信息';
+
+  @override
+  String get roadsideProcessResult => '处理结果';
+
+  @override
+  String get roadsideProcessDesc => '处理描述';
+
+  @override
+  String get roadsideProcessTime => '处理时间';
+
+  @override
+  String get roadsideDealTitle => '订单处理';
+
+  @override
+  String get roadsideDealResultLabel => '处理结果';
+
+  @override
+  String get roadsideDealDescLabel => '处理说明';
+
+  @override
+  String get roadsideUploadLabel => '上传图片';
+
+  @override
+  String get roadsideDealSuccess => '提交成功';
+
+  @override
+  String get roadsideDealFailed => '提交失败';
 
   @override
   String get offlineRegisterTitle => '线下用户注册';
@@ -1833,6 +2128,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetOfflineFaultEntry => '查看离线故障';
 
   @override
+  String get cabinetOfflineRealtimeTab => '实时信息';
+
+  @override
+  String get cabinetOfflineWarehouseTab => '仓库信息';
+
+  @override
+  String get cabinetOfflineWarehouseEmpty => '暂无仓库信息';
+
+  @override
+  String get cabinetOfflineWarehouseTotal => '总数';
+
+  @override
+  String get cabinetOfflineWarehouseCityCodeLabel => '城市编码';
+
+  @override
+  String get cabinetOfflineWarehouseLatLabel => '纬度';
+
+  @override
+  String get cabinetOfflineWarehouseLngLabel => '经度';
+
+  @override
+  String get cabinetOfflineWarehouseOpPhoneLabel => '运营电话';
+
+  @override
+  String get cabinetOfflineWarehouseOpNameLabel => '运营人员';
+
+  @override
+  String get cabinetOfflineWarehouseCreateTimeLabel => '创建时间';
+
+  @override
   String get cabinetOfflinePortLabel => '仓门号';
 
   @override
@@ -1878,6 +2203,30 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vcuVersionLabel => '版本';
 
   @override
+  String get vcuControlTab => '控制';
+
+  @override
+  String get vcuHistoryTab => '历史';
+
+  @override
+  String get vcuHistoryFilterAll => '全部';
+
+  @override
+  String get vcuHistoryFilterRequest => '请求';
+
+  @override
+  String get vcuHistoryFilterResponse => '响应';
+
+  @override
+  String get vcuHistoryEmpty => '暂无历史记录';
+
+  @override
+  String get vcuHistoryStatusSuccess => '成功';
+
+  @override
+  String get vcuHistoryStatusFailed => '失败';
+
+  @override
   String get promoteWebTitle => '推广页面';
 
   @override
@@ -1909,132 +2258,6 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get addressPickerEmpty => '拖动地图选择位置';
-
-  @override
-  String get roadsideTitle => '道路救援';
-
-  @override
-  String get roadsideTabAll => '全部';
-
-  @override
-  String get roadsideTabWaiting => '待处理';
-
-  @override
-  String get roadsideTabProcessing => '处理中';
-
-  @override
-  String get roadsideTabCompleted => '已完成';
-
-  @override
-  String get roadsideEmpty => '暂无救援订单';
-
-  @override
-  String get roadsideStatusWaiting => '待处理';
-
-  @override
-  String get roadsideStatusProcessing => '处理中';
-
-  @override
-  String get roadsideStatusCompleted => '已完成';
-
-  @override
-  String get roadsideResultReturnFactory => '返厂';
-
-  @override
-  String get roadsideResultCompleted => '已处理';
-
-  @override
-  String get roadsideTimeLabel => '报修时间';
-
-  @override
-  String get roadsideResultLabel => '处理结果';
-
-  @override
-  String get roadsideDetailTitle => '救援订单详情';
-
-  @override
-  String get roadsideDetailEmpty => '暂无详情';
-
-  @override
-  String get roadsideDealAction => '去处理';
-
-  @override
-  String get roadsidePayAction => '确认支付';
-
-  @override
-  String get roadsidePayFeeLabel => '费用';
-
-  @override
-  String get roadsidePayTypeLabel => '支付方式';
-
-  @override
-  String get roadsidePayTypeCash => '现金';
-
-  @override
-  String get roadsidePayTypeOnline => '线上';
-
-  @override
-  String get roadsideAttachmentLabel => '附件';
-
-  @override
-  String get roadsideUploadAction => '上传';
-
-  @override
-  String get roadsidePaySuccess => '支付成功';
-
-  @override
-  String get roadsidePayFailed => '支付失败';
-
-  @override
-  String get roadsideConfirm => '确认';
-
-  @override
-  String get roadsideStatusLabel => '状态';
-
-  @override
-  String get roadsideDeviceSnLabel => '设备SN';
-
-  @override
-  String get roadsideDescLabel => '描述';
-
-  @override
-  String get roadsideReporterLabel => '报修人';
-
-  @override
-  String get roadsideReportTimeLabel => '报修时间';
-
-  @override
-  String get roadsideLocationLabel => '位置';
-
-  @override
-  String get roadsideProcessTitle => '处理信息';
-
-  @override
-  String get roadsideProcessResult => '处理结果';
-
-  @override
-  String get roadsideProcessDesc => '处理描述';
-
-  @override
-  String get roadsideProcessTime => '处理时间';
-
-  @override
-  String get roadsideDealTitle => '订单处理';
-
-  @override
-  String get roadsideDealResultLabel => '处理结果';
-
-  @override
-  String get roadsideDealDescLabel => '处理说明';
-
-  @override
-  String get roadsideUploadLabel => '上传图片';
-
-  @override
-  String get roadsideDealSuccess => '提交成功';
-
-  @override
-  String get roadsideDealFailed => '提交失败';
 
   @override
   String get bluetoothAuthTitle => '蓝牙授权';
@@ -2079,9 +2302,8 @@ class AppLocalizationsZh extends AppLocalizations {
   String get bluetoothOperateTitle => '蓝牙运维';
 
   @override
-    String get bluetoothOperateTip => '支持蓝牙扫描/连接与授权相关指令，请在靠近设备并开启蓝牙后操作。';
+  String get bluetoothOperateTip => '支持蓝牙扫描/连接与授权相关指令，请在靠近设备并开启蓝牙后操作。';
 
   @override
-  String get bluetoothOperateTodoList =>
-      '• 扫描并连接蓝牙设备\n• 读取钥匙ID、授权/清空授权/设置有效期\n• 支持发送HEX指令并查看日志';
+  String get bluetoothOperateTodoList => '• 扫描并连接蓝牙设备\n• 读取钥匙ID、授权/清空授权/设置有效期\n• 支持发送HEX指令并查看日志';
 }

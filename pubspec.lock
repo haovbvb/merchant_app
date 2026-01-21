@@ -653,13 +653,6 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.7.2"
-  jui:
-    dependency: "direct main"
-    description:
-      path: jui
-      relative: true
-    source: path
-    version: "0.2.1"
   leak_tracker:
     dependency: transitive
     description:

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/storage_keys.dart';
+import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/login/providers/auth_controller.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -38,6 +39,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   @override
   Widget build(BuildContext context) {
     ref.watch(authNotifierProvider);
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -80,7 +82,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'OKLA Merchant',
+                    l10n.loginBrandTitle,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       color: AppColors.black09Text,
@@ -124,7 +126,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Future<void> _onSubmit() async {
     if (!_agreedToTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please agree to the terms first')),
+        SnackBar(content: Text(context.l10n.loginAgreeTermsToast)),
       );
       return;
     }
@@ -175,12 +177,13 @@ class _AccountField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return TextFormField(
       controller: controller,
       keyboardType: TextInputType.emailAddress,
       style: TextStyle(color: AppColors.black09Text, fontSize: 16),
       decoration: InputDecoration(
-        hintText: 'Please enter account',
+        hintText: l10n.loginAccountHint,
         hintStyle: TextStyle(color: AppColors.black04Text, fontSize: 16),
         prefixIcon: Icon(
           Icons.person_outline,
@@ -200,7 +203,7 @@ class _AccountField extends StatelessWidget {
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Account is required';
+          return l10n.nameRequired;
         }
         return null;
       },
@@ -221,12 +224,13 @@ class _PasswordField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return TextFormField(
       controller: controller,
       obscureText: obscurePassword,
       style: TextStyle(color: AppColors.black09Text, fontSize: 16),
       decoration: InputDecoration(
-        hintText: 'Please enter password',
+        hintText: l10n.loginPasswordHint,
         hintStyle: TextStyle(color: AppColors.black04Text, fontSize: 16),
         prefixIcon: Icon(
           Icons.lock_outline,
@@ -256,10 +260,10 @@ class _PasswordField extends StatelessWidget {
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return 'Password is required';
+          return l10n.passwordRequired;
         }
         if (value.length < 6) {
-          return 'Password must be at least 6 characters';
+          return l10n.passwordTooShort;
         }
         return null;
       },
@@ -280,6 +284,7 @@ class _LoginButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final isActive = agreedToTerms && !isSubmitting;
     return SizedBox(
       height: 52,
@@ -307,7 +312,7 @@ class _LoginButton extends StatelessWidget {
                 ),
               )
             : Text(
-                agreedToTerms ? 'Confirm' : 'Log In',
+                agreedToTerms ? l10n.loginButtonConfirm : l10n.login,
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
@@ -327,6 +332,7 @@ class _TermsCheckbox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Row(
       children: [
         SizedBox(
@@ -355,9 +361,9 @@ class _TermsCheckbox extends StatelessWidget {
                 height: 1.4,
               ),
               children: [
-                const TextSpan(text: 'I have read, and agree to '),
+                TextSpan(text: l10n.loginAgreePrefix),
                 TextSpan(
-                  text: 'User Agreement',
+                  text: l10n.profileUserAgreement,
                   style: const TextStyle(
                     color: Colors.blue,
                     decoration: TextDecoration.none,
@@ -367,9 +373,9 @@ class _TermsCheckbox extends StatelessWidget {
                       AppRouter.router.push(AppRouter.userAgreementPath);
                     },
                 ),
-                const TextSpan(text: ' and '),
+                TextSpan(text: l10n.loginAgreeAnd),
                 TextSpan(
-                  text: 'Privacy Policy',
+                  text: l10n.profilePrivacyPolicy,
                   style: const TextStyle(
                     color: Colors.blue,
                     decoration: TextDecoration.none,

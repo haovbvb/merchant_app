@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/data/models/vcu_history.dart';
 import 'package:merchant_app/data/models/vcu_version.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
@@ -7,22 +8,30 @@ class VcuState {
   final bool loading;
   final bool sending;
   final List<VcuVersion> versions;
+  final List<VcuHistoryItem> history;
+  final VcuHistoryFilter historyFilter;
 
   const VcuState({
     this.loading = false,
     this.sending = false,
     this.versions = const [],
+    this.history = const [],
+    this.historyFilter = VcuHistoryFilter.all,
   });
 
   VcuState copyWith({
     bool? loading,
     bool? sending,
     List<VcuVersion>? versions,
+    List<VcuHistoryItem>? history,
+    VcuHistoryFilter? historyFilter,
   }) {
     return VcuState(
       loading: loading ?? this.loading,
       sending: sending ?? this.sending,
       versions: versions ?? this.versions,
+      history: history ?? this.history,
+      historyFilter: historyFilter ?? this.historyFilter,
     );
   }
 }
@@ -54,18 +63,49 @@ class VcuNotifier extends Notifier<VcuState> {
     required String command,
     String? version,
   }) async {
-    if (vin.isEmpty || command.isEmpty) return false;
+    final trimmedVin = vin.trim();
+    final trimmedCommand = command.trim();
+    if (trimmedVin.isEmpty || trimmedCommand.isEmpty) return false;
+    _appendHistory(
+      VcuHistoryItem(
+        vin: trimmedVin,
+        command: trimmedCommand,
+        version: version,
+        type: VcuHistoryType.request,
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+      ),
+    );
     state = state.copyWith(sending: true);
     final response = await _api.post<Object>(
       ApiPath.vcuSendCommand,
       data: {
-        'vin': vin,
-        'command': command,
+        'vin': trimmedVin,
+        'command': trimmedCommand,
         if (version != null && version.isNotEmpty) 'version': version,
       },
       parser: (json) => json ?? Object(),
     );
+    _appendHistory(
+      VcuHistoryItem(
+        vin: trimmedVin,
+        command: trimmedCommand,
+        version: version,
+        type: VcuHistoryType.response,
+        timestamp: DateTime.now().millisecondsSinceEpoch,
+        success: response.isSuccess,
+      ),
+    );
     state = state.copyWith(sending: false);
     return response.isSuccess;
+  }
+
+  void setHistoryFilter(VcuHistoryFilter filter) {
+    if (state.historyFilter == filter) return;
+    state = state.copyWith(historyFilter: filter);
+  }
+
+  void _appendHistory(VcuHistoryItem item) {
+    final updated = [item, ...state.history];
+    state = state.copyWith(history: updated);
   }
 }

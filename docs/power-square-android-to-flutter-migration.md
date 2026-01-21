@@ -95,6 +95,8 @@
    - ✅ 已补齐：语言设置（切换与选中态）
    - ✅ 已补齐：消息中心未读徽标（个人中心角标 + 列表已读）
    - ✅ 已补齐：主链路 P0 页面（工作台主入口、二维码、设备详情）
+   - ✅ 已补齐：设备详情子分页（电池/车辆/电柜 + 维修/保养/仓位/开门）
+   - ✅ 已补齐：柜机离线详情子分页（实时信息/仓库信息）
    - ✅ 已补齐：仓库/调拨剩余动作（盘点 start/scan/complete/revoke；调拨 createIssue/receive/withdraw）
 
 5. **系统能力专项迁移**（进行中）
@@ -255,34 +257,18 @@
 
 > 说明：基于 Android 侧模块与 Flutter 现有页面对比，以下功能点尚未发现明确对应实现。
 
-**设备详情（子分页/分栏）**
-
-- 维修记录（DeviceFixRecord）
-- 维保记录（MaintenanceRecord）
-- 仓库信息（DeviceWarehouse）
-
-**设备-电池充电列表/关键电池 SOC**
-
-- 电池充电列表（BatteryChargeList）
-- 关键电池 SOC 视图（KeyBatterySoc）
-
-**柜机离线详情（子分页/分栏）**
-
-- 实时信息（CabinetOfflineRealTime）
-- 仓库信息（CabinetOfflineWarehouse）
-
-**VCU**
-
-- 历史记录（VcuHistory）
-- 列表视图（VcuListView）
-
-**维修记录（新增/录入流程）**
-
-- 维修记录新增/提交流程（RepairRecordActivity：扫描/选择设备或站点、维修项目与结果、备注提交）
-
 **待确认（可能已被合并为现有页面）**
 
+**本次已对齐**
+
+- 设备-电池充电列表/关键电池 SOC（DeviceDetailPage 电池页：SOC + 充电记录）
+- VCU 历史/列表（VcuControlPage 历史 Tab）
 - 设备综合搜索（EquipmentSearchActivityNew）
+
+**不纳入迁移范围**
+
+- 被注释的 Activity（Manifest 中暂未启用）
+- BatteryRegisterActivity（被注释，不用迁移）
 
 ---
 

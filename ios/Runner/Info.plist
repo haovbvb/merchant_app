@@ -39,11 +39,11 @@
 	<string>Take a photo or scan QR code</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Find nearby devices</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Find nearby devices</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Find nearby devices</string>
 	<key>NSLocationUsageDescription</key>
+	<string>Find nearby devices</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Find nearby devices</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>Save to Gallery or select from Gallery</string>

@@ -56,7 +56,7 @@ class _BatteryLocationPageState extends ConsumerState<BatteryLocationPage> {
     final annotations = hasLocation
         ? {
             amaps.Annotation(
-              annotationId: const amaps.AnnotationId('battery'),
+              annotationId: amaps.AnnotationId('battery'),
               position: amaps.LatLng(lat, lng),
             ),
           }

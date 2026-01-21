@@ -35,6 +35,7 @@ class ApiPath {
     static const String cabinetBaseInfo = '/admin/station/queryStationDetail';
     static const String cabinetSecretKey = '/admin/station/queryStationSecretKey';
     static const String cabinetConfig = '/admin/station/config';
+    static const String cabinetLayoutHistory = '/admin/stations/{sn}/history';
     static const String cabinetFaultList = '/admin/faultReport/queryBySnAndPort';
 
   // 售后绑定
@@ -76,6 +77,14 @@ class ApiPath {
       '/admin/battery/queryDeviceChargeRecord';
   static const String batteryTurnDischargeStatus =
       '/admin/battery/turnDischargeStatus';
+  static const String batteryQueryFixList = '/admin/battery/queryFixList';
+  static const String carQueryFixList = '/admin/car/queryFixList';
+  static const String cabinetQueryFixList = '/admin/station/queryFixList';
+  static const String carQueryMaintainList = '/admin/car/queryMaintainList';
+  static const String cabinetPortDetail = '/admin/station/getPortDetail';
+  static const String cabinetCtrlPort = '/admin/station/ctrlPort';
+  static const String cabinetOpenBackDoor = '/admin/station/openBackDoor';
+  static const String vehicleGetDetail = '/admin/vehicle/getDetail';
   static const String monitorNearByVehicle =
       '/admin/monitor/vehicle/monitorOnMap';
 

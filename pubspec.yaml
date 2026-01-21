@@ -16,30 +16,26 @@ dependencies:
     sdk: flutter
 
   # 三方库
-  intl: ^0.20.2 #提供日期、数字、货币等格式化功能。
-  cupertino_icons: ^1.0.8
-  go_router: ^14.0.0 # 推荐的导航管理
-  dio: ^5.6.0 # 网络请求
-  shared_preferences: ^2.3.2 # 本地存储
-  flutter_riverpod: ^3.0.3 # 状态管理
-  crypto: ^3.0.6 # 加密散列
-  webview_flutter: ^4.8.0 # Web 页面展示
-  pull_to_refresh: ^2.0.0 # 下拉刷新列表
-  google_maps_flutter: ^2.9.0 # 地图
-  apple_maps_flutter: ^1.4.0 # iOS 原生地图
-  geolocator: ^13.0.2 # 定位
-  geocoding: ^3.0.0 # 反向地理编码
-  mobile_scanner: ^5.2.3 # 扫码
-  image_picker: ^1.1.2 # 图片选择
-  flutter_image_compress: ^2.3.0 # 图片压缩
-  fl_chart: ^0.69.0 # 图表
-  flutter_blue_plus: ^1.35.3 # BLE
-  permission_handler: ^11.3.1 # 权限管理
-  package_info_plus: ^8.0.2 # 应用版本信息
-
-  # 本地组件
-  jui:
-    path: ./jui
+  intl: 0.20.2 #提供日期、数字、货币等格式化功能。
+  cupertino_icons: 1.0.8
+  go_router: 14.8.1 # 推荐的导航管理
+  dio: 5.9.0 # 网络请求
+  shared_preferences: 2.5.3 # 本地存储
+  flutter_riverpod: 3.0.3 # 状态管理
+  crypto: 3.0.6 # 加密散列
+  webview_flutter: 4.13.0 # Web 页面展示
+  pull_to_refresh: 2.0.0 # 下拉刷新列表
+  google_maps_flutter: 2.14.0 # 地图
+  apple_maps_flutter: 1.4.0 # iOS 原生地图
+  geolocator: 13.0.4 # 定位
+  geocoding: 3.0.0 # 反向地理编码
+  mobile_scanner: 5.2.3 # 扫码
+  image_picker: 1.2.1 # 图片选择
+  flutter_image_compress: 2.4.0 # 图片压缩
+  fl_chart: 0.69.2 # 图表
+  flutter_blue_plus: 1.36.8 # BLE
+  permission_handler: 11.4.0 # 权限管理
+  package_info_plus: 8.3.1 # 应用版本信息
 
 dev_dependencies:
   flutter_test:

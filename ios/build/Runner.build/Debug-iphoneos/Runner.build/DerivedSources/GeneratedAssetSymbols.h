@@ -6,7 +6,4 @@
 #define AC_SWIFT_PRIVATE
 #endif
 
-/// The "LaunchImage" asset catalog image resource.
-static NSString * const ACImageNameLaunchImage AC_SWIFT_PRIVATE = @"LaunchImage";
-
 #undef AC_SWIFT_PRIVATE

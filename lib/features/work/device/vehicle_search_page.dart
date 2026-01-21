@@ -220,7 +220,10 @@ class _VehicleSearchPageState extends State<VehicleSearchPage> {
     if (sn.trim().isEmpty) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => DeviceDetailPage(initialSn: sn),
+        builder: (_) => DeviceDetailPage(
+          initialSn: sn,
+          initialDeviceType: 2,
+        ),
       ),
     );
   }

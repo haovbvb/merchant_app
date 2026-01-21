@@ -19,5 +19,7 @@ dependencies: \
   /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/google_maps_flutter_ios/google_maps_flutter_ios.framework/Headers/FLTGoogleMapsPlugin.h \
   /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/image_picker_ios/image_picker_ios.framework/Modules/module.modulemap \
   /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/image_picker_ios/image_picker_ios.framework/Headers/FLTImagePickerPlugin.h \
+  /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/package_info_plus/package_info_plus.framework/Modules/module.modulemap \
+  /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/package_info_plus/package_info_plus.framework/Headers/FPPPackageInfoPlusPlugin.h \
   /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/permission_handler_apple/permission_handler_apple.framework/Modules/module.modulemap \
   /Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/permission_handler_apple/permission_handler_apple.framework/Headers/PermissionHandlerPlugin.h

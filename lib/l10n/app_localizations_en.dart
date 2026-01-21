@@ -82,6 +82,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileGreeting => 'Manage your personal settings here.';
 
   @override
+  String get login => 'Sign In';
+
+  @override
+  String get loginBrandTitle => 'OKLA Merchant';
+
+  @override
+  String get loginHint => 'Enter your username and password to continue.';
+
+  @override
+  String get loginAccountHint => 'Please enter account';
+
+  @override
+  String get loginPasswordHint => 'Please enter password';
+
+  @override
+  String get loginAgreeTermsToast => 'Please agree to the terms first';
+
+  @override
+  String get loginButtonConfirm => 'Confirm';
+
+  @override
+  String get loginAgreePrefix => 'I have read, and agree to ';
+
+  @override
+  String get loginAgreeAnd => ' and ';
+
+  @override
+  String get nameLabel => 'Username';
+
+  @override
+  String get nameRequired => 'Username is required';
+
+  @override
+  String get passwordLabel => 'Password';
+
+  @override
+  String get passwordRequired => 'Password is required';
+
+  @override
+  String get passwordTooShort => 'Password must be at least 6 characters';
+
+  @override
   String get profileMessage => 'Message';
 
   @override
@@ -140,9 +182,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutVersionLabel => 'Version';
-
-  @override
-  String get login => 'Sign In';
 
   @override
   String get userListTitle => 'User List';
@@ -457,24 +496,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repairRecordEmpty => 'No repair records';
 
   @override
-  String get loginHint => 'Enter your username and password to continue.';
-
-  @override
-  String get nameLabel => 'Username';
-
-  @override
-  String get nameRequired => 'Username is required';
-
-  @override
-  String get passwordLabel => 'Password';
-
-  @override
-  String get passwordRequired => 'Password is required';
-
-  @override
-  String get passwordTooShort => 'Password must be at least 6 characters';
-
-  @override
   String get afterSaleBindTitle => 'After-sale Binding';
 
   @override
@@ -520,8 +541,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get afterSaleBindSuccessTitle => 'Binding Success';
 
   @override
-  String get afterSaleBindSuccessMessage =>
-      'The device has been bound successfully.';
+  String get afterSaleBindSuccessMessage => 'The device has been bound successfully.';
 
   @override
   String get afterSaleBindUserIdLabel => 'ID';
@@ -602,8 +622,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unbindDeviceUnfinishedTitle => 'Unfinished maintenance order';
 
   @override
-  String get unbindDeviceUnfinishedDesc =>
-      'Unfinished maintenance order detected. Continue unbind?';
+  String get unbindDeviceUnfinishedDesc => 'Unfinished maintenance order detected. Continue unbind?';
 
   @override
   String get unbindDeviceConfirm => 'Confirm unbind';
@@ -686,37 +705,35 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get warehouseInventoryEnterSnHint => 'Enter device SN';
 
-    @override
-    String get warehouseInventoryManualInputHint => 'Enter device SN';
+  @override
+  String get warehouseInventoryManualInputHint => 'Enter device SN';
 
-    @override
-    String get warehouseInventoryScanManual => 'Scan';
+  @override
+  String get warehouseInventoryScanManual => 'Scan';
 
-    @override
-    String get warehouseInventoryScanSuccess => 'Scan success';
+  @override
+  String get warehouseInventoryScanSuccess => 'Scan success';
 
-    @override
-    String get warehouseInventoryScanRepeat => 'Already scanned';
+  @override
+  String get warehouseInventoryScanRepeat => 'Already scanned';
 
-    @override
-    String get warehouseInventoryScanFailed => 'Scan failed';
+  @override
+  String get warehouseInventoryScanFailed => 'Scan failed';
 
-    @override
-    String get warehouseInventoryBatchComplete => 'Batch scan completed';
+  @override
+  String get warehouseInventoryBatchComplete => 'Batch scan completed';
 
-    @override
-    String get warehouseInventoryRevokeConfirmTitle => 'Revoke inventory';
+  @override
+  String get warehouseInventoryRevokeConfirmTitle => 'Revoke inventory';
 
-    @override
-    String get warehouseInventoryRevokeConfirmDesc =>
-      'Are you sure to revoke this inventory?';
+  @override
+  String get warehouseInventoryRevokeConfirmDesc => 'Are you sure to revoke this inventory?';
 
-    @override
-    String get warehouseInventoryCompleteConfirmTitle => 'Complete inventory';
+  @override
+  String get warehouseInventoryCompleteConfirmTitle => 'Complete inventory';
 
-    @override
-    String get warehouseInventoryCompleteConfirmDesc =>
-      'Are you sure to complete this inventory?';
+  @override
+  String get warehouseInventoryCompleteConfirmDesc => 'Are you sure to complete this inventory?';
 
   @override
   String get warehouseTabAll => 'All';
@@ -791,8 +808,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warehouseTransportReceiveWarehouse => 'Receive Warehouse';
 
   @override
-  String get warehouseTransportSelectReceiveWarehouse =>
-      'Select receive warehouse';
+  String get warehouseTransportSelectReceiveWarehouse => 'Select receive warehouse';
 
   @override
   String get warehouseTransportAddDevice => 'Add';
@@ -813,8 +829,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warehouseTransportEditTrackingNumber => 'Edit Tracking';
 
   @override
-  String get warehouseTransportBatchReceiveComplete =>
-      'Batch receive completed';
+  String get warehouseTransportBatchReceiveComplete => 'Batch receive completed';
 
   @override
   String get warehouseTransportSearchTitle => 'Transfer Search';
@@ -859,8 +874,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanCameraPermissionTitle => 'Camera permission required';
 
   @override
-  String get scanCameraPermissionDesc =>
-      'Please allow camera access in system settings to scan QR codes.';
+  String get scanCameraPermissionDesc => 'Please allow camera access in system settings to scan QR codes.';
 
   @override
   String get scanPermissionRetry => 'Retry';
@@ -872,8 +886,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bluetoothPermissionTitle => 'Bluetooth permission required';
 
   @override
-  String get bluetoothPermissionDesc =>
-      'Please allow Bluetooth permissions in system settings to connect devices.';
+  String get bluetoothPermissionDesc => 'Please allow Bluetooth permissions in system settings to connect devices.';
 
   @override
   String get bluetoothPermissionRetry => 'Retry';
@@ -894,14 +907,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qrcodeBatchScan => 'Batch Scan';
 
   @override
-  String get qrcodeListEmpty =>
-      'No device SNs yet. Please scan or enter a device SN.';
+  String get qrcodeListEmpty => 'No device SNs yet. Please scan or enter a device SN.';
 
   @override
   String get qrcodeSameAsPrevious => 'Same as the previous code.';
 
   @override
   String get qrcodeMaxDevice => 'Maximum device count reached.';
+
+  @override
+  String get deviceSearchTitle => 'Device Search';
+
+  @override
+  String get deviceSearchHistoryTitle => 'Search History';
+
+  @override
+  String get deviceSearchHistoryClear => 'Clear';
+
   @override
   String get qrcodeDeviceTypeTitle => 'Device Type';
 
@@ -929,29 +951,21 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get qrcodeResolveFailed => 'Resolve failed';
 
-    @override
-    String get deviceSearchTitle => 'Device Search';
+  @override
+  String get deviceSearchHint => 'Enter device SN or keyword';
 
-    @override
-    String get deviceSearchHistoryTitle => 'Search History';
+  @override
+  String get deviceSearchEmpty => 'No results';
 
-    @override
-    String get deviceSearchHistoryClear => 'Clear';
+  @override
+  String get deviceDetailTitle => 'Device Detail';
 
-    @override
-    String get deviceSearchHint => 'Enter device SN or keyword';
+  @override
+  String get deviceDetailSearchHint => 'Enter device SN';
 
-    @override
-    String get deviceSearchEmpty => 'No results';
+  @override
+  String get deviceDetailEmpty => 'No device information';
 
-    @override
-    String get deviceDetailTitle => 'Device Detail';
-
-    @override
-    String get deviceDetailSearchHint => 'Enter device SN';
-
-    @override
-    String get deviceDetailEmpty => 'No device information';
   @override
   String get deviceDetailChargeHistoryTitle => 'Charge History';
 
@@ -1012,20 +1026,167 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deviceDetailToggleFailed => 'Operation failed';
 
-    @override
-    String get vehicleSearchTitle => 'Vehicle Search';
+  @override
+  String get deviceDetailTabBattery => 'Battery';
 
-    @override
-    String get vehicleSearchDistanceLabel => 'Distance';
+  @override
+  String get deviceDetailTabVehicle => 'Vehicle';
 
-    @override
-    String get vehicleSearchBindIdLabel => 'Bind ID';
+  @override
+  String get deviceDetailTabCabinet => 'Cabinet';
 
-    @override
-    String get vehicleSearchHint => 'Enter vehicle SN or keyword';
+  @override
+  String get deviceDetailBatteryBaseInfoTitle => 'Battery Info';
 
-    @override
-    String get vehicleSearchEmpty => 'No results';
+  @override
+  String get deviceDetailVehicleBaseInfoTitle => 'Vehicle Info';
+
+  @override
+  String get deviceDetailCabinetBaseInfoTitle => 'Cabinet Info';
+
+  @override
+  String get deviceDetailFixRecordsTitle => 'Fix Records';
+
+  @override
+  String get deviceDetailFixRecordsEmpty => 'No fix records';
+
+  @override
+  String get deviceDetailFixResultLabel => 'Fix Result';
+
+  @override
+  String get deviceDetailFixManLabel => 'Fixer';
+
+  @override
+  String get deviceDetailFixRemarkLabel => 'Fix Remark';
+
+  @override
+  String get deviceDetailFixTimeLabel => 'Fix Time';
+
+  @override
+  String get deviceDetailMaintenanceTitle => 'Maintenance Records';
+
+  @override
+  String get deviceDetailMaintenanceEmpty => 'No maintenance records';
+
+  @override
+  String get deviceDetailMaintenanceUserLabel => 'Maintainer';
+
+  @override
+  String get deviceDetailMaintenanceLogLabel => 'Maintenance Log';
+
+  @override
+  String get deviceDetailMaintenanceTimeLabel => 'Maintenance Time';
+
+  @override
+  String get deviceDetailCabinPortTitle => 'Cabin Ports';
+
+  @override
+  String get deviceDetailCabinPortEmpty => 'No cabin port info';
+
+  @override
+  String get deviceDetailCabinOpenDoor => 'Open Door';
+
+  @override
+  String get deviceDetailCabinOpenBackDoor => 'Open Back Door';
+
+  @override
+  String get deviceDetailCabinOpenDoorSuccess => 'Door opened';
+
+  @override
+  String get deviceDetailCabinOpenDoorFailed => 'Failed to open door';
+
+  @override
+  String get deviceDetailCabinOpenBackDoorSuccess => 'Back door opened';
+
+  @override
+  String get deviceDetailCabinOpenBackDoorFailed => 'Failed to open back door';
+
+  @override
+  String get deviceDetailSnLabel => 'SN';
+
+  @override
+  String get deviceDetailVinLabel => 'VIN';
+
+  @override
+  String get deviceDetailCarNumberLabel => 'Plate';
+
+  @override
+  String get deviceDetailModelLabel => 'Model';
+
+  @override
+  String get deviceDetailSpecLabel => 'Spec';
+
+  @override
+  String get deviceDetailOwnerLabel => 'Owner';
+
+  @override
+  String get deviceDetailPhoneLabel => 'Phone';
+
+  @override
+  String get deviceDetailMotorNumberLabel => 'Motor No.';
+
+  @override
+  String get deviceDetailControllerSnLabel => 'Controller SN';
+
+  @override
+  String get deviceDetailBatterySnLabel => 'Battery SN';
+
+  @override
+  String get deviceDetailStationNameLabel => 'Cabinet Name';
+
+  @override
+  String get deviceDetailStationStatusLabel => 'Cabinet Status';
+
+  @override
+  String get deviceDetailStationAddressLabel => 'Cabinet Address';
+
+  @override
+  String get deviceDetailStationOnlineLabel => 'Online Status';
+
+  @override
+  String get deviceDetailPortNoLabel => 'Port No.';
+
+  @override
+  String get deviceDetailPortNameLabel => 'Port Name';
+
+  @override
+  String get deviceDetailCabinBatterySn => 'Cabin Battery';
+
+  @override
+  String get deviceDetailCabinSoc => 'Cabin SOC';
+
+  @override
+  String get deviceDetailCabinPortStatus => 'Port Status';
+
+  @override
+  String get deviceDetailDoorStatusLabel => 'Door Status';
+
+  @override
+  String get deviceDetailLockStatusLabel => 'Lock Status';
+
+  @override
+  String get deviceDetailChargeStatusLabel => 'Charge Status';
+
+  @override
+  String get deviceDetailVoltageLabel => 'Voltage';
+
+  @override
+  String get deviceDetailTemperatureLabel => 'Temperature';
+
+  @override
+  String get vehicleSearchTitle => 'Vehicle Search';
+
+  @override
+  String get vehicleSearchDistanceLabel => 'Distance';
+
+  @override
+  String get vehicleSearchBindIdLabel => 'Bind ID';
+
+  @override
+  String get vehicleSearchHint => 'Enter vehicle SN or keyword';
+
+  @override
+  String get vehicleSearchEmpty => 'No results';
 
   @override
   String get batteryEntryTitle => 'Battery Entry';
@@ -1152,6 +1313,132 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get warehouseTransportStatusWithdrawn => 'Withdrawn';
+
+  @override
+  String get roadsideTitle => 'Roadside Assistance';
+
+  @override
+  String get roadsideTabAll => 'All';
+
+  @override
+  String get roadsideTabWaiting => 'Pending';
+
+  @override
+  String get roadsideTabProcessing => 'In Progress';
+
+  @override
+  String get roadsideTabCompleted => 'Completed';
+
+  @override
+  String get roadsideEmpty => 'No roadside orders';
+
+  @override
+  String get roadsideStatusWaiting => 'Pending';
+
+  @override
+  String get roadsideStatusProcessing => 'In Progress';
+
+  @override
+  String get roadsideStatusCompleted => 'Completed';
+
+  @override
+  String get roadsideResultReturnFactory => 'Return to factory';
+
+  @override
+  String get roadsideResultCompleted => 'Resolved';
+
+  @override
+  String get roadsideTimeLabel => 'Reported At';
+
+  @override
+  String get roadsideResultLabel => 'Result';
+
+  @override
+  String get roadsideDetailTitle => 'Roadside Order Detail';
+
+  @override
+  String get roadsideDetailEmpty => 'No detail available';
+
+  @override
+  String get roadsideDealAction => 'Process';
+
+  @override
+  String get roadsidePayAction => 'Pay';
+
+  @override
+  String get roadsidePayFeeLabel => 'Fee';
+
+  @override
+  String get roadsidePayTypeLabel => 'Payment Method';
+
+  @override
+  String get roadsidePayTypeCash => 'Cash';
+
+  @override
+  String get roadsidePayTypeOnline => 'Online';
+
+  @override
+  String get roadsideAttachmentLabel => 'Attachments';
+
+  @override
+  String get roadsideUploadAction => 'Upload';
+
+  @override
+  String get roadsidePaySuccess => 'Payment successful';
+
+  @override
+  String get roadsidePayFailed => 'Payment failed';
+
+  @override
+  String get roadsideConfirm => 'Confirm';
+
+  @override
+  String get roadsideStatusLabel => 'Status';
+
+  @override
+  String get roadsideDeviceSnLabel => 'Device SN';
+
+  @override
+  String get roadsideDescLabel => 'Description';
+
+  @override
+  String get roadsideReporterLabel => 'Reporter';
+
+  @override
+  String get roadsideReportTimeLabel => 'Reported At';
+
+  @override
+  String get roadsideLocationLabel => 'Location';
+
+  @override
+  String get roadsideProcessTitle => 'Processing';
+
+  @override
+  String get roadsideProcessResult => 'Result';
+
+  @override
+  String get roadsideProcessDesc => 'Notes';
+
+  @override
+  String get roadsideProcessTime => 'Processed At';
+
+  @override
+  String get roadsideDealTitle => 'Process Order';
+
+  @override
+  String get roadsideDealResultLabel => 'Result';
+
+  @override
+  String get roadsideDealDescLabel => 'Processing Notes';
+
+  @override
+  String get roadsideUploadLabel => 'Upload Images';
+
+  @override
+  String get roadsideDealSuccess => 'Submitted';
+
+  @override
+  String get roadsideDealFailed => 'Submit failed';
 
   @override
   String get offlineRegisterTitle => 'Offline User Registration';
@@ -1841,6 +2128,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetOfflineFaultEntry => 'View Faults';
 
   @override
+  String get cabinetOfflineRealtimeTab => 'Realtime';
+
+  @override
+  String get cabinetOfflineWarehouseTab => 'Warehouse';
+
+  @override
+  String get cabinetOfflineWarehouseEmpty => 'No warehouse info';
+
+  @override
+  String get cabinetOfflineWarehouseTotal => 'Total';
+
+  @override
+  String get cabinetOfflineWarehouseCityCodeLabel => 'City code';
+
+  @override
+  String get cabinetOfflineWarehouseLatLabel => 'Latitude';
+
+  @override
+  String get cabinetOfflineWarehouseLngLabel => 'Longitude';
+
+  @override
+  String get cabinetOfflineWarehouseOpPhoneLabel => 'Operator phone';
+
+  @override
+  String get cabinetOfflineWarehouseOpNameLabel => 'Operator name';
+
+  @override
+  String get cabinetOfflineWarehouseCreateTimeLabel => 'Created time';
+
+  @override
   String get cabinetOfflinePortLabel => 'Port';
 
   @override
@@ -1886,6 +2203,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vcuVersionLabel => 'Version';
 
   @override
+  String get vcuControlTab => 'Control';
+
+  @override
+  String get vcuHistoryTab => 'History';
+
+  @override
+  String get vcuHistoryFilterAll => 'All';
+
+  @override
+  String get vcuHistoryFilterRequest => 'Request';
+
+  @override
+  String get vcuHistoryFilterResponse => 'Response';
+
+  @override
+  String get vcuHistoryEmpty => 'No history yet';
+
+  @override
+  String get vcuHistoryStatusSuccess => 'Success';
+
+  @override
+  String get vcuHistoryStatusFailed => 'Failed';
+
+  @override
   String get promoteWebTitle => 'Promote Web';
 
   @override
@@ -1917,132 +2258,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addressPickerEmpty => 'Move map to pick a location';
-
-  @override
-  String get roadsideTitle => 'Roadside Assistance';
-
-  @override
-  String get roadsideTabAll => 'All';
-
-  @override
-  String get roadsideTabWaiting => 'Pending';
-
-  @override
-  String get roadsideTabProcessing => 'In Progress';
-
-  @override
-  String get roadsideTabCompleted => 'Completed';
-
-  @override
-  String get roadsideEmpty => 'No roadside orders';
-
-  @override
-  String get roadsideStatusWaiting => 'Pending';
-
-  @override
-  String get roadsideStatusProcessing => 'In Progress';
-
-  @override
-  String get roadsideStatusCompleted => 'Completed';
-
-  @override
-  String get roadsideResultReturnFactory => 'Return to factory';
-
-  @override
-  String get roadsideResultCompleted => 'Resolved';
-
-  @override
-  String get roadsideTimeLabel => 'Reported At';
-
-  @override
-  String get roadsideResultLabel => 'Result';
-
-  @override
-  String get roadsideDetailTitle => 'Roadside Order Detail';
-
-  @override
-  String get roadsideDetailEmpty => 'No detail available';
-
-  @override
-  String get roadsideDealAction => 'Process';
-
-  @override
-  String get roadsidePayAction => 'Pay';
-
-  @override
-  String get roadsidePayFeeLabel => 'Fee';
-
-  @override
-  String get roadsidePayTypeLabel => 'Payment Method';
-
-  @override
-  String get roadsidePayTypeCash => 'Cash';
-
-  @override
-  String get roadsidePayTypeOnline => 'Online';
-
-  @override
-  String get roadsideAttachmentLabel => 'Attachments';
-
-  @override
-  String get roadsideUploadAction => 'Upload';
-
-  @override
-  String get roadsidePaySuccess => 'Payment successful';
-
-  @override
-  String get roadsidePayFailed => 'Payment failed';
-
-  @override
-  String get roadsideConfirm => 'Confirm';
-
-  @override
-  String get roadsideStatusLabel => 'Status';
-
-  @override
-  String get roadsideDeviceSnLabel => 'Device SN';
-
-  @override
-  String get roadsideDescLabel => 'Description';
-
-  @override
-  String get roadsideReporterLabel => 'Reporter';
-
-  @override
-  String get roadsideReportTimeLabel => 'Reported At';
-
-  @override
-  String get roadsideLocationLabel => 'Location';
-
-  @override
-  String get roadsideProcessTitle => 'Processing';
-
-  @override
-  String get roadsideProcessResult => 'Result';
-
-  @override
-  String get roadsideProcessDesc => 'Notes';
-
-  @override
-  String get roadsideProcessTime => 'Processed At';
-
-  @override
-  String get roadsideDealTitle => 'Process Order';
-
-  @override
-  String get roadsideDealResultLabel => 'Result';
-
-  @override
-  String get roadsideDealDescLabel => 'Processing Notes';
-
-  @override
-  String get roadsideUploadLabel => 'Upload Images';
-
-  @override
-  String get roadsideDealSuccess => 'Submitted';
-
-  @override
-  String get roadsideDealFailed => 'Submit failed';
 
   @override
   String get bluetoothAuthTitle => 'Bluetooth Authorization';
@@ -2087,10 +2302,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bluetoothOperateTitle => 'Bluetooth Operations';
 
   @override
-  String get bluetoothOperateTip =>
-      'Supports BLE scan/connect and authorization commands. Please stay near the device and keep Bluetooth on.';
+  String get bluetoothOperateTip => 'Supports BLE scan/connect and authorization commands. Please stay near the device and keep Bluetooth on.';
 
   @override
-  String get bluetoothOperateTodoList =>
-      '• Scan and connect a device\n• Read Key ID / authorize / clear / set validity\n• Send HEX commands and view logs';
+  String get bluetoothOperateTodoList => '• Scan and connect a device\n• Read Key ID / authorize / clear / set validity\n• Send HEX commands and view logs';
 }

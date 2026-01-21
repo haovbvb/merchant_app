@@ -17,6 +17,7 @@ export 'device_inventory_resp.dart';
 export 'device_inventory_scan_result.dart';
 export 'device_transport_resp.dart';
 export 'installment_payment_response.dart';
+export 'layout_cabinet_info.dart';
 export 'maintenance.dart';
 export 'message_list_response.dart';
 export 'near_by_vehicle.dart';

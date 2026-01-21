@@ -5,18 +5,7 @@
 	<key>colors</key>
 	<array/>
 	<key>images</key>
-	<array>
-		<dict>
-			<key>catalogPath</key>
-			<string>/Users/ping/Desktop/work/merchant_app/ios/Runner/Assets.xcassets</string>
-			<key>objcSymbol</key>
-			<string>ACImageNameLaunchImage</string>
-			<key>relativePath</key>
-			<string>./LaunchImage.imageset</string>
-			<key>swiftSymbol</key>
-			<string>launch</string>
-		</dict>
-	</array>
+	<array/>
 	<key>symbols</key>
 	<array/>
 </dict>

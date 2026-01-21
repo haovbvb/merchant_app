@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -152,6 +151,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get changePasswordConfirmHint => 'Re-enter new password';
+
+  @override
+  String get changePasswordIdPrefix => 'ID:';
+
+  @override
+  String get changePasswordRuleHint => 'The length of the new password is 8~16 characters and must contain numbers, letters or special characters';
+
+  @override
+  String get changePasswordConfirmAction => 'Confirm';
 
   @override
   String get changePasswordSubmit => 'Submit';

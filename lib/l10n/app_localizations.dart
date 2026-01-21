@@ -383,6 +383,24 @@ abstract class AppLocalizations {
   /// **'Re-enter new password'**
   String get changePasswordConfirmHint;
 
+  /// No description provided for @changePasswordIdPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'ID:'**
+  String get changePasswordIdPrefix;
+
+  /// No description provided for @changePasswordRuleHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The length of the new password is 8~16 characters and must contain numbers, letters or special characters'**
+  String get changePasswordRuleHint;
+
+  /// No description provided for @changePasswordConfirmAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get changePasswordConfirmAction;
+
   /// No description provided for @changePasswordSubmit.
   ///
   /// In en, this message translates to:

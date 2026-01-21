@@ -1,10 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
-class AboutPage extends StatelessWidget {
+class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
+
+  @override
+  State<AboutPage> createState() => _AboutPageState();
+}
+
+class _AboutPageState extends State<AboutPage> {
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    // 恢复默认状态栏样式
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
+    );
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,32 +43,32 @@ class AboutPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8F8),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Align(
-              alignment: Alignment.topCenter,
-              child: Image.asset(
-                'assets/android/mipmap-xxhdpi/bg_about.webp',
-                width: double.infinity,
-                fit: BoxFit.fitWidth,
-              ),
+      extendBodyBehindAppBar: true,
+      body: Stack(
+        children: [
+          Align(
+            alignment: Alignment.topCenter,
+            child: Image.asset(
+              'assets/android/mipmap-xxhdpi/bg_about.webp',
+              width: double.infinity,
+              fit: BoxFit.fitWidth,
             ),
-            Positioned(
-              left: 12,
-              top: 12,
-              child: IconButton(
-                icon: Image.asset(
-                  'assets/android/mipmap-xxhdpi/icon_arrow_left.webp',
-                  width: 24,
-                  height: 24,
-                ),
-                onPressed: () => Navigator.pop(context),
+          ),
+          Positioned(
+            left: 12,
+            top: MediaQuery.of(context).padding.top + 12,
+            child: IconButton(
+              icon: Image.asset(
+                'assets/android/mipmap-xxhdpi/icon_arrow_left.webp',
+                width: 24,
+                height: 24,
               ),
+              onPressed: () => Navigator.pop(context),
             ),
-            Column(
-              children: [
-                const SizedBox(height: 120),
+          ),
+          Column(
+            children: [
+              SizedBox(height: MediaQuery.of(context).padding.top + 60),
                 Image.asset(
                   'assets/android/mipmap-xxhdpi/icon_logo_login.png',
                   width: 88,
@@ -128,7 +159,6 @@ class AboutPage extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 }

@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -152,6 +151,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get changePasswordConfirmHint => '再次输入新密码';
+
+  @override
+  String get changePasswordIdPrefix => '账号：';
+
+  @override
+  String get changePasswordRuleHint => '新密码长度为 8~16 位，必须包含数字、字母或特殊字符';
+
+  @override
+  String get changePasswordConfirmAction => '确认';
 
   @override
   String get changePasswordSubmit => '提交';

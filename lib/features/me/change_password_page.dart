@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
@@ -32,51 +33,123 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final user = AuthSession.instance.current;
+    final account = _formatAccount(user?.name, user?.emailCode);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.changePasswordTitle)),
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        title: Text(l10n.changePasswordTitle),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _PasswordField(
-                controller: _oldController,
-                label: l10n.changePasswordOldLabel,
-                hint: l10n.changePasswordOldHint,
-                obscure: _obscureOld,
-                onToggle: () => setState(() => _obscureOld = !_obscureOld),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
+                child: Text(
+                  '${l10n.changePasswordIdPrefix} $account',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.normal,
+                    color: Color(0xFF333333),
+                  ),
+                ),
               ),
               const SizedBox(height: 16),
-              _PasswordField(
-                controller: _newController,
-                label: l10n.changePasswordNewLabel,
-                hint: l10n.changePasswordNewHint,
-                obscure: _obscureNew,
-                onToggle: () => setState(() => _obscureNew = !_obscureNew),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.info_outline, color: Colors.grey, size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.changePasswordRuleHint,
+                        style: const TextStyle(
+                          color: Color(0xFF999999),
+                          fontSize: 13,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
-              _PasswordField(
-                controller: _confirmController,
-                label: l10n.changePasswordConfirmLabel,
-                hint: l10n.changePasswordConfirmHint,
-                obscure: _obscureConfirm,
-                onToggle: () =>
-                    setState(() => _obscureConfirm = !_obscureConfirm),
+              Container(
+                color: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                child: Column(
+                  children: [
+                    _PasswordField(
+                      controller: _oldController,
+                      label: l10n.changePasswordOldLabel,
+                      hint: l10n.changePasswordOldHint,
+                      obscure: _obscureOld,
+                      onToggle: () => setState(() => _obscureOld = !_obscureOld),
+                    ),
+                    const SizedBox(height: 20),
+                    _PasswordField(
+                      controller: _newController,
+                      label: l10n.changePasswordNewLabel,
+                      hint: l10n.changePasswordNewHint,
+                      obscure: _obscureNew,
+                      onToggle: () => setState(() => _obscureNew = !_obscureNew),
+                    ),
+                    const SizedBox(height: 20),
+                    _PasswordField(
+                      controller: _confirmController,
+                      label: l10n.changePasswordConfirmLabel,
+                      hint: l10n.changePasswordConfirmHint,
+                      obscure: _obscureConfirm,
+                      onToggle: () =>
+                          setState(() => _obscureConfirm = !_obscureConfirm),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: FilledButton(
-                  onPressed: _submitting ? null : _submit,
-                  child: _submitting
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(l10n.changePasswordSubmit),
+              const SizedBox(height: 16),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: _submitting ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF56B327),
+                      disabledBackgroundColor: const Color(0xFF56B327),
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: _submitting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            l10n.changePasswordConfirmAction,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                  ),
                 ),
               ),
             ],
@@ -84,6 +157,18 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         ),
       ),
     );
+  }
+
+  String _formatAccount(String? name, String? emailCode) {
+    final safeName = (name ?? '').trim();
+    final safeCode = (emailCode ?? '').trim();
+    if (safeName.isEmpty) {
+      return '-';
+    }
+    if (safeCode.isEmpty) {
+      return safeName;
+    }
+    return '$safeName@$safeCode';
   }
 
   Future<void> _submit() async {
@@ -142,29 +227,55 @@ class _PasswordField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return TextFormField(
-      controller: controller,
-      obscureText: obscure,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        suffixIcon: IconButton(
-          icon: Icon(obscure ? Icons.visibility_off : Icons.visibility),
-          onPressed: onToggle,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF333333),
+            fontWeight: FontWeight.normal,
+          ),
         ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: controller,
+          obscureText: obscure,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: const TextStyle(
+              color: Color(0xFFCCCCCC),
+              fontSize: 15,
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                color: const Color(0xFF999999),
+                size: 20,
+              ),
+              onPressed: onToggle,
+            ),
+            contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            border: const UnderlineInputBorder(),
+            enabledBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFFE5E5E5)),
+            ),
+            focusedBorder: const UnderlineInputBorder(
+              borderSide: BorderSide(color: Color(0xFFB7E1A8), width: 1.5),
+            ),
+          ),
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return l10n.changePasswordRequired;
+            }
+            if (value.trim().length < 6) {
+              return l10n.changePasswordTooShort;
+            }
+            return null;
+          },
         ),
-      ),
-      validator: (value) {
-        if (value == null || value.trim().isEmpty) {
-          return l10n.changePasswordRequired;
-        }
-        if (value.trim().length < 6) {
-          return l10n.changePasswordTooShort;
-        }
-        return null;
-      },
+      ],
     );
   }
 }

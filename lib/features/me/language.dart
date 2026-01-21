@@ -17,20 +17,23 @@ class LanguageSelectionPage extends ConsumerWidget {
         itemBuilder: (context, index) {
           final option = options[index];
           final isSelected = option.locale == currentLocale;
-          return ListTile(
-            title: Text(
-              option.title,
-              style: TextStyle(
-                color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : const Color(0xE60C0C0D),
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+          return Container(
+            color: Colors.white,
+            child: ListTile(
+              title: Text(
+                option.title,
+                style: TextStyle(
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.primary
+                      : const Color(0xE60C0C0D),
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                ),
               ),
+              trailing: isSelected
+                  ? const Icon(Icons.check, color: Color(0xFF56B327))
+                  : null,
+              onTap: () => _onSelect(ref, option.locale, context),
             ),
-            trailing: isSelected
-                ? const Icon(Icons.check, color: Color(0xFF56B327))
-                : null,
-            onTap: () => _onSelect(ref, option.locale, context),
           );
         },
         separatorBuilder: (_, __) => const Divider(height: 1),

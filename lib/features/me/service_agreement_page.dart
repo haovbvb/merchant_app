@@ -14,25 +14,31 @@ class ServiceAgreementPage extends StatelessWidget {
       appBar: AppBar(title: Text(l10n.profileUserAgreement)),
       body: ListView(
         children: [
-          ListTile(
-            leading: const Icon(Icons.verified_user_outlined),
-            title: Text(l10n.profileUserAgreement),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _openWebView(
-              context,
-              title: l10n.profileUserAgreement,
-              url: userAgreementUrl,
+          Container(
+            color: Colors.white,
+            child: ListTile(
+              leading: const Icon(Icons.verified_user_outlined),
+              title: Text(l10n.profileUserAgreement),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _openWebView(
+                context,
+                title: l10n.profileUserAgreement,
+                url: userAgreementUrl,
+              ),
             ),
           ),
           const Divider(height: 1),
-          ListTile(
-            leading: const Icon(Icons.privacy_tip_outlined),
-            title: Text(l10n.profilePrivacyPolicy),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _openWebView(
-              context,
-              title: l10n.profilePrivacyPolicy,
-              url: privacyPolicyUrl,
+          Container(
+            color: Colors.white,
+            child: ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined),
+              title: Text(l10n.profilePrivacyPolicy),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _openWebView(
+                context,
+                title: l10n.profilePrivacyPolicy,
+                url: privacyPolicyUrl,
+              ),
             ),
           ),
         ],

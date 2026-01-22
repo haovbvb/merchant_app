@@ -1,10 +1,8 @@
 import 'dart:math';
-import 'dart:ui' as ui;
 
 import 'package:apple_maps_flutter/apple_maps_flutter.dart' as amaps;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -46,6 +44,8 @@ class _HomeTabState extends ConsumerState<HomeTab> {
   int? _maintainFlag;
   NearByVehicle? _selectedVehicle;
   gmaps.BitmapDescriptor? _markerIcon;
+  amaps.BitmapDescriptor? _appleMarkerIcon;
+  bool _appleIconLoaded = false;
 
   @override
   void initState() {
@@ -54,17 +54,36 @@ class _HomeTabState extends ConsumerState<HomeTab> {
     _loadInitialData();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_appleIconLoaded) return;
+    _appleIconLoaded = true;
+    _loadAppleMarkerIcon();
+  }
+
   Future<void> _loadMarkerIcon() async {
-    final bytes = await rootBundle.load('assets/android/mipmap-xxhdpi/icon_marker_vehicle.png');
-    final codec = await ui.instantiateImageCodec(
-      bytes.buffer.asUint8List(),
-      targetWidth: 120,
+    final configuration = createLocalImageConfiguration(context);
+    final icon = await gmaps.BitmapDescriptor.fromAssetImage(
+      configuration,
+      'assets/android/mipmap-xxhdpi/icon_marker_vehicle.png',
     );
-    final frame = await codec.getNextFrame();
-    final data = await frame.image.toByteData(format: ui.ImageByteFormat.png);
-    if (data != null && mounted) {
+    if (mounted) {
       setState(() {
-        _markerIcon = gmaps.BitmapDescriptor.bytes(data.buffer.asUint8List());
+        _markerIcon = icon;
+      });
+    }
+  }
+
+  Future<void> _loadAppleMarkerIcon() async {
+    final configuration = createLocalImageConfiguration(context);
+    final icon = await amaps.BitmapDescriptor.fromAssetImage(
+      configuration,
+      'assets/android/mipmap-xxhdpi/icon_marker_vehicle.png',
+    );
+    if (mounted) {
+      setState(() {
+        _appleMarkerIcon = icon;
       });
     }
   }
@@ -354,6 +373,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               item.sn ?? item.cardNum ?? '${item.latitude}-${item.longitude}',
             ),
             position: amaps.LatLng(item.latitude!, item.longitude!),
+            icon: _appleMarkerIcon ?? amaps.BitmapDescriptor.defaultAnnotation,
             onTap: () => _selectVehicle(item),
           ),
         )
@@ -490,6 +510,7 @@ class _HomeOverlays extends StatelessWidget {
               const SizedBox(width: 12),
               _CircleIconButton(
                 icon: Icons.filter_alt_outlined,
+                showShadow: false,
                 onPressed: onFilter,
               ),
             ],
@@ -498,19 +519,27 @@ class _HomeOverlays extends StatelessWidget {
         const Spacer(),
         // 底部按钮
         Padding(
-          padding: const EdgeInsets.only(right: 16, bottom: 100),
+          padding: const EdgeInsets.only(right: 16, bottom: 155),
           child: Align(
             alignment: Alignment.centerRight,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 _CircleIconButton(
-                  icon: Icons.refresh,
+                  iconWidget: Image.asset(
+                    'assets/android/mipmap-xxhdpi/icon_refresh.png',
+                    // width: 22,
+                    // height: 22,
+                  ),
                   onPressed: onRefresh,
                 ),
                 const SizedBox(height: 10),
                 _CircleIconButton(
-                  icon: Icons.my_location_outlined,
+                  iconWidget: Image.asset(
+                    'assets/android/mipmap-xxhdpi/icon_location1.png',
+                    // width: 22,
+                    // height: 22,
+                  ),
                   onPressed: onLocate,
                 ),
               ],
@@ -772,10 +801,17 @@ class _VehicleImage extends StatelessWidget {
 }
 
 class _CircleIconButton extends StatelessWidget {
-  const _CircleIconButton({required this.icon, required this.onPressed});
+  const _CircleIconButton({
+    required this.onPressed,
+    this.icon,
+    this.iconWidget,
+    this.showShadow = true,
+  });
 
-  final IconData icon;
+  final IconData? icon;
+  final Widget? iconWidget;
   final VoidCallback onPressed;
+  final bool showShadow;
 
   @override
   Widget build(BuildContext context) {
@@ -783,17 +819,19 @@ class _CircleIconButton extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: showShadow
+            ? [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: IconButton(
-        icon: Icon(icon),
-        color: AppColors.black07Text,
+        icon: iconWidget ?? Icon(icon),
+        color: iconWidget == null ? AppColors.black07Text : null,
         onPressed: onPressed,
       ),
     );
@@ -834,7 +872,7 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
-class _VehicleDetailPopup extends StatelessWidget {
+class _VehicleDetailPopup extends StatefulWidget {
   const _VehicleDetailPopup({
     required this.vehicle,
     required this.address,
@@ -850,6 +888,43 @@ class _VehicleDetailPopup extends StatelessWidget {
   final VoidCallback onViewMore;
 
   @override
+  State<_VehicleDetailPopup> createState() => _VehicleDetailPopupState();
+}
+
+class _VehicleDetailPopupState extends State<_VehicleDetailPopup>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Offset> _slideAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, 1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOut,
+    ));
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleClose() async {
+    await _controller.reverse();
+    widget.onClose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
@@ -858,25 +933,30 @@ class _VehicleDetailPopup extends StatelessWidget {
       left: 0,
       right: 0,
       bottom: 0,
+      top: 0,
       child: GestureDetector(
-        onTap: onClose,
+        onTap: _handleClose,
         child: Container(
-          color: Colors.black.withOpacity(0.3),
-          child: GestureDetector(
-            onTap: () {}, // 阻止点击穿透
-            child: Container(
-              margin: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+          color: Colors.transparent,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: GestureDetector(
+                onTap: () {}, // 阻止点击穿透
+                child: Container(
+                  margin: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3F4F5),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
-                ],
-              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -885,7 +965,7 @@ class _VehicleDetailPopup extends StatelessWidget {
                     alignment: Alignment.topRight,
                     child: IconButton(
                       icon: const Icon(Icons.close),
-                      onPressed: onClose,
+                      onPressed: _handleClose,
                       padding: const EdgeInsets.all(16),
                     ),
                   ),
@@ -898,14 +978,14 @@ class _VehicleDetailPopup extends StatelessWidget {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            _VehicleImage(url: vehicle.img),
+                            _VehicleImage(url: widget.vehicle.img),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'SN: ${vehicle.sn ?? '-'}',
+                                    'SN: ${widget.vehicle.sn ?? '-'}',
                                     style: theme.textTheme.titleMedium?.copyWith(
                                       color: AppColors.black09Text,
                                       fontWeight: FontWeight.w600,
@@ -917,7 +997,7 @@ class _VehicleDetailPopup extends StatelessWidget {
                                     spacing: 8,
                                     runSpacing: 6,
                                     children: [
-                                      if (vehicle.needMaintenance == true)
+                                      if (widget.vehicle.needMaintenance == true)
                                         _StatusChip(
                                           label: l10n.homeFilterNeedMaintenance,
                                           borderColor: AppColors.danger,
@@ -925,7 +1005,7 @@ class _VehicleDetailPopup extends StatelessWidget {
                                           fontSize: 12,
                                         ),
                                       _StatusChip(
-                                        label: 'Binding ID: ${vehicle.cardNum ?? '-'}',
+                                        label: 'Binding ID: ${widget.vehicle.cardNum ?? '-'}',
                                         borderColor: AppColors.black02Text,
                                         textColor: AppColors.black06Text,
                                         fontSize: 12,
@@ -960,7 +1040,7 @@ class _VehicleDetailPopup extends StatelessWidget {
                             const SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                address,
+                                widget.address,
                                 style: theme.textTheme.bodyMedium?.copyWith(
                                   color: AppColors.black06Text,
                                   height: 1.3,
@@ -976,7 +1056,7 @@ class _VehicleDetailPopup extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              distance,
+                              widget.distance,
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: AppColors.black06Text,
                                 fontSize: 12,
@@ -1035,7 +1115,7 @@ class _VehicleDetailPopup extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      '${vehicle.mile?.toStringAsFixed(0) ?? '0'}km',
+                                      '${widget.vehicle.mile?.toStringAsFixed(0) ?? '0'}km',
                                       style: theme.textTheme.titleLarge?.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.bold,
@@ -1053,7 +1133,10 @@ class _VehicleDetailPopup extends StatelessWidget {
                         SizedBox(
                           width: double.infinity,
                           child: TextButton(
-                            onPressed: onViewMore,
+                            onPressed: () async {
+                              await _controller.reverse();
+                              widget.onViewMore();
+                            },
                             style: TextButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
@@ -1070,6 +1153,8 @@ class _VehicleDetailPopup extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+                ),
               ),
             ),
           ),

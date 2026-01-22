@@ -50,6 +50,7 @@ flutter:
   assets:
     - assets/images/
     - assets/images/3.0x/
+    - assets/android/mipmap-xxhdpi/3.0x/
     - assets/android/mipmap-xxhdpi/
 
   # To add custom fonts to your application, add a fonts section here,

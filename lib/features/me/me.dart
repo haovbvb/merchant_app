@@ -10,15 +10,17 @@ import 'package:merchant_app/features/me/providers/language_notifier.dart';
 
 class _ProfileAction {
   const _ProfileAction({
-    required this.icon,
+    this.icon,
+    this.iconPath,
     required this.iconBg,
     required this.label,
     this.badgeText,
     this.trailingText,
     this.onTap,
-  });
+  }) : assert(icon != null || iconPath != null, 'Either icon or iconPath must be provided');
 
-  final IconData icon;
+  final IconData? icon;
+  final String? iconPath;
   final Color iconBg;
   final String label;
   final String? badgeText;
@@ -59,14 +61,14 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
 
     final actionsPrimary = [
       _ProfileAction(
-        icon: Icons.message_outlined,
+        iconPath: 'assets/android/mipmap-xxhdpi/icon_notification.webp',
         iconBg: const Color(0xFFFFD54F),
         label: context.l10n.profileMessage,
         badgeText: _badgeText(unreadCount),
         onTap: () => AppRouter.router.push(AppRouter.messagePath),
       ),
       _ProfileAction(
-        icon: Icons.lock_outline,
+        iconPath: 'assets/android/mipmap-xxhdpi/icon_change_psw.webp',
         iconBg: const Color(0xFF9575CD),
         label: context.l10n.profileChangePassword,
         onTap: () => AppRouter.router.push(AppRouter.changePasswordPath),
@@ -75,20 +77,20 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
 
     final actionsSecondary = [
       _ProfileAction(
-        icon: Icons.language,
+        iconPath: 'assets/android/mipmap-xxhdpi/icon_language_setting.webp',
         iconBg: const Color(0xFF64B5F6),
         label: context.l10n.profileLanguage,
         trailingText: _localeLabel(currentLocale),
         onTap: () => AppRouter.router.push(AppRouter.languagePath),
       ),
       _ProfileAction(
-        icon: Icons.verified_user_outlined,
+        iconPath: 'assets/android/mipmap-xxhdpi/icon_user_agreement.png',
         iconBg: const Color(0xFF66BB6A),
         label: context.l10n.profileUserAgreement,
         onTap: () => AppRouter.router.push(AppRouter.serviceAgreementPath),
       ),
       _ProfileAction(
-        icon: Icons.info_outline,
+        iconPath: 'assets/android/mipmap-xxhdpi/icon_about_app.webp',
         iconBg: const Color(0xFFFFB74D),
         label: context.l10n.profileAbout,
         onTap: () => AppRouter.router.push(AppRouter.aboutPath),
@@ -279,7 +281,7 @@ class _ProfileCard extends StatelessWidget {
             if (i != actions.length - 1)
               const Divider(
                 height: 1,
-                indent: 72,
+                indent: 16,
                 endIndent: 16,
                 color: Color(0xFFE5E7EB),
               ),
@@ -305,13 +307,15 @@ class _ProfileActionTile extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              width: 44,
-              height: 44,
               decoration: BoxDecoration(
-                color: action.iconBg,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(action.icon, color: Colors.white, size: 22),
+              child: action.iconPath != null
+                  ? Image.asset(
+                      action.iconPath!,
+                      fit: BoxFit.contain,
+                    )
+                  : Icon(action.icon, color: Colors.white, size: 22),
             ),
             const SizedBox(width: 16),
             Expanded(

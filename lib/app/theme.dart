@@ -31,6 +31,8 @@ class BaseTheme {
       ),
       primaryColor: primaryColor,
       scaffoldBackgroundColor: paperIvory,
+      splashFactory: NoSplash.splashFactory,
+      highlightColor: Colors.transparent,
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white,
         foregroundColor: textDark,
@@ -67,6 +69,8 @@ class BaseTheme {
         primary: primaryColor,
         secondary: energyOrange,
       ),
+      splashFactory: NoSplash.splashFactory,
+      highlightColor: Colors.transparent,
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,

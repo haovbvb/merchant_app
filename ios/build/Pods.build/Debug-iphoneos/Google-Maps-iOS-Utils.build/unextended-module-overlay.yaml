@@ -4,7 +4,7 @@
   "case-sensitive": false,
   "roots": [{
     "type": "directory",
-    "name": "/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/Google-Maps-iOS-Utils/GoogleMapsUtils.framework/Modules",
+    "name": "/Users/ping/Desktop/work/merchant_app/ios/build/Debug-iphoneos/Google-Maps-iOS-Utils/GoogleMapsUtils.framework/Modules",
     "contents": [{
       "type": "file",
       "name": "module.modulemap",
@@ -13,7 +13,7 @@
     },
     {
     "type": "directory",
-    "name": "/Users/ping/Desktop/work/merchant_app/build/ios/Debug-iphoneos/Google-Maps-iOS-Utils/GoogleMapsUtils.framework/Headers",
+    "name": "/Users/ping/Desktop/work/merchant_app/ios/build/Debug-iphoneos/Google-Maps-iOS-Utils/GoogleMapsUtils.framework/Headers",
     "contents": [{
       "type": "file",
       "name": "GoogleMapsUtils-Swift.h",

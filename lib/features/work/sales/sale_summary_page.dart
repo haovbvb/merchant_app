@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,9 +22,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => ref.read(saleSummaryProvider.notifier).refresh(),
-    );
+    Future.microtask(() => ref.read(saleSummaryProvider.notifier).refresh());
   }
 
   @override
@@ -82,7 +82,10 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage> {
       context: context,
       firstDate: DateTime(now.year - 2),
       lastDate: now,
-      initialDateRange: DateTimeRange(start: state.startDate, end: state.endDate),
+      initialDateRange: DateTimeRange(
+        start: state.startDate,
+        end: state.endDate,
+      ),
     );
     if (!mounted || range == null) return;
     notifier.updateDateRange(range.start, range.end);
@@ -222,8 +225,10 @@ class _ChartSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(l10n.saleSummarySummarySection,
-                style: const TextStyle(fontWeight: FontWeight.w600)),
+            Text(
+              l10n.saleSummarySummarySection,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
             ToggleButtons(
               isSelected: [showAmount, !showAmount],
               onPressed: (index) => onToggle(index == 0),
@@ -268,43 +273,60 @@ class _AmountLineChart extends StatelessWidget {
     for (var i = 0; i < data.amountList.length; i++) {
       spots.add(FlSpot(i.toDouble(), data.amountList[i]));
     }
+    final maxY = _calcMaxY(data.amountList.map((e) => e.toDouble()).toList());
     return LineChart(
       LineChartData(
         gridData: const FlGridData(show: false),
+        borderData: _chartBorder(),
+        minY: 0,
+        maxY: maxY,
         titlesData: FlTitlesData(
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: true, reservedSize: 36),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 36,
+              interval: _leftInterval(maxY),
+            ),
           ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               interval: _bottomInterval(data.timeList.length),
-              getTitlesWidget: (value, meta) {
-                final index = value.toInt();
-                if (index < 0 || index >= data.timeList.length) {
-                  return const SizedBox.shrink();
-                }
-                final text = data.timeList[index];
-                return SideTitleWidget(
-                  axisSide: meta.axisSide,
-                  child: Text(
-                    _formatDateLabel(text),
-                    style: const TextStyle(fontSize: 10),
-                  ),
-                );
-              },
+              getTitlesWidget: (value, meta) =>
+                  _buildBottomTitle(value, meta, data.timeList),
             ),
           ),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
         ),
         lineBarsData: [
           LineChartBarData(
             spots: spots,
-            isCurved: true,
-            color: Theme.of(context).colorScheme.primary,
-            barWidth: 3,
-            dotData: const FlDotData(show: false),
+            isCurved: false,
+            color: const Color(0xFF56B327),
+            barWidth: 1.5,
+            dotData: FlDotData(
+              show: true,
+              getDotPainter: (spot, percent, barData, index) =>
+                  FlDotCirclePainter(
+                    radius: 3,
+                    color: const Color(0xFF56B327),
+                    strokeWidth: 2,
+                    strokeColor: Colors.white,
+                  ),
+            ),
+            belowBarData: BarAreaData(
+              show: true,
+              gradient: const LinearGradient(
+                colors: [Color(0xFFFFEEEB), Colors.white],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
           ),
         ],
       ),
@@ -327,7 +349,7 @@ class _OrderBarChart extends StatelessWidget {
           barRods: [
             BarChartRodData(
               toY: data.numList[i].toDouble(),
-              color: Theme.of(context).colorScheme.secondary,
+              color: const Color(0xFF3FA9FC),
               width: 8,
               borderRadius: BorderRadius.circular(4),
             ),
@@ -335,35 +357,35 @@ class _OrderBarChart extends StatelessWidget {
         ),
       );
     }
+    final maxY = _calcMaxY(data.numList.map((e) => e.toDouble()).toList());
     return BarChart(
       BarChartData(
         gridData: const FlGridData(show: false),
+        borderData: _chartBorder(),
+        minY: 0,
+        maxY: maxY,
         titlesData: FlTitlesData(
-          leftTitles: const AxisTitles(
-            sideTitles: SideTitles(showTitles: true, reservedSize: 36),
+          leftTitles: AxisTitles(
+            sideTitles: SideTitles(
+              showTitles: true,
+              reservedSize: 36,
+              interval: _leftInterval(maxY),
+            ),
           ),
           bottomTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
               interval: _bottomInterval(data.timeList.length),
-              getTitlesWidget: (value, meta) {
-                final index = value.toInt();
-                if (index < 0 || index >= data.timeList.length) {
-                  return const SizedBox.shrink();
-                }
-                final text = data.timeList[index];
-                return SideTitleWidget(
-                  axisSide: meta.axisSide,
-                  child: Text(
-                    _formatDateLabel(text),
-                    style: const TextStyle(fontSize: 10),
-                  ),
-                );
-              },
+              getTitlesWidget: (value, meta) =>
+                  _buildBottomTitle(value, meta, data.timeList),
             ),
           ),
-          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+          rightTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
+          topTitles: const AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
         ),
         barGroups: bars,
       ),
@@ -372,9 +394,8 @@ class _OrderBarChart extends StatelessWidget {
 }
 
 double _bottomInterval(int length) {
-  if (length <= 6) return 1;
-  if (length <= 12) return 2;
-  return (length / 6).ceilToDouble();
+  if (length <= 12) return 1;
+  return (length / 12).ceilToDouble();
 }
 
 String _formatDateLabel(String raw) {
@@ -384,6 +405,50 @@ String _formatDateLabel(String raw) {
   return raw;
 }
 
+SideTitleWidget _buildBottomTitle(
+  double value,
+  TitleMeta meta,
+  List<String> labels,
+) {
+  final index = value.toInt();
+  if (index < 0 || index >= labels.length) {
+    return const SideTitleWidget(
+      axisSide: AxisSide.bottom,
+      child: SizedBox.shrink(),
+    );
+  }
+  final text = labels[index];
+  return SideTitleWidget(
+    axisSide: meta.axisSide,
+    angle: 70 * math.pi / 180,
+    child: Text(_formatDateLabel(text), style: const TextStyle(fontSize: 10)),
+  );
+}
+
+double _calcMaxY(List<double> values) {
+  if (values.isEmpty) return 8;
+  final maxValue = values.reduce(math.max);
+  if (maxValue <= 8) return 8;
+  return maxValue.ceilToDouble();
+}
+
+double _leftInterval(double maxY) {
+  if (maxY <= 8) return 1;
+  return (maxY / 8).ceilToDouble();
+}
+
+FlBorderData _chartBorder() {
+  return FlBorderData(
+    show: true,
+    border: const Border(
+      left: BorderSide(color: Color(0xFFEDEDED), width: 0.5),
+      bottom: BorderSide(color: Color(0xFFEDEDED), width: 0.5),
+      right: BorderSide.none,
+      top: BorderSide.none,
+    ),
+  );
+}
+
 class _SectionTitle extends StatelessWidget {
   const _SectionTitle({required this.title});
 
@@ -391,10 +456,7 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: const TextStyle(fontWeight: FontWeight.w600),
-    );
+    return Text(title, style: const TextStyle(fontWeight: FontWeight.w600));
   }
 }
 
@@ -414,7 +476,9 @@ class _OrderList extends StatelessWidget {
           .map(
             (order) => Card(
               child: ListTile(
-                title: Text('${l10n.saleSummaryOrderNo}: ${order.orderNo ?? '-'}'),
+                title: Text(
+                  '${l10n.saleSummaryOrderNo}: ${order.orderNo ?? '-'}',
+                ),
                 subtitle: Text(
                   '${l10n.saleSummaryAmount}: ${order.amount?.toStringAsFixed(2) ?? '-'}\n'
                   '${l10n.saleSummaryPayWay}: ${_payWayText(l10n, order.payWay)}',

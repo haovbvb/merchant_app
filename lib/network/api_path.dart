@@ -1,5 +1,4 @@
 class ApiPath {
-
   static const String proBaseUrl = 'https://okla-admin-app.esquare-global.com';
   static const String testBaseUrl = 'https://okla-admin-app.esquare-global.com';
 
@@ -8,7 +7,7 @@ class ApiPath {
   static const String login = '/admin/sys/user/login';
   static const String logout = '/admin/sys/user/logout';
   static const String refreshToken = '/admin/sys/account/refreshToken';
-    static const String changePassword = '/admin/sys/account/changePassword';
+  static const String changePassword = '/admin/sys/account/changePassword';
 
   // 入库/登记
   static const String batteryModelList = '/admin/battery/getModelList';
@@ -17,26 +16,27 @@ class ApiPath {
   static const String vehicleRegister = '/admin/vehicle/register';
   static const String stationModelList = '/admin/station/getModelList';
   static const String stationRegister = '/admin/station/register';
-  static const String stationGetTypeBySource =
-      '/admin/station/getStationType';
+  static const String stationGetTypeBySource = '/admin/station/getStationType';
   static const String stationInstall = '/admin/station/install';
   static const String stationTakeOff = '/admin/station/takeOff';
   static const String stationUploadImage = '/admin/station/upload';
   static const String stationPermission = '/admin/station/stationPermission';
-  static const String stationCancelPermission = '/admin/station/cancelPermission';
-  static const String stationQueryPermission = '/admin/station/queryStationPermission';
+  static const String stationCancelPermission =
+      '/admin/station/cancelPermission';
+  static const String stationQueryPermission =
+      '/admin/station/queryStationPermission';
   static const String stationQueryListBySn = '/admin/station/queryListBySn';
   static const String accountQueryBePermissionList =
       '/admin/sys/account/queryBePermissionList';
-    static const String bluetoothGetLockIdBySn = '/admin/blueTooth/getLockIdBySn';
-    static const String bluetoothAuthAdd = '/admin/blueTooth/authAdd';
-    static const String bluetoothGetUidByPhone = '/admin/blueTooth/getUidByPhone';
-    static const String bluetoothEnOrDecrypt = '/admin/blueTooth/enOrDecrypt';
-    static const String cabinetBaseInfo = '/admin/station/queryStationDetail';
-    static const String cabinetSecretKey = '/admin/station/queryStationSecretKey';
-    static const String cabinetConfig = '/admin/station/config';
-    static const String cabinetLayoutHistory = '/admin/stations/{sn}/history';
-    static const String cabinetFaultList = '/admin/faultReport/queryBySnAndPort';
+  static const String bluetoothGetLockIdBySn = '/admin/blueTooth/getLockIdBySn';
+  static const String bluetoothAuthAdd = '/admin/blueTooth/authAdd';
+  static const String bluetoothGetUidByPhone = '/admin/blueTooth/getUidByPhone';
+  static const String bluetoothEnOrDecrypt = '/admin/blueTooth/enOrDecrypt';
+  static const String cabinetBaseInfo = '/admin/station/queryStationDetail';
+  static const String cabinetSecretKey = '/admin/station/queryStationSecretKey';
+  static const String cabinetConfig = '/admin/station/config';
+  static const String cabinetLayoutHistory = '/admin/stations/{sn}/history';
+  static const String cabinetFaultList = '/admin/faultReport/queryBySnAndPort';
 
   // 售后绑定
   static const String afterSaleQueryUserForBindOrder =
@@ -52,8 +52,8 @@ class ApiPath {
   static const String userSearchList = '/admin/user/searchList';
   static const String userGetDetail = '/admin/user/getDetail';
   static const String userQueryOrderList = '/admin/user/queryUserOrderList';
-    static const String messageGetSysList = '/admin/sys/msg/getSysMessage';
-    static const String messageUpdateFlag = '/admin/sys/msg/updateMsgFlag';
+  static const String messageGetSysList = '/admin/sys/msg/getSysMessage';
+  static const String messageUpdateFlag = '/admin/sys/msg/updateMsgFlag';
   static const String userUploadAttachment = '/admin/user/uploadAttachment';
   static const String tradeUploadAttachment = '/admin/trade/uploadAttachment';
   static const String userConfirmPayOrder = '/admin/trade/confirmPayOrder';
@@ -102,10 +102,10 @@ class ApiPath {
   static const String saleSummaryQueryAfterSaleData =
       '/admin/trade/queryAfterSaleData';
 
-    // 销售/注册
-    static const String areaCodeConfig = '/admin/getAreaCodeConfig';
-    static const String offlineRegister = '/admin/register';
-    static const String sendSms = '/admin/sendSms';
+  // 销售/注册
+  static const String areaCodeConfig = '/admin/getAreaCodeConfig';
+  static const String offlineRegister = '/admin/register';
+  static const String sendSms = '/admin/sendSms';
   static const String querySaleDeviceInfo = '/admin/trade/querySaleDeviceInfo';
   static const String queryServicePlanByName = '/admin/trade/queryInfoPage';
   static const String queryPaymentPlanList =
@@ -123,16 +123,17 @@ class ApiPath {
   static const String queryUserForRefundDeposit =
       '/admin/trade/queryUserForRefundDeposit';
   static const String refundDeposit = '/admin/trade/refundDeposit';
-    static const String queryUserForPayPeriod = '/admin/trade/queryUserForPayPeriod';
-    static const String payPeriod = '/admin/trade/payPeriod';
-    static const String manualReplace = '/admin/swap/exchange';
+  static const String queryUserForPayPeriod =
+      '/admin/trade/queryUserForPayPeriod';
+  static const String payPeriod = '/admin/trade/payPeriod';
+  static const String manualReplace = '/admin/swap/exchange';
 
-    // 道路救援
-    static const String roadSaveQueryPage = '/admin/op/queryRoadSavePage';
-    static const String roadSaveQueryInfo = '/admin/op/queryRoadSaveInfo';
-    static const String roadSavePay = '/admin/op/payRoadSave';
-    static const String roadSaveDeal = '/admin/op/saveRoadSaveResponse';
-    static const String roadSaveUploadImg = '/admin/op/uploadRoadSaveImg';
+  // 道路救援
+  static const String roadSaveQueryPage = '/admin/op/queryRoadSavePage';
+  static const String roadSaveQueryInfo = '/admin/op/queryRoadSaveInfo';
+  static const String roadSavePay = '/admin/op/payRoadSave';
+  static const String roadSaveDeal = '/admin/op/saveRoadSaveResponse';
+  static const String roadSaveUploadImg = '/admin/op/uploadRoadSaveImg';
 
   // 设备解绑
   static const String unbindDevice = '/admin/op/unbindDevice';
@@ -167,10 +168,10 @@ class ApiPath {
   static const String transportWithdraw = '/admin/transfer/withdraw';
   static const String transportEditTrackingNumber =
       '/admin/transfer/editTrackingNumber';
-  static const String transportCheckDeviceSn =
-      '/admin/transfer/checkDeviceSn';
+  static const String transportCheckDeviceSn = '/admin/transfer/checkDeviceSn';
 
   // VCU
   static const String vcuSendCommand = '/admin/car/ctrlVehicle';
   static const String vcuVersionList = '/admin/car/queryVceVersionList';
+  static const String deviceCommonSearch = '/admin/device/commonSearch';
 }

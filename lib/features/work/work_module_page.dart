@@ -16,6 +16,7 @@ import 'package:merchant_app/features/work/device/device_search_page.dart';
 import 'package:merchant_app/features/work/device/vehicle_search_page.dart';
 import 'package:merchant_app/features/work/entry/battery_entry_page.dart';
 import 'package:merchant_app/features/work/entry/battery_ship_page.dart';
+import 'package:merchant_app/features/work/entry/shipping_entry_page.dart';
 import 'package:merchant_app/features/work/entry/station_entry_page.dart';
 import 'package:merchant_app/features/work/entry/vehicle_entry_page.dart';
 import 'package:merchant_app/features/work/maintenance/maintenance_book_page.dart';
@@ -39,8 +40,8 @@ import 'package:merchant_app/features/work/user/user_detail_page.dart';
 import 'package:merchant_app/features/work/user/user_list_page.dart';
 import 'package:merchant_app/features/work/vcu/vcu_control_page.dart';
 import 'package:merchant_app/features/work/vcu/vcu_search_page.dart';
-import 'package:merchant_app/features/work/warehouse/inventory_detail_page.dart';
-import 'package:merchant_app/features/work/warehouse/inventory_list_page.dart';
+import 'package:merchant_app/features/work/warehouse/inventory_detail_page_new.dart';
+import 'package:merchant_app/features/work/warehouse/inventory_list_page_new.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_search_page.dart';
 import 'package:merchant_app/features/work/warehouse/transport_controller.dart';
 import 'package:merchant_app/features/work/warehouse/transport_detail_page.dart';
@@ -83,6 +84,8 @@ class WorkModulePage extends StatelessWidget {
         return const VehicleEntryPage();
       case 'station_entry':
         return const StationEntryPage();
+      case 'shipping_entry':
+        return const ShippingEntryPage();
       case 'battery_ship':
         return const BatteryShipPage();
       case 'user_list':
@@ -146,9 +149,9 @@ class WorkModulePage extends StatelessWidget {
       case 'bluetooth_operate':
         return const BluetoothOperatePage();
       case 'device_inventory':
-        return const InventoryListPage();
+        return const InventoryListPageNew();
       case 'device_inventory_detail':
-        return InventoryDetailPage(inventoryNo: recordNo ?? '');
+        return InventoryDetailPageNew(inventoryNo: recordNo ?? '');
       case 'device_inventory_search':
         return const InventorySearchPage();
       case 'device_transport_issue':

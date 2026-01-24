@@ -107,6 +107,18 @@ abstract class AppLocalizations {
   /// **'Welcome to Merchant!'**
   String get welcomeMessage;
 
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @confirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get confirm;
+
   /// No description provided for @logout.
   ///
   /// In en, this message translates to:
@@ -1625,6 +1637,78 @@ abstract class AppLocalizations {
   /// **'Revoked'**
   String get warehouseInventoryStatusRevoked;
 
+  /// No description provided for @inventoryCountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory Count'**
+  String get inventoryCountTitle;
+
+  /// No description provided for @inventorySearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter inventory number to search'**
+  String get inventorySearchHint;
+
+  /// No description provided for @inventoryEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No information about Inventory'**
+  String get inventoryEmptyHint;
+
+  /// No description provided for @inventoryDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory Count Detail'**
+  String get inventoryDetailTitle;
+
+  /// No description provided for @inventoryCreateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Inventory Count'**
+  String get inventoryCreateTitle;
+
+  /// No description provided for @inventorySelectWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Warehouse'**
+  String get inventorySelectWarehouse;
+
+  /// No description provided for @inventoryScanToReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to receive'**
+  String get inventoryScanToReceive;
+
+  /// No description provided for @inventoryStatusInventoryed.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventoryed'**
+  String get inventoryStatusInventoryed;
+
+  /// No description provided for @inventoryStatusNotCounted.
+  ///
+  /// In en, this message translates to:
+  /// **'Not counted'**
+  String get inventoryStatusNotCounted;
+
+  /// No description provided for @inventoryStatusNotInStock.
+  ///
+  /// In en, this message translates to:
+  /// **'Not in stock'**
+  String get inventoryStatusNotInStock;
+
+  /// No description provided for @inventoryCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory Completed'**
+  String get inventoryCompleted;
+
+  /// No description provided for @selectDeviceType.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Device Type'**
+  String get selectDeviceType;
+
   /// No description provided for @warehouseTransportTitle.
   ///
   /// In en, this message translates to:
@@ -1834,6 +1918,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Confirm'**
   String get scanConfirm;
+
+  /// No description provided for @scanSuccessEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Successful entry, continue entering'**
+  String get scanSuccessEntry;
 
   /// No description provided for @scanCameraPermissionTitle.
   ///
@@ -2471,6 +2561,36 @@ abstract class AppLocalizations {
   /// **'No results'**
   String get vehicleSearchEmpty;
 
+  /// No description provided for @shippingEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping Entry'**
+  String get shippingEntryTitle;
+
+  /// No description provided for @shippingEntrySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the device model to be entered'**
+  String get shippingEntrySubtitle;
+
+  /// No description provided for @deviceTypeVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get deviceTypeVehicle;
+
+  /// No description provided for @deviceTypeBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery'**
+  String get deviceTypeBattery;
+
+  /// No description provided for @deviceTypeStation.
+  ///
+  /// In en, this message translates to:
+  /// **'Station'**
+  String get deviceTypeStation;
+
   /// No description provided for @batteryEntryTitle.
   ///
   /// In en, this message translates to:
@@ -2644,6 +2764,144 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Stay'**
   String get entryStayAction;
+
+  /// No description provided for @entryDimensionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Dimension'**
+  String get entryDimensionLabel;
+
+  /// No description provided for @entryNetWeightLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Net Weight'**
+  String get entryNetWeightLabel;
+
+  /// No description provided for @entryManualEntryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Entry'**
+  String get entryManualEntryButton;
+
+  /// No description provided for @entryScanEntryButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan Entry'**
+  String get entryScanEntryButton;
+
+  /// No description provided for @entryEmptyDeviceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'There is no device letter yet,\nplease scan or receive the device SN to enter'**
+  String get entryEmptyDeviceHint;
+
+  /// No description provided for @entryManualEntryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Entry'**
+  String get entryManualEntryTitle;
+
+  /// No description provided for @entryStationSnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Station SN'**
+  String get entryStationSnLabel;
+
+  /// No description provided for @entryStationSnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter station SN'**
+  String get entryStationSnHint;
+
+  /// No description provided for @entryBatterySnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery SN'**
+  String get entryBatterySnLabel;
+
+  /// No description provided for @entryBatterySnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter battery SN'**
+  String get entryBatterySnHint;
+
+  /// No description provided for @entryVehicleSnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle SN'**
+  String get entryVehicleSnLabel;
+
+  /// No description provided for @entryVehicleSnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter vehicle SN'**
+  String get entryVehicleSnHint;
+
+  /// No description provided for @entryImeiHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter IMEI code (optional)'**
+  String get entryImeiHint;
+
+  /// No description provided for @entryIccidHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter ICCID code (optional)'**
+  String get entryIccidHint;
+
+  /// No description provided for @entrySnRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'SN is required'**
+  String get entrySnRequired;
+
+  /// No description provided for @entryConfirmSubmitTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Submission?'**
+  String get entryConfirmSubmitTitle;
+
+  /// No description provided for @entryConfirmSubmitPrefix.
+  ///
+  /// In en, this message translates to:
+  /// **'A total of '**
+  String get entryConfirmSubmitPrefix;
+
+  /// No description provided for @entryConfirmSubmitSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' are being submitted for entry. Once submitted, it will be reflected in the system and cannot be revised.'**
+  String get entryConfirmSubmitSuffix;
+
+  /// No description provided for @entrySubmissionCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Submission Completed!'**
+  String get entrySubmissionCompleted;
+
+  /// No description provided for @entryShipPromptMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You need to ship the batteries entered this time to the agent?'**
+  String get entryShipPromptMessage;
+
+  /// No description provided for @entryCloseButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get entryCloseButton;
+
+  /// No description provided for @entryShipButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Ship'**
+  String get entryShipButton;
+
+  /// No description provided for @entryReturnToWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Workbench'**
+  String get entryReturnToWorkbench;
 
   /// No description provided for @shipDeviceTypeLabel.
   ///
@@ -4007,10 +4265,40 @@ abstract class AppLocalizations {
   /// **'Longitude'**
   String get cabinetPutawayLongitude;
 
+  /// No description provided for @cabinetPutawaySnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter station SN or scan QR code'**
+  String get cabinetPutawaySnHint;
+
+  /// No description provided for @cabinetPutawayNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter station name'**
+  String get cabinetPutawayNameHint;
+
+  /// No description provided for @cabinetPutawayAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter station address'**
+  String get cabinetPutawayAddressHint;
+
+  /// No description provided for @cabinetPutawayCoordinates.
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinates'**
+  String get cabinetPutawayCoordinates;
+
+  /// No description provided for @cabinetPutawayTimesPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'times/day'**
+  String get cabinetPutawayTimesPerDay;
+
   /// No description provided for @cabinetPutawaySwapTime.
   ///
   /// In en, this message translates to:
-  /// **'Swap Times'**
+  /// **'Battery Exchange Indicator'**
   String get cabinetPutawaySwapTime;
 
   /// No description provided for @cabinetPutawayStoreNum.
@@ -4058,14 +4346,20 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetUnshelveTitle.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet Unshelve'**
+  /// **'Retire Station'**
   String get cabinetUnshelveTitle;
 
   /// No description provided for @cabinetUnshelveSn.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet SN'**
+  /// **'Station SN'**
   String get cabinetUnshelveSn;
+
+  /// No description provided for @cabinetUnshelveSnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter station SN or scan QR code'**
+  String get cabinetUnshelveSnHint;
 
   /// No description provided for @cabinetUnshelveInfoTitle.
   ///
@@ -4076,7 +4370,7 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetUnshelveInfoEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No cabinet info'**
+  /// **'No device parameter info'**
   String get cabinetUnshelveInfoEmpty;
 
   /// No description provided for @cabinetUnshelveName.
@@ -4097,10 +4391,58 @@ abstract class AppLocalizations {
   /// **'Reason'**
   String get cabinetUnshelveReason;
 
+  /// No description provided for @cabinetUnshelveReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reasons For Retirement'**
+  String get cabinetUnshelveReasonLabel;
+
+  /// No description provided for @cabinetUnshelveReasonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter reasons'**
+  String get cabinetUnshelveReasonHint;
+
+  /// No description provided for @cabinetUnshelveCommonReasons.
+  ///
+  /// In en, this message translates to:
+  /// **'Common Reasons'**
+  String get cabinetUnshelveCommonReasons;
+
+  /// No description provided for @cabinetUnshelveReason1.
+  ///
+  /// In en, this message translates to:
+  /// **'The point dealer does not renew the contract'**
+  String get cabinetUnshelveReason1;
+
+  /// No description provided for @cabinetUnshelveReason2.
+  ///
+  /// In en, this message translates to:
+  /// **'Efficiency is not up to standard'**
+  String get cabinetUnshelveReason2;
+
+  /// No description provided for @cabinetUnshelveReason3.
+  ///
+  /// In en, this message translates to:
+  /// **'Device damage and retire to repair'**
+  String get cabinetUnshelveReason3;
+
+  /// No description provided for @cabinetUnshelveConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Retire?'**
+  String get cabinetUnshelveConfirmTitle;
+
+  /// No description provided for @cabinetUnshelveConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'After deactivation, the operating hours of the station will be cleared. If relisted, please modify the operating hours in management portal.'**
+  String get cabinetUnshelveConfirmMessage;
+
   /// No description provided for @cabinetUnshelveSubmit.
   ///
   /// In en, this message translates to:
-  /// **'Submit'**
+  /// **'Confirm'**
   String get cabinetUnshelveSubmit;
 
   /// No description provided for @cabinetUnshelveSuccess.
@@ -4598,7 +4940,7 @@ abstract class AppLocalizations {
   /// No description provided for @addressPickerTitle.
   ///
   /// In en, this message translates to:
-  /// **'Select Address'**
+  /// **'Address'**
   String get addressPickerTitle;
 
   /// No description provided for @addressPickerConfirm.
@@ -4612,6 +4954,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Move map to pick a location'**
   String get addressPickerEmpty;
+
+  /// No description provided for @addressPickerCoordinates.
+  ///
+  /// In en, this message translates to:
+  /// **'Coordinates'**
+  String get addressPickerCoordinates;
+
+  /// No description provided for @addressPickerSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search location'**
+  String get addressPickerSearchHint;
 
   /// No description provided for @bluetoothAuthTitle.
   ///
@@ -4708,6 +5062,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'• Scan and connect a device\n• Read Key ID / authorize / clear / set validity\n• Send HEX commands and view logs'**
   String get bluetoothOperateTodoList;
+
+  /// No description provided for @deviceDetailTabBasicInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Info'**
+  String get deviceDetailTabBasicInfo;
+
+  /// No description provided for @deviceDetailTabPortDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Port Detail'**
+  String get deviceDetailTabPortDetail;
+
+  /// No description provided for @deviceDetailTabAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Address'**
+  String get deviceDetailTabAddress;
+
+  /// No description provided for @deviceDetailTabRepairRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Repair Records'**
+  String get deviceDetailTabRepairRecords;
+
+  /// No description provided for @deviceDetailInputTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Input Time'**
+  String get deviceDetailInputTimeLabel;
+
+  /// No description provided for @deviceDetailBindingStateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Binding State'**
+  String get deviceDetailBindingStateLabel;
+
+  /// No description provided for @deviceDetailOnboarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Onboarded'**
+  String get deviceDetailOnboarded;
+
+  /// No description provided for @deviceDetailNotBoarded.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Boarded'**
+  String get deviceDetailNotBoarded;
+
+  /// No description provided for @deviceDetailOnboardedTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Onboarded Time'**
+  String get deviceDetailOnboardedTimeLabel;
+
+  /// No description provided for @deviceDetailResponsibleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Responsible'**
+  String get deviceDetailResponsibleLabel;
+
+  /// No description provided for @deviceDetailPhotoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get deviceDetailPhotoLabel;
+
+  /// No description provided for @deviceDetailPortFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get deviceDetailPortFilterAll;
+
+  /// No description provided for @deviceDetailPortFilterAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get deviceDetailPortFilterAvailable;
+
+  /// No description provided for @deviceDetailPortFilterDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get deviceDetailPortFilterDisabled;
+
+  /// No description provided for @deviceDetailPortFilterInUse.
+  ///
+  /// In en, this message translates to:
+  /// **'In Use'**
+  String get deviceDetailPortFilterInUse;
+
+  /// No description provided for @deviceDetailPortReplaceable.
+  ///
+  /// In en, this message translates to:
+  /// **'Replaceable'**
+  String get deviceDetailPortReplaceable;
+
+  /// No description provided for @deviceDetailPortDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get deviceDetailPortDisabled;
+
+  /// No description provided for @deviceDetailPortAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get deviceDetailPortAvailable;
+
+  /// No description provided for @deviceDetailPortSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up'**
+  String get deviceDetailPortSetup;
+
+  /// No description provided for @deviceDetailNavigation.
+  ///
+  /// In en, this message translates to:
+  /// **'Navigation'**
+  String get deviceDetailNavigation;
+
+  /// No description provided for @deviceDetailRepairCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get deviceDetailRepairCompleted;
+
+  /// No description provided for @deviceDetailRepairMissingParts.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing Parts'**
+  String get deviceDetailRepairMissingParts;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

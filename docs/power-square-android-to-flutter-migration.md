@@ -253,7 +253,7 @@
 - StaticSaleActivity
 - UnbindActivityNew
 
-## 4.1 未迁移清单（复核：2026-01-20）
+## 4.1 未迁移清单（复核：2026-01-23）
 
 > 说明：基于 Android 侧模块与 Flutter 现有页面对比，以下功能点尚未发现明确对应实现。
 
@@ -269,6 +269,28 @@
 
 - 被注释的 Activity（Manifest 中暂未启用）
 - BatteryRegisterActivity（被注释，不用迁移）
+
+**仍待迁移 / 待补齐（按优先级）**
+
+**P0（当前未发现缺口）**
+- 暂无新增 P0 缺口；以现有主链路闭环为准
+
+**P1（功能未完整落地）**
+- 报表与图表：销售统计/售后统计/月度/排行等（Android 使用 MPAndroidChart）
+- 推送与崩溃上报：Firebase Messaging / Crashlytics / Analytics
+- 日志/埋点：统一事件模型与采集策略
+- 权限统一封装：除扫码/定位/蓝牙外的全量权限管理
+
+**P2（低优先级/低频）**
+- VCU 模块：VcuDeviceSearchActivity / VcuControlActivity（含版本、指令控制）
+- 地图/推广类页面：BatteryLocActivity / PromoteWebActivity
+
+**系统能力专项（剩余部分）**
+- Google Maps 关键能力补齐（路线/路径规划与渲染）
+- 相机/扫码稳定性与场景补齐（非主流程边角页）
+
+**回归与发布（待开始）**
+- 回归测试计划、灰度策略与线上稳定性观测
 
 ---
 

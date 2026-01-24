@@ -9,12 +9,14 @@ class CabinetUnshelvePage extends ConsumerStatefulWidget {
   const CabinetUnshelvePage({super.key});
 
   @override
-  ConsumerState<CabinetUnshelvePage> createState() => _CabinetUnshelvePageState();
+  ConsumerState<CabinetUnshelvePage> createState() =>
+      _CabinetUnshelvePageState();
 }
 
 class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
   final _snController = TextEditingController();
   final _reasonController = TextEditingController();
+  String? _selectedReason;
 
   @override
   void dispose() {
@@ -30,66 +32,254 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
     final notifier = ref.read(cabinetUnshelveProvider.notifier);
     final cabinet = state.cabinet;
 
+    // 常见原因列表
+    final commonReasons = [
+      l10n.cabinetUnshelveReason1,
+      l10n.cabinetUnshelveReason2,
+      l10n.cabinetUnshelveReason3,
+    ];
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.cabinetUnshelveTitle)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      backgroundColor: const Color(0xFFF5F6F7),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const SizedBox.shrink(),
+      ),
+      body: Column(
         children: [
-          TextField(
-            controller: _snController,
-            decoration: InputDecoration(
-              labelText: l10n.cabinetUnshelveSn,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              suffixIcon: Wrap(
-                spacing: 4,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.qr_code_scanner),
-                    onPressed: _scanSn,
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                // 顶部图标和标题
+                Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE85D4C),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_downward,
+                          color: Colors.white,
+                          size: 36,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.cabinetUnshelveTitle,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () => notifier.queryCabinet(
-                      _snController.text.trim(),
-                    ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Station SN 卡片
+                _CardSection(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _InputRow(
+                        label: l10n.cabinetUnshelveSn,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _snController,
+                                decoration: InputDecoration(
+                                  hintText: l10n.cabinetUnshelveSnHint,
+                                  hintStyle: const TextStyle(
+                                    color: Color(0xFF999999),
+                                    fontSize: 15,
+                                  ),
+                                  border: InputBorder.none,
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                                style: const TextStyle(fontSize: 15),
+                                onSubmitted: (_) => notifier.queryCabinet(
+                                  _snController.text.trim(),
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: _scanSn,
+                              child: const Icon(
+                                Icons.qr_code_scanner,
+                                color: Color(0xFF333333),
+                                size: 24,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                      // 设备参数信息区
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF9F9F9),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        margin: const EdgeInsets.only(top: 16),
+                        child: cabinet == null
+                            ? Text(
+                                l10n.cabinetUnshelveInfoEmpty,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: Color(0xFF999999),
+                                  fontSize: 14,
+                                ),
+                              )
+                            : _CabinetInfoWidget(cabinet: cabinet),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Reasons 卡片
+                _CardSection(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _InputRow(
+                        label: l10n.cabinetUnshelveReasonLabel,
+                        child: TextField(
+                          controller: _reasonController,
+                          decoration: InputDecoration(
+                            hintText: l10n.cabinetUnshelveReasonHint,
+                            hintStyle: const TextStyle(
+                              color: Color(0xFF999999),
+                              fontSize: 15,
+                            ),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          style: const TextStyle(fontSize: 15),
+                          maxLines: 2,
+                        ),
+                      ),
+                      const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                      const SizedBox(height: 16),
+                      Text(
+                        l10n.cabinetUnshelveCommonReasons,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF999999),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: commonReasons.map((reason) {
+                          final isSelected = _selectedReason == reason;
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _selectedReason = reason;
+                                _reasonController.text = reason;
+                              });
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: isSelected
+                                    ? const Color(0xFFE8F5E9)
+                                    : Colors.white,
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? const Color(0xFF4CAF50)
+                                      : const Color(0xFFEEEEEE),
+                                ),
+                              ),
+                              child: Text(
+                                reason,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: isSelected
+                                      ? const Color(0xFF4CAF50)
+                                      : const Color(0xFF333333),
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          _InfoCard(
-            title: l10n.cabinetUnshelveInfoTitle,
-            content: cabinet == null
-                ? l10n.cabinetUnshelveInfoEmpty
-                : '${l10n.cabinetUnshelveName}: ${cabinet.stationName ?? '-'}\n'
-                    '${l10n.cabinetUnshelveModel}: ${cabinet.stationModel ?? '-'}',
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _reasonController,
-            maxLines: 3,
-            decoration: InputDecoration(
-              labelText: l10n.cabinetUnshelveReason,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+
+          // 底部按钮
+          Container(
+            padding: EdgeInsets.fromLTRB(
+              24,
+              16,
+              24,
+              16 + MediaQuery.of(context).padding.bottom,
+            ),
+            color: Colors.white,
+            child: SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: FilledButton(
+                onPressed: state.submitting
+                    ? null
+                    : () => _showConfirmDialog(context),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF4CAF50),
+                  disabledBackgroundColor: const Color(0xFFB8E6B8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                ),
+                child: state.submitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        l10n.cabinetUnshelveSubmit,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
               ),
             ),
-          ),
-          const SizedBox(height: 20),
-          FilledButton(
-            onPressed: state.submitting
-                ? null
-                : () => _submit(context, notifier),
-            child: state.submitting
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.cabinetUnshelveSubmit),
           ),
         ],
       ),
@@ -99,49 +289,206 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => const QrScanPage(
-          parseDeviceSn: true,
-          deviceType: 3,
-        ),
+        builder: (_) => const QrScanPage(parseDeviceSn: true, deviceType: 3),
       ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
+    ref.read(cabinetUnshelveProvider.notifier).queryCabinet(result);
   }
 
-  Future<void> _submit(
-    BuildContext context,
-    CabinetUnshelveNotifier notifier,
-  ) async {
+  Future<void> _showConfirmDialog(BuildContext context) async {
     final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.cabinetUnshelveConfirmTitle,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF333333),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.cabinetUnshelveConfirmMessage,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF666666),
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 44,
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(context).pop(false),
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: const Color(0xFFF5F5F5),
+                          foregroundColor: const Color(0xFF333333),
+                          side: BorderSide.none,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                        ),
+                        child: Text(l10n.cancel),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: SizedBox(
+                      height: 44,
+                      child: FilledButton(
+                        onPressed: () => Navigator.of(context).pop(true),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFF4CAF50),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(22),
+                          ),
+                        ),
+                        child: Text(l10n.confirm),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      _submit(context);
+    }
+  }
+
+  Future<void> _submit(BuildContext context) async {
+    final l10n = context.l10n;
+    final notifier = ref.read(cabinetUnshelveProvider.notifier);
     final ok = await notifier.submit(
       sn: _snController.text.trim(),
       reason: _reasonController.text.trim(),
     );
     if (!context.mounted) return;
-    showToast(ok ? l10n.cabinetUnshelveSuccess : l10n.cabinetUnshelveFailed);
+    if (ok) {
+      showToast(l10n.cabinetUnshelveSuccess);
+      Navigator.of(context).pop();
+    } else {
+      showToast(l10n.cabinetUnshelveFailed);
+    }
   }
 }
 
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.title, required this.content});
+/// 卡片容器
+class _CardSection extends StatelessWidget {
+  const _CardSection({required this.child});
 
-  final String title;
-  final String content;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 6),
-            Text(content),
-          ],
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: child,
+    );
+  }
+}
+
+/// 输入行
+class _InputRow extends StatelessWidget {
+  const _InputRow({required this.label, required this.child});
+
+  final String label;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 15, color: Color(0xFF333333)),
         ),
+        const SizedBox(height: 8),
+        child,
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+}
+
+/// 电柜信息组件
+class _CabinetInfoWidget extends StatelessWidget {
+  const _CabinetInfoWidget({required this.cabinet});
+
+  final dynamic cabinet;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      child: Row(
+        children: [
+          // 电柜图片占位
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: const Color(0xFFEEEEEE),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(
+              Icons.ev_station,
+              color: Color(0xFF999999),
+              size: 32,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  cabinet.stationName ?? '-',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF333333),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  cabinet.stationModel ?? '-',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF999999),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

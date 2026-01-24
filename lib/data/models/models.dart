@@ -41,5 +41,6 @@ export 'user_authorization_list.dart';
 export 'user_detail.dart';
 export 'user_info.dart';
 export 'user_order_response.dart';
+export 'vcu_device_search.dart';
 export 'vehicle_repair_list_resp.dart';
 export 'warehouse_info.dart';

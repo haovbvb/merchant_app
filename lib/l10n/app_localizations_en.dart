@@ -15,6 +15,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeMessage => 'Welcome to Merchant!';
 
   @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get confirm => 'Confirm';
+
+  @override
   String get logout => 'Logout';
 
   @override
@@ -774,6 +780,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warehouseInventoryStatusRevoked => 'Revoked';
 
   @override
+  String get inventoryCountTitle => 'Inventory Count';
+
+  @override
+  String get inventorySearchHint => 'Enter inventory number to search';
+
+  @override
+  String get inventoryEmptyHint => 'No information about Inventory';
+
+  @override
+  String get inventoryDetailTitle => 'Inventory Count Detail';
+
+  @override
+  String get inventoryCreateTitle => 'Create Inventory Count';
+
+  @override
+  String get inventorySelectWarehouse => 'Select Warehouse';
+
+  @override
+  String get inventoryScanToReceive => 'Scan to receive';
+
+  @override
+  String get inventoryStatusInventoryed => 'Inventoryed';
+
+  @override
+  String get inventoryStatusNotCounted => 'Not counted';
+
+  @override
+  String get inventoryStatusNotInStock => 'Not in stock';
+
+  @override
+  String get inventoryCompleted => 'Inventory Completed';
+
+  @override
+  String get selectDeviceType => 'Select Device Type';
+
+  @override
   String get warehouseTransportTitle => 'Device Transfer';
 
   @override
@@ -877,6 +919,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scanConfirm => 'Confirm';
+
+  @override
+  String get scanSuccessEntry => 'Successful entry, continue entering';
 
   @override
   String get scanCameraPermissionTitle => 'Camera permission required';
@@ -1197,6 +1242,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vehicleSearchEmpty => 'No results';
 
   @override
+  String get shippingEntryTitle => 'Shipping Entry';
+
+  @override
+  String get shippingEntrySubtitle => 'Select the device model to be entered';
+
+  @override
+  String get deviceTypeVehicle => 'Vehicle';
+
+  @override
+  String get deviceTypeBattery => 'Battery';
+
+  @override
+  String get deviceTypeStation => 'Station';
+
+  @override
   String get batteryEntryTitle => 'Battery Entry';
 
   @override
@@ -1282,6 +1342,75 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get entryStayAction => 'Stay';
+
+  @override
+  String get entryDimensionLabel => 'Dimension';
+
+  @override
+  String get entryNetWeightLabel => 'Net Weight';
+
+  @override
+  String get entryManualEntryButton => 'Manual Entry';
+
+  @override
+  String get entryScanEntryButton => 'Scan Entry';
+
+  @override
+  String get entryEmptyDeviceHint => 'There is no device letter yet,\nplease scan or receive the device SN to enter';
+
+  @override
+  String get entryManualEntryTitle => 'Manual Entry';
+
+  @override
+  String get entryStationSnLabel => 'Station SN';
+
+  @override
+  String get entryStationSnHint => 'Please enter station SN';
+
+  @override
+  String get entryBatterySnLabel => 'Battery SN';
+
+  @override
+  String get entryBatterySnHint => 'Please enter battery SN';
+
+  @override
+  String get entryVehicleSnLabel => 'Vehicle SN';
+
+  @override
+  String get entryVehicleSnHint => 'Please enter vehicle SN';
+
+  @override
+  String get entryImeiHint => 'Please enter IMEI code (optional)';
+
+  @override
+  String get entryIccidHint => 'Please enter ICCID code (optional)';
+
+  @override
+  String get entrySnRequired => 'SN is required';
+
+  @override
+  String get entryConfirmSubmitTitle => 'Confirm Submission?';
+
+  @override
+  String get entryConfirmSubmitPrefix => 'A total of ';
+
+  @override
+  String get entryConfirmSubmitSuffix => ' are being submitted for entry. Once submitted, it will be reflected in the system and cannot be revised.';
+
+  @override
+  String get entrySubmissionCompleted => 'Submission Completed!';
+
+  @override
+  String get entryShipPromptMessage => 'You need to ship the batteries entered this time to the agent?';
+
+  @override
+  String get entryCloseButton => 'Close';
+
+  @override
+  String get entryShipButton => 'Ship';
+
+  @override
+  String get entryReturnToWorkbench => 'Return to Workbench';
 
   @override
   String get shipDeviceTypeLabel => 'Device Type';
@@ -1965,7 +2094,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetPutawayLongitude => 'Longitude';
 
   @override
-  String get cabinetPutawaySwapTime => 'Swap Times';
+  String get cabinetPutawaySnHint => 'Enter station SN or scan QR code';
+
+  @override
+  String get cabinetPutawayNameHint => 'Enter station name';
+
+  @override
+  String get cabinetPutawayAddressHint => 'Enter station address';
+
+  @override
+  String get cabinetPutawayCoordinates => 'Coordinates';
+
+  @override
+  String get cabinetPutawayTimesPerDay => 'times/day';
+
+  @override
+  String get cabinetPutawaySwapTime => 'Battery Exchange Indicator';
 
   @override
   String get cabinetPutawayStoreNum => 'Slots';
@@ -1989,16 +2133,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetPutawayFailed => 'Submit failed';
 
   @override
-  String get cabinetUnshelveTitle => 'Cabinet Unshelve';
+  String get cabinetUnshelveTitle => 'Retire Station';
 
   @override
-  String get cabinetUnshelveSn => 'Cabinet SN';
+  String get cabinetUnshelveSn => 'Station SN';
+
+  @override
+  String get cabinetUnshelveSnHint => 'Enter station SN or scan QR code';
 
   @override
   String get cabinetUnshelveInfoTitle => 'Cabinet Info';
 
   @override
-  String get cabinetUnshelveInfoEmpty => 'No cabinet info';
+  String get cabinetUnshelveInfoEmpty => 'No device parameter info';
 
   @override
   String get cabinetUnshelveName => 'Name';
@@ -2010,7 +2157,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetUnshelveReason => 'Reason';
 
   @override
-  String get cabinetUnshelveSubmit => 'Submit';
+  String get cabinetUnshelveReasonLabel => 'Reasons For Retirement';
+
+  @override
+  String get cabinetUnshelveReasonHint => 'Enter reasons';
+
+  @override
+  String get cabinetUnshelveCommonReasons => 'Common Reasons';
+
+  @override
+  String get cabinetUnshelveReason1 => 'The point dealer does not renew the contract';
+
+  @override
+  String get cabinetUnshelveReason2 => 'Efficiency is not up to standard';
+
+  @override
+  String get cabinetUnshelveReason3 => 'Device damage and retire to repair';
+
+  @override
+  String get cabinetUnshelveConfirmTitle => 'Confirm Retire?';
+
+  @override
+  String get cabinetUnshelveConfirmMessage => 'After deactivation, the operating hours of the station will be cleared. If relisted, please modify the operating hours in management portal.';
+
+  @override
+  String get cabinetUnshelveSubmit => 'Confirm';
 
   @override
   String get cabinetUnshelveSuccess => 'Submitted';
@@ -2259,13 +2430,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get batteryLocationEmpty => 'No location data';
 
   @override
-  String get addressPickerTitle => 'Select Address';
+  String get addressPickerTitle => 'Address';
 
   @override
   String get addressPickerConfirm => 'Confirm';
 
   @override
   String get addressPickerEmpty => 'Move map to pick a location';
+
+  @override
+  String get addressPickerCoordinates => 'Coordinates';
+
+  @override
+  String get addressPickerSearchHint => 'Search location';
 
   @override
   String get bluetoothAuthTitle => 'Bluetooth Authorization';
@@ -2314,4 +2491,70 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bluetoothOperateTodoList => '• Scan and connect a device\n• Read Key ID / authorize / clear / set validity\n• Send HEX commands and view logs';
+
+  @override
+  String get deviceDetailTabBasicInfo => 'Basic Info';
+
+  @override
+  String get deviceDetailTabPortDetail => 'Port Detail';
+
+  @override
+  String get deviceDetailTabAddress => 'Address';
+
+  @override
+  String get deviceDetailTabRepairRecords => 'Repair Records';
+
+  @override
+  String get deviceDetailInputTimeLabel => 'Input Time';
+
+  @override
+  String get deviceDetailBindingStateLabel => 'Binding State';
+
+  @override
+  String get deviceDetailOnboarded => 'Onboarded';
+
+  @override
+  String get deviceDetailNotBoarded => 'Not Boarded';
+
+  @override
+  String get deviceDetailOnboardedTimeLabel => 'Onboarded Time';
+
+  @override
+  String get deviceDetailResponsibleLabel => 'Responsible';
+
+  @override
+  String get deviceDetailPhotoLabel => 'Photos';
+
+  @override
+  String get deviceDetailPortFilterAll => 'All';
+
+  @override
+  String get deviceDetailPortFilterAvailable => 'Available';
+
+  @override
+  String get deviceDetailPortFilterDisabled => 'Disabled';
+
+  @override
+  String get deviceDetailPortFilterInUse => 'In Use';
+
+  @override
+  String get deviceDetailPortReplaceable => 'Replaceable';
+
+  @override
+  String get deviceDetailPortDisabled => 'Disabled';
+
+  @override
+  String get deviceDetailPortAvailable => 'Available';
+
+  @override
+  String get deviceDetailPortSetup => 'Set up';
+
+  @override
+  String get deviceDetailNavigation => 'Navigation';
+
+  @override
+  String get deviceDetailRepairCompleted => 'Completed';
+
+  @override
+  String get deviceDetailRepairMissingParts => 'Missing Parts';
 }

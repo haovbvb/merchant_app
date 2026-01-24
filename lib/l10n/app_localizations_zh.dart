@@ -15,6 +15,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get welcomeMessage => '欢迎使用商家端！';
 
   @override
+  String get cancel => '取消';
+
+  @override
+  String get confirm => '确认';
+
+  @override
   String get logout => '退出登录';
 
   @override
@@ -774,6 +780,42 @@ class AppLocalizationsZh extends AppLocalizations {
   String get warehouseInventoryStatusRevoked => '已撤销';
 
   @override
+  String get inventoryCountTitle => '盘点';
+
+  @override
+  String get inventorySearchHint => '输入盘点单号搜索';
+
+  @override
+  String get inventoryEmptyHint => '暂无盘点信息';
+
+  @override
+  String get inventoryDetailTitle => '盘点详情';
+
+  @override
+  String get inventoryCreateTitle => '创建盘点';
+
+  @override
+  String get inventorySelectWarehouse => '选择仓库';
+
+  @override
+  String get inventoryScanToReceive => '扫码盘点';
+
+  @override
+  String get inventoryStatusInventoryed => '已盘点';
+
+  @override
+  String get inventoryStatusNotCounted => '未盘点';
+
+  @override
+  String get inventoryStatusNotInStock => '不在库';
+
+  @override
+  String get inventoryCompleted => '完成盘点';
+
+  @override
+  String get selectDeviceType => '选择设备类型';
+
+  @override
   String get warehouseTransportTitle => '调拨';
 
   @override
@@ -877,6 +919,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get scanConfirm => '确认';
+
+  @override
+  String get scanSuccessEntry => '录入成功，继续录入';
 
   @override
   String get scanCameraPermissionTitle => '需要相机权限';
@@ -1197,6 +1242,21 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vehicleSearchEmpty => '暂无结果';
 
   @override
+  String get shippingEntryTitle => '设备入库';
+
+  @override
+  String get shippingEntrySubtitle => '选择要录入的设备型号';
+
+  @override
+  String get deviceTypeVehicle => '车辆';
+
+  @override
+  String get deviceTypeBattery => '电池';
+
+  @override
+  String get deviceTypeStation => '站点';
+
+  @override
   String get batteryEntryTitle => '电池入库';
 
   @override
@@ -1282,6 +1342,75 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get entryStayAction => '留在此页';
+
+  @override
+  String get entryDimensionLabel => '尺寸';
+
+  @override
+  String get entryNetWeightLabel => '净重';
+
+  @override
+  String get entryManualEntryButton => '手动录入';
+
+  @override
+  String get entryScanEntryButton => '扫码录入';
+
+  @override
+  String get entryEmptyDeviceHint => '暂无设备信息，\n请扫码或手动录入设备SN';
+
+  @override
+  String get entryManualEntryTitle => '手动录入';
+
+  @override
+  String get entryStationSnLabel => '柜机SN';
+
+  @override
+  String get entryStationSnHint => '请输入柜机SN';
+
+  @override
+  String get entryBatterySnLabel => '电池SN';
+
+  @override
+  String get entryBatterySnHint => '请输入电池SN';
+
+  @override
+  String get entryVehicleSnLabel => '车辆SN';
+
+  @override
+  String get entryVehicleSnHint => '请输入车辆SN';
+
+  @override
+  String get entryImeiHint => '请输入IMEI码（可选）';
+
+  @override
+  String get entryIccidHint => '请输入ICCID码（可选）';
+
+  @override
+  String get entrySnRequired => 'SN不能为空';
+
+  @override
+  String get entryConfirmSubmitTitle => '确认提交？';
+
+  @override
+  String get entryConfirmSubmitPrefix => '共计 ';
+
+  @override
+  String get entryConfirmSubmitSuffix => ' 即将提交入库。提交后将录入系统，无法撤销。';
+
+  @override
+  String get entrySubmissionCompleted => '提交成功！';
+
+  @override
+  String get entryShipPromptMessage => '是否将本次录入的设备发货给代理商？';
+
+  @override
+  String get entryCloseButton => '关闭';
+
+  @override
+  String get entryShipButton => '发货';
+
+  @override
+  String get entryReturnToWorkbench => '返回工作台';
 
   @override
   String get shipDeviceTypeLabel => '设备类型';
@@ -1965,7 +2094,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetPutawayLongitude => '经度';
 
   @override
-  String get cabinetPutawaySwapTime => '换电次数';
+  String get cabinetPutawaySnHint => '输入电柜SN或扫码';
+
+  @override
+  String get cabinetPutawayNameHint => '输入站点名称';
+
+  @override
+  String get cabinetPutawayAddressHint => '输入站点地址';
+
+  @override
+  String get cabinetPutawayCoordinates => '坐标';
+
+  @override
+  String get cabinetPutawayTimesPerDay => '次/天';
+
+  @override
+  String get cabinetPutawaySwapTime => '换电指标';
 
   @override
   String get cabinetPutawayStoreNum => '仓数';
@@ -1992,13 +2136,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetUnshelveTitle => '柜机下架';
 
   @override
-  String get cabinetUnshelveSn => '电柜SN';
+  String get cabinetUnshelveSn => '站点SN';
+
+  @override
+  String get cabinetUnshelveSnHint => '输入站点SN或扫码';
 
   @override
   String get cabinetUnshelveInfoTitle => '电柜信息';
 
   @override
-  String get cabinetUnshelveInfoEmpty => '暂无电柜信息';
+  String get cabinetUnshelveInfoEmpty => '暂无设备参数信息';
 
   @override
   String get cabinetUnshelveName => '名称';
@@ -2010,7 +2157,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetUnshelveReason => '原因';
 
   @override
-  String get cabinetUnshelveSubmit => '提交';
+  String get cabinetUnshelveReasonLabel => '下架原因';
+
+  @override
+  String get cabinetUnshelveReasonHint => '输入原因';
+
+  @override
+  String get cabinetUnshelveCommonReasons => '常见原因';
+
+  @override
+  String get cabinetUnshelveReason1 => '站点经销商不续签合同';
+
+  @override
+  String get cabinetUnshelveReason2 => '效率不达标';
+
+  @override
+  String get cabinetUnshelveReason3 => '设备损坏退回维修';
+
+  @override
+  String get cabinetUnshelveConfirmTitle => '确认下架？';
+
+  @override
+  String get cabinetUnshelveConfirmMessage => '下架后，站点的运营时间将被清除。如需重新上架，请在管理后台修改运营时间。';
+
+  @override
+  String get cabinetUnshelveSubmit => '确认';
 
   @override
   String get cabinetUnshelveSuccess => '提交成功';
@@ -2259,13 +2430,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get batteryLocationEmpty => '暂无定位信息';
 
   @override
-  String get addressPickerTitle => '选择地址';
+  String get addressPickerTitle => '地址';
 
   @override
   String get addressPickerConfirm => '确认';
 
   @override
   String get addressPickerEmpty => '拖动地图选择位置';
+
+  @override
+  String get addressPickerCoordinates => '坐标';
+
+  @override
+  String get addressPickerSearchHint => '搜索地址';
 
   @override
   String get bluetoothAuthTitle => '蓝牙授权';
@@ -2314,4 +2491,70 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get bluetoothOperateTodoList => '• 扫描并连接蓝牙设备\n• 读取钥匙ID、授权/清空授权/设置有效期\n• 支持发送HEX指令并查看日志';
+
+  @override
+  String get deviceDetailTabBasicInfo => '基本信息';
+
+  @override
+  String get deviceDetailTabPortDetail => '仓位详情';
+
+  @override
+  String get deviceDetailTabAddress => '地址';
+
+  @override
+  String get deviceDetailTabRepairRecords => '维修记录';
+
+  @override
+  String get deviceDetailInputTimeLabel => '入库时间';
+
+  @override
+  String get deviceDetailBindingStateLabel => '绑定状态';
+
+  @override
+  String get deviceDetailOnboarded => '已上架';
+
+  @override
+  String get deviceDetailNotBoarded => '未上架';
+
+  @override
+  String get deviceDetailOnboardedTimeLabel => '上架时间';
+
+  @override
+  String get deviceDetailResponsibleLabel => '负责人';
+
+  @override
+  String get deviceDetailPhotoLabel => '现场照片';
+
+  @override
+  String get deviceDetailPortFilterAll => '全部';
+
+  @override
+  String get deviceDetailPortFilterAvailable => '可用';
+
+  @override
+  String get deviceDetailPortFilterDisabled => '禁用';
+
+  @override
+  String get deviceDetailPortFilterInUse => '使用中';
+
+  @override
+  String get deviceDetailPortReplaceable => '可换电';
+
+  @override
+  String get deviceDetailPortDisabled => '禁用';
+
+  @override
+  String get deviceDetailPortAvailable => '空闲';
+
+  @override
+  String get deviceDetailPortSetup => '设置';
+
+  @override
+  String get deviceDetailNavigation => '导航';
+
+  @override
+  String get deviceDetailRepairCompleted => '已完成';
+
+  @override
+  String get deviceDetailRepairMissingParts => '缺件';
 }

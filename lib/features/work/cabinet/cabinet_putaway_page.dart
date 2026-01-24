@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,20 +19,20 @@ class CabinetPutawayPage extends ConsumerStatefulWidget {
 
 class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
   final _snController = TextEditingController();
+  final _nameController = TextEditingController();
   final _addressController = TextEditingController();
-  final _latController = TextEditingController();
-  final _lngController = TextEditingController();
-  final _swapTimeController = TextEditingController();
-  final _storeNumController = TextEditingController();
+  final _swapTimeController = TextEditingController(text: '0');
+
+  double? _latitude;
+  double? _longitude;
+  final List<String> _localImages = [];
 
   @override
   void dispose() {
     _snController.dispose();
+    _nameController.dispose();
     _addressController.dispose();
-    _latController.dispose();
-    _lngController.dispose();
     _swapTimeController.dispose();
-    _storeNumController.dispose();
     super.dispose();
   }
 
@@ -42,146 +44,336 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
     final cabinet = state.cabinet;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.cabinetPutawayTitle)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      backgroundColor: const Color(0xFFF5F6F7),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const SizedBox.shrink(),
+        centerTitle: true,
+      ),
+      body: Column(
         children: [
-          TextField(
-            controller: _snController,
-            decoration: InputDecoration(
-              labelText: l10n.cabinetPutawaySn,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              suffixIcon: Wrap(
-                spacing: 4,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.qr_code_scanner),
-                    onPressed: _scanSn,
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                // 顶部图标和标题
+                Container(
+                  color: Colors.white,
+                  padding: const EdgeInsets.only(bottom: 24),
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 72,
+                        height: 72,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF4CAF50),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: const Icon(
+                          Icons.arrow_upward,
+                          color: Colors.white,
+                          size: 36,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.cabinetPutawayTitle,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () => notifier.queryCabinet(
-                      _snController.text.trim(),
-                    ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Station SN 卡片
+                _CardSection(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _InputRow(
+                        label: l10n.cabinetPutawaySn,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _snController,
+                                decoration: InputDecoration(
+                                  hintText: l10n.cabinetPutawaySnHint,
+                                  hintStyle: const TextStyle(
+                                    color: Color(0xFF999999),
+                                    fontSize: 15,
+                                  ),
+                                  border: InputBorder.none,
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                                style: const TextStyle(fontSize: 15),
+                                onSubmitted: (_) => notifier.queryCabinet(
+                                  _snController.text.trim(),
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: _scanSn,
+                              child: const Icon(
+                                Icons.qr_code_scanner,
+                                color: Color(0xFF333333),
+                                size: 24,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                      // 设备参数信息区
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 20),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF9F9F9),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        margin: const EdgeInsets.only(top: 16),
+                        child: Text(
+                          cabinet == null
+                              ? l10n.cabinetPutawayInfoEmpty
+                              : '${cabinet.stationName ?? '-'}\n${cabinet.stationModel ?? '-'}',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Color(0xFF999999),
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Station Name / Address / Coordinates
+                _CardSection(
+                  child: Column(
+                    children: [
+                      _InputRow(
+                        label: l10n.cabinetPutawayName,
+                        child: TextField(
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                            hintText: l10n.cabinetPutawayNameHint,
+                            hintStyle: const TextStyle(
+                              color: Color(0xFF999999),
+                              fontSize: 15,
+                            ),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ),
+                      const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                      _InputRow(
+                        label: l10n.cabinetPutawayAddress,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _addressController,
+                                decoration: InputDecoration(
+                                  hintText: l10n.cabinetPutawayAddressHint,
+                                  hintStyle: const TextStyle(
+                                    color: Color(0xFF999999),
+                                    fontSize: 15,
+                                  ),
+                                  border: InputBorder.none,
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                                style: const TextStyle(fontSize: 15),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => _selectAddress(context),
+                              child: const Icon(
+                                Icons.location_on_outlined,
+                                color: Color(0xFF333333),
+                                size: 24,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                      _DisplayRow(
+                        label: l10n.cabinetPutawayCoordinates,
+                        value: _latitude != null && _longitude != null
+                            ? '${_latitude!.toStringAsFixed(6)}, ${_longitude!.toStringAsFixed(6)}'
+                            : '- -',
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Battery Exchange Indicator
+                _CardSection(
+                  child: Column(
+                    children: [
+                      _InputRow(
+                        label: l10n.cabinetPutawaySwapTime,
+                        labelSuffix: ' (${l10n.cabinetPutawayTimesPerDay})',
+                        child: TextField(
+                          controller: _swapTimeController,
+                          keyboardType: TextInputType.number,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Photo
+                _CardSection(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            l10n.cabinetPutawayImages,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Color(0xFF333333),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            '(${state.images.length + _localImages.length}/5)',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF999999),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          // 已上传的图片
+                          ...state.images.map(
+                            (url) => _ImageItem(
+                              imageUrl: url,
+                              onDelete: () => notifier.removeImage(url),
+                            ),
+                          ),
+                          // 本地待上传图片
+                          ..._localImages.map(
+                            (path) => _ImageItem(
+                              localPath: path,
+                              onDelete: () {
+                                setState(() => _localImages.remove(path));
+                              },
+                            ),
+                          ),
+                          // 添加按钮
+                          if (state.images.length + _localImages.length < 5)
+                            GestureDetector(
+                              onTap: state.uploading
+                                  ? null
+                                  : () => _pickImages(
+                                      context,
+                                      notifier,
+                                      state.images.length + _localImages.length,
+                                    ),
+                              child: Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF5F5F5),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.camera_alt_outlined,
+                                  color: Color(0xFF999999),
+                                  size: 32,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 24),
+              ],
             ),
           ),
-          const SizedBox(height: 12),
-          _InfoCard(
-            title: l10n.cabinetPutawayInfoTitle,
-            content: cabinet == null
-                ? l10n.cabinetPutawayInfoEmpty
-                : '${l10n.cabinetPutawayName}: ${cabinet.stationName ?? '-'}\n'
-                    '${l10n.cabinetPutawayModel}: ${cabinet.stationModel ?? '-'}\n'
-                    '${l10n.cabinetPutawaySpec}: ${cabinet.stationModelName ?? '-'}',
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _addressController,
-            label: l10n.cabinetPutawayAddress,
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.map_outlined),
-              onPressed: () => _selectAddress(context),
+
+          // 底部按钮
+          Container(
+            padding: EdgeInsets.fromLTRB(
+              24,
+              16,
+              24,
+              16 + MediaQuery.of(context).padding.bottom,
             ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _latController,
-                  label: l10n.cabinetPutawayLatitude,
-                  keyboardType: TextInputType.number,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildTextField(
-                  controller: _lngController,
-                  label: l10n.cabinetPutawayLongitude,
-                  keyboardType: TextInputType.number,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _swapTimeController,
-                  label: l10n.cabinetPutawaySwapTime,
-                  keyboardType: TextInputType.number,
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _buildTextField(
-                  controller: _storeNumController,
-                  label: l10n.cabinetPutawayStoreNum,
-                  keyboardType: TextInputType.number,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _SectionTitle(title: l10n.cabinetPutawayImages),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              ...state.images.map(
-                (url) => InputChip(
-                  label: Text(url),
-                  onDeleted: () => notifier.removeImage(url),
-                ),
-              ),
-              ActionChip(
-                label: Text(l10n.cabinetPutawayAddImage),
-                onPressed: state.uploading
+            color: Colors.white,
+            child: SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: FilledButton(
+                onPressed: state.submitting
                     ? null
-                    : () => _pickImages(context, notifier, state.images.length),
+                    : () => _submit(context, notifier),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF4CAF50),
+                  disabledBackgroundColor: const Color(0xFFB8E6B8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                ),
+                child: state.submitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        l10n.cabinetPutawaySubmit,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
               ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          FilledButton(
-            onPressed: state.submitting
-                ? null
-                : () => _submit(context, notifier),
-            child: state.submitting
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.cabinetPutawaySubmit),
+            ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    TextInputType? keyboardType,
-    Widget? suffixIcon,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        suffixIcon: suffixIcon,
       ),
     );
   }
@@ -189,14 +381,12 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => const QrScanPage(
-          parseDeviceSn: true,
-          deviceType: 3,
-        ),
+        builder: (_) => const QrScanPage(parseDeviceSn: true, deviceType: 3),
       ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
+    ref.read(cabinetPutawayProvider.notifier).queryCabinet(result);
   }
 
   Future<void> _selectAddress(BuildContext context) async {
@@ -206,16 +396,20 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
     );
     if (!mounted || result == null) return;
     _addressController.text = result.address;
-    _latController.text = result.latitude.toString();
-    _lngController.text = result.longitude.toString();
+    setState(() {
+      _latitude = result.latitude;
+      _longitude = result.longitude;
+    });
   }
 
   AddressResult? _buildAddressResult() {
     final address = _addressController.text.trim();
-    final lat = double.tryParse(_latController.text.trim());
-    final lng = double.tryParse(_lngController.text.trim());
-    if (address.isEmpty || lat == null || lng == null) return null;
-    return AddressResult(address: address, latitude: lat, longitude: lng);
+    if (address.isEmpty || _latitude == null || _longitude == null) return null;
+    return AddressResult(
+      address: address,
+      latitude: _latitude!,
+      longitude: _longitude!,
+    );
   }
 
   Future<void> _pickImages(
@@ -225,17 +419,22 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
   ) async {
     final l10n = context.l10n;
     final picker = ImagePicker();
-    final remaining = 4 - currentCount;
+    final remaining = 5 - currentCount;
     if (remaining <= 0) {
       showToast(l10n.cabinetPutawayImageLimit);
       return;
     }
     final picks = await picker.pickMultiImage();
     if (!mounted || picks.isEmpty) return;
+
     for (final item in picks.take(remaining)) {
+      // 先添加本地预览
+      setState(() => _localImages.add(item.path));
+      // 上传图片
       final url = await notifier.uploadImage(item.path);
       if (url != null && url.isNotEmpty) {
         notifier.addImage(url);
+        setState(() => _localImages.remove(item.path));
       }
     }
   }
@@ -245,57 +444,149 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
     CabinetPutawayNotifier notifier,
   ) async {
     final l10n = context.l10n;
-    final lat = double.tryParse(_latController.text.trim()) ?? 0;
-    final lng = double.tryParse(_lngController.text.trim()) ?? 0;
     final swapTime = int.tryParse(_swapTimeController.text.trim()) ?? 0;
-    final storeNum = int.tryParse(_storeNumController.text.trim()) ?? 0;
     final ok = await notifier.submit(
       sn: _snController.text.trim(),
-      latitude: lat,
-      longitude: lng,
+      latitude: _latitude ?? 0,
+      longitude: _longitude ?? 0,
       swapTime: swapTime,
-      storeNum: storeNum,
+      storeNum: 0,
       address: _addressController.text.trim(),
     );
     if (!context.mounted) return;
-    showToast(ok ? l10n.cabinetPutawaySuccess : l10n.cabinetPutawayFailed);
+    if (ok) {
+      showToast(l10n.cabinetPutawaySuccess);
+      Navigator.of(context).pop();
+    } else {
+      showToast(l10n.cabinetPutawayFailed);
+    }
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title});
+/// 卡片容器
+class _CardSection extends StatelessWidget {
+  const _CardSection({required this.child});
 
-  final String title;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: const TextStyle(fontWeight: FontWeight.w600),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: child,
     );
   }
 }
 
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.title, required this.content});
+/// 输入行
+class _InputRow extends StatelessWidget {
+  const _InputRow({required this.label, required this.child, this.labelSuffix});
 
-  final String title;
-  final String content;
+  final String label;
+  final String? labelSuffix;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
           children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 6),
-            Text(content),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 15, color: Color(0xFF333333)),
+            ),
+            if (labelSuffix != null)
+              Text(
+                labelSuffix!,
+                style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
+              ),
           ],
         ),
+        const SizedBox(height: 8),
+        child,
+        const SizedBox(height: 8),
+      ],
+    );
+  }
+}
+
+/// 显示行（只读）
+class _DisplayRow extends StatelessWidget {
+  const _DisplayRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 15, color: Color(0xFF333333)),
+          ),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 15, color: Color(0xFF999999)),
+          ),
+        ],
       ),
+    );
+  }
+}
+
+/// 图片项
+class _ImageItem extends StatelessWidget {
+  const _ImageItem({this.imageUrl, this.localPath, required this.onDelete});
+
+  final String? imageUrl;
+  final String? localPath;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            image: DecorationImage(
+              image: localPath != null
+                  ? FileImage(File(localPath!))
+                  : NetworkImage(imageUrl!) as ImageProvider,
+              fit: BoxFit.cover,
+            ),
+          ),
+        ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: onDelete,
+            child: Container(
+              width: 20,
+              height: 20,
+              decoration: const BoxDecoration(
+                color: Colors.black54,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, color: Colors.white, size: 14),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -14,11 +14,8 @@ import 'package:merchant_app/features/work/cabinet/cabinet_unshelve_page.dart';
 import 'package:merchant_app/features/work/device/device_detail_page.dart';
 import 'package:merchant_app/features/work/device/device_search_page.dart';
 import 'package:merchant_app/features/work/device/vehicle_search_page.dart';
-import 'package:merchant_app/features/work/entry/battery_entry_page.dart';
 import 'package:merchant_app/features/work/entry/battery_ship_page.dart';
 import 'package:merchant_app/features/work/entry/shipping_entry_page.dart';
-import 'package:merchant_app/features/work/entry/station_entry_page.dart';
-import 'package:merchant_app/features/work/entry/vehicle_entry_page.dart';
 import 'package:merchant_app/features/work/maintenance/maintenance_book_page.dart';
 import 'package:merchant_app/features/work/maintenance/repair_record_page.dart';
 import 'package:merchant_app/features/work/map/battery_location_page.dart';
@@ -79,11 +76,8 @@ class WorkModulePage extends StatelessWidget {
       case 'unbind_device':
         return const UnbindDevicePage();
       case 'battery_entry':
-        return const BatteryEntryPage();
       case 'vehicle_entry':
-        return const VehicleEntryPage();
       case 'station_entry':
-        return const StationEntryPage();
       case 'shipping_entry':
         return const ShippingEntryPage();
       case 'battery_ship':

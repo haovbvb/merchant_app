@@ -25,7 +25,7 @@ class QrScanPage extends StatefulWidget {
 }
 
 class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
-  final MobileScannerController _controller = MobileScannerController();
+  MobileScannerController? _controller;
   final TextEditingController _inputController = TextEditingController();
   final FocusNode _inputFocusNode = FocusNode();
 
@@ -55,9 +55,13 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
     });
   }
 
+  void _initController() {
+    _controller ??= MobileScannerController();
+  }
+
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     _inputController.dispose();
     _inputFocusNode.removeListener(_onFocusChange);
     _inputFocusNode.dispose();
@@ -86,6 +90,9 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
   }
 
   Widget _buildScannerView(BuildContext context) {
+    // 确保控制器已初始化
+    _initController();
+
     final l10n = context.l10n;
     final size = MediaQuery.of(context).size;
     final scanAreaSize = size.width * 0.65;
@@ -94,7 +101,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
       children: [
         // 相机预览
         Positioned.fill(
-          child: MobileScanner(controller: _controller, onDetect: _onDetect),
+          child: MobileScanner(controller: _controller!, onDetect: _onDetect),
         ),
 
         // 扫描框遮罩层
@@ -412,7 +419,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
   }
 
   void _toggleTorch() {
-    _controller.toggleTorch();
+    _controller?.toggleTorch();
     setState(() {
       _torchOn = !_torchOn;
     });

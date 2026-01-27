@@ -43,9 +43,9 @@
 	<string>Find nearby devices</string>
 	<key>NSLocationUsageDescription</key>
 	<string>Find nearby devices</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>Find nearby devices</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save to Gallery or select from Gallery</string>
+	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Save to Gallery or select from Gallery</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>

@@ -5,6 +5,7 @@ import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/sale_data.dart';
 import 'package:merchant_app/data/models/shop1_num.dart';
 import 'package:merchant_app/features/work/device/device_detail_page.dart';
+import 'package:merchant_app/features/work/entry/shipping_entry_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/work_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
@@ -36,19 +37,10 @@ class _WorkTabState extends ConsumerState<WorkTab> {
         title: '入库/登记',
         modules: [
           _WorkModule(
-            key: 'battery_entry',
-            title: '电池入库',
+            key: 'shipping_entry',
+            title: 'Shipping Entry',
             iconPath: 'assets/android/mipmap-xxhdpi/icon_ship_entry.webp',
-          ),
-          _WorkModule(
-            key: 'vehicle_entry',
-            title: '车辆入库',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_ship_entry.webp',
-          ),
-          _WorkModule(
-            key: 'station_entry',
-            title: '站点入库',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_ship_entry.webp',
+            showAsBottomSheet: true,
           ),
           _WorkModule(
             key: 'battery_ship',
@@ -88,17 +80,20 @@ class _WorkTabState extends ConsumerState<WorkTab> {
           _WorkModule(
             key: 'after_sale_bind',
             title: '售后绑定',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_aftersale_binding.webp',
+            iconPath:
+                'assets/android/mipmap-xxhdpi/icon_aftersale_binding.webp',
           ),
           _WorkModule(
             key: 'maintenance_book',
             title: '维修预约',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_schedule_maintenance.png',
+            iconPath:
+                'assets/android/mipmap-xxhdpi/icon_schedule_maintenance.png',
           ),
           _WorkModule(
             key: 'repair_record',
             title: '维修记录',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_repair_registration.png',
+            iconPath:
+                'assets/android/mipmap-xxhdpi/icon_repair_registration.png',
           ),
           _WorkModule(
             key: 'unbind_device',
@@ -113,7 +108,8 @@ class _WorkTabState extends ConsumerState<WorkTab> {
           _WorkModule(
             key: 'road_assist',
             title: '道路救援',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_roadside_assistance.png',
+            iconPath:
+                'assets/android/mipmap-xxhdpi/icon_roadside_assistance.png',
           ),
           _WorkModule(
             key: 'road_order_detail',
@@ -288,7 +284,8 @@ class _WorkTabState extends ConsumerState<WorkTab> {
           _WorkModule(
             key: 'bluetooth_operate',
             title: '蓝牙运维',
-            iconPath: 'assets/android/mipmap-xxhdpi/img_bluetooth_operate_icon.webp',
+            iconPath:
+                'assets/android/mipmap-xxhdpi/img_bluetooth_operate_icon.webp',
           ),
         ],
       ),
@@ -350,17 +347,11 @@ class _WorkTabState extends ConsumerState<WorkTab> {
 
   Future<void> _scanAndOpenDetail() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(
-        builder: (_) => const QrScanPage(
-          parseDeviceSn: true,
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
     );
     if (!mounted || result == null || result.isEmpty) return;
     await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => DeviceDetailPage(initialSn: result),
-      ),
+      MaterialPageRoute(builder: (_) => DeviceDetailPage(initialSn: result)),
     );
   }
 }
@@ -394,7 +385,10 @@ class _WorkbenchHeader extends StatelessWidget {
             Expanded(
               child: Text(
                 l10n.workbenchMonthlyIncomeTitle,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             IconButton(
@@ -487,10 +481,7 @@ class _MetricTile extends StatelessWidget {
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(color: Colors.black54),
-          ),
+          Text(label, style: const TextStyle(color: Colors.black54)),
         ],
       ),
     );
@@ -498,10 +489,7 @@ class _MetricTile extends StatelessWidget {
 }
 
 class _WorkSectionCard extends StatelessWidget {
-  const _WorkSectionCard({
-    required this.section,
-    required this.titleStyle,
-  });
+  const _WorkSectionCard({required this.section, required this.titleStyle});
 
   final _WorkSection section;
   final TextStyle? titleStyle;
@@ -521,18 +509,20 @@ class _WorkSectionCard extends StatelessWidget {
               child: ListTile(
                 leading: module.iconPath == null
                     ? null
-                    : Image.asset(
-                        module.iconPath!,
-                        width: 24,
-                        height: 24,
-                      ),
+                    : Image.asset(module.iconPath!, width: 24, height: 24),
                 title: Text(module.title),
                 subtitle: null,
                 trailing: const Icon(Icons.chevron_right),
-                onTap: () => AppRouter.router.push(
-                  '${AppRouter.workModulePath}/${module.key}',
-                  extra: module.title,
-                ),
+                onTap: () {
+                  if (module.showAsBottomSheet) {
+                    ShippingEntryPage.showAsBottomSheet(context);
+                  } else {
+                    AppRouter.router.push(
+                      '${AppRouter.workModulePath}/${module.key}',
+                      extra: module.title,
+                    );
+                  }
+                },
               ),
             );
           }),
@@ -554,11 +544,11 @@ class _WorkModule {
     required this.key,
     required this.title,
     this.iconPath,
+    this.showAsBottomSheet = false,
   });
 
   final String key;
   final String title;
   final String? iconPath;
+  final bool showAsBottomSheet;
 }
-
-

@@ -243,7 +243,7 @@ class _MessageEmptyState extends StatelessWidget {
         children: [
           Image.asset(
             'assets/android/mipmap-xxhdpi/icon_empty_record.png',
-            width: 80,
+            // width: 80,
           ),
           const SizedBox(height: 16),
           Text(

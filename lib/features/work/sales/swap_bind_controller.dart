@@ -11,10 +11,13 @@ class SwapBindState {
   final bool submitting;
   final SwapBindInfo? info;
   final CarVo? selectedCar;
+  final BatteryVo? selectedBattery;
   final List<BatteryVo> selectedBatteries;
   final List<Pack> packs;
   final Pack? selectedPack;
   final int paySource;
+  final bool submitSuccess;
+  final String? documentNo;
 
   const SwapBindState({
     this.loadingUser = false,
@@ -22,10 +25,13 @@ class SwapBindState {
     this.submitting = false,
     this.info,
     this.selectedCar,
+    this.selectedBattery,
     this.selectedBatteries = const [],
     this.packs = const [],
     this.selectedPack,
     this.paySource = 2,
+    this.submitSuccess = false,
+    this.documentNo,
   });
 
   SwapBindState copyWith({
@@ -34,10 +40,13 @@ class SwapBindState {
     bool? submitting,
     SwapBindInfo? info,
     CarVo? selectedCar,
+    BatteryVo? selectedBattery,
     List<BatteryVo>? selectedBatteries,
     List<Pack>? packs,
     Pack? selectedPack,
     int? paySource,
+    bool? submitSuccess,
+    String? documentNo,
   }) {
     return SwapBindState(
       loadingUser: loadingUser ?? this.loadingUser,
@@ -45,10 +54,13 @@ class SwapBindState {
       submitting: submitting ?? this.submitting,
       info: info ?? this.info,
       selectedCar: selectedCar ?? this.selectedCar,
+      selectedBattery: selectedBattery ?? this.selectedBattery,
       selectedBatteries: selectedBatteries ?? this.selectedBatteries,
       packs: packs ?? this.packs,
       selectedPack: selectedPack ?? this.selectedPack,
       paySource: paySource ?? this.paySource,
+      submitSuccess: submitSuccess ?? this.submitSuccess,
+      documentNo: documentNo ?? this.documentNo,
     );
   }
 }
@@ -84,6 +96,14 @@ class SwapBindNotifier extends Notifier<SwapBindState> {
 
   void selectCar(CarVo? car) {
     state = state.copyWith(selectedCar: car, selectedPack: null, packs: const []);
+  }
+
+  void selectBattery(BatteryVo? battery) {
+    state = state.copyWith(
+      selectedBattery: battery,
+      selectedBatteries: battery != null ? [battery] : const [],
+      selectedPack: null,
+    );
   }
 
   void toggleBattery(BatteryVo battery) {
@@ -139,17 +159,30 @@ class SwapBindNotifier extends Notifier<SwapBindState> {
     final pack = state.selectedPack;
     if (pack == null) return false;
     state = state.copyWith(submitting: true);
-    final response = await _api.post<Object>(
+    final response = await _api.post<Map<String, dynamic>>(
       ApiPath.createSwapBindOrder,
       data: {
         'infoCode': pack.infoCode ?? '',
         'paySource': state.paySource,
         'cardNum': cardNum,
       },
-      parser: (json) => json ?? Object(),
+      parser: (json) => json is Map<String, dynamic> ? json : <String, dynamic>{},
     );
+    if (response.isSuccess) {
+      final docNo = response.result?['documentNo'] as String?;
+      state = state.copyWith(
+        submitting: false,
+        submitSuccess: true,
+        documentNo: docNo,
+      );
+      return true;
+    }
     state = state.copyWith(submitting: false);
-    return response.isSuccess;
+    return false;
+  }
+
+  void reset() {
+    state = const SwapBindState();
   }
 
   int? _minRentDay(List<int?> values) {

@@ -18,6 +18,7 @@ class UserListState {
   final bool loadingMore;
   final int page;
   final String keyword;
+  final int? status;
   final List<UserInfo> items;
   final int total;
 
@@ -26,6 +27,7 @@ class UserListState {
     this.loadingMore = false,
     this.page = 1,
     this.keyword = '',
+    this.status,
     this.items = const [],
     this.total = 0,
   });
@@ -37,6 +39,8 @@ class UserListState {
     bool? loadingMore,
     int? page,
     String? keyword,
+    int? status,
+    bool clearStatus = false,
     List<UserInfo>? items,
     int? total,
   }) {
@@ -45,6 +49,7 @@ class UserListState {
       loadingMore: loadingMore ?? this.loadingMore,
       page: page ?? this.page,
       keyword: keyword ?? this.keyword,
+      status: clearStatus ? null : (status ?? this.status),
       items: items ?? this.items,
       total: total ?? this.total,
     );
@@ -60,9 +65,16 @@ class UserListNotifier extends Notifier<UserListState> {
   @override
   UserListState build() => const UserListState();
 
-  Future<void> refresh({String? keyword}) async {
+  Future<void> refresh({String? keyword, int? status}) async {
     final nextKeyword = keyword ?? state.keyword;
-    state = state.copyWith(loading: true, page: 1, keyword: nextKeyword);
+    final nextStatus = status;
+    state = state.copyWith(
+      loading: true,
+      page: 1,
+      keyword: nextKeyword,
+      status: nextStatus,
+      clearStatus: status == null,
+    );
 
     final response = await _api.get<_UserListResponse>(
       _endpointForKeyword(nextKeyword),
@@ -70,6 +82,7 @@ class UserListNotifier extends Notifier<UserListState> {
         'pageNum': 1,
         'pageSize': _pageSize,
         if (nextKeyword.trim().isNotEmpty) 'keyword': nextKeyword.trim(),
+        if (nextStatus != null) 'status': nextStatus,
       },
       parser: (json) =>
           _UserListResponse.fromJson(Map<String, dynamic>.from(json as Map)),
@@ -94,6 +107,7 @@ class UserListNotifier extends Notifier<UserListState> {
         'pageNum': nextPage,
         'pageSize': _pageSize,
         if (state.keyword.trim().isNotEmpty) 'keyword': state.keyword.trim(),
+        if (state.status != null) 'status': state.status,
       },
       parser: (json) =>
           _UserListResponse.fromJson(Map<String, dynamic>.from(json as Map)),

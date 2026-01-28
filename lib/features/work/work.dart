@@ -42,16 +42,16 @@ class _WorkTabState extends ConsumerState<WorkTab> {
             iconPath: 'assets/android/mipmap-xxhdpi/icon_ship_entry.webp',
             showAsBottomSheet: true,
           ),
-          _WorkModule(
-            key: 'battery_ship',
-            title: '电池出库',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_device_issue.png',
-          ),
-          _WorkModule(
-            key: 'device_transport_issue_list',
-            title: '出库列表',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_device_issue.png',
-          ),
+          // _WorkModule(
+          //   key: 'battery_ship',
+          //   title: '电池出库',
+          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_device_issue.png',
+          // ),
+          // _WorkModule(
+          //   key: 'device_transport_issue_list',
+          //   title: '出库列表',
+          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_device_issue.png',
+          // ),
         ],
       ),
       _WorkSection(
@@ -66,11 +66,6 @@ class _WorkTabState extends ConsumerState<WorkTab> {
             key: 'device_search',
             title: '设备搜索',
             iconPath: 'assets/android/mipmap-xxhdpi/icon_device_query.webp',
-          ),
-          _WorkModule(
-            key: 'vehicle_search',
-            title: '车辆搜索',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_search.webp',
           ),
         ],
       ),
@@ -91,7 +86,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
           ),
           _WorkModule(
             key: 'repair_record',
-            title: '维修记录',
+            title: '维修登记',
             iconPath:
                 'assets/android/mipmap-xxhdpi/icon_repair_registration.png',
           ),
@@ -111,16 +106,16 @@ class _WorkTabState extends ConsumerState<WorkTab> {
             iconPath:
                 'assets/android/mipmap-xxhdpi/icon_roadside_assistance.png',
           ),
-          _WorkModule(
-            key: 'road_order_detail',
-            title: '救援订单详情',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_request.png',
-          ),
-          _WorkModule(
-            key: 'road_order_deal',
-            title: '救援订单处理',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_response.png',
-          ),
+          // _WorkModule(
+          //   key: 'road_order_detail',
+          //   title: '救援订单详情',
+          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_request.png',
+          // ),
+          // _WorkModule(
+          //   key: 'road_order_deal',
+          //   title: '救援订单处理',
+          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_response.png',
+          // ),
         ],
       ),
       _WorkSection(
@@ -131,16 +126,16 @@ class _WorkTabState extends ConsumerState<WorkTab> {
             title: '用户列表',
             iconPath: 'assets/android/mipmap-xxhdpi/icon_user_query.png',
           ),
-          _WorkModule(
-            key: 'user_search',
-            title: '用户搜索',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_user_query.png',
-          ),
-          _WorkModule(
-            key: 'user_detail',
-            title: '用户详情',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_user_query.png',
-          ),
+          // _WorkModule(
+          //   key: 'user_search',
+          //   title: '用户搜索',
+          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_user_query.png',
+          // ),
+          // _WorkModule(
+          //   key: 'user_detail',
+          //   title: '用户详情',
+          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_user_query.png',
+          // ),
         ],
       ),
       _WorkSection(
@@ -171,26 +166,26 @@ class _WorkTabState extends ConsumerState<WorkTab> {
             title: '设备调拨-出库',
             iconPath: 'assets/android/mipmap-xxhdpi/icon_device_issue.png',
           ),
-          _WorkModule(
-            key: 'device_transport_detail',
-            title: '调拨详情',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_warehouse.png',
-          ),
+          // _WorkModule(
+          //   key: 'device_transport_detail',
+          //   title: '调拨详情',
+          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_warehouse.png',
+          // ),
           _WorkModule(
             key: 'device_inventory',
             title: '设备盘点',
             iconPath: 'assets/android/mipmap-xxhdpi/icon_inventory_count.webp',
           ),
-          _WorkModule(
-            key: 'device_inventory_detail',
-            title: '盘点详情',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_inventory_count.webp',
-          ),
-          _WorkModule(
-            key: 'device_inventory_search',
-            title: '盘点搜索',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_search.webp',
-          ),
+          // _WorkModule(
+          //   key: 'device_inventory_detail',
+          //   title: '盘点详情',
+          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_inventory_count.webp',
+          // ),
+          // _WorkModule(
+          //   key: 'device_inventory_search',
+          //   title: '盘点搜索',
+          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_search.webp',
+          // ),
         ],
       ),
       _WorkSection(

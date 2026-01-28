@@ -13,7 +13,7 @@ import 'package:merchant_app/core/utils/location_permission.dart';
 import 'package:merchant_app/data/models/near_by_vehicle.dart';
 import 'package:merchant_app/features/home/widgets/vehicle_map.dart';
 import 'package:merchant_app/features/work/device/device_detail_page.dart';
-import 'package:merchant_app/features/work/device/vehicle_search_page.dart';
+import 'package:merchant_app/features/work/device/device_search_page.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
@@ -255,7 +255,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
 
   Future<void> _openSearch() async {
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const VehicleSearchPage()),
+      MaterialPageRoute(builder: (_) => const DeviceSearchPage()),
     );
   }
 

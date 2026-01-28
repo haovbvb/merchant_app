@@ -59,140 +59,505 @@ class _OfflineUserRegisterPageState
     final notifier = ref.read(offlineRegisterProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.offlineRegisterTitle)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: Column(
         children: [
-          _AreaPicker(
-            l10n: l10n,
-            selected: state.selectedArea,
-            onTap: () => _showAreaSheet(context, state.areas, notifier),
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _phoneController,
-            label: l10n.offlineRegisterPhone,
-            keyboardType: TextInputType.phone,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _codeController,
-                  label: l10n.offlineRegisterSmsCode,
-                  keyboardType: TextInputType.number,
-                ),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                children: [
+                  // Header icon and title
+                  _buildHeader(l10n),
+                  const SizedBox(height: 24),
+
+                  // Card 1: Phone, Code, Password
+                  _buildCard(
+                    children: [
+                      _buildPhoneField(l10n, state, notifier),
+                      _buildDivider(),
+                      _buildCodeField(l10n, state, notifier),
+                      _buildDivider(),
+                      _buildPasswordField(l10n),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Card 2: First Name, Last Name, Account
+                  _buildCard(
+                    children: [
+                      _buildInputField(
+                        label: l10n.offlineRegisterFirstName,
+                        controller: _firstNameController,
+                        hintText: l10n.offlineRegisterFirstNameHint,
+                        isRequired: true,
+                      ),
+                      _buildDivider(),
+                      _buildInputField(
+                        label: l10n.offlineRegisterLastName,
+                        controller: _lastNameController,
+                        hintText: l10n.offlineRegisterLastNameHint,
+                        isRequired: true,
+                      ),
+                      _buildDivider(),
+                      _buildInputField(
+                        label: l10n.offlineRegisterUsername,
+                        controller: _usernameController,
+                        hintText: l10n.offlineRegisterUsernameHint,
+                        isRequired: true,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Card 3: Birthday, Email, Referrer
+                  _buildCard(
+                    children: [
+                      _buildBirthdayField(l10n),
+                      _buildDivider(),
+                      _buildInputField(
+                        label: l10n.offlineRegisterEmail,
+                        controller: _emailController,
+                        hintText: l10n.offlineRegisterEmailHint,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      _buildDivider(),
+                      _buildReferrerField(l10n),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
-              const SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: state.sending
-                    ? null
-                    : () => _sendSms(context, notifier),
-                child: Text(l10n.offlineRegisterSendCode),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _passwordController,
-            label: l10n.offlineRegisterPassword,
-            obscureText: _obscurePassword,
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscurePassword ? Icons.visibility_off : Icons.visibility,
-              ),
-              onPressed: () => setState(() {
-                _obscurePassword = !_obscurePassword;
-              }),
             ),
           ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _firstNameController,
-            label: l10n.offlineRegisterFirstName,
+
+          // Submit button
+          _buildSubmitButton(l10n, state, notifier),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(AppLocalizations l10n) {
+    return Column(
+      children: [
+        Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color: const Color(0xFF2196F3),
+            borderRadius: BorderRadius.circular(16),
           ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _lastNameController,
-            label: l10n.offlineRegisterLastName,
+          child: const Icon(
+            Icons.person_add_alt_1,
+            color: Colors.white,
+            size: 32,
           ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _usernameController,
-            label: l10n.offlineRegisterUsername,
+        ),
+        const SizedBox(height: 12),
+        Text(
+          l10n.offlineRegisterTitle,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF333333),
           ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _birthdayController,
-            label: l10n.offlineRegisterBirthday,
-            readOnly: true,
-            onTap: () => _pickBirthday(context),
-            suffixIcon: const Icon(Icons.date_range),
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _emailController,
-            label: l10n.offlineRegisterEmail,
-            keyboardType: TextInputType.emailAddress,
-          ),
-          const SizedBox(height: 12),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCard({required List<Widget> children}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildDivider() {
+    return const Divider(height: 1, color: Color(0xFFEEEEEE));
+  }
+
+  Widget _buildPhoneField(
+    AppLocalizations l10n,
+    OfflineRegisterState state,
+    OfflineRegisterNotifier notifier,
+  ) {
+    final selected = state.selectedArea;
+    final areaCode = selected?.areaCode ?? '+880';
+    final countryShort = _getCountryShort(selected?.country);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel(l10n.offlineRegisterPhone, isRequired: true),
+          const SizedBox(height: 8),
           Row(
             children: [
-              Expanded(
-                child: _buildTextField(
-                  controller: _referrerController,
-                  label: l10n.offlineRegisterReferrer,
+              GestureDetector(
+                onTap: () => _showAreaSheet(context, state.areas, notifier, state.selectedArea),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '$countryShort $areaCode',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Color(0xFF333333),
+                      ),
+                    ),
+                    const Icon(
+                      Icons.arrow_drop_down,
+                      color: Color(0xFF666666),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.qr_code_scanner),
-                onPressed: _scanReferrer,
+              Container(
+                width: 1,
+                height: 20,
+                color: const Color(0xFFDDDDDD),
+                margin: const EdgeInsets.symmetric(horizontal: 12),
+              ),
+              Expanded(
+                child: TextField(
+                  controller: _phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(
+                    hintText: l10n.offlineRegisterPhoneHint,
+                    hintStyle: const TextStyle(color: Color(0xFF999999)),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF333333),
+                  ),
+                ),
               ),
             ],
-          ),
-          const SizedBox(height: 20),
-          FilledButton(
-            onPressed: state.registering
-                ? null
-                : () => _submit(context, notifier),
-            child: state.registering
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.offlineRegisterSubmit),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    TextInputType? keyboardType,
-    bool obscureText = false,
-    bool readOnly = false,
-    VoidCallback? onTap,
-    Widget? suffixIcon,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      obscureText: obscureText,
-      readOnly: readOnly,
-      onTap: onTap,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        suffixIcon: suffixIcon,
+  Widget _buildCodeField(
+    AppLocalizations l10n,
+    OfflineRegisterState state,
+    OfflineRegisterNotifier notifier,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel(l10n.offlineRegisterSmsCode, isRequired: true),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _codeController,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    hintText: l10n.offlineRegisterCodeHint,
+                    hintStyle: const TextStyle(color: Color(0xFF999999)),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF333333),
+                  ),
+                ),
+              ),
+              if (state.countdown > 0)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0xFFDDDDDD)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    '${state.countdown}s',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF999999),
+                    ),
+                  ),
+                )
+              else
+                GestureDetector(
+                  onTap: state.sending
+                      ? null
+                      : () => _sendSms(context, notifier),
+                  child: Text(
+                    l10n.offlineRegisterSendCode,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF4CAF50),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
       ),
     );
+  }
+
+  Widget _buildPasswordField(AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel(l10n.offlineRegisterPassword, isRequired: true),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _passwordController,
+                  obscureText: _obscurePassword,
+                  decoration: InputDecoration(
+                    hintText: l10n.offlineRegisterPasswordHint,
+                    hintStyle: const TextStyle(color: Color(0xFF999999)),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF333333),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: () => setState(() {
+                  _obscurePassword = !_obscurePassword;
+                }),
+                child: Icon(
+                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                  color: const Color(0xFF999999),
+                  size: 22,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required TextEditingController controller,
+    String? hintText,
+    bool isRequired = false,
+    TextInputType? keyboardType,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel(label, isRequired: isRequired),
+          const SizedBox(height: 8),
+          TextField(
+            controller: controller,
+            keyboardType: keyboardType,
+            decoration: InputDecoration(
+              hintText: hintText,
+              hintStyle: const TextStyle(color: Color(0xFF999999)),
+              border: InputBorder.none,
+              isDense: true,
+              contentPadding: EdgeInsets.zero,
+            ),
+            style: const TextStyle(
+              fontSize: 16,
+              color: Color(0xFF333333),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBirthdayField(AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel(l10n.offlineRegisterBirthday),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () => _pickBirthday(context),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _birthdayController.text.isEmpty
+                        ? l10n.offlineRegisterBirthdayHint
+                        : _birthdayController.text,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: _birthdayController.text.isEmpty
+                          ? const Color(0xFF999999)
+                          : const Color(0xFF333333),
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.calendar_today_outlined,
+                  color: Color(0xFF999999),
+                  size: 20,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReferrerField(AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel(l10n.offlineRegisterReferrer),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _referrerController,
+                  decoration: InputDecoration(
+                    hintText: l10n.offlineRegisterReferrerHint,
+                    hintStyle: const TextStyle(color: Color(0xFF999999)),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF333333),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: _scanReferrer,
+                child: const Icon(
+                  Icons.qr_code_scanner,
+                  color: Color(0xFF999999),
+                  size: 22,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLabel(String text, {bool isRequired = false}) {
+    return Row(
+      children: [
+        Text(
+          text,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF666666),
+          ),
+        ),
+        if (isRequired)
+          const Text(
+            ' *',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.red,
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildSubmitButton(
+    AppLocalizations l10n,
+    OfflineRegisterState state,
+    OfflineRegisterNotifier notifier,
+  ) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      color: const Color(0xFFF5F5F5),
+      child: SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: ElevatedButton(
+          onPressed:
+              state.registering ? null : () => _submit(context, notifier),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF4CAF50),
+            disabledBackgroundColor: const Color(0xFFE8F5E9),
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 0,
+          ),
+          child: state.registering
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Text(
+                  l10n.offlineRegisterSubmit,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+        ),
+      ),
+    );
+  }
+
+  String _getCountryShort(String? country) {
+    if (country == null) return 'BD';
+    if (country.toLowerCase().contains('bangladesh')) return 'BD';
+    if (country.toLowerCase().contains('china')) return 'CN';
+    if (country.toLowerCase().contains('angola')) return 'AO';
+    if (country.toLowerCase().contains('south africa')) return 'ZA';
+    if (country.toLowerCase().contains('thailand')) return 'TH';
+    return country.substring(0, 2).toUpperCase();
   }
 
   Future<void> _sendSms(
@@ -207,7 +572,8 @@ class _OfflineUserRegisterPageState
     }
     final ok = await notifier.sendSms(phone);
     if (!context.mounted) return;
-    showToast(ok ? l10n.offlineRegisterSendSuccess : l10n.offlineRegisterSendFail);
+    showToast(
+        ok ? l10n.offlineRegisterSendSuccess : l10n.offlineRegisterSendFail);
   }
 
   Future<void> _submit(
@@ -283,7 +649,9 @@ class _OfflineUserRegisterPageState
       lastDate: now,
     );
     if (picked == null || !mounted) return;
-    _birthdayController.text = DateFormat('yyyy/MM/dd').format(picked);
+    setState(() {
+      _birthdayController.text = DateFormat('yyyy-MM-dd').format(picked);
+    });
   }
 
   Future<void> _scanReferrer() async {
@@ -308,52 +676,91 @@ class _OfflineUserRegisterPageState
     BuildContext context,
     List<AreaCountry> list,
     OfflineRegisterNotifier notifier,
+    AreaCountry? currentSelected,
   ) async {
     if (list.isEmpty) return;
+    final l10n = context.l10n;
     final selected = await showModalBottomSheet<AreaCountry>(
       context: context,
-      builder: (_) => SafeArea(
-        child: ListView(
-          shrinkWrap: true,
-          children: list
-              .map(
-                (area) => ListTile(
-                  title: Text(area.country ?? '-'),
-                  subtitle: Text(area.areaCode ?? ''),
-                  onTap: () => Navigator.of(context).pop(area),
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Text(
+                  l10n.offlineRegisterSelectCountry,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF333333),
+                  ),
                 ),
-              )
-              .toList(),
+              ),
+              const Divider(height: 1),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: list.length,
+                  separatorBuilder: (_, __) =>
+                      const Divider(height: 1, indent: 16, endIndent: 16),
+                  itemBuilder: (context, index) {
+                    final area = list[index];
+                    final isSelected =
+                        currentSelected?.areaCode == area.areaCode;
+                    return ListTile(
+                      title: Text(
+                        area.country ?? '-',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: isSelected
+                              ? const Color(0xFF4CAF50)
+                              : const Color(0xFF333333),
+                        ),
+                      ),
+                      trailing: Text(
+                        area.areaCode ?? '',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF999999),
+                        ),
+                      ),
+                      onTap: () => Navigator.of(context).pop(area),
+                    );
+                  },
+                ),
+              ),
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF333333),
+                      side: const BorderSide(color: Color(0xFFDDDDDD)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: Text(l10n.cancel),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
     if (selected == null) return;
     notifier.selectArea(selected);
-  }
-}
-
-class _AreaPicker extends StatelessWidget {
-  const _AreaPicker({
-    required this.l10n,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final AppLocalizations l10n;
-  final AreaCountry? selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = selected?.country ?? l10n.offlineRegisterAreaCode;
-    final code = selected?.areaCode ?? '';
-
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(label),
-      subtitle: Text(code),
-      trailing: const Icon(Icons.expand_more),
-      onTap: onTap,
-    );
   }
 }

@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/bind_device.dart';
 import 'package:merchant_app/data/models/user_detail.dart';
 import 'package:merchant_app/data/models/user_order_response.dart';
 import 'package:merchant_app/features/work/user/user_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UserDetailPage extends ConsumerStatefulWidget {
   const UserDetailPage({super.key, required this.cardNum});
@@ -20,13 +22,23 @@ class UserDetailPage extends ConsumerStatefulWidget {
   ConsumerState<UserDetailPage> createState() => _UserDetailPageState();
 }
 
-class _UserDetailPageState extends ConsumerState<UserDetailPage> {
+class _UserDetailPageState extends ConsumerState<UserDetailPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 4, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(userDetailProvider.notifier).loadDetail(widget.cardNum);
     });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
   }
 
   @override
@@ -35,52 +47,67 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
     final state = ref.watch(userDetailProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.userDetailTitle)),
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: Text(
+          l10n.userDetailTitle,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        centerTitle: true,
+      ),
       body: state.loading
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              padding: const EdgeInsets.all(16),
+          : Column(
               children: [
-                _UserHeader(detail: state.detail),
-                const SizedBox(height: 16),
-                _SectionTitle(title: l10n.userDetailBindDevicesTitle),
-                const SizedBox(height: 8),
-                _DeviceSection(
-                  title: l10n.userDetailBatteryList,
-                  devices: state.detail?.batteryList ?? const [],
+                // User header
+                _UserHeader(detail: state.detail, l10n: l10n),
+                // Tabs
+                Container(
+                  color: Colors.white,
+                  child: TabBar(
+                    controller: _tabController,
+                    labelColor: AppColors.primaryColor,
+                    unselectedLabelColor: const Color(0xFF666666),
+                    labelStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    unselectedLabelStyle: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.normal,
+                    ),
+                    indicatorColor: AppColors.primaryColor,
+                    indicatorSize: TabBarIndicatorSize.label,
+                    tabs: [
+                      Tab(text: l10n.userTabBasicInfo),
+                      Tab(text: l10n.userTabOrderRecords),
+                      Tab(text: l10n.userTabPaymentRecords),
+                      Tab(text: l10n.userTabSwapRecords),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 12),
-                _DeviceSection(
-                  title: l10n.userDetailVehicleList,
-                  devices: state.detail?.vehicleList ?? const [],
+                // Tab content
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _BasicInfoTab(detail: state.detail, l10n: l10n),
+                      _OrderRecordsTab(orders: state.orders, l10n: l10n),
+                      _PaymentRecordsTab(l10n: l10n),
+                      _SwapRecordsTab(l10n: l10n),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 16),
-                _SectionTitle(title: l10n.userDetailOrderList),
-                const SizedBox(height: 8),
-                state.orders.isEmpty
-                    ? _EmptyOrderState(text: l10n.userDetailOrderEmpty)
-                    : Column(
-                        children: [
-                          _OrderSection(
-                            title: l10n.userDetailOrderSale,
-                            orders: state.orders
-                                .where((order) => order.orderType == 1)
-                                .toList(),
-                          ),
-                          _OrderSection(
-                            title: l10n.userDetailOrderRent,
-                            orders: state.orders
-                                .where((order) => order.orderType == 2)
-                                .toList(),
-                          ),
-                          _OrderSection(
-                            title: l10n.userDetailOrderSwap,
-                            orders: state.orders
-                                .where((order) => order.orderType == 3)
-                                .toList(),
-                          ),
-                        ],
-                      ),
               ],
             ),
     );
@@ -88,30 +115,300 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage> {
 }
 
 class _UserHeader extends StatelessWidget {
-  const _UserHeader({required this.detail});
+  const _UserHeader({required this.detail, required this.l10n});
 
   final UserDetail? detail;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
     final displayName =
         '${detail?.firstName ?? ''} ${detail?.lastName ?? ''}'.trim();
 
-    return Card(
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          // Avatar
+          CircleAvatar(
+            radius: 32,
+            backgroundColor: const Color(0xFFF5F5F5),
+            backgroundImage: (detail?.avatar?.isNotEmpty ?? false)
+                ? NetworkImage(detail!.avatar!)
+                : null,
+            child: (detail?.avatar?.isEmpty ?? true)
+                ? const Icon(Icons.person, color: Color(0xFF999999), size: 36)
+                : null,
+          ),
+          const SizedBox(width: 16),
+          // Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  displayName.isEmpty
+                      ? (detail?.username ?? '-')
+                      : displayName,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'ID: ${detail?.cardNum ?? '-'}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF999999),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Phone button
+          if (detail?.phone?.isNotEmpty ?? false)
+            GestureDetector(
+              onTap: () => _callPhone(detail!.phone!),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.phone, color: Colors.white, size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      l10n.userDetailCall,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _callPhone(String phone) async {
+    final uri = Uri.parse('tel:$phone');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+}
+
+// =============================================================================
+// Basic Info Tab
+// =============================================================================
+
+class _BasicInfoTab extends StatelessWidget {
+  const _BasicInfoTab({required this.detail, required this.l10n});
+
+  final UserDetail? detail;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Vehicle & Battery section
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              _DeviceRow(
+                icon: Icons.electric_moped_outlined,
+                label: l10n.userBasicVehicle,
+                devices: detail?.vehicleList ?? const [],
+                onTap: () => _showDeviceSheet(context, l10n, l10n.userBasicVehicle,
+                    detail?.vehicleList ?? const []),
+              ),
+              const Divider(height: 1, indent: 56),
+              _DeviceRow(
+                icon: Icons.battery_charging_full_outlined,
+                label: l10n.userBasicBattery,
+                devices: detail?.batteryList ?? const [],
+                onTap: () => _showDeviceSheet(context, l10n, l10n.userBasicBattery,
+                    detail?.batteryList ?? const []),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Basic info card
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              _InfoRow(label: l10n.userBasicRegisterTime, value: detail?.createTime ?? '-'),
+              const SizedBox(height: 12),
+              _InfoRow(label: l10n.userBasicUserType, value: _getUserType(l10n, detail?.type)),
+              const SizedBox(height: 12),
+              _InfoRow(label: l10n.userBasicBirthday, value: detail?.birthday ?? '-'),
+              const SizedBox(height: 12),
+              _InfoRow(label: l10n.userBasicPhone, value: detail?.phone ?? '-'),
+              const SizedBox(height: 12),
+              _InfoRow(label: l10n.userBasicEmail, value: detail?.email ?? '-'),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Photos section
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.userBasicPhotos,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF333333),
+                ),
+              ),
+              const SizedBox(height: 12),
+              _PhotoGrid(photos: _parsePhotos(detail?.imgList)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        // Remark section
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.userBasicRemark,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF333333),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                detail?.remark?.isNotEmpty == true ? detail!.remark! : '-',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF666666),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getUserType(AppLocalizations l10n, int? type) {
+    switch (type) {
+      case 0:
+        return l10n.userTypeNormal;
+      case 1:
+        return l10n.userTypeSenior;
+      case 2:
+        return l10n.userTypeVip;
+      default:
+        return l10n.userTypeNormal;
+    }
+  }
+
+  List<String> _parsePhotos(String? imgList) {
+    if (imgList == null || imgList.isEmpty) return const [];
+    return imgList.split(',').where((s) => s.trim().isNotEmpty).toList();
+  }
+
+  void _showDeviceSheet(BuildContext context, AppLocalizations l10n,
+      String title, List<BindDevice> devices) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => _DeviceSheet(title: title, devices: devices, l10n: l10n),
+    );
+  }
+}
+
+class _DeviceRow extends StatelessWidget {
+  const _DeviceRow({
+    required this.icon,
+    required this.label,
+    required this.devices,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final List<BindDevice> devices;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Text(
-              displayName.isEmpty ? (detail?.username ?? '-') : displayName,
-              style: Theme.of(context).textTheme.titleMedium,
+            Icon(icon, color: const Color(0xFF666666), size: 24),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF333333),
+                ),
+              ),
             ),
-            const SizedBox(height: 8),
-            Text('${l10n.userDetailCardNum}: ${detail?.cardNum ?? '-'}'),
-            Text('${l10n.userDetailPhone}: ${detail?.phone ?? '-'}'),
-            Text('${l10n.userDetailIdNumber}: ${detail?.idNumber ?? '-'}'),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              decoration: BoxDecoration(
+                color: AppColors.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                devices.length.toString(),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.primaryColor,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right, color: Color(0xFFCCCCCC)),
           ],
         ),
       ),
@@ -119,137 +416,299 @@ class _UserHeader extends StatelessWidget {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
-    );
-  }
-}
-
-class _DeviceSection extends StatelessWidget {
-  const _DeviceSection({required this.title, required this.devices});
+class _DeviceSheet extends StatelessWidget {
+  const _DeviceSheet({
+    required this.title,
+    required this.devices,
+    required this.l10n,
+  });
 
   final String title;
   final List<BindDevice> devices;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.6,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                const SizedBox(width: 40),
+                Expanded(
+                  child: Text(
+                    title,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
             ),
-            const SizedBox(height: 8),
-            if (devices.isEmpty)
-              _EmptyBindDeviceState(text: l10n.userDetailBindEmpty)
-            else
-              Column(
-                children: devices
-                    .map(
-                      (device) => ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(device.deviceSn ?? '-'),
-                        subtitle:
-                            Text(device.modelName ?? device.model ?? '-'),
+          ),
+          const Divider(height: 1),
+          Flexible(
+            child: devices.isEmpty
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(32),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.inbox_outlined,
+                              size: 48, color: Colors.grey[400]),
+                          const SizedBox(height: 16),
+                          Text(
+                            l10n.userDetailBindEmpty,
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        ],
                       ),
-                    )
-                    .toList(),
-              ),
-          ],
-        ),
+                    ),
+                  )
+                : ListView.separated(
+                    shrinkWrap: true,
+                    padding: const EdgeInsets.all(16),
+                    itemCount: devices.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final device = devices[index];
+                      return Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8F8F8),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              device.deviceSn ?? '-',
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              device.modelName ?? device.model ?? '-',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF999999),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _EmptyBindDeviceState extends StatelessWidget {
-  const _EmptyBindDeviceState({required this.text});
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.label, required this.value});
 
-  final String text;
+  final String label;
+  final String value;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Row(
       children: [
-        Image.asset(
-          'assets/android/mipmap-xxhdpi/empty_user_binddevice.png',
-          width: 140,
+        SizedBox(
+          width: 100,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF999999),
+            ),
+          ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          text,
-          style: const TextStyle(color: Colors.black54),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF333333),
+            ),
+          ),
         ),
       ],
     );
   }
 }
 
-class _EmptyOrderState extends StatelessWidget {
-  const _EmptyOrderState({required this.text});
+class _PhotoGrid extends StatelessWidget {
+  const _PhotoGrid({required this.photos});
 
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Image.asset(
-          'assets/android/mipmap-xxhdpi/empty_user_orderrecord.png',
-          width: 140,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          text,
-          style: const TextStyle(color: Colors.black54),
-        ),
-      ],
-    );
-  }
-}
-
-class _OrderSection extends StatelessWidget {
-  const _OrderSection({required this.title, required this.orders});
-
-  final String title;
-  final List<OrderItem> orders;
+  final List<String> photos;
 
   @override
   Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    if (orders.isEmpty) {
-      return const SizedBox.shrink();
+    if (photos.isEmpty) {
+      return const Text(
+        '-',
+        style: TextStyle(fontSize: 14, color: Color(0xFF666666)),
+      );
     }
+
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: photos.map((url) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            url,
+            width: 72,
+            height: 72,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => Container(
+              width: 72,
+              height: 72,
+              color: const Color(0xFFF5F5F5),
+              child: const Icon(Icons.broken_image_outlined, color: Color(0xFF999999)),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+}
+
+// =============================================================================
+// Order Records Tab
+// =============================================================================
+
+class _OrderRecordsTab extends StatefulWidget {
+  const _OrderRecordsTab({required this.orders, required this.l10n});
+
+  final List<OrderItem> orders;
+  final AppLocalizations l10n;
+
+  @override
+  State<_OrderRecordsTab> createState() => _OrderRecordsTabState();
+}
+
+class _OrderRecordsTabState extends State<_OrderRecordsTab>
+    with SingleTickerProviderStateMixin {
+  late TabController _subTabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _subTabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _subTabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final saleOrders = widget.orders.where((o) => o.orderType == 1).toList();
+    final rentOrders = widget.orders.where((o) => o.orderType == 2).toList();
+    final swapOrders = widget.orders.where((o) => o.orderType == 3).toList();
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+        Container(
+          color: Colors.white,
+          child: TabBar(
+            controller: _subTabController,
+            labelColor: AppColors.primaryColor,
+            unselectedLabelColor: const Color(0xFF666666),
+            labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+            unselectedLabelStyle: const TextStyle(fontSize: 13),
+            indicatorColor: AppColors.primaryColor,
+            indicatorSize: TabBarIndicatorSize.label,
+            tabs: [
+              Tab(text: widget.l10n.userOrderTabSale),
+              Tab(text: widget.l10n.userOrderTabRent),
+              Tab(text: widget.l10n.userOrderTabSwap),
+            ],
+          ),
         ),
-        const SizedBox(height: 8),
-        ...orders.map((order) => _OrderCard(order: order, l10n: l10n)),
-        const SizedBox(height: 12),
+        Expanded(
+          child: TabBarView(
+            controller: _subTabController,
+            children: [
+              _OrderList(orders: saleOrders, l10n: widget.l10n, orderType: 1),
+              _OrderList(orders: rentOrders, l10n: widget.l10n, orderType: 2),
+              _OrderList(orders: swapOrders, l10n: widget.l10n, orderType: 3),
+            ],
+          ),
+        ),
       ],
+    );
+  }
+}
+
+class _OrderList extends StatelessWidget {
+  const _OrderList({
+    required this.orders,
+    required this.l10n,
+    required this.orderType,
+  });
+
+  final List<OrderItem> orders;
+  final AppLocalizations l10n;
+  final int orderType;
+
+  @override
+  Widget build(BuildContext context) {
+    if (orders.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/android/mipmap-xxhdpi/empty_user_orderrecord.png',
+              width: 120,
+              height: 120,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.receipt_long_outlined,
+                size: 64,
+                color: Colors.grey[400],
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.userDetailOrderEmpty,
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: orders.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final order = orders[index];
+        return _OrderCard(order: order, l10n: l10n);
+      },
     );
   }
 }
@@ -262,58 +721,84 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final typeTag = _typeChip(context, l10n, order.orderType);
     switch (order.orderType) {
       case 1:
-        return _SaleOrderCard(order: order, l10n: l10n, typeTag: typeTag);
+        return _SaleOrderCard(order: order, l10n: l10n);
       case 2:
-        return _RentOrderCard(order: order, l10n: l10n, typeTag: typeTag);
+        return _RentOrderCard(order: order, l10n: l10n);
       case 3:
-        return _SwapOrderCard(order: order, l10n: l10n, typeTag: typeTag);
+        return _SwapOrderCard(order: order, l10n: l10n);
       default:
-        return _BaseOrderCard(
-          title: order.orderNo,
-          typeTag: typeTag,
-          subtitle: _infoRow(l10n.orderLabelAmount, _formatAmount(order.orderAmount)),
-          status: _statusChip(context, l10n, order.otherOrder?.status),
-        );
+        return const SizedBox.shrink();
     }
   }
 }
 
 class _SaleOrderCard extends StatelessWidget {
-  const _SaleOrderCard({
-    required this.order,
-    required this.l10n,
-    required this.typeTag,
-  });
+  const _SaleOrderCard({required this.order, required this.l10n});
 
   final OrderItem order;
   final AppLocalizations l10n;
-  final Widget typeTag;
 
   @override
   Widget build(BuildContext context) {
     final sale = order.saleOrder;
-    return _BaseOrderCard(
-      title: order.orderNo,
-      typeTag: typeTag,
-      status: _statusChip(context, l10n, sale?.status),
-      leading: _OrderImage(url: sale?.deviceImg),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
         children: [
-          _infoRow(
-            l10n.orderLabelOrderTime,
-            _formatDate(sale?.createTime ?? order.createTime),
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    order.orderNo,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF333333),
+                    ),
+                  ),
+                ),
+                _statusChip(context, l10n, sale?.status),
+              ],
+            ),
           ),
-          _infoRow(l10n.orderLabelDeviceSn, sale?.deviceSn ?? '-'),
-          _infoRow(l10n.orderLabelModel, sale?.deviceModel ?? '-'),
-          _infoRow(l10n.orderLabelAmount, _formatAmount(order.orderAmount)),
-          _infoRow(
-            l10n.orderLabelPayType,
-            _payTypeLabel(l10n, order.payWay, sale?.payType),
+          const Divider(height: 1),
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _OrderImage(url: sale?.deviceImg),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _orderInfoRow(l10n.orderLabelOrderTime, _formatDate(sale?.createTime ?? order.createTime)),
+                      _orderInfoRow(l10n.orderLabelDeviceSn, sale?.deviceSn ?? '-'),
+                      _orderInfoRow(l10n.orderLabelModel, sale?.deviceModel ?? '-'),
+                      _orderInfoRow(l10n.orderLabelAmount, _formatAmount(order.orderAmount)),
+                      _orderInfoRow(l10n.orderLabelPayType, _payTypeLabel(l10n, order.payWay, sale?.payType)),
+                      if (sale?.payType == 2) ...[
+                        _orderInfoRow(l10n.orderLabelTerm, sale?.period?.toString() ?? '-'),
+                        _orderInfoRow(l10n.orderLabelRate, _formatRate(sale?.rate)),
+                        _orderInfoRow(l10n.orderLabelMonthly, _formatAmount(sale?.perAmount)),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
+          // Voucher action
           if (_buildVoucherAction(
                 context,
                 l10n,
@@ -324,12 +809,10 @@ class _SaleOrderCard extends StatelessWidget {
                 attachment: sale?.attachment ?? order.attachment,
               )
               case final Widget action)
-            action,
-          if (sale?.payType == 2) ...[
-            _infoRow(l10n.orderLabelTerm, sale?.period?.toString() ?? '-'),
-            _infoRow(l10n.orderLabelRate, _formatRate(sale?.rate)),
-            _infoRow(l10n.orderLabelMonthly, _formatAmount(sale?.perAmount)),
-          ],
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: action,
+            ),
         ],
       ),
     );
@@ -337,49 +820,70 @@ class _SaleOrderCard extends StatelessWidget {
 }
 
 class _RentOrderCard extends StatelessWidget {
-  const _RentOrderCard({
-    required this.order,
-    required this.l10n,
-    required this.typeTag,
-  });
+  const _RentOrderCard({required this.order, required this.l10n});
 
   final OrderItem order;
   final AppLocalizations l10n;
-  final Widget typeTag;
 
   @override
   Widget build(BuildContext context) {
     final rent = order.rentOrder;
-    return _BaseOrderCard(
-      title: order.orderNo,
-      typeTag: typeTag,
-      status: _statusChip(context, l10n, rent?.status),
-      leading: _OrderImage(url: rent?.deviceImg),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
         children: [
-          _infoRow(
-            l10n.orderLabelOrderTime,
-            _formatDate(rent?.createTime ?? order.createTime),
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    order.orderNo,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF333333),
+                    ),
+                  ),
+                ),
+                _statusChip(context, l10n, rent?.status),
+              ],
+            ),
           ),
-          _infoRow(l10n.orderLabelPackageName, rent?.infoName ?? '-'),
-          _infoRow(l10n.orderLabelDeviceSn, rent?.deviceSn ?? '-'),
-          _infoRow(l10n.orderLabelModel, rent?.deviceModel ?? '-'),
-          _infoRow(l10n.orderLabelAmount, _formatAmount(rent?.serviceAmount)),
-          _infoRow(l10n.orderLabelDeposit, _formatAmount(rent?.depositAmount)),
-          _infoRow(
-            l10n.orderLabelServiceDays,
-            _formatUnit(rent?.duration, l10n.orderUnitDays),
+          const Divider(height: 1),
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _OrderImage(url: rent?.deviceImg),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _orderInfoRow(l10n.orderLabelOrderTime, _formatDate(rent?.createTime ?? order.createTime)),
+                      _orderInfoRow(l10n.orderLabelPackageName, rent?.infoName ?? '-'),
+                      _orderInfoRow(l10n.orderLabelDeviceSn, rent?.deviceSn ?? '-'),
+                      _orderInfoRow(l10n.orderLabelModel, rent?.deviceModel ?? '-'),
+                      _orderInfoRow(l10n.orderLabelAmount, _formatAmount(rent?.serviceAmount)),
+                      _orderInfoRow(l10n.orderLabelDeposit, _formatAmount(rent?.depositAmount)),
+                      _orderInfoRow(l10n.orderLabelServiceDays, _formatUnit(rent?.duration, l10n.orderUnitDays)),
+                      _orderInfoRow(l10n.orderLabelRemainDays, _formatUnit(rent?.remainDuration, l10n.orderUnitDays)),
+                      _orderInfoRow(l10n.orderLabelExpireDate, _formatDate(rent?.expireDate)),
+                      _orderInfoRow(l10n.orderLabelPayType, _payTypeLabel(l10n, order.payWay, rent?.payType)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          _infoRow(
-            l10n.orderLabelRemainDays,
-            _formatUnit(rent?.remainDuration, l10n.orderUnitDays),
-          ),
-          _infoRow(l10n.orderLabelExpireDate, _formatDate(rent?.expireDate)),
-          _infoRow(
-            l10n.orderLabelPayType,
-            _payTypeLabel(l10n, order.payWay, rent?.payType),
-          ),
+          // Voucher action
           if (_buildVoucherAction(
                 context,
                 l10n,
@@ -390,7 +894,10 @@ class _RentOrderCard extends StatelessWidget {
                 attachment: rent?.attachment ?? order.attachment,
               )
               case final Widget action)
-            action,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: action,
+            ),
         ],
       ),
     );
@@ -398,15 +905,10 @@ class _RentOrderCard extends StatelessWidget {
 }
 
 class _SwapOrderCard extends StatelessWidget {
-  const _SwapOrderCard({
-    required this.order,
-    required this.l10n,
-    required this.typeTag,
-  });
+  const _SwapOrderCard({required this.order, required this.l10n});
 
   final OrderItem order;
   final AppLocalizations l10n;
-  final Widget typeTag;
 
   @override
   Widget build(BuildContext context) {
@@ -414,42 +916,54 @@ class _SwapOrderCard extends StatelessWidget {
     final batteryInfo = swap == null
         ? '-'
         : '${swap.batteryType ?? '-'} • ${swap.batteryNum ?? '-'}';
-    return _BaseOrderCard(
-      title: order.orderNo,
-      typeTag: typeTag,
-      status: _statusChip(context, l10n, swap?.status),
-      subtitle: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
         children: [
-          _infoRow(
-            l10n.orderLabelOrderTime,
-            _formatDate(swap?.createTime ?? order.createTime),
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    order.orderNo,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF333333),
+                    ),
+                  ),
+                ),
+                _statusChip(context, l10n, swap?.status),
+              ],
+            ),
           ),
-          _infoRow(l10n.orderLabelPackageName, swap?.infoName ?? '-'),
-          _infoRow(l10n.orderLabelVehicle, swap?.carType ?? '-'),
-          _infoRow(l10n.orderLabelBattery, batteryInfo),
-          _infoRow(l10n.orderLabelAmount, _formatAmount(order.orderAmount)),
-          _infoRow(
-            l10n.orderLabelServiceDays,
-            _formatUnit(swap?.duration, l10n.orderUnitDays),
+          const Divider(height: 1),
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _orderInfoRow(l10n.orderLabelOrderTime, _formatDate(swap?.createTime ?? order.createTime)),
+                _orderInfoRow(l10n.orderLabelPackageName, swap?.infoName ?? '-'),
+                _orderInfoRow(l10n.orderLabelVehicle, swap?.carType ?? '-'),
+                _orderInfoRow(l10n.orderLabelBattery, batteryInfo),
+                _orderInfoRow(l10n.orderLabelAmount, _formatAmount(order.orderAmount)),
+                _orderInfoRow(l10n.orderLabelServiceDays, _formatUnit(swap?.duration, l10n.orderUnitDays)),
+                _orderInfoRow(l10n.orderLabelSwapTimes, _formatUnit(swap?.times, l10n.orderUnitTimes)),
+                _orderInfoRow(l10n.orderLabelRemainDays, _formatUnit(swap?.remainDuration, l10n.orderUnitDays)),
+                _orderInfoRow(l10n.orderLabelRemainTimes, _formatUnit(swap?.remainTime, l10n.orderUnitTimes)),
+                _orderInfoRow(l10n.orderLabelExpireDate, _formatDate(swap?.expireDate)),
+                _orderInfoRow(l10n.orderLabelPayType, _payTypeLabel(l10n, order.payWay, swap?.payType)),
+              ],
+            ),
           ),
-          _infoRow(
-            l10n.orderLabelSwapTimes,
-            _formatUnit(swap?.times, l10n.orderUnitTimes),
-          ),
-          _infoRow(
-            l10n.orderLabelRemainDays,
-            _formatUnit(swap?.remainDuration, l10n.orderUnitDays),
-          ),
-          _infoRow(
-            l10n.orderLabelRemainTimes,
-            _formatUnit(swap?.remainTime, l10n.orderUnitTimes),
-          ),
-          _infoRow(l10n.orderLabelExpireDate, _formatDate(swap?.expireDate)),
-          _infoRow(
-            l10n.orderLabelPayType,
-            _payTypeLabel(l10n, order.payWay, swap?.payType),
-          ),
+          // Voucher action
           if (_buildVoucherAction(
                 context,
                 l10n,
@@ -460,74 +974,75 @@ class _SwapOrderCard extends StatelessWidget {
                 attachment: swap?.attachment ?? order.attachment,
               )
               case final Widget action)
-            action,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: action,
+            ),
         ],
       ),
     );
   }
 }
 
-class _BaseOrderCard extends StatelessWidget {
-  const _BaseOrderCard({
-    required this.title,
-    required this.subtitle,
-    this.typeTag,
-    this.leading,
-    this.status,
-  });
+// =============================================================================
+// Payment Records Tab
+// =============================================================================
 
-  final String? title;
-  final Widget subtitle;
-  final Widget? typeTag;
-  final Widget? leading;
-  final Widget? status;
+class _PaymentRecordsTab extends StatelessWidget {
+  const _PaymentRecordsTab({required this.l10n});
+
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (typeTag != null) ...[
-                        typeTag!,
-                        const SizedBox(height: 6),
-                      ],
-                      Text(
-                        title ?? '-',
-                        style: Theme.of(context).textTheme.titleSmall,
-                      ),
-                    ],
-                  ),
-                ),
-                if (status != null) status!,
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (leading != null) ...[
-                  leading!,
-                  const SizedBox(width: 12),
-                ],
-                Expanded(child: subtitle),
-              ],
-            ),
-          ],
-        ),
+    // TODO: Implement payment records API
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.payment_outlined, size: 64, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            l10n.userDetailOrderEmpty,
+            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+          ),
+        ],
       ),
     );
   }
 }
+
+// =============================================================================
+// Swap Records Tab
+// =============================================================================
+
+class _SwapRecordsTab extends StatelessWidget {
+  const _SwapRecordsTab({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    // TODO: Implement swap records API
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.swap_horiz_outlined, size: 64, color: Colors.grey[400]),
+          const SizedBox(height: 16),
+          Text(
+            l10n.userDetailOrderEmpty,
+            style: TextStyle(color: Colors.grey[600], fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// =============================================================================
+// Helper Widgets
+// =============================================================================
 
 class _OrderImage extends StatelessWidget {
   const _OrderImage({required this.url});
@@ -537,24 +1052,24 @@ class _OrderImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
+      borderRadius: BorderRadius.circular(8),
       child: url == null || url!.isEmpty
           ? Container(
-              width: 52,
-              height: 52,
-              color: Colors.black12,
-              child: const Icon(Icons.image_outlined, size: 28),
+              width: 60,
+              height: 60,
+              color: const Color(0xFFF5F5F5),
+              child: const Icon(Icons.image_outlined, size: 28, color: Color(0xFF999999)),
             )
           : Image.network(
               url!,
-              width: 52,
-              height: 52,
+              width: 60,
+              height: 60,
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => Container(
-                width: 52,
-                height: 52,
-                color: Colors.black12,
-                child: const Icon(Icons.broken_image_outlined, size: 28),
+                width: 60,
+                height: 60,
+                color: const Color(0xFFF5F5F5),
+                child: const Icon(Icons.broken_image_outlined, size: 28, color: Color(0xFF999999)),
               ),
             ),
     );
@@ -574,31 +1089,65 @@ class _VoucherButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: TextButton.icon(
-        onPressed: onPressed,
-        icon: Image.asset(iconPath, width: 18, height: 18),
-        label: Text(label),
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          border: Border.all(color: AppColors.primaryColor),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              iconPath,
+              width: 16,
+              height: 16,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.upload_file,
+                size: 16,
+                color: AppColors.primaryColor,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.primaryColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-Widget _infoRow(String label, String value) {
+// =============================================================================
+// Helper Functions
+// =============================================================================
+
+Widget _orderInfoRow(String label, String value) {
   return Padding(
-    padding: const EdgeInsets.only(bottom: 4),
+    padding: const EdgeInsets.only(bottom: 6),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 96,
+          width: 90,
           child: Text(
             label,
-            style: const TextStyle(color: Colors.black54),
+            style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
           ),
         ),
-        Expanded(child: Text(value)),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 13, color: Color(0xFF333333)),
+          ),
+        ),
       ],
     ),
   );
@@ -910,34 +1459,6 @@ Widget _statusChip(
       style: TextStyle(fontSize: 12, color: colors.text),
     ),
   );
-}
-
-Widget _typeChip(BuildContext context, AppLocalizations l10n, int orderType) {
-  final label = _orderTypeLabel(l10n, orderType);
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-    decoration: BoxDecoration(
-      color: const Color(0xFFF2F4F7),
-      borderRadius: BorderRadius.circular(10),
-    ),
-    child: Text(
-      label,
-      style: const TextStyle(fontSize: 12, color: Color(0xFF5E6A7A)),
-    ),
-  );
-}
-
-String _orderTypeLabel(AppLocalizations l10n, int orderType) {
-  switch (orderType) {
-    case 1:
-      return l10n.userDetailOrderSale;
-    case 2:
-      return l10n.userDetailOrderRent;
-    case 3:
-      return l10n.userDetailOrderSwap;
-    default:
-      return '-';
-  }
 }
 
 String _statusLabel(AppLocalizations l10n, int? status) {

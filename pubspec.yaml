@@ -32,6 +32,7 @@ dependencies:
   mobile_scanner: 5.2.3 # 扫码
   image_picker: 1.2.1 # 图片选择
   flutter_image_compress: 2.4.0 # 图片压缩
+  url_launcher: 6.3.1 # URL 和电话拨打
   fl_chart: 0.69.2 # 图表
   flutter_blue_plus: 1.36.8 # BLE
   permission_handler: 11.4.0 # 权限管理

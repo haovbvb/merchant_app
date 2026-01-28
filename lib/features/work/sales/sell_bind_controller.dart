@@ -16,6 +16,8 @@ class SellBindState {
   final bool loadingPlans;
   final bool loadingPaymentPlans;
   final bool submitting;
+  final bool submitSuccess;
+  final String? documentNo;
   final PurchasingUser? user;
   final BatterOrVehicleInfo? deviceInfo;
   final List<ServicePlanBean> plans;
@@ -33,6 +35,8 @@ class SellBindState {
     this.loadingPlans = false,
     this.loadingPaymentPlans = false,
     this.submitting = false,
+    this.submitSuccess = false,
+    this.documentNo,
     this.user,
     this.deviceInfo,
     this.plans = const [],
@@ -51,6 +55,8 @@ class SellBindState {
     bool? loadingPlans,
     bool? loadingPaymentPlans,
     bool? submitting,
+    bool? submitSuccess,
+    String? documentNo,
     PurchasingUser? user,
     BatterOrVehicleInfo? deviceInfo,
     List<ServicePlanBean>? plans,
@@ -68,6 +74,8 @@ class SellBindState {
       loadingPlans: loadingPlans ?? this.loadingPlans,
       loadingPaymentPlans: loadingPaymentPlans ?? this.loadingPaymentPlans,
       submitting: submitting ?? this.submitting,
+      submitSuccess: submitSuccess ?? this.submitSuccess,
+      documentNo: documentNo ?? this.documentNo,
       user: user ?? this.user,
       deviceInfo: deviceInfo ?? this.deviceInfo,
       plans: plans ?? this.plans,
@@ -222,17 +230,19 @@ class SellBindNotifier extends Notifier<SellBindState> {
     required String lastName,
     required String idNumber,
     required String phone,
+    String? cardImgUrl,
+    String? personImgUrl,
   }) async {
     final plan = state.selectedPlan;
     final device = state.deviceInfo;
     if (plan == null || device == null) return false;
     state = state.copyWith(submitting: true);
-    final response = await _api.post<Object>(
+    final response = await _api.post<String>(
       ApiPath.sellBind,
       data: {
         'address': address,
         'birthday': birthday,
-        'cardImg': state.cardImgUrl ?? '',
+        'cardImg': cardImgUrl ?? state.cardImgUrl ?? '',
         'cardNum': cardNum,
         'email': email,
         'firstName': firstName,
@@ -241,16 +251,24 @@ class SellBindNotifier extends Notifier<SellBindState> {
         'phone': phone,
         'payType': state.payType,
         'planNo': state.selectedPaymentPlan?.planNo ?? '',
-        'personImg': state.personImgUrl ?? '',
+        'personImg': personImgUrl ?? state.personImgUrl ?? '',
         'infoCode': plan.infoCode ?? '',
         'paySource': state.paySource,
         'deviceSn': device.batteryVo?.sn ?? device.carVo?.sn ?? '',
         'type': device.deviceType,
       },
-      parser: (json) => json ?? Object(),
+      parser: (json) => json?.toString() ?? '',
     );
-    state = state.copyWith(submitting: false);
+    state = state.copyWith(
+      submitting: false,
+      submitSuccess: response.isSuccess,
+      documentNo: response.result,
+    );
     return response.isSuccess;
+  }
+
+  void reset() {
+    state = const SellBindState();
   }
 
   Future<Uint8List?> _compressImage(String path) async {

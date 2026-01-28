@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
-import 'package:merchant_app/data/models/payment_plan.dart';
+import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
 import 'package:merchant_app/data/models/service_plan.dart';
-import 'package:merchant_app/features/work/map/address_picker_page.dart';
-import 'package:merchant_app/features/work/map/address_result.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/sell_bind_controller.dart';
+import 'package:merchant_app/features/work/sales/widgets/applicant_sheet.dart';
+import 'package:merchant_app/features/work/sales/widgets/package_sheet.dart';
+import 'package:merchant_app/features/work/sales/widgets/payment_sheet.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
 class SellBindPage extends ConsumerStatefulWidget {
@@ -19,43 +20,11 @@ class SellBindPage extends ConsumerStatefulWidget {
 }
 
 class _SellBindPageState extends ConsumerState<SellBindPage> {
-  final _cardController = TextEditingController();
   final _snController = TextEditingController();
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _idController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _birthdayController = TextEditingController();
-  final _addressController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    ref.listen<SellBindState>(sellBindProvider, (prev, next) {
-      final user = next.user;
-      if (user == null) return;
-      _firstNameController.text = user.firstName ?? _firstNameController.text;
-      _lastNameController.text = user.lastName ?? _lastNameController.text;
-      _phoneController.text = user.phone ?? _phoneController.text;
-      _idController.text = user.idNumber ?? _idController.text;
-      _emailController.text = user.email ?? _emailController.text;
-      _birthdayController.text = user.birthday ?? _birthdayController.text;
-      _addressController.text = user.address ?? _addressController.text;
-    });
-  }
 
   @override
   void dispose() {
-    _cardController.dispose();
     _snController.dispose();
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _phoneController.dispose();
-    _idController.dispose();
-    _emailController.dispose();
-    _birthdayController.dispose();
-    _addressController.dispose();
     super.dispose();
   }
 
@@ -65,222 +34,266 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
     final state = ref.watch(sellBindProvider);
     final notifier = ref.read(sellBindProvider.notifier);
 
+    // 成功页面
+    if (state.submitSuccess && state.documentNo != null) {
+      return _SuccessPage(
+        documentNo: state.documentNo!,
+        paySource: state.paySource,
+        onReturn: () {
+          notifier.reset();
+          Navigator.of(context).pop();
+        },
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.sellBindTitle)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+      body: Column(
         children: [
-          _SectionTitle(title: l10n.sellBindPlanSection),
-          const SizedBox(height: 8),
-          _PlanSelector(
-            l10n: l10n,
-            selected: state.selectedPlan,
-            onTap: () => _showPlanSheet(context, notifier),
-          ),
-          const SizedBox(height: 16),
-          _SectionTitle(title: l10n.sellBindDeviceSection),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _snController,
-            decoration: InputDecoration(
-              labelText: l10n.sellBindDeviceSn,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              suffixIcon: Wrap(
-                spacing: 4,
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.qr_code_scanner),
-                    onPressed: _scanSn,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () => notifier.queryDevice(
-                      _snController.text.trim(),
+                  // Header
+                  _buildHeader(l10n),
+                  const SizedBox(height: 24),
+
+                  // Package Section
+                  _buildPackageSection(l10n, state, notifier),
+                  const SizedBox(height: 16),
+
+                  // Device SN Section
+                  _buildDeviceSection(l10n, state, notifier),
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
+
+          // Submit Button
+          _buildSubmitButton(l10n, state, notifier),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(AppLocalizations l10n) {
+    return Column(
+      children: [
+        Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFF6B4A),
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: const Icon(
+            Icons.shopping_bag,
+            color: Colors.white,
+            size: 32,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          l10n.sellBindTitle,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF333333),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPackageSection(
+    AppLocalizations l10n,
+    SellBindState state,
+    SellBindNotifier notifier,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.sellBindPackage,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF333333),
+            ),
+          ),
+          const SizedBox(height: 8),
+          GestureDetector(
+            onTap: () => _showPackageSheet(context, notifier),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              decoration: const BoxDecoration(
+                border: Border(
+                  bottom: BorderSide(color: Color(0xFFEEEEEE)),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      l10n.sellBindPackageHint,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF999999),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          _InfoCard(
-            title: l10n.sellBindDeviceInfo,
-            content: _deviceInfoText(l10n, state),
-          ),
           const SizedBox(height: 16),
-          _SectionTitle(title: l10n.sellBindUserSection),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _cardController,
-            decoration: InputDecoration(
-              labelText: l10n.sellBindCardNum,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () => notifier.queryUser(
-                  _cardController.text.trim(),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _firstNameController,
-            label: l10n.sellBindFirstName,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _lastNameController,
-            label: l10n.sellBindLastName,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _phoneController,
-            label: l10n.sellBindPhone,
-            keyboardType: TextInputType.phone,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _idController,
-            label: l10n.sellBindIdNumber,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _emailController,
-            label: l10n.sellBindEmail,
-            keyboardType: TextInputType.emailAddress,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _birthdayController,
-            label: l10n.sellBindBirthday,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _addressController,
-            label: l10n.sellBindAddress,
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.map_outlined),
-              onPressed: () => _selectAddress(context),
-            ),
-          ),
-          const SizedBox(height: 16),
-          _SectionTitle(title: l10n.sellBindAttachment),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _UploadChip(
-                label: l10n.sellBindCardImage,
-                value: state.cardImgUrl,
-                onTap: () => _pickImage(
-                  context,
-                  notifier,
-                  notifier.setCardImgUrl,
-                ),
-              ),
-              const SizedBox(width: 8),
-              _UploadChip(
-                label: l10n.sellBindPersonImage,
-                value: state.personImgUrl,
-                onTap: () => _pickImage(
-                  context,
-                  notifier,
-                  notifier.setPersonImgUrl,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _SectionTitle(title: l10n.sellBindPaymentSection),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: [
-              ChoiceChip(
-                label: Text(l10n.sellBindPayCash),
-                selected: state.paySource == 1,
-                onSelected: (_) => notifier.updatePaySource(1),
-              ),
-              ChoiceChip(
-                label: Text(l10n.sellBindPayOnline),
-                selected: state.paySource == 2,
-                onSelected: (_) => notifier.updatePaySource(2),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          if (state.paySource == 2)
-            Wrap(
-              spacing: 8,
-              children: [
-                ChoiceChip(
-                  label: Text(l10n.sellBindPayFull),
-                  selected: state.payType == 1,
-                  onSelected: (_) => notifier.updatePayType(1),
-                ),
-                ChoiceChip(
-                  label: Text(l10n.sellBindPayInstallment),
-                  selected: state.payType == 2,
-                  onSelected: (_) => notifier.updatePayType(2),
-                ),
-              ],
-            ),
-          if (state.paySource == 2 && state.payType == 2) ...[
-            const SizedBox(height: 8),
-            _PlanList(
-              l10n: l10n,
-              plans: state.paymentPlans,
-              selected: state.selectedPaymentPlan,
-              onSelected: notifier.selectPaymentPlan,
-            ),
-          ],
-          const SizedBox(height: 20),
-          FilledButton(
-            onPressed: state.submitting
-                ? null
-                : () => _submit(context, notifier),
-            child: state.submitting
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.sellBindSubmit),
-          ),
+          if (state.selectedPlan != null)
+            _PackageCard(plan: state.selectedPlan!)
+          else
+            _buildEmptyCard(l10n.sellBindNoPackageInfo),
         ],
       ),
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    TextInputType? keyboardType,
-    Widget? suffixIcon,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        suffixIcon: suffixIcon,
+  Widget _buildDeviceSection(
+    AppLocalizations l10n,
+    SellBindState state,
+    SellBindNotifier notifier,
+  ) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.sellBindDeviceSn,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF333333),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _snController,
+                  decoration: InputDecoration(
+                    hintText: l10n.sellBindDeviceSnHint,
+                    hintStyle: const TextStyle(color: Color(0xFF999999)),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xFF333333),
+                  ),
+                  onSubmitted: (value) {
+                    if (value.trim().isNotEmpty) {
+                      notifier.queryDevice(value.trim());
+                    }
+                  },
+                ),
+              ),
+              GestureDetector(
+                onTap: _scanSn,
+                child: const Icon(
+                  Icons.qr_code_scanner,
+                  color: Color(0xFF333333),
+                  size: 24,
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 1, color: Color(0xFFEEEEEE)),
+          const SizedBox(height: 16),
+          if (state.deviceInfo != null)
+            _DeviceInfoCard(deviceInfo: state.deviceInfo!)
+          else
+            _buildEmptyCard(l10n.sellBindNoDeviceInfo),
+        ],
       ),
     );
   }
 
-  Future<void> _selectAddress(BuildContext context) async {
-    final result = await Navigator.of(context).push<AddressResult>(
-      MaterialPageRoute(builder: (_) => const AddressPickerPage()),
+  Widget _buildEmptyCard(String text) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 32),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F8F8),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Center(
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF999999),
+          ),
+        ),
+      ),
     );
-    if (!mounted || result == null || result.address.isEmpty) return;
-    _addressController.text = result.address;
+  }
+
+  Widget _buildSubmitButton(
+    AppLocalizations l10n,
+    SellBindState state,
+    SellBindNotifier notifier,
+  ) {
+    final isEnabled = state.selectedPlan != null && state.deviceInfo != null;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      color: const Color(0xFFF5F5F5),
+      child: SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: ElevatedButton(
+          onPressed: isEnabled
+              ? () => _handleSubmit(context, state, notifier)
+              : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF4CAF50),
+            disabledBackgroundColor: const Color(0xFFE8F5E9),
+            foregroundColor: Colors.white,
+            disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 0,
+          ),
+          child: Text(
+            l10n.sellBindSubmit,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _scanSn() async {
@@ -291,238 +304,617 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
+    ref.read(sellBindProvider.notifier).queryDevice(result);
   }
 
-  String _deviceInfoText(AppLocalizations l10n, SellBindState state) {
-    final device = state.deviceInfo;
-    if (device == null) return l10n.sellBindDeviceEmpty;
-    if (device.batteryVo != null) {
-      final battery = device.batteryVo!;
-      return 'SN: ${battery.sn ?? '-'}\n${battery.model ?? '-'} ${battery.spec ?? ''}';
-    }
-    if (device.carVo != null) {
-      final car = device.carVo!;
-      return 'SN: ${car.sn ?? '-'}\n${car.model} ${car.spec}';
-    }
-    return l10n.sellBindDeviceEmpty;
-  }
-
-  Future<void> _showPlanSheet(
+  Future<void> _showPackageSheet(
     BuildContext context,
     SellBindNotifier notifier,
   ) async {
-    final l10n = context.l10n;
-    final controller = TextEditingController();
-    await notifier.queryPlans('');
-    if (!context.mounted) return;
-    final selected = await showModalBottomSheet<ServicePlanBean>(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextField(
-                  controller: controller,
-                  decoration: InputDecoration(
-                    hintText: l10n.sellBindPlanSearch,
-                    suffixIcon: IconButton(
-                      icon: const Icon(Icons.search),
-                      onPressed: () => notifier.queryPlans(
-                        controller.text.trim(),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Flexible(
-                  child: Consumer(
-                    builder: (context, ref, _) {
-                      final plans = ref.watch(sellBindProvider).plans;
-                      if (plans.isEmpty) {
-                        return Text(l10n.sellBindPlanEmpty);
-                      }
-                      return ListView.separated(
-                        shrinkWrap: true,
-                        itemCount: plans.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
-                        itemBuilder: (_, index) {
-                          final item = plans[index];
-                          final price = item.packageAmount?.toStringAsFixed(2) ?? '-';
-                          return ListTile(
-                            title: Text(item.infoName ?? '-'),
-                            subtitle: Text('${l10n.sellBindPlanPrice}: $price'),
-                            onTap: () => Navigator.of(context).pop(item),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    final selected = await PackageSheet.show(context, notifier);
     if (selected != null) {
       notifier.selectPlan(selected);
     }
   }
 
-  Future<void> _pickImage(
+  Future<void> _handleSubmit(
     BuildContext context,
-    SellBindNotifier notifier,
-    ValueChanged<String?> onSuccess,
-  ) async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked == null) return;
-    final url = await notifier.uploadCardImage(picked.path);
-    if (url != null) {
-      onSuccess(url);
-    }
-  }
-
-  Future<void> _submit(
-    BuildContext context,
+    SellBindState state,
     SellBindNotifier notifier,
   ) async {
     final l10n = context.l10n;
+
+    // Step 1: Select Applicant
+    final applicantResult = await ApplicantSheet.show(context, notifier);
+    if (applicantResult == null || !mounted) return;
+
+    // Step 2: Select Payment
+    final paymentResult = await PaymentSheet.show(
+      context,
+      notifier,
+      state.selectedPlan!.packageAmount ?? 0,
+    );
+    if (paymentResult == null || !mounted) return;
+
+    // Step 3: Validate device matches package
+    final device = state.deviceInfo;
+    final plan = state.selectedPlan;
+    if (device != null && plan != null) {
+      final deviceModel = device.batteryVo?.model ?? device.carVo?.model;
+      final planModel = plan.batteryType ?? plan.carType;
+      if (deviceModel != null && planModel != null && deviceModel != planModel) {
+        _showModelMismatchDialog(context, l10n);
+        return;
+      }
+    }
+
+    // Step 4: Submit
     final ok = await notifier.submit(
-      address: _addressController.text.trim(),
-      birthday: _birthdayController.text.trim(),
-      cardNum: _cardController.text.trim(),
-      email: _emailController.text.trim(),
-      firstName: _firstNameController.text.trim(),
-      lastName: _lastNameController.text.trim(),
-      idNumber: _idController.text.trim(),
-      phone: _phoneController.text.trim(),
+      address: applicantResult.address,
+      birthday: applicantResult.birthday,
+      cardNum: applicantResult.cardNum,
+      email: applicantResult.email,
+      firstName: applicantResult.firstName,
+      lastName: applicantResult.lastName,
+      idNumber: applicantResult.idNumber,
+      phone: applicantResult.phone,
+      cardImgUrl: applicantResult.cardImgUrl,
+      personImgUrl: applicantResult.personImgUrl,
     );
-    if (!context.mounted) return;
-    showToast(ok ? l10n.sellBindSuccess : l10n.sellBindFailed);
+
+    if (!mounted) return;
+    if (!ok) {
+      showToast(l10n.sellBindFailed);
+    }
   }
-}
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: const TextStyle(fontWeight: FontWeight.w600),
-    );
-  }
-}
-
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.title, required this.content});
-
-  final String title;
-  final String content;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 6),
-            Text(content),
-          ],
+  void _showModelMismatchDialog(BuildContext context, AppLocalizations l10n) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
         ),
+        title: Text(
+          l10n.sellBindUnableSubmit,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        content: Text(
+          l10n.sellBindModelMismatch,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 14,
+            color: Color(0xFF666666),
+          ),
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4CAF50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text(l10n.confirm),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _PlanSelector extends StatelessWidget {
-  const _PlanSelector({
-    required this.l10n,
-    required this.selected,
-    required this.onTap,
-  });
+// Package Card
+class _PackageCard extends StatelessWidget {
+  const _PackageCard({required this.plan});
 
-  final AppLocalizations l10n;
-  final ServicePlanBean? selected;
-  final VoidCallback onTap;
+  final ServicePlanBean plan;
 
   @override
   Widget build(BuildContext context) {
-    final title = selected?.infoName ?? l10n.sellBindPlanHint;
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(title),
-      subtitle: Text(selected?.infoCode ?? ''),
-      trailing: const Icon(Icons.expand_more),
-      onTap: onTap,
-    );
-  }
-}
+    final price = plan.packageAmount?.toStringAsFixed(2) ?? '0.00';
+    final modelType = plan.batteryType != null ? 'Battery' : 'Vehicle';
+    final model = plan.batteryType ?? plan.carType ?? '-';
 
-class _PlanList extends StatelessWidget {
-  const _PlanList({
-    required this.l10n,
-    required this.plans,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final AppLocalizations l10n;
-  final List<PaymentPlan> plans;
-  final PaymentPlan? selected;
-  final ValueChanged<PaymentPlan> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    if (plans.isEmpty) {
-      return Text(l10n.sellBindPlanEmpty);
-    }
-    return Column(
-      children: plans
-          .map(
-            (plan) => RadioListTile<PaymentPlan>(
-              value: plan,
-              groupValue: selected,
-              onChanged: (value) {
-                if (value != null) onSelected(value);
-              },
-              title: Text(plan.planName ?? '-'),
-              subtitle: Text(
-                '${l10n.sellBindPlanPeriod}: ${plan.period ?? '-'}',
-              ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1E3A5F), Color(0xFF2D4A6F)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            plan.infoName ?? '-',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFFCCCCCC),
             ),
-          )
-          .toList(),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '\$$price',
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Text(
+                'Applicable Models:',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.white.withValues(alpha: 0.6),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$modelType · $model',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _UploadChip extends StatelessWidget {
-  const _UploadChip({
-    required this.label,
-    required this.value,
-    required this.onTap,
-  });
+// Device Info Card
+class _DeviceInfoCard extends StatelessWidget {
+  const _DeviceInfoCard({required this.deviceInfo});
 
-  final String label;
-  final String? value;
-  final VoidCallback onTap;
+  final BatterOrVehicleInfo deviceInfo;
 
   @override
   Widget build(BuildContext context) {
-    return ActionChip(
-      label: Text(value == null || value!.isEmpty ? label : '✓ $label'),
-      onPressed: onTap,
+    if (deviceInfo.batteryVo != null) {
+      return _BatteryCard(battery: deviceInfo.batteryVo!);
+    }
+    if (deviceInfo.carVo != null) {
+      return _VehicleCard(car: deviceInfo.carVo!);
+    }
+    return const SizedBox.shrink();
+  }
+}
+
+class _BatteryCard extends StatelessWidget {
+  const _BatteryCard({required this.battery});
+
+  final BatteryVo battery;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEEEEEE)),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                // Battery image
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: battery.img != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            battery.img!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.battery_charging_full,
+                              size: 32,
+                              color: Color(0xFF999999),
+                            ),
+                          ),
+                        )
+                      : const Icon(
+                          Icons.battery_charging_full,
+                          size: 32,
+                          color: Color(0xFF999999),
+                        ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        battery.sn ?? '-',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF333333),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          _buildTag('Battery · ${battery.model ?? '-'}'),
+                          const SizedBox(width: 8),
+                          _buildTag(battery.spec ?? '-'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: Color(0xFFEEEEEE)),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              children: [
+                _buildMetric('SOC', '${battery.soc ?? 0}%'),
+                _buildMetric('SOH', '${battery.soh ?? 0}'),
+                _buildMetric('Cycle', '${battery.cycle ?? 0}'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTag(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFFDDDDDD)),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 12,
+          color: Color(0xFF666666),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMetric(String label, String value) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF999999),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF333333),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _VehicleCard extends StatelessWidget {
+  const _VehicleCard({required this.car});
+
+  final CarVo car;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFEEEEEE)),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                // Vehicle image
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: car.img != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            car.img!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.electric_moped,
+                              size: 32,
+                              color: Color(0xFF999999),
+                            ),
+                          ),
+                        )
+                      : const Icon(
+                          Icons.electric_moped,
+                          size: 32,
+                          color: Color(0xFF999999),
+                        ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        car.sn ?? '-',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF333333),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          _buildTag('Vehicle · ${car.model}'),
+                          const SizedBox(width: 8),
+                          _buildTag(car.spec),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: Color(0xFFEEEEEE)),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              children: [
+                _buildMetric('VIN', car.vin ?? '-'),
+                _buildMetric('Plate Number', car.carNumber ?? '-'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTag(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFFDDDDDD)),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 12,
+          color: Color(0xFF666666),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMetric(String label, String value) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF999999),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF333333),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Success Page
+class _SuccessPage extends StatelessWidget {
+  const _SuccessPage({
+    required this.documentNo,
+    required this.paySource,
+    required this.onReturn,
+  });
+
+  final String documentNo;
+  final int paySource;
+  final VoidCallback onReturn;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final message = paySource == 2
+        ? l10n.sellBindSuccessMessageOnline
+        : l10n.sellBindSuccessMessageCash;
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: onReturn,
+        ),
+        title: Text(
+          l10n.sellBindTitle,
+          style: const TextStyle(color: Colors.black),
+        ),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Success icon
+              Container(
+                width: 64,
+                height: 64,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF4CAF50),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check,
+                  color: Colors.white,
+                  size: 40,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.sellBindSuccessTitle,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF333333),
+                ),
+              ),
+              const SizedBox(height: 12),
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF666666),
+                  ),
+                  children: [
+                    TextSpan(text: message.split('30')[0]),
+                    const TextSpan(
+                      text: '30 minutes',
+                      style: TextStyle(color: Color(0xFFFF9800)),
+                    ),
+                    if (message.split('30').length > 1)
+                      TextSpan(text: message.split('30')[1].replaceFirst(' minutes', '')),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Document Number
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF8E1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      l10n.sellBindDocumentNumber,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF999999),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          documentNo,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF333333),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () {
+                            Clipboard.setData(ClipboardData(text: documentNo));
+                            showToast(l10n.sellBindCopied);
+                          },
+                          child: const Icon(
+                            Icons.copy,
+                            size: 18,
+                            color: Color(0xFF999999),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              // Return button
+              OutlinedButton(
+                onPressed: onReturn,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF4CAF50),
+                  side: const BorderSide(color: Color(0xFF4CAF50)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  ),
+                ),
+                child: Text(l10n.sellBindReturnWorkbench),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

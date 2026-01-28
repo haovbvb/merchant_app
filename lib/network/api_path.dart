@@ -159,6 +159,8 @@ class ApiPath {
       '/admin/transfer/queryDeviceReceivePage';
   static const String transportQueryIssueDetail =
       '/admin/transfer/queryIssueDetail';
+  static const String transportQueryReceiveDetail =
+      '/admin/transfer/queryReceiveDetail';
   static const String transportQueryMyWarehouseInfo =
       '/admin/transfer/queryMyWarehouseInfo';
   static const String transportQueryInWarehouseList =

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/features/work/warehouse/device_type_sheet.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_controller.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_detail_page_new.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
@@ -251,62 +252,7 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
   }
 
   Future<void> _showCreateSheet(BuildContext context) async {
-    final l10n = context.l10n;
-    final deviceType = await showModalBottomSheet<int>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-          ),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    l10n.selectDeviceType,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
-                ),
-                ListTile(
-                  leading: const Icon(
-                    Icons.battery_charging_full,
-                    color: Color(0xFF4CAF50),
-                  ),
-                  title: Text(l10n.warehouseDeviceTypeBattery),
-                  onTap: () => Navigator.of(context).pop(1),
-                ),
-                ListTile(
-                  leading: const Icon(
-                    Icons.electric_moped,
-                    color: Color(0xFF4CAF50),
-                  ),
-                  title: Text(l10n.warehouseDeviceTypeVehicle),
-                  onTap: () => Navigator.of(context).pop(2),
-                ),
-                ListTile(
-                  leading: const Icon(
-                    Icons.ev_station,
-                    color: Color(0xFF4CAF50),
-                  ),
-                  title: Text(l10n.warehouseDeviceTypeStation),
-                  onTap: () => Navigator.of(context).pop(3),
-                ),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    final deviceType = await DeviceTypeSheet.show(context);
 
     if (deviceType == null || !mounted) return;
 

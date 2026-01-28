@@ -1,0 +1,256 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/data/models/service_plan.dart';
+import 'package:merchant_app/features/work/sales/sell_bind_controller.dart';
+
+class PackageSheet extends ConsumerStatefulWidget {
+  const PackageSheet({super.key, required this.notifier});
+
+  final SellBindNotifier notifier;
+
+  static Future<ServicePlanBean?> show(
+    BuildContext context,
+    SellBindNotifier notifier,
+  ) async {
+    await notifier.queryPlans('');
+    if (!context.mounted) return null;
+
+    return showModalBottomSheet<ServicePlanBean>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => PackageSheet(notifier: notifier),
+    );
+  }
+
+  @override
+  ConsumerState<PackageSheet> createState() => _PackageSheetState();
+}
+
+class _PackageSheetState extends ConsumerState<PackageSheet> {
+  final _searchController = TextEditingController();
+  ServicePlanBean? _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    final state = ref.read(sellBindProvider);
+    _selected = state.selectedPlan;
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    final state = ref.watch(sellBindProvider);
+    final plans = state.plans;
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      child: Column(
+        children: [
+          // Header
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Row(
+              children: [
+                const Spacer(),
+                Text(
+                  l10n.sellBindChoosePackage,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF333333),
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const Icon(Icons.close, color: Color(0xFF999999)),
+                ),
+              ],
+            ),
+          ),
+
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F5F5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.search,
+                    color: Color(0xFF999999),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText: l10n.sellBindPackageSearchHint,
+                        hintStyle: const TextStyle(color: Color(0xFF999999)),
+                        border: InputBorder.none,
+                        isDense: true,
+                        contentPadding: const EdgeInsets.symmetric(
+                          vertical: 12,
+                        ),
+                      ),
+                      onSubmitted: (value) {
+                        widget.notifier.queryPlans(value.trim());
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Package list
+          Expanded(
+            child: state.loadingPlans
+                ? const Center(child: CircularProgressIndicator())
+                : plans.isEmpty
+                    ? Center(
+                        child: Text(
+                          l10n.sellBindPlanEmpty,
+                          style: const TextStyle(color: Color(0xFF999999)),
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: plans.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        itemBuilder: (context, index) {
+                          final plan = plans[index];
+                          final isSelected =
+                              _selected?.infoCode == plan.infoCode;
+                          return _PackageItem(
+                            plan: plan,
+                            isSelected: isSelected,
+                            onTap: () {
+                              setState(() => _selected = plan);
+                              Navigator.of(context).pop(plan);
+                            },
+                          );
+                        },
+                      ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PackageItem extends StatelessWidget {
+  const _PackageItem({
+    required this.plan,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final ServicePlanBean plan;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final price = plan.packageAmount?.toStringAsFixed(2) ?? '0.00';
+    final modelType = plan.batteryType != null ? 'Battery' : 'Vehicle';
+    final model = plan.batteryType ?? plan.carType ?? '-';
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? const Color(0xFF4CAF50) : const Color(0xFFEEEEEE),
+          ),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    plan.infoName ?? '-',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF333333),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '\$$price',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFFF6B4A),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  const Divider(height: 1),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Text(
+                        'Applicable Models:',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[500],
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '$modelType · $model',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF333333),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            if (isSelected)
+              Container(
+                width: 24,
+                height: 24,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF4CAF50),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}

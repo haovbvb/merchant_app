@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/pack.dart';
-import 'package:merchant_app/features/work/map/address_picker_page.dart';
-import 'package:merchant_app/features/work/map/address_result.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/rent_bind_controller.dart';
-import 'package:merchant_app/l10n/app_localizations.dart';
+import 'package:merchant_app/features/work/sales/widgets/rent_applicant_sheet.dart';
+import 'package:merchant_app/features/work/sales/widgets/rent_package_sheet.dart';
+import 'package:merchant_app/features/work/sales/widgets/rent_payment_sheet.dart';
 
 class RentBindPage extends ConsumerStatefulWidget {
   const RentBindPage({super.key});
@@ -18,43 +18,11 @@ class RentBindPage extends ConsumerStatefulWidget {
 }
 
 class _RentBindPageState extends ConsumerState<RentBindPage> {
-  final _cardController = TextEditingController();
   final _snController = TextEditingController();
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _idController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _birthdayController = TextEditingController();
-  final _addressController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    ref.listen<RentBindState>(rentBindProvider, (prev, next) {
-      final user = next.user;
-      if (user == null) return;
-      _firstNameController.text = user.firstName ?? _firstNameController.text;
-      _lastNameController.text = user.lastName ?? _lastNameController.text;
-      _phoneController.text = user.phone ?? _phoneController.text;
-      _idController.text = user.idNumber ?? _idController.text;
-      _emailController.text = user.email ?? _emailController.text;
-      _birthdayController.text = user.birthday ?? _birthdayController.text;
-      _addressController.text = user.address ?? _addressController.text;
-    });
-  }
 
   @override
   void dispose() {
-    _cardController.dispose();
     _snController.dispose();
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _phoneController.dispose();
-    _idController.dispose();
-    _emailController.dispose();
-    _birthdayController.dispose();
-    _addressController.dispose();
     super.dispose();
   }
 
@@ -64,195 +32,494 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
     final state = ref.watch(rentBindProvider);
     final notifier = ref.read(rentBindProvider.notifier);
 
+    // Show success page
+    if (state.submitSuccess) {
+      return _SuccessPage(
+        paySource: state.paySource,
+        documentNo: state.documentNo ?? '',
+        onReturn: () {
+          notifier.reset();
+          Navigator.of(context).pop();
+        },
+      );
+    }
+
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.rentBindTitle)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFFF5F5F5),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const SizedBox.shrink(),
+      ),
+      body: Column(
         children: [
-          _SectionTitle(title: l10n.rentBindDeviceSection),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _snController,
-            decoration: InputDecoration(
-              labelText: l10n.rentBindDeviceSn,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              suffixIcon: Wrap(
-                spacing: 4,
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.qr_code_scanner),
-                    onPressed: _scanSn,
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () => notifier.queryDevice(
-                      _snController.text.trim(),
-                    ),
-                  ),
+                  _buildHeader(),
+                  const SizedBox(height: 16),
+                  _buildDeviceSection(l10n, state, notifier),
+                  const SizedBox(height: 8),
+                  _buildPackageSection(l10n, state, notifier),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 8),
-          _InfoCard(
-            title: l10n.rentBindDeviceInfo,
-            content: _deviceInfoText(l10n, state),
-          ),
-          const SizedBox(height: 12),
-          _PackList(
-            l10n: l10n,
-            packs: state.deviceInfo?.packList ?? const [],
-            selected: state.selectedPack,
-            onSelected: notifier.selectPack,
-          ),
-          const SizedBox(height: 16),
-          _SectionTitle(title: l10n.rentBindUserSection),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _cardController,
-            decoration: InputDecoration(
-              labelText: l10n.rentBindCardNum,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.search),
-                onPressed: () => notifier.queryUser(
-                  _cardController.text.trim(),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _firstNameController,
-            label: l10n.rentBindFirstName,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _lastNameController,
-            label: l10n.rentBindLastName,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _phoneController,
-            label: l10n.rentBindPhone,
-            keyboardType: TextInputType.phone,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _idController,
-            label: l10n.rentBindIdNumber,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _emailController,
-            label: l10n.rentBindEmail,
-            keyboardType: TextInputType.emailAddress,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _birthdayController,
-            label: l10n.rentBindBirthday,
-          ),
-          const SizedBox(height: 12),
-          _buildTextField(
-            controller: _addressController,
-            label: l10n.rentBindAddress,
-            suffixIcon: IconButton(
-              icon: const Icon(Icons.map_outlined),
-              onPressed: () => _selectAddress(context),
-            ),
-          ),
-          const SizedBox(height: 16),
-          _SectionTitle(title: l10n.rentBindAttachment),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _UploadChip(
-                label: l10n.rentBindCardImage,
-                value: state.cardImgUrl,
-                onTap: () => _pickImage(
-                  context,
-                  notifier,
-                  notifier.setCardImgUrl,
-                ),
-              ),
-              const SizedBox(width: 8),
-              _UploadChip(
-                label: l10n.rentBindPersonImage,
-                value: state.personImgUrl,
-                onTap: () => _pickImage(
-                  context,
-                  notifier,
-                  notifier.setPersonImgUrl,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _SectionTitle(title: l10n.rentBindPaymentSection),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: [
-              ChoiceChip(
-                label: Text(l10n.rentBindPayCash),
-                selected: state.paySource == 1,
-                onSelected: (_) => notifier.updatePaySource(1),
-              ),
-              ChoiceChip(
-                label: Text(l10n.rentBindPayOnline),
-                selected: state.paySource == 2,
-                onSelected: (_) => notifier.updatePaySource(2),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          FilledButton(
-            onPressed: state.submitting
-                ? null
-                : () => _submit(context, notifier),
-            child: state.submitting
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.rentBindSubmit),
-          ),
+          _buildSubmitButton(l10n, state, notifier),
         ],
       ),
     );
   }
 
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    TextInputType? keyboardType,
-    Widget? suffixIcon,
-  }) {
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        labelText: label,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+  Widget _buildHeader() {
+    final l10n = context.l10n;
+    return Column(
+      children: [
+        Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFA726),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(
+            Icons.vpn_key,
+            color: Colors.white,
+            size: 32,
+          ),
         ),
-        suffixIcon: suffixIcon,
+        const SizedBox(height: 12),
+        Text(
+          l10n.rentBindTitle,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF333333),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDeviceSection(
+    dynamic l10n,
+    RentBindState state,
+    RentBindNotifier notifier,
+  ) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.rentBindDeviceSn,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF999999),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _snController,
+                  decoration: InputDecoration(
+                    hintText: l10n.rentBindDeviceSnHint,
+                    hintStyle: const TextStyle(
+                      color: Color(0xFFCCCCCC),
+                      fontSize: 14,
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                    isDense: true,
+                  ),
+                  onSubmitted: (value) {
+                    if (value.trim().isNotEmpty) {
+                      notifier.queryDevice(value.trim());
+                    }
+                  },
+                ),
+              ),
+              GestureDetector(
+                onTap: _scanSn,
+                child: const Icon(
+                  Icons.qr_code_scanner,
+                  color: Color(0xFF333333),
+                  size: 24,
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 16, color: Color(0xFFEEEEEE)),
+          if (state.deviceInfo != null) ...[
+            _buildDeviceCard(state),
+          ] else ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 32),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8F8F8),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                l10n.rentBindNoDeviceInfo,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFFCCCCCC),
+                ),
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
 
-  Future<void> _selectAddress(BuildContext context) async {
-    final result = await Navigator.of(context).push<AddressResult>(
-      MaterialPageRoute(builder: (_) => const AddressPickerPage()),
+  Widget _buildDeviceCard(RentBindState state) {
+    final device = state.deviceInfo!;
+    final car = device.carVo;
+    final battery = device.batteryVo;
+
+    if (car != null) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8F8F8),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.electric_moped,
+                    size: 40,
+                    color: Color(0xFF666666),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        car.sn ?? '',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF333333),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          _buildTag('Vehicle · ${car.model}'),
+                          _buildTag(car.spec),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildInfoItem('VIN', car.vin ?? '-'),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 32,
+                    color: const Color(0xFFEEEEEE),
+                  ),
+                  Expanded(
+                    child: _buildInfoItem('Plate Number', car.carNumber ?? '-'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (battery != null) {
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF8F8F8),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 64,
+                  height: 64,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.battery_charging_full,
+                    size: 40,
+                    color: Color(0xFF666666),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        battery.sn ?? '',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF333333),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          _buildTag('Battery · ${battery.model ?? ''}'),
+                          _buildTag(battery.spec ?? ''),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildInfoItem('SOC', '${battery.soc ?? '-'}%'),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 32,
+                    color: const Color(0xFFEEEEEE),
+                  ),
+                  Expanded(
+                    child: _buildInfoItem('SOH', '${battery.soh ?? '-'}%'),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 32,
+                    color: const Color(0xFFEEEEEE),
+                  ),
+                  Expanded(
+                    child: _buildInfoItem('Cycle', '${battery.cycle ?? '-'}'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildTag(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFFEEEEEE)),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 12,
+          color: Color(0xFF666666),
+        ),
+      ),
     );
-    if (!mounted || result == null || result.address.isEmpty) return;
-    _addressController.text = result.address;
+  }
+
+  Widget _buildInfoItem(String label, String value) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Color(0xFF999999),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF333333),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPackageSection(
+    dynamic l10n,
+    RentBindState state,
+    RentBindNotifier notifier,
+  ) {
+    final selectedPack = state.selectedPack;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.rentBindPackage,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF999999),
+            ),
+          ),
+          const SizedBox(height: 12),
+          if (selectedPack != null) ...[
+            _PackageCard(pack: selectedPack),
+            const SizedBox(height: 12),
+            Center(
+              child: TextButton(
+                onPressed: () => _selectPackage(notifier, state),
+                child: Text(
+                  l10n.rentBindReselect,
+                  style: const TextStyle(
+                    color: Color(0xFF2196F3),
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          ] else ...[
+            GestureDetector(
+              onTap: () => _selectPackage(notifier, state),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Color(0xFFEEEEEE)),
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        l10n.rentBindPackageHint,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFFCCCCCC),
+                        ),
+                      ),
+                    ),
+                    const Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Color(0xFF999999),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton(
+    dynamic l10n,
+    RentBindState state,
+    RentBindNotifier notifier,
+  ) {
+    final canSubmit = state.deviceInfo != null && state.selectedPack != null;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      child: SizedBox(
+        width: double.infinity,
+        height: 48,
+        child: ElevatedButton(
+          onPressed: canSubmit && !state.submitting
+              ? () => _showApplicantSheet(notifier, state)
+              : null,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF4CAF50),
+            disabledBackgroundColor: const Color(0xFFE8F5E9),
+            foregroundColor: Colors.white,
+            disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            elevation: 0,
+          ),
+          child: state.submitting
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+              : Text(
+                  l10n.rentBindSubmit,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+        ),
+      ),
+    );
   }
 
   Future<void> _scanSn() async {
@@ -263,149 +530,352 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
+    ref.read(rentBindProvider.notifier).queryDevice(result);
   }
 
-  String _deviceInfoText(AppLocalizations l10n, RentBindState state) {
-    final device = state.deviceInfo;
-    if (device == null) return l10n.rentBindDeviceEmpty;
-    if (device.batteryVo != null) {
-      final battery = device.batteryVo!;
-      return 'SN: ${battery.sn ?? '-'}\n${battery.model ?? '-'} ${battery.spec ?? ''}';
-    }
-    if (device.carVo != null) {
-      final car = device.carVo!;
-      return 'SN: ${car.sn ?? '-'}\n${car.model} ${car.spec}';
-    }
-    return l10n.rentBindDeviceEmpty;
-  }
-
-  Future<void> _pickImage(
-    BuildContext context,
+  Future<void> _selectPackage(
     RentBindNotifier notifier,
-    ValueChanged<String?> onSuccess,
+    RentBindState state,
   ) async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
-    if (picked == null) return;
-    final url = await notifier.uploadCardImage(picked.path);
-    if (url != null) {
-      onSuccess(url);
+    final packs = state.deviceInfo?.packList ?? [];
+    if (packs.isEmpty) {
+      showToast(context.l10n.rentBindNoPackageInfo);
+      return;
+    }
+
+    final selected = await RentPackageSheet.show(
+      context,
+      packs,
+      state.selectedPack,
+    );
+    if (selected != null) {
+      notifier.selectPack(selected);
     }
   }
 
-  Future<void> _submit(
-    BuildContext context,
+  Future<void> _showApplicantSheet(
     RentBindNotifier notifier,
+    RentBindState state,
   ) async {
+    final result = await RentApplicantSheet.show(context, notifier);
+    if (result == null || !mounted) return;
+
+    // Show payment sheet
+    await _showPaymentSheet(notifier, state, result);
+  }
+
+  Future<void> _showPaymentSheet(
+    RentBindNotifier notifier,
+    RentBindState state,
+    RentApplicantResult applicantResult,
+  ) async {
+    final pack = state.selectedPack;
+    if (pack == null) return;
+
+    final paymentResult = await RentPaymentSheet.show(
+      context,
+      notifier,
+      pack.packageAmount ?? 0,
+      pack.depositAmount ?? 0,
+    );
+    if (paymentResult == null || !mounted) return;
+
+    // Submit
     final l10n = context.l10n;
-    final ok = await notifier.submit(
-      address: _addressController.text.trim(),
-      birthday: _birthdayController.text.trim(),
-      cardNum: _cardController.text.trim(),
-      email: _emailController.text.trim(),
-      firstName: _firstNameController.text.trim(),
-      lastName: _lastNameController.text.trim(),
-      idNumber: _idController.text.trim(),
-      phone: _phoneController.text.trim(),
+    final success = await notifier.submit(
+      address: applicantResult.address,
+      birthday: applicantResult.birthday,
+      cardNum: applicantResult.cardNum,
+      email: applicantResult.email,
+      firstName: applicantResult.firstName,
+      lastName: applicantResult.lastName,
+      idNumber: applicantResult.idNumber,
+      phone: applicantResult.phone,
       deviceSn: _snController.text.trim(),
+      cardImgUrl: applicantResult.cardImgUrl,
+      personImgUrl: applicantResult.personImgUrl,
     );
-    if (!context.mounted) return;
-    showToast(ok ? l10n.rentBindSuccess : l10n.rentBindFailed);
+
+    if (!mounted) return;
+    if (!success) {
+      showToast(l10n.rentBindFailed);
+    }
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title});
+class _PackageCard extends StatelessWidget {
+  const _PackageCard({required this.pack});
 
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: const TextStyle(fontWeight: FontWeight.w600),
-    );
-  }
-}
-
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.title, required this.content});
-
-  final String title;
-  final String content;
+  final Pack pack;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 6),
-            Text(content),
-          ],
+    final l10n = context.l10n;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF1E3A5F), Color(0xFF2D4A6F)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Stack(
+        children: [
+          // Background decoration
+          Positioned(
+            right: -20,
+            top: -20,
+            child: Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white.withValues(alpha: 0.05),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  pack.infoName ?? '',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white70,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '\$${(pack.packageAmount ?? 0).toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.rentBindServicePeriod,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.white54,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              _buildPeriodText(pack),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.rentBindDeposit,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.white54,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '\$${(pack.depositAmount ?? 0).toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
-}
 
-class _PackList extends StatelessWidget {
-  const _PackList({
-    required this.l10n,
-    required this.packs,
-    required this.selected,
-    required this.onSelected,
-  });
-
-  final AppLocalizations l10n;
-  final List<Pack> packs;
-  final Pack? selected;
-  final ValueChanged<Pack> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    if (packs.isEmpty) {
-      return Text(l10n.rentBindPackEmpty);
-    }
-    return Column(
-      children: packs
-          .map(
-            (pack) => RadioListTile<Pack>(
-              value: pack,
-              groupValue: selected,
-              onChanged: (value) {
-                if (value != null) onSelected(value);
-              },
-              title: Text(pack.infoName ?? '-'),
-              subtitle: Text(
-                '${l10n.rentBindPackAmount}: ${pack.packageAmount ?? '-'}',
-              ),
-            ),
-          )
-          .toList(),
-    );
+  String _buildPeriodText(Pack pack) {
+    final periodValue = pack.duration ?? 30;
+    return 'Fixed period · ${periodValue}days';
   }
 }
 
-class _UploadChip extends StatelessWidget {
-  const _UploadChip({
-    required this.label,
-    required this.value,
-    required this.onTap,
+class _SuccessPage extends StatelessWidget {
+  const _SuccessPage({
+    required this.paySource,
+    required this.documentNo,
+    required this.onReturn,
   });
 
-  final String label;
-  final String? value;
-  final VoidCallback onTap;
+  final int paySource;
+  final String documentNo;
+  final VoidCallback onReturn;
 
   @override
   Widget build(BuildContext context) {
-    return ActionChip(
-      label: Text(value == null || value!.isEmpty ? label : '✓ $label'),
-      onPressed: onTap,
+    final l10n = context.l10n;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.rentBindTitle),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: onReturn,
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: const BoxDecoration(
+                  color: Color(0xFF4CAF50),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.check,
+                  color: Colors.white,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.rentBindSuccessTitle,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF333333),
+                ),
+              ),
+              const SizedBox(height: 12),
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF666666),
+                    height: 1.5,
+                  ),
+                  children: [
+                    TextSpan(
+                      text: paySource == 2
+                          ? l10n.rentBindSuccessMessageOnline
+                          : l10n.rentBindSuccessMessageCash,
+                    ),
+                    const TextSpan(
+                      text: ' 30 minutes',
+                      style: TextStyle(
+                        color: Color(0xFFFF9800),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF8E1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      l10n.rentBindDocumentNumber,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF999999),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          documentNo,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF333333),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () {
+                            Clipboard.setData(ClipboardData(text: documentNo));
+                            showToast(l10n.rentBindCopied);
+                          },
+                          child: const Icon(
+                            Icons.copy,
+                            size: 18,
+                            color: Color(0xFF999999),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              OutlinedButton(
+                onPressed: onReturn,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF4CAF50),
+                  side: const BorderSide(color: Color(0xFF4CAF50)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 12,
+                  ),
+                ),
+                child: Text(l10n.rentBindReturnWorkbench),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

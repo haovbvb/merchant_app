@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/warehouse_info.dart';
-import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/warehouse/transport_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
@@ -23,9 +22,6 @@ class TransportCreatePage extends ConsumerStatefulWidget {
 }
 
 class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
-  final TextEditingController _snController = TextEditingController();
-  final TextEditingController _trackingController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
@@ -39,120 +35,380 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
   }
 
   @override
-  void dispose() {
-    _snController.dispose();
-    _trackingController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final state = ref.watch(transportCreateProvider);
     final notifier = ref.read(transportCreateProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.warehouseTransportCreateTitle)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        title: Text(_getCreateTitle(l10n)),
+      ),
+      body: Column(
         children: [
-          _InfoTile(
-            label: l10n.warehouseTransportSendWarehouse,
-            value: _warehouseDisplayName(l10n, state.myWarehouse),
-          ),
-          _SelectTile(
-            label: l10n.warehouseTransportReceiveWarehouse,
-            value: _selectedWarehouseName(l10n, state.selectedInWarehouse),
-            onTap: () => _showWarehousePicker(
-              context,
-              l10n,
-              state.inWarehouses,
-              notifier,
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _trackingController,
-            decoration: InputDecoration(
-              labelText: l10n.warehouseTransportTrackingNumber,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            onChanged: notifier.setTrackingNumber,
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _snController,
-                  decoration: InputDecoration(
-                    labelText: l10n.warehouseTransportInputDeviceSn,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 发出仓库
+                  _SectionCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.deviceIssueWarehouse,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF999999),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.asset(
+                                'assets/android/mipmap-xxhdpi/icon_warehouse.png',
+                                width: 56,
+                                height: 56,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _getWarehouseName(state.myWarehouse),
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.w500,
+                                      color: Color(0xFF1A1A1A),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    state.myWarehouse?.cityName ?? '',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Color(0xFF999999),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: () => _addSn(notifier),
-                child: Text(l10n.warehouseTransportAddDevice),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: const Icon(Icons.qr_code_scanner),
-                onPressed: () => _scanAndAdd(context, notifier),
-              ),
-            ],
-          ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton.icon(
-              onPressed: () => _openBatchScan(context, notifier),
-              icon: const Icon(Icons.playlist_add),
-              label: Text(l10n.qrcodeBatchScan),
-            ),
-          ),
-          const SizedBox(height: 12),
-          if (state.sns.isNotEmpty)
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: state.sns
-                  .map(
-                    (sn) => Chip(
-                      label: Text(sn),
-                      onDeleted: () => notifier.removeSn(sn),
+                  // 接收仓库
+                  _SectionCard(
+                    child: _SelectRow(
+                      icon: 'assets/android/mipmap-xxhdpi/icon_receive_warehouse.png',
+                      label: l10n.deviceReceiveWarehouse,
+                      value: state.selectedInWarehouse != null
+                          ? (state.selectedInWarehouse!.inWarehouseName ??
+                              state.selectedInWarehouse!.warehouseName ??
+                              '')
+                          : l10n.deviceIssuePleaseSelectWarehouse,
+                      valueColor: state.selectedInWarehouse != null
+                          ? const Color(0xFF1A1A1A)
+                          : const Color(0xFF999999),
+                      onTap: () => _showWarehousePicker(context, l10n, notifier),
                     ),
-                  )
-                  .toList(),
+                  ),
+                  // 物流单号
+                  _SectionCard(
+                    child: _SelectRow(
+                      icon: 'assets/android/mipmap-xxhdpi/icon_edt_traknumber.png',
+                      label: l10n.deviceIssueTrackingNumber,
+                      value: state.trackingNumber.isNotEmpty
+                          ? state.trackingNumber
+                          : l10n.deviceIssuePleaseEnterTracking,
+                      valueColor: state.trackingNumber.isNotEmpty
+                          ? const Color(0xFF1A1A1A)
+                          : const Color(0xFF999999),
+                      onTap: () => _showTrackingDialog(context, l10n, notifier),
+                    ),
+                  ),
+                  // 选择设备
+                  _SectionCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _getSelectDeviceLabel(l10n),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _ActionButton(
+                                icon: Icons.edit_outlined,
+                                label: l10n.deviceIssueEnterSn,
+                                outlined: true,
+                                onTap: () => _showSnInputDialog(context, l10n, notifier),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: _ActionButton(
+                                icon: Icons.qr_code_scanner,
+                                label: l10n.deviceIssueScanQrCode,
+                                outlined: false,
+                                onTap: () => _scanAndAdd(context, notifier),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  // 设备列表
+                  if (state.sns.isNotEmpty)
+                    Container(
+                      color: Colors.white,
+                      margin: const EdgeInsets.only(top: 8),
+                      child: Column(
+                        children: state.sns.asMap().entries.map((entry) {
+                          final sn = entry.value;
+                          return Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 12,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        sn,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Color(0xFF333333),
+                                        ),
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () => notifier.removeSn(sn),
+                                      child: Icon(
+                                        Icons.delete_outline,
+                                        color: Colors.grey.shade400,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (entry.key < state.sns.length - 1)
+                                const Divider(height: 1, indent: 16),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  const SizedBox(height: 100),
+                ],
+              ),
             ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: state.submitting
-                ? null
-                : () async {
-                    notifier.setTrackingNumber(_trackingController.text.trim());
-                    final created = await notifier.createIssue();
-                    if (!mounted) return;
-                    if (created) {
-                      Navigator.of(context).pop(true);
-                    }
-                  },
-            child: Text(l10n.warehouseTransportCreateAction),
+          ),
+          // 底部栏
+          Container(
+            padding: EdgeInsets.fromLTRB(
+              16,
+              12,
+              16,
+              12 + MediaQuery.of(context).padding.bottom,
+            ),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x0D000000),
+                  blurRadius: 8,
+                  offset: Offset(0, -2),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${state.sns.length}',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1A1A1A),
+                      ),
+                    ),
+                    Text(
+                      l10n.deviceIssueTotalIssued,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF999999),
+                      ),
+                    ),
+                  ],
+                ),
+                const Spacer(),
+                SizedBox(
+                  width: 160,
+                  height: 44,
+                  child: FilledButton(
+                    onPressed: state.submitting || state.sns.isEmpty
+                        ? null
+                        : () => _submit(context, notifier),
+                    style: FilledButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(22),
+                      ),
+                      disabledBackgroundColor: const Color(0xFFCCE5C0),
+                    ),
+                    child: Text(l10n.confirm),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Future<void> _addSn(TransportCreateNotifier notifier) async {
-    final sn = _snController.text.trim();
-    if (sn.isEmpty) return;
-    await notifier.addSn(sn);
-    _snController.clear();
+  String _getCreateTitle(AppLocalizations l10n) {
+    switch (widget.deviceType) {
+      case 1:
+        return l10n.deviceIssueCreateBattery;
+      case 2:
+        return l10n.deviceIssueCreateVehicle;
+      case 3:
+        return l10n.deviceIssueCreateStation;
+      default:
+        return l10n.deviceIssueCreate;
+    }
+  }
+
+  String _getSelectDeviceLabel(AppLocalizations l10n) {
+    switch (widget.deviceType) {
+      case 1:
+        return l10n.deviceIssueSelectBattery;
+      case 2:
+        return l10n.deviceIssueSelectVehicle;
+      case 3:
+        return l10n.deviceIssueSelectStation;
+      default:
+        return l10n.deviceIssueSelectDevice;
+    }
+  }
+
+  String _getWarehouseName(WarehouseInfo? info) {
+    if (info == null) return '-';
+    return info.warehouseName ?? info.outWarehouseName ?? '-';
+  }
+
+  Future<void> _showWarehousePicker(
+    BuildContext context,
+    AppLocalizations l10n,
+    TransportCreateNotifier notifier,
+  ) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) => _WarehousePickerSheet(
+        l10n: l10n,
+        notifier: notifier,
+        ref: ref,
+      ),
+    );
+  }
+
+  Future<void> _showTrackingDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+    TransportCreateNotifier notifier,
+  ) async {
+    final controller = TextEditingController(
+      text: ref.read(transportCreateProvider).trackingNumber,
+    );
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deviceIssueTrackingNumber),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: l10n.deviceIssueEnterTracking,
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (result != null) {
+      notifier.setTrackingNumber(result);
+    }
+  }
+
+  Future<void> _showSnInputDialog(
+    BuildContext context,
+    AppLocalizations l10n,
+    TransportCreateNotifier notifier,
+  ) async {
+    final controller = TextEditingController();
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.deviceIssueEnterDeviceSn),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          decoration: InputDecoration(
+            hintText: l10n.deviceIssueEnterDeviceSn,
+            border: const OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+    if (result != null && result.isNotEmpty) {
+      await notifier.addSn(result);
+    }
   }
 
   Future<void> _scanAndAdd(
@@ -167,130 +423,314 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
         ),
       ),
     );
-    if (result == null || result.isEmpty) return;
-    await notifier.addSn(result);
+    if (result != null && result.isNotEmpty) {
+      await notifier.addSn(result);
+    }
   }
 
-  Future<void> _openBatchScan(
+  Future<void> _submit(
     BuildContext context,
     TransportCreateNotifier notifier,
   ) async {
-    final existing = ref.read(transportCreateProvider).sns;
-    final result = await Navigator.of(context).push<List<String>>(
-      MaterialPageRoute(
-        builder: (_) => QrBatchScanPage(
-          initialItems: existing,
-          fixedDeviceType: widget.deviceType,
-        ),
-      ),
-    );
-    if (!mounted || result == null || result.isEmpty) return;
-    for (final sn in result) {
-      await notifier.addSn(sn);
-    }
-  }
-
-  String _warehouseDisplayName(AppLocalizations l10n, WarehouseInfo? info) {
-    if (info == null) return '-';
-    if ((info.warehouseName ?? '').isNotEmpty) {
-      return info.warehouseName ?? '-';
-    }
-    if ((info.outWarehouseName ?? '').isNotEmpty) {
-      return info.outWarehouseName ?? '-';
-    }
-    return '-';
-  }
-
-  String _selectedWarehouseName(AppLocalizations l10n, WarehouseInfo? info) {
-    if (info == null) return l10n.warehouseTransportSelectReceiveWarehouse;
-    return info.inWarehouseName ?? info.warehouseName ?? '-';
-  }
-
-  Future<void> _showWarehousePicker(
-    BuildContext context,
-    AppLocalizations l10n,
-    List<WarehouseInfo> list,
-    TransportCreateNotifier notifier,
-  ) async {
-    if (list.isEmpty) {
-      await notifier.loadInWarehouseList();
-    }
-    final updatedList = ref.read(transportCreateProvider).inWarehouses;
+    final created = await notifier.createIssue();
     if (!mounted) return;
-    await showModalBottomSheet<void>(
-      context: context,
-      builder: (_) {
-        return ListView.separated(
-          itemCount: updatedList.length,
-          separatorBuilder: (_, __) => const Divider(height: 1),
-          itemBuilder: (context, index) {
-            final item = updatedList[index];
-            return ListTile(
-              title: Text(item.inWarehouseName ?? item.warehouseName ?? '-'),
-              subtitle: Text(item.cityName ?? ''),
-              onTap: () {
-                notifier.selectInWarehouse(item);
-                Navigator.of(context).pop();
-              },
-            );
-          },
-        );
-      },
+    if (created) {
+      Navigator.of(context).pop(true);
+    }
+  }
+}
+
+class _SectionCard extends StatelessWidget {
+  const _SectionCard({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.all(16),
+      color: Colors.white,
+      child: child,
     );
   }
 }
 
-class _InfoTile extends StatelessWidget {
-  const _InfoTile({required this.label, required this.value});
+class _SelectRow extends StatelessWidget {
+  const _SelectRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.valueColor,
+    required this.onTap,
+  });
 
+  final String icon;
   final String label;
   final String value;
+  final Color valueColor;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Row(
         children: [
-          SizedBox(width: 120, child: Text(label)),
-          Expanded(child: Text(value)),
+          Image.asset(icon, width: 20, height: 20),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xFF333333),
+            ),
+          ),
+          const Spacer(),
+          Flexible(
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                color: valueColor,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 4),
+          const Icon(
+            Icons.chevron_right,
+            color: Color(0xFFCCCCCC),
+            size: 20,
+          ),
         ],
       ),
     );
   }
 }
 
-class _SelectTile extends StatelessWidget {
-  const _SelectTile({
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
     required this.label,
-    required this.value,
+    required this.outlined,
     required this.onTap,
   });
 
+  final IconData icon;
   final String label;
-  final String value;
+  final bool outlined;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: InkWell(
-        onTap: onTap,
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 44,
+        decoration: BoxDecoration(
+          color: outlined ? Colors.white : const Color(0xFFEEF7E9),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: outlined ? const Color(0xFFE5E5E5) : primaryColor,
+          ),
+        ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(width: 120, child: Text(label)),
-            Expanded(
-              child: Text(
-                value,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
+            Icon(
+              icon,
+              size: 18,
+              color: outlined ? const Color(0xFF666666) : primaryColor,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                color: outlined ? const Color(0xFF666666) : primaryColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WarehousePickerSheet extends StatefulWidget {
+  const _WarehousePickerSheet({
+    required this.l10n,
+    required this.notifier,
+    required this.ref,
+  });
+
+  final AppLocalizations l10n;
+  final TransportCreateNotifier notifier;
+  final WidgetRef ref;
+
+  @override
+  State<_WarehousePickerSheet> createState() => _WarehousePickerSheetState();
+}
+
+class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
+  final TextEditingController _searchController = TextEditingController();
+  final String _selectedCity = '';
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = widget.ref.watch(transportCreateProvider);
+    final warehouses = state.inWarehouses;
+    final selectedWarehouse = state.selectedInWarehouse;
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.7,
+      padding: const EdgeInsets.only(top: 16),
+      child: Column(
+        children: [
+          // 头部
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SizedBox(width: 40),
+                Text(
+                  widget.l10n.deviceIssueChooseWarehouse,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.of(context).pop(),
+                  child: const Icon(Icons.close, size: 24),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          // 搜索框
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              height: 40,
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F5F5),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: TextField(
+                controller: _searchController,
+                onChanged: (value) {
+                  widget.notifier.loadInWarehouseList(
+                    keyword: value,
+                    cityCode: _selectedCity,
+                  );
+                },
+                decoration: InputDecoration(
+                  hintText: widget.l10n.deviceIssueSearchWarehouse,
+                  hintStyle: TextStyle(
+                    color: Colors.grey.shade400,
+                    fontSize: 14,
+                  ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Colors.grey.shade400,
+                    size: 20,
+                  ),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                 ),
               ),
             ),
-            const Icon(Icons.chevron_right),
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          // 城市筛选
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: GestureDetector(
+              onTap: () {
+                // TODO: 显示城市选择器
+              },
+              child: Row(
+                children: [
+                  Text(
+                    _selectedCity.isEmpty
+                        ? widget.l10n.deviceIssueAllCity
+                        : _selectedCity,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF333333),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 20,
+                    color: Color(0xFF666666),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Divider(height: 1),
+          // 仓库列表
+          Expanded(
+            child: ListView.separated(
+              itemCount: warehouses.length,
+              separatorBuilder: (_, __) => const Divider(
+                height: 1,
+                indent: 16,
+                endIndent: 16,
+              ),
+              itemBuilder: (context, index) {
+                final warehouse = warehouses[index];
+                final isSelected = selectedWarehouse?.inWarehouseNo ==
+                    warehouse.inWarehouseNo;
+                return ListTile(
+                  title: Text(
+                    warehouse.inWarehouseName ?? warehouse.warehouseName ?? '-',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      color: Color(0xFF1A1A1A),
+                    ),
+                  ),
+                  subtitle: Text(
+                    warehouse.cityName ?? '',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF999999),
+                    ),
+                  ),
+                  trailing: isSelected
+                      ? Icon(
+                          Icons.check,
+                          color: Theme.of(context).colorScheme.primary,
+                        )
+                      : null,
+                  onTap: () {
+                    widget.notifier.selectInWarehouse(warehouse);
+                    Navigator.of(context).pop();
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +11,7 @@ class OfflineRegisterState {
   final bool loading;
   final bool sending;
   final bool registering;
+  final int countdown;
   final List<AreaCountry> areas;
   final AreaCountry? selectedArea;
 
@@ -16,6 +19,7 @@ class OfflineRegisterState {
     this.loading = false,
     this.sending = false,
     this.registering = false,
+    this.countdown = 0,
     this.areas = const [],
     this.selectedArea,
   });
@@ -24,6 +28,7 @@ class OfflineRegisterState {
     bool? loading,
     bool? sending,
     bool? registering,
+    int? countdown,
     List<AreaCountry>? areas,
     AreaCountry? selectedArea,
   }) {
@@ -31,6 +36,7 @@ class OfflineRegisterState {
       loading: loading ?? this.loading,
       sending: sending ?? this.sending,
       registering: registering ?? this.registering,
+      countdown: countdown ?? this.countdown,
       areas: areas ?? this.areas,
       selectedArea: selectedArea ?? this.selectedArea,
     );
@@ -44,9 +50,23 @@ final offlineRegisterProvider =
 
 class OfflineRegisterNotifier extends Notifier<OfflineRegisterState> {
   final ApiService _api = ApiService();
+  Timer? _countdownTimer;
 
   @override
   OfflineRegisterState build() => const OfflineRegisterState();
+
+  void _startCountdown() {
+    _countdownTimer?.cancel();
+    state = state.copyWith(countdown: 60);
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (state.countdown <= 1) {
+        timer.cancel();
+        state = state.copyWith(countdown: 0);
+      } else {
+        state = state.copyWith(countdown: state.countdown - 1);
+      }
+    });
+  }
 
   Future<void> loadAreas() async {
     if (state.loading) return;
@@ -71,7 +91,7 @@ class OfflineRegisterNotifier extends Notifier<OfflineRegisterState> {
   }
 
   Future<bool> sendSms(String phone) async {
-    if (state.sending) return false;
+    if (state.sending || state.countdown > 0) return false;
     state = state.copyWith(sending: true);
     final response = await _api.post<Object>(
       ApiPath.sendSms,
@@ -82,6 +102,9 @@ class OfflineRegisterNotifier extends Notifier<OfflineRegisterState> {
       parser: (json) => json ?? Object(),
     );
     state = state.copyWith(sending: false);
+    if (response.isSuccess) {
+      _startCountdown();
+    }
     return response.isSuccess;
   }
 

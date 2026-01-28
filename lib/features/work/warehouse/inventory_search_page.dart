@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_controller.dart';
-import 'package:merchant_app/features/work/warehouse/inventory_detail_page.dart';
+import 'package:merchant_app/features/work/warehouse/inventory_detail_page_new.dart';
 
 class InventorySearchPage extends ConsumerStatefulWidget {
   const InventorySearchPage({super.key});
@@ -65,7 +65,7 @@ class _InventorySearchPageState extends ConsumerState<InventorySearchPage> {
                             trailing: const Icon(Icons.chevron_right),
                             onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (_) => InventoryDetailPage(
+                                builder: (_) => InventoryDetailPageNew(
                                   inventoryNo: item.inventoryNo ?? '',
                                 ),
                               ),

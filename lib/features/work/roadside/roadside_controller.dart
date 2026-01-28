@@ -201,6 +201,10 @@ class RoadSideDealNotifier extends Notifier<RoadSideDealState> {
   @override
   RoadSideDealState build() => const RoadSideDealState();
 
+  void clearImages() {
+    state = state.copyWith(imageUrls: []);
+  }
+
   Future<String?> uploadImage(String path) async {
     final data = await _compressImage(path);
     if (data == null || data.isEmpty) return null;

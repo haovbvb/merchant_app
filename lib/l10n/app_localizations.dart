@@ -503,6 +503,240 @@ abstract class AppLocalizations {
   /// **'Clear'**
   String get userSearchHistoryClear;
 
+  /// No description provided for @userFilterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get userFilterAll;
+
+  /// No description provided for @userFilterNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get userFilterNormal;
+
+  /// No description provided for @userFilterEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'Ended'**
+  String get userFilterEnded;
+
+  /// No description provided for @userFilterOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Overdue'**
+  String get userFilterOverdue;
+
+  /// No description provided for @userFilterDishonest.
+  ///
+  /// In en, this message translates to:
+  /// **'Dishonest'**
+  String get userFilterDishonest;
+
+  /// No description provided for @userStatOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get userStatOrder;
+
+  /// No description provided for @userStatConsumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Consumption'**
+  String get userStatConsumption;
+
+  /// No description provided for @userStatAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get userStatAssets;
+
+  /// No description provided for @userTipNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'User account is in normal status'**
+  String get userTipNormal;
+
+  /// No description provided for @userTipEnded.
+  ///
+  /// In en, this message translates to:
+  /// **'User services have ended'**
+  String get userTipEnded;
+
+  /// No description provided for @userTipOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'User has overdue payments pending'**
+  String get userTipOverdue;
+
+  /// No description provided for @userTipDishonest.
+  ///
+  /// In en, this message translates to:
+  /// **'User is flagged as dishonest'**
+  String get userTipDishonest;
+
+  /// No description provided for @userTabBasicInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic Info'**
+  String get userTabBasicInfo;
+
+  /// No description provided for @userTabOrderRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Records'**
+  String get userTabOrderRecords;
+
+  /// No description provided for @userTabPaymentRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Records'**
+  String get userTabPaymentRecords;
+
+  /// No description provided for @userTabSwapRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap Records'**
+  String get userTabSwapRecords;
+
+  /// No description provided for @userOrderTabSale.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Order'**
+  String get userOrderTabSale;
+
+  /// No description provided for @userOrderTabRent.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental Order'**
+  String get userOrderTabRent;
+
+  /// No description provided for @userOrderTabSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap Order'**
+  String get userOrderTabSwap;
+
+  /// No description provided for @userBasicVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get userBasicVehicle;
+
+  /// No description provided for @userBasicBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery'**
+  String get userBasicBattery;
+
+  /// No description provided for @userBasicRegisterTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration Time'**
+  String get userBasicRegisterTime;
+
+  /// No description provided for @userBasicUserType.
+  ///
+  /// In en, this message translates to:
+  /// **'User Type'**
+  String get userBasicUserType;
+
+  /// No description provided for @userBasicBirthday.
+  ///
+  /// In en, this message translates to:
+  /// **'Birthday'**
+  String get userBasicBirthday;
+
+  /// No description provided for @userBasicPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get userBasicPhone;
+
+  /// No description provided for @userBasicEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get userBasicEmail;
+
+  /// No description provided for @userBasicPhotos.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get userBasicPhotos;
+
+  /// No description provided for @userBasicRemark.
+  ///
+  /// In en, this message translates to:
+  /// **'Remark'**
+  String get userBasicRemark;
+
+  /// No description provided for @userTypeNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get userTypeNormal;
+
+  /// No description provided for @userTypeSenior.
+  ///
+  /// In en, this message translates to:
+  /// **'Senior'**
+  String get userTypeSenior;
+
+  /// No description provided for @userTypeVip.
+  ///
+  /// In en, this message translates to:
+  /// **'VIP'**
+  String get userTypeVip;
+
+  /// No description provided for @userPaymentType.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Type'**
+  String get userPaymentType;
+
+  /// No description provided for @userPaymentAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Amount'**
+  String get userPaymentAmount;
+
+  /// No description provided for @userPaymentTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Time'**
+  String get userPaymentTime;
+
+  /// No description provided for @userSwapRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap Record'**
+  String get userSwapRecord;
+
+  /// No description provided for @userSwapTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap Time'**
+  String get userSwapTime;
+
+  /// No description provided for @userSwapOldBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'Old Battery'**
+  String get userSwapOldBattery;
+
+  /// No description provided for @userSwapNewBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'New Battery'**
+  String get userSwapNewBattery;
+
+  /// No description provided for @userDetailCall.
+  ///
+  /// In en, this message translates to:
+  /// **'Call'**
+  String get userDetailCall;
+
   /// No description provided for @userDetailTitle.
   ///
   /// In en, this message translates to:
@@ -878,19 +1112,19 @@ abstract class AppLocalizations {
   /// No description provided for @maintenanceBookTitle.
   ///
   /// In en, this message translates to:
-  /// **'Maintenance Booking'**
+  /// **'Schedule Maintenance'**
   String get maintenanceBookTitle;
 
   /// No description provided for @maintenanceSnLabel.
   ///
   /// In en, this message translates to:
-  /// **'Vehicle SN'**
+  /// **'Vehicle SN / VIN'**
   String get maintenanceSnLabel;
 
   /// No description provided for @maintenanceSnHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter or scan vehicle SN'**
+  /// **'Enter vehicle sn / vin or scan QR code'**
   String get maintenanceSnHint;
 
   /// No description provided for @maintenanceFetchInfo.
@@ -908,25 +1142,25 @@ abstract class AppLocalizations {
   /// No description provided for @maintenanceEmptyInfo.
   ///
   /// In en, this message translates to:
-  /// **'No maintenance info'**
+  /// **'No vehicle parameter info'**
   String get maintenanceEmptyInfo;
 
   /// No description provided for @maintenanceNoteLabel.
   ///
   /// In en, this message translates to:
-  /// **'Maintenance Notes'**
+  /// **'Maintenance Log'**
   String get maintenanceNoteLabel;
 
   /// No description provided for @maintenanceNoteHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter notes'**
+  /// **'Enter maintenance log'**
   String get maintenanceNoteHint;
 
   /// No description provided for @maintenanceSubmit.
   ///
   /// In en, this message translates to:
-  /// **'Submit'**
+  /// **'Confirm'**
   String get maintenanceSubmit;
 
   /// No description provided for @maintenanceVehicleSn.
@@ -965,11 +1199,113 @@ abstract class AppLocalizations {
   /// **'Maintenance Success'**
   String get maintenanceSuccessTitle;
 
+  /// No description provided for @maintenanceSuccessMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance Success!'**
+  String get maintenanceSuccessMessage;
+
   /// No description provided for @maintenanceSuccessBack.
   ///
   /// In en, this message translates to:
-  /// **'Back'**
+  /// **'Return to Workbench'**
   String get maintenanceSuccessBack;
+
+  /// No description provided for @maintenanceBindUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind User'**
+  String get maintenanceBindUser;
+
+  /// No description provided for @maintenanceAppointmentNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointment No'**
+  String get maintenanceAppointmentNo;
+
+  /// No description provided for @maintenanceAppointmentDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Appointment Date'**
+  String get maintenanceAppointmentDate;
+
+  /// No description provided for @maintenanceRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance Records'**
+  String get maintenanceRecords;
+
+  /// No description provided for @maintenanceRidingBehavior.
+  ///
+  /// In en, this message translates to:
+  /// **'Riding behavior over the past 30 day'**
+  String get maintenanceRidingBehavior;
+
+  /// No description provided for @maintenanceAvgMileage.
+  ///
+  /// In en, this message translates to:
+  /// **'AVG Mileage /daily'**
+  String get maintenanceAvgMileage;
+
+  /// No description provided for @maintenanceAvgSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'AVG Speed'**
+  String get maintenanceAvgSpeed;
+
+  /// No description provided for @maintenanceAvgSwapCount.
+  ///
+  /// In en, this message translates to:
+  /// **'AVG Swap Count'**
+  String get maintenanceAvgSwapCount;
+
+  /// No description provided for @maintenanceCostsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance Costs'**
+  String get maintenanceCostsTitle;
+
+  /// No description provided for @maintenanceTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total (\$)'**
+  String get maintenanceTotalLabel;
+
+  /// No description provided for @maintenanceTotalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter amount  (No fee, fill in 0)'**
+  String get maintenanceTotalHint;
+
+  /// No description provided for @maintenancePaymentMethods.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Methods'**
+  String get maintenancePaymentMethods;
+
+  /// No description provided for @maintenancePayCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get maintenancePayCash;
+
+  /// No description provided for @maintenancePayOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get maintenancePayOnline;
+
+  /// No description provided for @maintenanceUploadVoucher.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Voucher'**
+  String get maintenanceUploadVoucher;
+
+  /// No description provided for @maintenanceMileageNotReached.
+  ///
+  /// In en, this message translates to:
+  /// **'The vehicle mileage has not reached the maintenance mileage'**
+  String get maintenanceMileageNotReached;
 
   /// No description provided for @repairRecordTitle.
   ///
@@ -980,7 +1316,7 @@ abstract class AppLocalizations {
   /// No description provided for @repairRecordAddTitle.
   ///
   /// In en, this message translates to:
-  /// **'Add Repair Record'**
+  /// **'Repair Registration'**
   String get repairRecordAddTitle;
 
   /// No description provided for @repairRecordDeviceSnLabel.
@@ -992,7 +1328,7 @@ abstract class AppLocalizations {
   /// No description provided for @repairRecordDeviceSnHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter or scan device SN'**
+  /// **'Enter device SN or scan  QR code'**
   String get repairRecordDeviceSnHint;
 
   /// No description provided for @repairRecordFetchDeviceInfo.
@@ -1010,32 +1346,44 @@ abstract class AppLocalizations {
   /// No description provided for @repairRecordDeviceInfoEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No device info'**
+  /// **'No device parameter info'**
   String get repairRecordDeviceInfoEmpty;
 
   /// No description provided for @repairRecordProjectLabel.
   ///
   /// In en, this message translates to:
-  /// **'Repair item'**
+  /// **'Repair Project'**
   String get repairRecordProjectLabel;
 
   /// No description provided for @repairRecordProjectHint.
   ///
   /// In en, this message translates to:
-  /// **'Select repair item'**
+  /// **'Please select a repair project'**
   String get repairRecordProjectHint;
+
+  /// No description provided for @repairRecordSelectProject.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Repair Project'**
+  String get repairRecordSelectProject;
 
   /// No description provided for @repairRecordResultLabel.
   ///
   /// In en, this message translates to:
-  /// **'Repair result'**
+  /// **'Repair Results'**
   String get repairRecordResultLabel;
 
   /// No description provided for @repairRecordResultHint.
   ///
   /// In en, this message translates to:
-  /// **'Select repair result'**
+  /// **'Please select a repair  results'**
   String get repairRecordResultHint;
+
+  /// No description provided for @repairRecordSelectResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Repair Result'**
+  String get repairRecordSelectResult;
 
   /// No description provided for @repairRecordRemarkLabel.
   ///
@@ -1046,13 +1394,13 @@ abstract class AppLocalizations {
   /// No description provided for @repairRecordRemarkHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter remark'**
+  /// **'Enter rmark content'**
   String get repairRecordRemarkHint;
 
   /// No description provided for @repairRecordSubmit.
   ///
   /// In en, this message translates to:
-  /// **'Submit'**
+  /// **'Confirm'**
   String get repairRecordSubmit;
 
   /// No description provided for @repairRecordSubmitSuccess.
@@ -1070,13 +1418,13 @@ abstract class AppLocalizations {
   /// No description provided for @repairRecordDeviceSpecLabel.
   ///
   /// In en, this message translates to:
-  /// **'Spec'**
+  /// **'Specification'**
   String get repairRecordDeviceSpecLabel;
 
   /// No description provided for @repairRecordDeviceCardNumLabel.
   ///
   /// In en, this message translates to:
-  /// **'Card number'**
+  /// **'Binding User ID'**
   String get repairRecordDeviceCardNumLabel;
 
   /// No description provided for @repairRecordDeviceNameLabel.
@@ -1084,6 +1432,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Name'**
   String get repairRecordDeviceNameLabel;
+
+  /// No description provided for @repairRecordDevicePlateNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Plate Number'**
+  String get repairRecordDevicePlateNumber;
+
+  /// No description provided for @repairRecordDeviceEntryTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry Time'**
+  String get repairRecordDeviceEntryTime;
+
+  /// No description provided for @repairRecordBound.
+  ///
+  /// In en, this message translates to:
+  /// **'Bound'**
+  String get repairRecordBound;
+
+  /// No description provided for @repairRecordUnbound.
+  ///
+  /// In en, this message translates to:
+  /// **'Unbound'**
+  String get repairRecordUnbound;
+
+  /// No description provided for @repairRecordCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get repairRecordCancel;
 
   /// No description provided for @repairRecordSnHint.
   ///
@@ -1100,25 +1478,25 @@ abstract class AppLocalizations {
   /// No description provided for @afterSaleBindTitle.
   ///
   /// In en, this message translates to:
-  /// **'After-sale Binding'**
+  /// **'After-sales Binding'**
   String get afterSaleBindTitle;
 
   /// No description provided for @afterSaleBindUserSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'User Information'**
+  /// **'User ID'**
   String get afterSaleBindUserSectionTitle;
 
   /// No description provided for @afterSaleBindCardNumLabel.
   ///
   /// In en, this message translates to:
-  /// **'Card Number'**
+  /// **'User ID'**
   String get afterSaleBindCardNumLabel;
 
   /// No description provided for @afterSaleBindCardNumHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter card number'**
+  /// **'Enter User ID or scan QR code'**
   String get afterSaleBindCardNumHint;
 
   /// No description provided for @afterSaleBindUserInfoTitle.
@@ -1130,25 +1508,61 @@ abstract class AppLocalizations {
   /// No description provided for @afterSaleBindUserInfoEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No user information'**
+  /// **'No user info'**
   String get afterSaleBindUserInfoEmpty;
 
   /// No description provided for @afterSaleBindSelectableOrders.
   ///
   /// In en, this message translates to:
-  /// **'Selectable Orders'**
+  /// **'After-sales Order'**
   String get afterSaleBindSelectableOrders;
 
   /// No description provided for @afterSaleBindNoOrders.
   ///
   /// In en, this message translates to:
-  /// **'No orders available'**
+  /// **'Select after-sales order to bind'**
   String get afterSaleBindNoOrders;
+
+  /// No description provided for @afterSaleBindSelectOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select After-sales Order'**
+  String get afterSaleBindSelectOrder;
+
+  /// No description provided for @afterSaleBindReselect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reselect'**
+  String get afterSaleBindReselect;
+
+  /// No description provided for @afterSaleBindOrderNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Order NO'**
+  String get afterSaleBindOrderNo;
+
+  /// No description provided for @afterSaleBindOrderType.
+  ///
+  /// In en, this message translates to:
+  /// **'Order type'**
+  String get afterSaleBindOrderType;
+
+  /// No description provided for @afterSaleBindOrderStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Order status'**
+  String get afterSaleBindOrderStatus;
+
+  /// No description provided for @afterSaleBindApplicableDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Applicable devices'**
+  String get afterSaleBindApplicableDevices;
 
   /// No description provided for @afterSaleBindDeviceSectionTitle.
   ///
   /// In en, this message translates to:
-  /// **'Device Information'**
+  /// **'Device SN'**
   String get afterSaleBindDeviceSectionTitle;
 
   /// No description provided for @afterSaleBindDeviceSnLabel.
@@ -1160,7 +1574,7 @@ abstract class AppLocalizations {
   /// No description provided for @afterSaleBindDeviceSnHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter device SN or scan'**
+  /// **'Enter device sn or scan QR code'**
   String get afterSaleBindDeviceSnHint;
 
   /// No description provided for @afterSaleBindDeviceInfoTitle.
@@ -1172,7 +1586,7 @@ abstract class AppLocalizations {
   /// No description provided for @afterSaleBindDeviceInfoEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No device information'**
+  /// **'No device parameter info'**
   String get afterSaleBindDeviceInfoEmpty;
 
   /// No description provided for @afterSaleBindConfirm.
@@ -1256,31 +1670,85 @@ abstract class AppLocalizations {
   /// No description provided for @afterSaleBindOrderStatusInstallment.
   ///
   /// In en, this message translates to:
-  /// **'Installment'**
+  /// **'In-progress'**
   String get afterSaleBindOrderStatusInstallment;
 
   /// No description provided for @afterSaleBindOrderStatusLease.
   ///
   /// In en, this message translates to:
-  /// **'Leasing'**
+  /// **'Lease'**
   String get afterSaleBindOrderStatusLease;
+
+  /// No description provided for @afterSaleBindVin.
+  ///
+  /// In en, this message translates to:
+  /// **'VIN'**
+  String get afterSaleBindVin;
+
+  /// No description provided for @afterSaleBindPlateNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Plate Number'**
+  String get afterSaleBindPlateNumber;
+
+  /// No description provided for @afterSaleBindSoc.
+  ///
+  /// In en, this message translates to:
+  /// **'SOC'**
+  String get afterSaleBindSoc;
+
+  /// No description provided for @afterSaleBindSoh.
+  ///
+  /// In en, this message translates to:
+  /// **'SOH'**
+  String get afterSaleBindSoh;
+
+  /// No description provided for @afterSaleBindCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get afterSaleBindCycle;
+
+  /// No description provided for @afterSaleBindCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get afterSaleBindCancel;
+
+  /// No description provided for @afterSaleBindUnableToSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to submit'**
+  String get afterSaleBindUnableToSubmit;
+
+  /// No description provided for @afterSaleBindDeviceMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The device model does not match the device model used in the order, please modify it and try again'**
+  String get afterSaleBindDeviceMismatch;
+
+  /// No description provided for @afterSaleBindOk.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get afterSaleBindOk;
 
   /// No description provided for @unbindDeviceTitle.
   ///
   /// In en, this message translates to:
-  /// **'Unbind Device'**
+  /// **'Device Unbinding'**
   String get unbindDeviceTitle;
 
   /// No description provided for @unbindDeviceUserIdLabel.
   ///
   /// In en, this message translates to:
-  /// **'Card Number'**
+  /// **'User ID'**
   String get unbindDeviceUserIdLabel;
 
   /// No description provided for @unbindDeviceUserIdHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter card number or scan'**
+  /// **'Enter User ID or scan QR code'**
   String get unbindDeviceUserIdHint;
 
   /// No description provided for @unbindDeviceDeviceSnLabel.
@@ -1292,49 +1760,55 @@ abstract class AppLocalizations {
   /// No description provided for @unbindDeviceDeviceSnHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter device SN or scan'**
+  /// **'Enter device SN or scan QR code'**
   String get unbindDeviceDeviceSnHint;
 
   /// No description provided for @unbindDeviceCheckRemarkLabel.
   ///
   /// In en, this message translates to:
-  /// **'Check Remark'**
+  /// **'Check Status'**
   String get unbindDeviceCheckRemarkLabel;
 
   /// No description provided for @unbindDeviceCheckRemarkHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter check status'**
+  /// **'Enter device status'**
   String get unbindDeviceCheckRemarkHint;
 
   /// No description provided for @unbindDeviceReasonTitle.
   ///
   /// In en, this message translates to:
-  /// **'Unbind Reason'**
+  /// **'Reason for Unbinding / Remarks'**
   String get unbindDeviceReasonTitle;
 
   /// No description provided for @unbindDeviceReasonHint.
   ///
   /// In en, this message translates to:
-  /// **'Select or enter reason'**
+  /// **'Enter Unbinding / Remarks'**
   String get unbindDeviceReasonHint;
 
   /// No description provided for @unbindDeviceReasonInputHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter unbind reason'**
+  /// **'Enter Unbinding / Remarks'**
   String get unbindDeviceReasonInputHint;
+
+  /// No description provided for @unbindDeviceCommonReasons.
+  ///
+  /// In en, this message translates to:
+  /// **'Common Reasons'**
+  String get unbindDeviceCommonReasons;
 
   /// No description provided for @unbindDeviceReason1.
   ///
   /// In en, this message translates to:
-  /// **'Device malfunction'**
+  /// **'User logs out, device works fine'**
   String get unbindDeviceReason1;
 
   /// No description provided for @unbindDeviceReason2.
   ///
   /// In en, this message translates to:
-  /// **'User request'**
+  /// **'Equipment failure'**
   String get unbindDeviceReason2;
 
   /// No description provided for @unbindDeviceReason3.
@@ -1342,6 +1816,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Other'**
   String get unbindDeviceReason3;
+
+  /// No description provided for @unbindDeviceConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get unbindDeviceConfirmButton;
 
   /// No description provided for @unbindDeviceUnfinishedTitle.
   ///
@@ -1876,6 +2356,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Withdraw'**
   String get warehouseTransportWithdrawLabel;
+
+  /// No description provided for @deviceIssueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Device Issue'**
+  String get deviceIssueTitle;
+
+  /// No description provided for @deviceReceiveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Device Receive'**
+  String get deviceReceiveTitle;
+
+  /// No description provided for @deviceIssueSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the in/out number to search'**
+  String get deviceIssueSearchHint;
+
+  /// No description provided for @deviceIssueEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No information about device issue'**
+  String get deviceIssueEmpty;
+
+  /// No description provided for @deviceIssueCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create'**
+  String get deviceIssueCreate;
+
+  /// No description provided for @deviceIssueStatusInTransit.
+  ///
+  /// In en, this message translates to:
+  /// **'In transit'**
+  String get deviceIssueStatusInTransit;
+
+  /// No description provided for @deviceIssueStatusReceiveAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive all'**
+  String get deviceIssueStatusReceiveAll;
+
+  /// No description provided for @deviceIssueStatusPartial.
+  ///
+  /// In en, this message translates to:
+  /// **'Partial reception'**
+  String get deviceIssueStatusPartial;
+
+  /// No description provided for @deviceIssueStatusWithdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdraw all'**
+  String get deviceIssueStatusWithdrawn;
+
+  /// No description provided for @deviceIssueQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get deviceIssueQuantity;
+
+  /// No description provided for @deviceIssueReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'Received'**
+  String get deviceIssueReceived;
+
+  /// No description provided for @deviceIssueWithdrawn.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawn'**
+  String get deviceIssueWithdrawn;
+
+  /// No description provided for @deviceIssueSearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No relevant information found'**
+  String get deviceIssueSearchEmpty;
+
+  /// No description provided for @deviceIssueWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue warehouse'**
+  String get deviceIssueWarehouse;
+
+  /// No description provided for @deviceReceiveWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Receiving warehouse'**
+  String get deviceReceiveWarehouse;
+
+  /// No description provided for @deviceIssuePleaseSelectWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a warehouse'**
+  String get deviceIssuePleaseSelectWarehouse;
+
+  /// No description provided for @deviceIssueTrackingNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking number'**
+  String get deviceIssueTrackingNumber;
+
+  /// No description provided for @deviceIssuePleaseEnterTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the tracking number'**
+  String get deviceIssuePleaseEnterTracking;
+
+  /// No description provided for @deviceIssueEnterTracking.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Tracking Number'**
+  String get deviceIssueEnterTracking;
+
+  /// No description provided for @deviceIssueSelectBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Battery'**
+  String get deviceIssueSelectBattery;
+
+  /// No description provided for @deviceIssueSelectVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Vehicle'**
+  String get deviceIssueSelectVehicle;
+
+  /// No description provided for @deviceIssueSelectStation.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Station'**
+  String get deviceIssueSelectStation;
+
+  /// No description provided for @deviceIssueSelectDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Device'**
+  String get deviceIssueSelectDevice;
+
+  /// No description provided for @deviceIssueEnterSn.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Device SN'**
+  String get deviceIssueEnterSn;
+
+  /// No description provided for @deviceIssueScanQrCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan QR Code'**
+  String get deviceIssueScanQrCode;
+
+  /// No description provided for @deviceIssueTotalIssued.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Issued'**
+  String get deviceIssueTotalIssued;
+
+  /// No description provided for @deviceIssueCreateBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Battery Issue'**
+  String get deviceIssueCreateBattery;
+
+  /// No description provided for @deviceIssueCreateVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Vehicle Issue'**
+  String get deviceIssueCreateVehicle;
+
+  /// No description provided for @deviceIssueCreateStation.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Station Issue'**
+  String get deviceIssueCreateStation;
+
+  /// No description provided for @deviceIssueChooseWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Warehouse'**
+  String get deviceIssueChooseWarehouse;
+
+  /// No description provided for @deviceIssueSearchWarehouse.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter warehouse name to search'**
+  String get deviceIssueSearchWarehouse;
+
+  /// No description provided for @deviceIssueAllCity.
+  ///
+  /// In en, this message translates to:
+  /// **'All City'**
+  String get deviceIssueAllCity;
+
+  /// No description provided for @deviceIssueEnterDeviceSn.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Device SN'**
+  String get deviceIssueEnterDeviceSn;
+
+  /// No description provided for @deviceIssueDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue Details'**
+  String get deviceIssueDetailTitle;
+
+  /// No description provided for @deviceReceiveDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Issue Details'**
+  String get deviceReceiveDetailTitle;
+
+  /// No description provided for @deviceReceiveSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the in/out number to search'**
+  String get deviceReceiveSearchHint;
+
+  /// No description provided for @deviceReceiveEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No information about device reception'**
+  String get deviceReceiveEmpty;
+
+  /// No description provided for @deviceReceiveScanToReceive.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan to receive'**
+  String get deviceReceiveScanToReceive;
+
+  /// No description provided for @deviceReceiveManualInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Manually enter device SN'**
+  String get deviceReceiveManualInput;
+
+  /// No description provided for @deviceReceiveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Received successfully'**
+  String get deviceReceiveSuccess;
+
+  /// No description provided for @deviceReceiveNotBelong.
+  ///
+  /// In en, this message translates to:
+  /// **'The device does not belong to this document'**
+  String get deviceReceiveNotBelong;
+
+  /// No description provided for @deviceReceiveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Receive'**
+  String get deviceReceiveAction;
+
+  /// No description provided for @deviceReceiveWithdraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Withdrawn'**
+  String get deviceReceiveWithdraw;
+
+  /// No description provided for @searchHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Search history'**
+  String get searchHistory;
 
   /// No description provided for @scanPageTitle.
   ///
@@ -3200,7 +3944,7 @@ abstract class AppLocalizations {
   /// No description provided for @roadsideDealTitle.
   ///
   /// In en, this message translates to:
-  /// **'Process Order'**
+  /// **'Processing Result'**
   String get roadsideDealTitle;
 
   /// No description provided for @roadsideDealResultLabel.
@@ -3212,8 +3956,14 @@ abstract class AppLocalizations {
   /// No description provided for @roadsideDealDescLabel.
   ///
   /// In en, this message translates to:
-  /// **'Processing Notes'**
+  /// **'Description'**
   String get roadsideDealDescLabel;
+
+  /// No description provided for @roadsideDealDescHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the description...'**
+  String get roadsideDealDescHint;
 
   /// No description provided for @roadsideUploadLabel.
   ///
@@ -3224,7 +3974,7 @@ abstract class AppLocalizations {
   /// No description provided for @roadsideDealSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Submitted'**
+  /// **'Submitted successfully'**
   String get roadsideDealSuccess;
 
   /// No description provided for @roadsideDealFailed.
@@ -3232,6 +3982,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Submit failed'**
   String get roadsideDealFailed;
+
+  /// No description provided for @roadsideRescueResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Rescue Result'**
+  String get roadsideRescueResult;
+
+  /// No description provided for @roadsidePhotoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get roadsidePhotoLabel;
+
+  /// No description provided for @roadsideSubmitButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit'**
+  String get roadsideSubmitButton;
+
+  /// No description provided for @roadsideDescRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter description'**
+  String get roadsideDescRequired;
+
+  /// No description provided for @roadsideDescriptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get roadsideDescriptionTitle;
+
+  /// No description provided for @roadsideFounderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Founder'**
+  String get roadsideFounderLabel;
+
+  /// No description provided for @roadsideCreationTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Creation Time'**
+  String get roadsideCreationTimeLabel;
+
+  /// No description provided for @roadsideReportSourceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Report Source'**
+  String get roadsideReportSourceLabel;
+
+  /// No description provided for @roadsideSourceApp.
+  ///
+  /// In en, this message translates to:
+  /// **'App'**
+  String get roadsideSourceApp;
+
+  /// No description provided for @roadsideSourceWeb.
+  ///
+  /// In en, this message translates to:
+  /// **'Web'**
+  String get roadsideSourceWeb;
+
+  /// No description provided for @roadsideProcessingResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing Result'**
+  String get roadsideProcessingResultTitle;
+
+  /// No description provided for @roadsideCostsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance Costs'**
+  String get roadsideCostsTitle;
+
+  /// No description provided for @roadsideTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get roadsideTotalLabel;
+
+  /// No description provided for @roadsidePaymentMethodLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Methods'**
+  String get roadsidePaymentMethodLabel;
+
+  /// No description provided for @roadsideUploadVoucherLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Voucher'**
+  String get roadsideUploadVoucherLabel;
+
+  /// No description provided for @roadsideNotPayingYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Paying Yet'**
+  String get roadsideNotPayingYet;
+
+  /// No description provided for @roadsideConfirmPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Payment'**
+  String get roadsideConfirmPayment;
 
   /// No description provided for @offlineRegisterTitle.
   ///
@@ -3251,11 +4103,23 @@ abstract class AppLocalizations {
   /// **'Phone'**
   String get offlineRegisterPhone;
 
+  /// No description provided for @offlineRegisterPhoneHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter phone number'**
+  String get offlineRegisterPhoneHint;
+
   /// No description provided for @offlineRegisterSmsCode.
   ///
   /// In en, this message translates to:
-  /// **'SMS Code'**
+  /// **'Code'**
   String get offlineRegisterSmsCode;
+
+  /// No description provided for @offlineRegisterCodeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter code'**
+  String get offlineRegisterCodeHint;
 
   /// No description provided for @offlineRegisterSendCode.
   ///
@@ -3269,11 +4133,23 @@ abstract class AppLocalizations {
   /// **'Password'**
   String get offlineRegisterPassword;
 
+  /// No description provided for @offlineRegisterPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter password'**
+  String get offlineRegisterPasswordHint;
+
   /// No description provided for @offlineRegisterFirstName.
   ///
   /// In en, this message translates to:
   /// **'First Name'**
   String get offlineRegisterFirstName;
+
+  /// No description provided for @offlineRegisterFirstNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter first name'**
+  String get offlineRegisterFirstNameHint;
 
   /// No description provided for @offlineRegisterLastName.
   ///
@@ -3281,11 +4157,23 @@ abstract class AppLocalizations {
   /// **'Last Name'**
   String get offlineRegisterLastName;
 
+  /// No description provided for @offlineRegisterLastNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter last name'**
+  String get offlineRegisterLastNameHint;
+
   /// No description provided for @offlineRegisterUsername.
   ///
   /// In en, this message translates to:
-  /// **'Username'**
+  /// **'Account'**
   String get offlineRegisterUsername;
+
+  /// No description provided for @offlineRegisterUsernameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Used for logging'**
+  String get offlineRegisterUsernameHint;
 
   /// No description provided for @offlineRegisterBirthday.
   ///
@@ -3293,11 +4181,23 @@ abstract class AppLocalizations {
   /// **'Birthday'**
   String get offlineRegisterBirthday;
 
+  /// No description provided for @offlineRegisterBirthdayHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select your birthday'**
+  String get offlineRegisterBirthdayHint;
+
   /// No description provided for @offlineRegisterEmail.
   ///
   /// In en, this message translates to:
   /// **'Email'**
   String get offlineRegisterEmail;
+
+  /// No description provided for @offlineRegisterEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email'**
+  String get offlineRegisterEmailHint;
 
   /// No description provided for @offlineRegisterReferrer.
   ///
@@ -3305,10 +4205,22 @@ abstract class AppLocalizations {
   /// **'Referrer'**
   String get offlineRegisterReferrer;
 
+  /// No description provided for @offlineRegisterReferrerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the referrer id or scan code'**
+  String get offlineRegisterReferrerHint;
+
+  /// No description provided for @offlineRegisterSelectCountry.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Country / Region'**
+  String get offlineRegisterSelectCountry;
+
   /// No description provided for @offlineRegisterSubmit.
   ///
   /// In en, this message translates to:
-  /// **'Register'**
+  /// **'Submit'**
   String get offlineRegisterSubmit;
 
   /// No description provided for @offlineRegisterPhoneRequired.
@@ -3500,7 +4412,7 @@ abstract class AppLocalizations {
   /// No description provided for @sellBindPayFull.
   ///
   /// In en, this message translates to:
-  /// **'Full'**
+  /// **'Full Payment'**
   String get sellBindPayFull;
 
   /// No description provided for @sellBindPayInstallment.
@@ -3563,10 +4475,220 @@ abstract class AppLocalizations {
   /// **'Period'**
   String get sellBindPlanPeriod;
 
+  /// No description provided for @sellBindPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Package'**
+  String get sellBindPackage;
+
+  /// No description provided for @sellBindPackageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Package'**
+  String get sellBindPackageHint;
+
+  /// No description provided for @sellBindNoPackageInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'No package info'**
+  String get sellBindNoPackageInfo;
+
+  /// No description provided for @sellBindDeviceSnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter device SN or scan'**
+  String get sellBindDeviceSnHint;
+
+  /// No description provided for @sellBindNoDeviceInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'No device info'**
+  String get sellBindNoDeviceInfo;
+
+  /// No description provided for @sellBindChoosePackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Package'**
+  String get sellBindChoosePackage;
+
+  /// No description provided for @sellBindPackageSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get sellBindPackageSearchHint;
+
+  /// No description provided for @sellBindSelectApplicant.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Applicant'**
+  String get sellBindSelectApplicant;
+
+  /// No description provided for @sellBindUserIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter User ID or scan'**
+  String get sellBindUserIdHint;
+
+  /// No description provided for @sellBindAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get sellBindAccount;
+
+  /// No description provided for @sellBindNid.
+  ///
+  /// In en, this message translates to:
+  /// **'NID'**
+  String get sellBindNid;
+
+  /// No description provided for @sellBindUploadNidPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload NID Photo'**
+  String get sellBindUploadNidPhoto;
+
+  /// No description provided for @sellBindNidPhotoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please upload the front and back of your NID'**
+  String get sellBindNidPhotoHint;
+
+  /// No description provided for @sellBindPersonalPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Photo'**
+  String get sellBindPersonalPhoto;
+
+  /// No description provided for @sellBindSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit successfully'**
+  String get sellBindSuccessTitle;
+
+  /// No description provided for @sellBindSuccessMessageOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'The package has been successfully bound.\nPlease remind the user to pay the package fee in the app.\nThe package will take effect after payment.'**
+  String get sellBindSuccessMessageOnline;
+
+  /// No description provided for @sellBindSuccessMessageCash.
+  ///
+  /// In en, this message translates to:
+  /// **'The package has been successfully bound.\nPlease submit the contract voucher to the backend in time.'**
+  String get sellBindSuccessMessageCash;
+
+  /// No description provided for @sellBindDocumentNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Document Number'**
+  String get sellBindDocumentNumber;
+
+  /// No description provided for @sellBindCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get sellBindCopied;
+
+  /// No description provided for @sellBindReturnWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Workbench'**
+  String get sellBindReturnWorkbench;
+
+  /// No description provided for @sellBindUnableSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to submit'**
+  String get sellBindUnableSubmit;
+
+  /// No description provided for @sellBindModelMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Model mismatch'**
+  String get sellBindModelMismatch;
+
+  /// No description provided for @sellBindSelectPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Payment'**
+  String get sellBindSelectPayment;
+
+  /// No description provided for @sellBindPaymentMethods.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Methods'**
+  String get sellBindPaymentMethods;
+
+  /// No description provided for @sellBindPaymentPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Period'**
+  String get sellBindPaymentPeriod;
+
+  /// No description provided for @sellBindFinancial.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial'**
+  String get sellBindFinancial;
+
+  /// No description provided for @sellBindPrincipal.
+  ///
+  /// In en, this message translates to:
+  /// **'Principal'**
+  String get sellBindPrincipal;
+
+  /// No description provided for @sellBindTotalInterest.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Interest'**
+  String get sellBindTotalInterest;
+
+  /// No description provided for @sellBindTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get sellBindTotal;
+
+  /// No description provided for @sellBindPeriods.
+  ///
+  /// In en, this message translates to:
+  /// **'Periods'**
+  String get sellBindPeriods;
+
+  /// No description provided for @sellBindAnnualRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Annual Interest Rate'**
+  String get sellBindAnnualRate;
+
+  /// No description provided for @sellBindNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get sellBindNext;
+
+  /// No description provided for @sellBindSelectPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Period'**
+  String get sellBindSelectPeriod;
+
+  /// No description provided for @sellBindEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your email'**
+  String get sellBindEmailHint;
+
+  /// No description provided for @sellBindAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your address'**
+  String get sellBindAddressHint;
+
   /// No description provided for @rentBindTitle.
   ///
   /// In en, this message translates to:
-  /// **'Rent Binding'**
+  /// **'Lease Binding'**
   String get rentBindTitle;
 
   /// No description provided for @rentBindDeviceSection.
@@ -3581,11 +4703,23 @@ abstract class AppLocalizations {
   /// **'Device SN'**
   String get rentBindDeviceSn;
 
+  /// No description provided for @rentBindDeviceSnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter device sn or scan QR code'**
+  String get rentBindDeviceSnHint;
+
   /// No description provided for @rentBindDeviceInfo.
   ///
   /// In en, this message translates to:
   /// **'Device Details'**
   String get rentBindDeviceInfo;
+
+  /// No description provided for @rentBindNoDeviceInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'No device parameter info'**
+  String get rentBindNoDeviceInfo;
 
   /// No description provided for @rentBindUserSection.
   ///
@@ -3677,6 +4811,12 @@ abstract class AppLocalizations {
   /// **'Online'**
   String get rentBindPayOnline;
 
+  /// No description provided for @rentBindPayFull.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Payment'**
+  String get rentBindPayFull;
+
   /// No description provided for @rentBindSubmit.
   ///
   /// In en, this message translates to:
@@ -3712,6 +4852,174 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Amount'**
   String get rentBindPackAmount;
+
+  /// No description provided for @rentBindPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Package'**
+  String get rentBindPackage;
+
+  /// No description provided for @rentBindPackageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the lease package'**
+  String get rentBindPackageHint;
+
+  /// No description provided for @rentBindNoPackageInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'No package info'**
+  String get rentBindNoPackageInfo;
+
+  /// No description provided for @rentBindSelectPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Package'**
+  String get rentBindSelectPackage;
+
+  /// No description provided for @rentBindServicePeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Period'**
+  String get rentBindServicePeriod;
+
+  /// No description provided for @rentBindDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit'**
+  String get rentBindDeposit;
+
+  /// No description provided for @rentBindReselect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reselect'**
+  String get rentBindReselect;
+
+  /// No description provided for @rentBindSelectApplicant.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Applicant'**
+  String get rentBindSelectApplicant;
+
+  /// No description provided for @rentBindUserIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the user ID or scan QR code'**
+  String get rentBindUserIdHint;
+
+  /// No description provided for @rentBindAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Account'**
+  String get rentBindAccount;
+
+  /// No description provided for @rentBindNid.
+  ///
+  /// In en, this message translates to:
+  /// **'NID'**
+  String get rentBindNid;
+
+  /// No description provided for @rentBindUploadNidPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload NID Photo'**
+  String get rentBindUploadNidPhoto;
+
+  /// No description provided for @rentBindNidPhotoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Front and back ID photos'**
+  String get rentBindNidPhotoHint;
+
+  /// No description provided for @rentBindPersonalPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Photo'**
+  String get rentBindPersonalPhoto;
+
+  /// No description provided for @rentBindEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in your email address'**
+  String get rentBindEmailHint;
+
+  /// No description provided for @rentBindAddressHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Fill in your email address'**
+  String get rentBindAddressHint;
+
+  /// No description provided for @rentBindSelectPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Payment'**
+  String get rentBindSelectPayment;
+
+  /// No description provided for @rentBindPaymentMethods.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Methods'**
+  String get rentBindPaymentMethods;
+
+  /// No description provided for @rentBindPaymentPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Period'**
+  String get rentBindPaymentPeriod;
+
+  /// No description provided for @rentBindLeaseAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Lease Amount'**
+  String get rentBindLeaseAmount;
+
+  /// No description provided for @rentBindTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get rentBindTotal;
+
+  /// No description provided for @rentBindConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get rentBindConfirm;
+
+  /// No description provided for @rentBindSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit successfully'**
+  String get rentBindSuccessTitle;
+
+  /// No description provided for @rentBindSuccessMessageOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Please proceed to the User App for payment in'**
+  String get rentBindSuccessMessageOnline;
+
+  /// No description provided for @rentBindSuccessMessageCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the order record and submit the contract voucher within'**
+  String get rentBindSuccessMessageCash;
+
+  /// No description provided for @rentBindDocumentNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Document Number'**
+  String get rentBindDocumentNumber;
+
+  /// No description provided for @rentBindCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get rentBindCopied;
+
+  /// No description provided for @rentBindReturnWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Workbench'**
+  String get rentBindReturnWorkbench;
 
   /// No description provided for @swapBindTitle.
   ///
@@ -3809,6 +5117,168 @@ abstract class AppLocalizations {
   /// **'Amount'**
   String get swapBindPackAmount;
 
+  /// No description provided for @swapBindUserId.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get swapBindUserId;
+
+  /// No description provided for @swapBindUserIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter User ID or scan QR code'**
+  String get swapBindUserIdHint;
+
+  /// No description provided for @swapBindUserEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter User ID to search'**
+  String get swapBindUserEmpty;
+
+  /// No description provided for @swapBindBindVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind Vehicle'**
+  String get swapBindBindVehicle;
+
+  /// No description provided for @swapBindSelectVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Vehicle'**
+  String get swapBindSelectVehicle;
+
+  /// No description provided for @swapBindSelectVehicleTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Vehicle'**
+  String get swapBindSelectVehicleTitle;
+
+  /// No description provided for @swapBindBindBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'Bind Battery'**
+  String get swapBindBindBattery;
+
+  /// No description provided for @swapBindSelectBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Battery'**
+  String get swapBindSelectBattery;
+
+  /// No description provided for @swapBindSelectBatteryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Battery'**
+  String get swapBindSelectBatteryTitle;
+
+  /// No description provided for @swapBindPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Package'**
+  String get swapBindPackage;
+
+  /// No description provided for @swapBindSelectPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Package'**
+  String get swapBindSelectPackage;
+
+  /// No description provided for @swapBindSelectPackageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Package'**
+  String get swapBindSelectPackageTitle;
+
+  /// No description provided for @swapBindReselect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reselect'**
+  String get swapBindReselect;
+
+  /// No description provided for @swapBindAvailableBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Battery'**
+  String get swapBindAvailableBattery;
+
+  /// No description provided for @swapBindAvailableVehicles.
+  ///
+  /// In en, this message translates to:
+  /// **'Available Vehicles'**
+  String get swapBindAvailableVehicles;
+
+  /// No description provided for @swapBindServicePeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Period'**
+  String get swapBindServicePeriod;
+
+  /// No description provided for @swapBindSwapTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap Time'**
+  String get swapBindSwapTime;
+
+  /// No description provided for @swapBindSelectPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Payment'**
+  String get swapBindSelectPayment;
+
+  /// No description provided for @swapBindPaymentMethods.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Methods'**
+  String get swapBindPaymentMethods;
+
+  /// No description provided for @swapBindPaymentPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Period'**
+  String get swapBindPaymentPeriod;
+
+  /// No description provided for @swapBindRemainingDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining Rental days'**
+  String get swapBindRemainingDays;
+
+  /// No description provided for @swapBindSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit successfully'**
+  String get swapBindSuccessTitle;
+
+  /// No description provided for @swapBindSuccessOnlineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please proceed to the User App for payment in'**
+  String get swapBindSuccessOnlineHint;
+
+  /// No description provided for @swapBindSuccessCashHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the order record and submit the contract voucher within'**
+  String get swapBindSuccessCashHint;
+
+  /// No description provided for @swapBindDocumentNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Document Number'**
+  String get swapBindDocumentNumber;
+
+  /// No description provided for @swapBindCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get swapBindCopied;
+
+  /// No description provided for @swapBindReturnWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Workbench'**
+  String get swapBindReturnWorkbench;
+
   /// No description provided for @depositRefundTitle.
   ///
   /// In en, this message translates to:
@@ -3830,13 +5300,13 @@ abstract class AppLocalizations {
   /// No description provided for @depositRefundOrderSection.
   ///
   /// In en, this message translates to:
-  /// **'Refund Orders'**
+  /// **'Deposit Refund Order'**
   String get depositRefundOrderSection;
 
   /// No description provided for @depositRefundVoucher.
   ///
   /// In en, this message translates to:
-  /// **'Voucher'**
+  /// **'Deposit Voucher'**
   String get depositRefundVoucher;
 
   /// No description provided for @depositRefundVoucherConfirmed.
@@ -3902,8 +5372,80 @@ abstract class AppLocalizations {
   /// No description provided for @depositRefundAmount.
   ///
   /// In en, this message translates to:
-  /// **'Amount'**
+  /// **'Deposit refund amount'**
   String get depositRefundAmount;
+
+  /// No description provided for @depositRefundUserId.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get depositRefundUserId;
+
+  /// No description provided for @depositRefundUserIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter User ID or scan QR code'**
+  String get depositRefundUserIdHint;
+
+  /// No description provided for @depositRefundSelectOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select the refund order'**
+  String get depositRefundSelectOrder;
+
+  /// No description provided for @depositRefundSelectOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Deposit Refund Order'**
+  String get depositRefundSelectOrderTitle;
+
+  /// No description provided for @depositRefundReselect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reselect'**
+  String get depositRefundReselect;
+
+  /// No description provided for @depositRefundUnbindingTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Unbinding time'**
+  String get depositRefundUnbindingTime;
+
+  /// No description provided for @depositRefundDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit'**
+  String get depositRefundDeposit;
+
+  /// No description provided for @depositRefundRecycled.
+  ///
+  /// In en, this message translates to:
+  /// **'Recycled'**
+  String get depositRefundRecycled;
+
+  /// No description provided for @depositRefundViewVoucher.
+  ///
+  /// In en, this message translates to:
+  /// **'View Voucher'**
+  String get depositRefundViewVoucher;
+
+  /// No description provided for @depositRefundRemarkHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the remarks'**
+  String get depositRefundRemarkHint;
+
+  /// No description provided for @depositRefundSuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit Refund Successful!'**
+  String get depositRefundSuccessTitle;
+
+  /// No description provided for @depositRefundReturnWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Workbench'**
+  String get depositRefundReturnWorkbench;
 
   /// No description provided for @installmentPayTitle.
   ///
@@ -4460,8 +6002,128 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetAuthTitle.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet Authorization'**
+  /// **'Station operation authorization'**
   String get cabinetAuthTitle;
+
+  /// No description provided for @cabinetAuthStationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Station'**
+  String get cabinetAuthStationLabel;
+
+  /// No description provided for @cabinetAuthSelectStation.
+  ///
+  /// In en, this message translates to:
+  /// **'Select a station'**
+  String get cabinetAuthSelectStation;
+
+  /// No description provided for @cabinetAuthSelectStationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select station'**
+  String get cabinetAuthSelectStationTitle;
+
+  /// No description provided for @cabinetAuthStationSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter station SN or scan QR code'**
+  String get cabinetAuthStationSearchHint;
+
+  /// No description provided for @cabinetAuthSelectStationRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a station'**
+  String get cabinetAuthSelectStationRequired;
+
+  /// No description provided for @cabinetAuthPersonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorized person'**
+  String get cabinetAuthPersonLabel;
+
+  /// No description provided for @cabinetAuthSelectPerson.
+  ///
+  /// In en, this message translates to:
+  /// **'Select authorized person'**
+  String get cabinetAuthSelectPerson;
+
+  /// No description provided for @cabinetAuthSelectPersonTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select authorized person'**
+  String get cabinetAuthSelectPersonTitle;
+
+  /// No description provided for @cabinetAuthPersonSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter user name or phone number'**
+  String get cabinetAuthPersonSearchHint;
+
+  /// No description provided for @cabinetAuthSelectPersonRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select authorized person'**
+  String get cabinetAuthSelectPersonRequired;
+
+  /// No description provided for @cabinetAuthTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization time'**
+  String get cabinetAuthTimeLabel;
+
+  /// No description provided for @cabinetAuthConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Authorization'**
+  String get cabinetAuthConfirmButton;
+
+  /// No description provided for @cabinetAuthRecordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorized Record'**
+  String get cabinetAuthRecordButton;
+
+  /// No description provided for @cabinetAuthRecordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorized Record'**
+  String get cabinetAuthRecordTitle;
+
+  /// No description provided for @cabinetAuthAllPort.
+  ///
+  /// In en, this message translates to:
+  /// **'All port'**
+  String get cabinetAuthAllPort;
+
+  /// No description provided for @cabinetAuthFaultPort.
+  ///
+  /// In en, this message translates to:
+  /// **'Fault port'**
+  String get cabinetAuthFaultPort;
+
+  /// No description provided for @cabinetAuthDisablePort.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable port'**
+  String get cabinetAuthDisablePort;
+
+  /// No description provided for @cabinetAuthSwapStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap standard'**
+  String get cabinetAuthSwapStandard;
+
+  /// No description provided for @cabinetAuthWorkAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Operation and maintenance work account'**
+  String get cabinetAuthWorkAccount;
+
+  /// No description provided for @cabinetAuthValidityPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Validity period'**
+  String get cabinetAuthValidityPeriod;
 
   /// No description provided for @cabinetAuthSn.
   ///
@@ -4586,14 +6248,32 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetOperateTitle.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet Operations'**
+  /// **'Staion Operation'**
   String get cabinetOperateTitle;
+
+  /// No description provided for @cabinetOperateStationOperation.
+  ///
+  /// In en, this message translates to:
+  /// **'Staion Operation'**
+  String get cabinetOperateStationOperation;
+
+  /// No description provided for @cabinetOperateBluetoothAuth.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth key authorization'**
+  String get cabinetOperateBluetoothAuth;
 
   /// No description provided for @cabinetOperateAuthorization.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet Authorization'**
+  /// **'Station operation authorization'**
   String get cabinetOperateAuthorization;
+
+  /// No description provided for @cabinetOperateOfflineOM.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline station O&M'**
+  String get cabinetOperateOfflineOM;
 
   /// No description provided for @cabinetOperateOfflineDetail.
   ///
@@ -4970,8 +6650,152 @@ abstract class AppLocalizations {
   /// No description provided for @bluetoothAuthTitle.
   ///
   /// In en, this message translates to:
-  /// **'Bluetooth Authorization'**
+  /// **'Authorization'**
   String get bluetoothAuthTitle;
+
+  /// No description provided for @bluetoothAuthFindTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Find Bluetooth key'**
+  String get bluetoothAuthFindTitle;
+
+  /// No description provided for @bluetoothAuthBluetoothLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth'**
+  String get bluetoothAuthBluetoothLabel;
+
+  /// No description provided for @bluetoothAuthAvailableDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Available devices'**
+  String get bluetoothAuthAvailableDevices;
+
+  /// No description provided for @bluetoothAuthScanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning...'**
+  String get bluetoothAuthScanning;
+
+  /// No description provided for @bluetoothAuthNoDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'No devices found'**
+  String get bluetoothAuthNoDevices;
+
+  /// No description provided for @bluetoothAuthConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth key is connected'**
+  String get bluetoothAuthConnected;
+
+  /// No description provided for @bluetoothAuthAuthorizedStation.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorized Station'**
+  String get bluetoothAuthAuthorizedStation;
+
+  /// No description provided for @bluetoothAuthSnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter station SN or scan QR code'**
+  String get bluetoothAuthSnHint;
+
+  /// No description provided for @bluetoothAuthSnRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter station SN'**
+  String get bluetoothAuthSnRequired;
+
+  /// No description provided for @bluetoothAuthOpenButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Opening Authorization'**
+  String get bluetoothAuthOpenButton;
+
+  /// No description provided for @bluetoothAuthClearButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Authorization'**
+  String get bluetoothAuthClearButton;
+
+  /// No description provided for @bluetoothAuthConfirmOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'The station door can be opened within 24 hours after authorization. Are you sure to authorized?'**
+  String get bluetoothAuthConfirmOpen;
+
+  /// No description provided for @bluetoothAuthConfirmClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure to clear the bluetooth key authorization??'**
+  String get bluetoothAuthConfirmClear;
+
+  /// No description provided for @bluetoothAuthCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancle'**
+  String get bluetoothAuthCancel;
+
+  /// No description provided for @bluetoothAuthConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get bluetoothAuthConfirm;
+
+  /// No description provided for @bluetoothAuthClearSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization cleared'**
+  String get bluetoothAuthClearSuccess;
+
+  /// No description provided for @bluetoothAuthClearFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear authorization failed'**
+  String get bluetoothAuthClearFailed;
+
+  /// No description provided for @bluetoothAuthTipsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Tips'**
+  String get bluetoothAuthTipsTitle;
+
+  /// No description provided for @bluetoothAuthTip1.
+  ///
+  /// In en, this message translates to:
+  /// **'Please make sure that the Bluetooth key is turned on and connected, and there is a Bluetooth logo on the key display;'**
+  String get bluetoothAuthTip1;
+
+  /// No description provided for @bluetoothAuthTip2.
+  ///
+  /// In en, this message translates to:
+  /// **'Before adding a new authorization, it is recommended to clear the authorization once and clear the records that are not needed;'**
+  String get bluetoothAuthTip2;
+
+  /// No description provided for @bluetoothAuthTip3.
+  ///
+  /// In en, this message translates to:
+  /// **'After successful authorization, you can turn off the Bluetooth of the mobile phone;'**
+  String get bluetoothAuthTip3;
+
+  /// No description provided for @bluetoothAuthTip4.
+  ///
+  /// In en, this message translates to:
+  /// **'ress the key Bluetooth button, the indicator light enters the flash state to unlock the lock;'**
+  String get bluetoothAuthTip4;
+
+  /// No description provided for @bluetoothAuthTip5.
+  ///
+  /// In en, this message translates to:
+  /// **'Press the key Bluetooth button, the indicator light enters the flash state to unlock the lock;'**
+  String get bluetoothAuthTip5;
+
+  /// No description provided for @bluetoothAuthTip6.
+  ///
+  /// In en, this message translates to:
+  /// **'The validity period of the authorization is preset to 24 hours after the authorization is successful;'**
+  String get bluetoothAuthTip6;
 
   /// No description provided for @bluetoothAuthSn.
   ///

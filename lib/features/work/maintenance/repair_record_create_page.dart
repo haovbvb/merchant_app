@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
 import 'package:merchant_app/data/models/device_fix.dart';
 import 'package:merchant_app/features/work/maintenance/maintenance_controller.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -34,134 +37,256 @@ class _RepairRecordCreatePageState
     final notifier = ref.read(repairRecordCreateProvider.notifier);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.repairRecordAddTitle)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const SizedBox.shrink(),
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // Header section
+                    Container(
+                      width: double.infinity,
+                      color: Colors.white,
+                      padding: const EdgeInsets.only(bottom: 24),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFB020),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Icon(
+                              Icons.build_outlined,
+                              color: Colors.white,
+                              size: 40,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            l10n.repairRecordAddTitle,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Device SN section
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInputField(
+                            label: l10n.repairRecordDeviceSnLabel,
+                            hint: l10n.repairRecordDeviceSnHint,
+                            controller: _snController,
+                            onChanged: notifier.updateSn,
+                            onScan: _scanSn,
+                          ),
+                          const Divider(height: 1, indent: 16, endIndent: 16),
+                          // Device info card
+                          if (state.deviceFix != null)
+                            _DeviceInfoCard(
+                              deviceFix: state.deviceFix!,
+                              l10n: l10n,
+                            )
+                          else
+                            _EmptyInfoCard(text: l10n.repairRecordDeviceInfoEmpty),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Repair Project section
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: _DropdownSelector(
+                        label: l10n.repairRecordProjectLabel,
+                        hint: l10n.repairRecordProjectHint,
+                        value: state.selectedProject?.itemName,
+                        onTap: () => _showProjectSelector(context, state, notifier, l10n),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Repair Results section
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: _DropdownSelector(
+                        label: l10n.repairRecordResultLabel,
+                        hint: l10n.repairRecordResultHint,
+                        value: state.selectedResult?.result,
+                        onTap: () => _showResultSelector(context, state, notifier, l10n),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Remark section
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.repairRecordRemarkLabel,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: _remarkController,
+                              decoration: InputDecoration(
+                                hintText: l10n.repairRecordRemarkHint,
+                                hintStyle: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 15,
+                                ),
+                                border: InputBorder.none,
+                                isDense: true,
+                                contentPadding: EdgeInsets.zero,
+                              ),
+                              maxLines: 3,
+                              onChanged: notifier.updateRemark,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Bottom button
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: const Color(0xFFF5F5F5),
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: FilledButton(
+                  onPressed: state.canSubmit
+                      ? () => _submit(context, l10n, notifier)
+                      : null,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    disabledBackgroundColor:
+                        AppColors.primaryColor.withOpacity(0.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: state.submitting
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Text(
+                          l10n.repairRecordSubmit,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required String hint,
+    required TextEditingController controller,
+    required ValueChanged<String> onChanged,
+    VoidCallback? onScan,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextField(
-            controller: _snController,
-            decoration: InputDecoration(
-              labelText: l10n.repairRecordDeviceSnLabel,
-              hintText: l10n.repairRecordDeviceSnHint,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.qr_code_scanner),
-                onPressed: _scanSn,
-              ),
-            ),
-            onChanged: notifier.updateSn,
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: state.loading
-                  ? null
-                  : () async {
-                      _remarkController.clear();
-                      notifier.updateRemark('');
-                      await notifier.fetchDeviceInfo();
-                    },
-              child: state.loading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(l10n.repairRecordFetchDeviceInfo),
-            ),
-          ),
-          const SizedBox(height: 16),
-          _InfoCard(
-            title: l10n.repairRecordDeviceInfoTitle,
-            content: state.deviceFix == null
-                ? l10n.repairRecordDeviceInfoEmpty
-                : _buildDeviceInfo(l10n, state.deviceFix!),
-          ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<DeviceFixProject>(
-            initialValue: state.selectedProject,
-            items: state.deviceFix?.itemList
-                    .map(
-                      (item) => DropdownMenuItem<DeviceFixProject>(
-                        value: item,
-                        child: Text(item.itemName),
-                      ),
-                    )
-                    .toList() ??
-                const [],
-            onChanged: state.deviceFix?.itemList.isNotEmpty == true
-                ? notifier.selectProject
-                : null,
-            decoration: InputDecoration(
-              labelText: l10n.repairRecordProjectLabel,
-              hintText: l10n.repairRecordProjectHint,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
             ),
           ),
           const SizedBox(height: 12),
-          DropdownButtonFormField<DeviceFixResult>(
-            initialValue: state.selectedResult,
-            items: state.deviceFix?.resultList
-                    .map(
-                      (item) => DropdownMenuItem<DeviceFixResult>(
-                        value: item,
-                        child: Text(item.result),
-                      ),
-                    )
-                    .toList() ??
-                const [],
-            onChanged: state.deviceFix?.resultList.isNotEmpty == true
-                ? notifier.selectResult
-                : null,
-            decoration: InputDecoration(
-              labelText: l10n.repairRecordResultLabel,
-              hintText: l10n.repairRecordResultHint,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    hintText: hint,
+                    hintStyle: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 15,
+                    ),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  onChanged: onChanged,
+                  onSubmitted: (_) {
+                    ref.read(repairRecordCreateProvider.notifier).fetchDeviceInfo();
+                  },
+                ),
               ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _remarkController,
-            decoration: InputDecoration(
-              labelText: l10n.repairRecordRemarkLabel,
-              hintText: l10n.repairRecordRemarkHint,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            maxLines: 3,
-            onChanged: notifier.updateRemark,
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: state.canSubmit
-                  ? () async {
-                      final success =
-                          await notifier.submitFixRecord();
-                      if (!mounted) return;
-                      if (success) {
-                        showToast(l10n.repairRecordSubmitSuccess);
-                        Navigator.of(context).pop(true);
-                      }
-                    }
-                  : null,
-              child: state.submitting
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(l10n.repairRecordSubmit),
-            ),
+              if (onScan != null)
+                GestureDetector(
+                  onTap: onScan,
+                  child: const Icon(
+                    Icons.qr_code_scanner,
+                    color: Colors.black54,
+                    size: 24,
+                  ),
+                ),
+            ],
           ),
         ],
       ),
@@ -171,66 +296,605 @@ class _RepairRecordCreatePageState
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => const QrScanPage(
-          parseDeviceSn: true,
-        ),
+        builder: (_) => const QrScanPage(parseDeviceSn: true),
       ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
-    ref.read(repairRecordCreateProvider.notifier).updateSn(result);
+    final notifier = ref.read(repairRecordCreateProvider.notifier);
+    notifier.updateSn(result);
+    _remarkController.clear();
+    notifier.updateRemark('');
+    await notifier.fetchDeviceInfo();
   }
 
-  String _buildDeviceInfo(
+  void _showProjectSelector(
+    BuildContext context,
+    RepairRecordCreateState state,
+    RepairRecordCreateNotifier notifier,
     AppLocalizations l10n,
-    DeviceFix fix,
   ) {
-    switch (fix.deviceType) {
-      case 1:
-        final battery = fix.batteryVo;
-        return '${l10n.repairRecordDeviceSnLabel}: ${battery?.sn ?? '-'}\n'
-            '${l10n.repairRecordDeviceModelLabel}: ${battery?.model ?? battery?.batModel ?? '-'}\n'
-            '${l10n.repairRecordDeviceSpecLabel}: ${battery?.spec ?? battery?.batSpec ?? '-'}';
-      case 2:
-        final car = fix.carVo;
-        return '${l10n.repairRecordDeviceSnLabel}: ${car?.sn ?? '-'}\n'
-            '${l10n.repairRecordDeviceModelLabel}: ${car?.model ?? '-'}\n'
-            '${l10n.repairRecordDeviceCardNumLabel}: ${car?.cardNum ?? '-'}';
-      case 3:
-        final station = fix.stationVo;
-        return '${l10n.repairRecordDeviceSnLabel}: ${station?.sn ?? '-'}\n'
-            '${l10n.repairRecordDeviceNameLabel}: ${station?.name ?? '-'}';
-      default:
-        return l10n.repairRecordDeviceInfoEmpty;
+    if (state.deviceFix == null || state.deviceFix!.itemList.isEmpty) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _SelectionSheet(
+        title: l10n.repairRecordSelectProject,
+        items: state.deviceFix!.itemList.map((e) => e.itemName).toList(),
+        onSelected: (index) {
+          notifier.selectProject(state.deviceFix!.itemList[index]);
+          Navigator.of(context).pop();
+        },
+        cancelText: l10n.repairRecordCancel,
+      ),
+    );
+  }
+
+  void _showResultSelector(
+    BuildContext context,
+    RepairRecordCreateState state,
+    RepairRecordCreateNotifier notifier,
+    AppLocalizations l10n,
+  ) {
+    if (state.deviceFix == null || state.deviceFix!.resultList.isEmpty) return;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _SelectionSheet(
+        title: l10n.repairRecordSelectResult,
+        items: state.deviceFix!.resultList.map((e) => e.result).toList(),
+        onSelected: (index) {
+          notifier.selectResult(state.deviceFix!.resultList[index]);
+          Navigator.of(context).pop();
+        },
+        cancelText: l10n.repairRecordCancel,
+      ),
+    );
+  }
+
+  Future<void> _submit(
+    BuildContext context,
+    AppLocalizations l10n,
+    RepairRecordCreateNotifier notifier,
+  ) async {
+    final success = await notifier.submitFixRecord();
+    if (!mounted) return;
+    if (success) {
+      showToast(l10n.repairRecordSubmitSuccess);
+      Navigator.of(context).pop(true);
     }
   }
 }
 
-class _InfoCard extends StatelessWidget {
-  const _InfoCard({required this.title, required this.content});
+class _EmptyInfoCard extends StatelessWidget {
+  const _EmptyInfoCard({required this.text});
 
-  final String title;
-  final String content;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: const TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DropdownSelector extends StatelessWidget {
+  const _DropdownSelector({
+    required this.label,
+    required this.hint,
+    required this.value,
+    required this.onTap,
+  });
+
+  final String label;
+  final String hint;
+  final String? value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 12),
+          GestureDetector(
+            onTap: onTap,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    value ?? hint,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: value != null ? Colors.black : Colors.grey,
+                    ),
+                  ),
+                ),
+                const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: Colors.grey,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SelectionSheet extends StatelessWidget {
+  const _SelectionSheet({
+    required this.title,
+    required this.items,
+    required this.onSelected,
+    required this.cancelText,
+  });
+
+  final String title;
+  final List<String> items;
+  final ValueChanged<int> onSelected;
+  final String cancelText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+              ),
+            ),
+            const Divider(height: 1),
+            ...items.asMap().entries.map((entry) {
+              return Column(
+                children: [
+                  ListTile(
+                    title: Text(
+                      entry.value,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    onTap: () => onSelected(entry.key),
+                  ),
+                  if (entry.key < items.length - 1)
+                    const Divider(height: 1, indent: 16, endIndent: 16),
+                ],
+              );
+            }),
             const SizedBox(height: 8),
-            Text(content),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: OutlinedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.black),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
+                  child: Text(
+                    cancelText,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _DeviceInfoCard extends StatelessWidget {
+  const _DeviceInfoCard({
+    required this.deviceFix,
+    required this.l10n,
+  });
+
+  final DeviceFix deviceFix;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    // deviceType: 1=battery, 2=vehicle, 3=station
+    if (deviceFix.deviceType == 1) {
+      return _BatteryInfoCard(battery: deviceFix.batteryVo, l10n: l10n);
+    } else if (deviceFix.deviceType == 2) {
+      return _VehicleInfoCard(vehicle: deviceFix.carVo, l10n: l10n);
+    }
+    return _EmptyInfoCard(text: l10n.repairRecordDeviceInfoEmpty);
+  }
+}
+
+class _BatteryInfoCard extends StatelessWidget {
+  const _BatteryInfoCard({required this.battery, required this.l10n});
+
+  final BatteryVo? battery;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final isBound = battery?.cardNum != null && battery!.cardNum!.isNotEmpty;
+    
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: battery?.img != null && battery!.img!.isNotEmpty
+                        ? Image.network(battery!.img!, fit: BoxFit.contain)
+                        : const Icon(Icons.battery_full, size: 32, color: Colors.grey),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          battery?.sn ?? '-',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        _BoundTag(isBound: isBound, l10n: l10n),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Model & Specification
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _StatItem(
+                      label: l10n.repairRecordDeviceModelLabel,
+                      value: battery?.model ?? battery?.batModel ?? '-',
+                    ),
+                  ),
+                  Container(width: 1, height: 40, color: Colors.grey.shade200),
+                  Expanded(
+                    child: _StatItem(
+                      label: l10n.repairRecordDeviceSpecLabel,
+                      value: battery?.spec ?? battery?.batSpec ?? '-',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Binding User ID & Entry Time
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  if (isBound)
+                    _InfoRow(
+                      label: l10n.repairRecordDeviceCardNumLabel,
+                      value: battery?.cardNum ?? '-',
+                    ),
+                  const SizedBox(height: 8),
+                  _InfoRow(
+                    label: l10n.repairRecordDeviceEntryTime,
+                    value: _formatDate(battery?.createTime),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return '-';
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('dd MMM, yyyy').format(date);
+    } catch (_) {
+      return dateStr;
+    }
+  }
+}
+
+class _VehicleInfoCard extends StatelessWidget {
+  const _VehicleInfoCard({required this.vehicle, required this.l10n});
+
+  final CarVo? vehicle;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final isBound = vehicle?.cardNum.isNotEmpty == true;
+    
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: vehicle?.img != null && vehicle!.img!.isNotEmpty
+                        ? Image.network(vehicle!.img!, fit: BoxFit.contain)
+                        : const Icon(Icons.electric_moped, size: 32, color: Colors.grey),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          vehicle?.sn ?? '-',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            _BoundTag(isBound: isBound, l10n: l10n),
+                            const SizedBox(width: 8),
+                            _Tag(text: vehicle?.spec ?? '-'),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Model & Plate Number
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _StatItem(
+                      label: l10n.repairRecordDeviceModelLabel,
+                      value: vehicle?.model ?? '-',
+                    ),
+                  ),
+                  Container(width: 1, height: 40, color: Colors.grey.shade200),
+                  Expanded(
+                    child: _StatItem(
+                      label: l10n.repairRecordDevicePlateNumber,
+                      value: vehicle?.carNumber ?? '-',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Binding User ID & Entry Time
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _InfoRow(
+                    label: l10n.repairRecordDeviceCardNumLabel,
+                    value: vehicle?.cardNum ?? '-',
+                  ),
+                  const SizedBox(height: 8),
+                  _InfoRow(
+                    label: l10n.repairRecordDeviceEntryTime,
+                    value: _formatDate(vehicle?.createTime),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null || dateStr.isEmpty) return '-';
+    try {
+      final date = DateTime.parse(dateStr);
+      return DateFormat('dd MMM, yyyy').format(date);
+    } catch (_) {
+      return dateStr;
+    }
+  }
+}
+
+class _BoundTag extends StatelessWidget {
+  const _BoundTag({required this.isBound, required this.l10n});
+
+  final bool isBound;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(
+          color: isBound ? AppColors.primaryColor : Colors.red,
+        ),
+      ),
+      child: Text(
+        isBound ? l10n.repairRecordBound : l10n.repairRecordUnbound,
+        style: TextStyle(
+          fontSize: 12,
+          color: isBound ? AppColors.primaryColor : Colors.red,
+        ),
+      ),
+    );
+  }
+}
+
+class _Tag extends StatelessWidget {
+  const _Tag({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 12, color: Colors.black87),
+      ),
+    );
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  const _StatItem({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: Colors.grey),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 14, color: Colors.grey),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
+        ),
+      ],
     );
   }
 }

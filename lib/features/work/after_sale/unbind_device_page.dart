@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/after_sale/unbind_device_controller.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -41,130 +42,267 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
     _syncControllers(state);
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.unbindDeviceTitle)),
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        title: const SizedBox.shrink(),
+      ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  _SectionTitle(title: l10n.afterSaleBindUserSectionTitle),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _cardController,
-                    decoration: InputDecoration(
-                      labelText: l10n.unbindDeviceUserIdLabel,
-                      hintText: l10n.unbindDeviceUserIdHint,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.qr_code_scanner),
-                        onPressed: _scanCardNum,
-                      ),
-                    ),
-                    onChanged: (value) {
-                      notifier.updateCardNum(value);
-                      _debounceCheck();
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _SectionTitle(title: l10n.afterSaleBindDeviceSectionTitle),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _deviceController,
-                    decoration: InputDecoration(
-                      labelText: l10n.unbindDeviceDeviceSnLabel,
-                      hintText: l10n.unbindDeviceDeviceSnHint,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: const Icon(Icons.qr_code_scanner),
-                        onPressed: _scanDeviceSn,
-                      ),
-                    ),
-                    onChanged: (value) {
-                      notifier.updateDeviceSn(value);
-                      _debounceCheck();
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  if (state.hasUnfinishedOrder)
-                    _WarningCard(
-                      title: l10n.unbindDeviceUnfinishedTitle,
-                      content: state.appointmentNo.isEmpty
-                          ? l10n.unbindDeviceUnfinishedDesc
-                          : '${l10n.unbindDeviceUnfinishedDesc}\n'
-                              '${state.appointmentNo}',
-                    ),
-                  const SizedBox(height: 16),
-                  _SectionTitle(title: l10n.unbindDeviceCheckRemarkLabel),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _checkRemarkController,
-                    decoration: InputDecoration(
-                      hintText: l10n.unbindDeviceCheckRemarkHint,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    onChanged: notifier.updateCheckRemark,
-                  ),
-                  const SizedBox(height: 16),
-                  _SectionTitle(title: l10n.unbindDeviceReasonTitle),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: _reasons(l10n)
-                        .map(
-                          (reason) => ChoiceChip(
-                            label: Text(reason),
-                            selected: state.remark == reason,
-                            onSelected: (_) {
-                              _remarkController.text = reason;
-                              notifier.updateRemark(reason);
-                            },
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // Header section
+                    Container(
+                      width: double.infinity,
+                      color: Colors.white,
+                      padding: const EdgeInsets.only(bottom: 24),
+                      child: Column(
+                        children: [
+                          Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF6B5B),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Icon(
+                              Icons.phonelink_erase,
+                              color: Colors.white,
+                              size: 40,
+                            ),
                           ),
-                        )
-                        .toList(),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _remarkController,
-                    decoration: InputDecoration(
-                      hintText: l10n.unbindDeviceReasonInputHint,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                          const SizedBox(height: 16),
+                          Text(
+                            l10n.unbindDeviceTitle,
+                            style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    onChanged: notifier.updateRemark,
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    // User ID and Device SN section
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInputField(
+                            label: l10n.unbindDeviceUserIdLabel,
+                            hint: l10n.unbindDeviceUserIdHint,
+                            controller: _cardController,
+                            onChanged: (v) {
+                              notifier.updateCardNum(v);
+                              _debounceCheck();
+                            },
+                            onScan: _scanCardNum,
+                          ),
+                          const Divider(height: 1, indent: 16, endIndent: 16),
+                          _buildInputField(
+                            label: l10n.unbindDeviceDeviceSnLabel,
+                            hint: l10n.unbindDeviceDeviceSnHint,
+                            controller: _deviceController,
+                            onChanged: (v) {
+                              notifier.updateDeviceSn(v);
+                              _debounceCheck();
+                            },
+                            onScan: _scanDeviceSn,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Check Status section
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: _buildInputField(
+                        label: l10n.unbindDeviceCheckRemarkLabel,
+                        hint: l10n.unbindDeviceCheckRemarkHint,
+                        controller: _checkRemarkController,
+                        onChanged: notifier.updateCheckRemark,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    // Reason section
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildInputField(
+                            label: l10n.unbindDeviceReasonTitle,
+                            hint: l10n.unbindDeviceReasonHint,
+                            controller: _remarkController,
+                            onChanged: notifier.updateRemark,
+                          ),
+                          const Divider(height: 1, indent: 16, endIndent: 16),
+                          Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.unbindDeviceCommonReasons,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 12,
+                                  runSpacing: 8,
+                                  children: [
+                                    for (final reason in _reasons(l10n))
+                                      _ReasonChip(
+                                        label: reason,
+                                        selected: state.remark == reason,
+                                        onTap: () {
+                                          notifier.updateRemark(reason);
+                                          _remarkController.text = reason;
+                                        },
+                                      ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (state.hasUnfinishedOrder)
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: _WarningCard(
+                          title: l10n.unbindDeviceUnfinishedTitle,
+                          content: state.appointmentNo.isEmpty
+                              ? l10n.unbindDeviceUnfinishedDesc
+                              : '${l10n.unbindDeviceUnfinishedDesc}\n'
+                                  '${state.appointmentNo}',
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
-            Padding(
+            // Bottom button
+            Container(
               padding: const EdgeInsets.all(16),
+              color: const Color(0xFFF5F5F5),
               child: SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
+                height: 50,
+                child: FilledButton(
                   onPressed: state.submitting
                       ? null
                       : () => _submit(context, l10n, notifier),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    disabledBackgroundColor:
+                        AppColors.primaryColor.withOpacity(0.5),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                  ),
                   child: state.submitting
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
-                      : Text(l10n.unbindDeviceConfirm),
+                      : Text(
+                          l10n.unbindDeviceConfirmButton,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                 ),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildInputField({
+    required String label,
+    required String hint,
+    required TextEditingController controller,
+    required ValueChanged<String> onChanged,
+    VoidCallback? onScan,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    hintText: hint,
+                    hintStyle: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 15,
+                    ),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  onChanged: onChanged,
+                ),
+              ),
+              if (onScan != null)
+                GestureDetector(
+                  onTap: onScan,
+                  child: const Icon(
+                    Icons.qr_code_scanner,
+                    color: Colors.black54,
+                    size: 24,
+                  ),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -280,16 +418,38 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title});
+class _ReasonChip extends StatelessWidget {
+  const _ReasonChip({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
 
-  final String title;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: const TextStyle(fontWeight: FontWeight.w600),
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.primaryColor.withOpacity(0.1) : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: selected ? AppColors.primaryColor : Colors.grey.shade300,
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 14,
+            color: selected ? AppColors.primaryColor : Colors.black87,
+          ),
+        ),
+      ),
     );
   }
 }

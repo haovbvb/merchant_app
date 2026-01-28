@@ -1,3 +1,7 @@
+import 'dart:typed_data';
+
+import 'package:dio/dio.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/data/models/device_fix.dart';
 import 'package:merchant_app/data/models/maintenance.dart';
@@ -13,6 +17,10 @@ class MaintenanceBookState {
   final String sn;
   final String note;
   final BookMaintenanceBean? appointment;
+  // Maintenance cost dialog fields
+  final String amount;
+  final int paySource; // 1=Cash, 2=Online
+  final List<String> voucherImages;
 
   const MaintenanceBookState({
     this.loading = false,
@@ -20,7 +28,21 @@ class MaintenanceBookState {
     this.sn = '',
     this.note = '',
     this.appointment,
+    this.amount = '',
+    this.paySource = 2, // default Online
+    this.voucherImages = const [],
   });
+
+  bool get canConfirmCost {
+    // Cash requires amount, voucher images optional
+    // Online requires just amount
+    final hasAmount = amount.trim().isNotEmpty;
+    if (paySource == 1) {
+      // Cash
+      return hasAmount;
+    }
+    return hasAmount;
+  }
 
   MaintenanceBookState copyWith({
     bool? loading,
@@ -28,13 +50,20 @@ class MaintenanceBookState {
     String? sn,
     String? note,
     BookMaintenanceBean? appointment,
+    bool clearAppointment = false,
+    String? amount,
+    int? paySource,
+    List<String>? voucherImages,
   }) {
     return MaintenanceBookState(
       loading: loading ?? this.loading,
       submitting: submitting ?? this.submitting,
       sn: sn ?? this.sn,
       note: note ?? this.note,
-      appointment: appointment ?? this.appointment,
+      appointment: clearAppointment ? null : (appointment ?? this.appointment),
+      amount: amount ?? this.amount,
+      paySource: paySource ?? this.paySource,
+      voucherImages: voucherImages ?? this.voucherImages,
     );
   }
 }
@@ -58,6 +87,46 @@ class MaintenanceBookNotifier extends Notifier<MaintenanceBookState> {
     state = state.copyWith(note: value);
   }
 
+  void updateAmount(String value) {
+    state = state.copyWith(amount: value);
+  }
+
+  void updatePaySource(int value) {
+    state = state.copyWith(paySource: value);
+  }
+
+  void addVoucherImage(String url) {
+    if (state.voucherImages.length >= 5) return;
+    state = state.copyWith(voucherImages: [...state.voucherImages, url]);
+  }
+
+  void removeVoucherImage(int index) {
+    final list = List<String>.from(state.voucherImages);
+    if (index >= 0 && index < list.length) {
+      list.removeAt(index);
+      state = state.copyWith(voucherImages: list);
+    }
+  }
+
+  void clearCostDialog() {
+    state = state.copyWith(
+      amount: '',
+      paySource: 2,
+      voucherImages: [],
+    );
+  }
+
+  void clearAll() {
+    state = state.copyWith(
+      clearAppointment: true,
+      sn: '',
+      note: '',
+      amount: '',
+      paySource: 2,
+      voucherImages: [],
+    );
+  }
+
   Future<void> fetchAppointment() async {
     final sn = state.sn.trim();
     if (sn.isEmpty) return;
@@ -78,21 +147,65 @@ class MaintenanceBookNotifier extends Notifier<MaintenanceBookState> {
   }
 
   Future<bool> submitMaintenance() async {
-    final appointmentNo = state.appointment?.reservationNo ?? '';
-    if (appointmentNo.trim().isEmpty) return false;
+    final appointment = state.appointment;
+    if (appointment == null) return false;
+    final cardNum = appointment.cardNum ?? '';
+    final deviceSn = appointment.sn ?? '';
+    if (cardNum.isEmpty || deviceSn.isEmpty) return false;
     state = state.copyWith(submitting: true);
 
+    final imgList = state.voucherImages.join(',');
     final response = await _api.post<Object>(
       ApiPath.maintenanceAddRecord,
       data: {
-        'appointmentNo': appointmentNo,
+        'cardNum': cardNum,
+        'deviceSn': deviceSn,
+        'imgList': imgList,
         'maintenanceNote': state.note.trim(),
+        'paySource': state.paySource,
+        'payTotal': state.amount.trim().isEmpty ? '0' : state.amount.trim(),
       },
       parser: (json) => json ?? Object(),
     );
 
     state = state.copyWith(submitting: false);
     return response.isSuccess;
+  }
+
+  Future<String?> uploadVoucher(String filePath) async {
+    final data = await _compressImage(filePath);
+    if (data == null || data.isEmpty) return null;
+    final fileName = _buildFileName(filePath);
+    final formData = FormData.fromMap({
+      'file': MultipartFile.fromBytes(data, filename: fileName),
+    });
+    final response = await _api.postForm<String>(
+      ApiPath.tradeUploadAttachment,
+      data: formData,
+      parser: (json) => json?.toString() ?? '',
+    );
+    if (response.isSuccess && response.result != null) {
+      return response.result;
+    }
+    return null;
+  }
+
+  Future<Uint8List?> _compressImage(String path) async {
+    return FlutterImageCompress.compressWithFile(
+      path,
+      quality: 80,
+      minWidth: 612,
+      minHeight: 816,
+      format: CompressFormat.jpeg,
+    );
+  }
+
+  String _buildFileName(String path) {
+    final segments = path.split('/');
+    final last = segments.isEmpty ? '' : segments.last;
+    final extIndex = last.lastIndexOf('.');
+    final ext = extIndex == -1 ? 'jpg' : last.substring(extIndex + 1);
+    return '${DateTime.now().millisecondsSinceEpoch}.$ext';
   }
 }
 

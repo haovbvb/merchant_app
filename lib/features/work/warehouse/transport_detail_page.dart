@@ -47,8 +47,9 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
         (widget.status == null || (widget.status != 1 && widget.status != 3));
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
-        title: Text(l10n.warehouseTransportDetailTitle),
+        title: Text(l10n.deviceIssueDetailTitle),
         actions: [
           if (widget.mode == TransportMode.receive)
             IconButton(
@@ -61,76 +62,224 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
               tooltip: l10n.qrcodeBatchScan,
               onPressed: () => _openBatchReceive(context, notifier),
             ),
-          if (canEditTracking)
-            IconButton(
-              icon: const Icon(Icons.edit),
-              onPressed: () => _showTrackingDialog(context, notifier, detail),
-            ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          _InfoTile(
-            label: l10n.warehouseTransportTransferNo,
-            value: detail?.transferNo ?? widget.transferNo,
-          ),
-          _InfoTile(
-            label: l10n.warehouseTransportDeviceType,
-            value: _deviceTypeLabel(l10n, detail?.deviceType),
-          ),
-          _InfoTile(
-            label: l10n.warehouseTransportFrom,
-            value: detail?.outWarehouseName ?? '-',
-          ),
-          _InfoTile(
-            label: l10n.warehouseTransportTo,
-            value: detail?.inWarehouseName ?? '-',
-          ),
-          _InfoTile(
-            label: l10n.warehouseTransportStatus,
-            value: detail == null
-                ? '-'
-                : _transportStatusLabel(l10n, detail.receivedNum, detail),
-          ),
-          _InfoTile(
-            label: l10n.warehouseTransportTrackingNumber,
-            value: detail?.trackingNumber ?? '-',
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.warehouseTransportDeviceListTitle,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 12),
-          if (state.items.isEmpty)
-            _EmptyCard(text: l10n.warehouseTransportEmpty)
-          else
-            ...state.items.map(
-              (item) => Card(
-                child: ListTile(
-                  title: Text(item.deviceSn),
-                  subtitle: Text(
-                    '${l10n.warehouseTransportStatus}: '
-                    '${_detailStatusLabel(l10n, item.status)}\n'
-                    '${l10n.warehouseTransportOperateTime}: ${item.opTime}',
+      body: state.loading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 订单信息卡片
+                  _OrderHeaderCard(
+                    detail: detail,
+                    transferNo: widget.transferNo,
+                    l10n: l10n,
                   ),
-                  trailing: widget.mode == TransportMode.receive &&
-                          item.status == 0
-                      ? _ReceiveActions(
-                          onReceive: () => notifier.receiveDevice(item.deviceSn),
-                          onWithdraw: () =>
-                              notifier.withdrawDevice(item.deviceSn),
-                          receiveLabel: l10n.warehouseTransportReceiveAction,
-                          withdrawLabel: l10n.warehouseTransportWithdrawAction,
-                        )
-                      : null,
-                ),
+                  const SizedBox(height: 8),
+                  // 物流单号
+                  Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Image.asset(
+                          'assets/android/mipmap-xxhdpi/icon_edt_traknumber.png',
+                          width: 20,
+                          height: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.deviceIssueTrackingNumber,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF333333),
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          (detail?.trackingNumber.isNotEmpty ?? false)
+                              ? detail!.trackingNumber
+                              : '- -',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                        ),
+                        if (canEditTracking) ...[
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: () =>
+                                _showTrackingDialog(context, notifier, detail),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: const Color(0xFFE5E5E5),
+                                ),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.edit_outlined,
+                                    size: 14,
+                                    color: Color(0xFF666666),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    l10n.entryEditAction,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF666666),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // 设备列表
+                  Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // 标题行
+                        Text(
+                          '${_getDeviceTypeLabel(l10n, detail?.deviceType)} (${state.items.length})',
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1A1A1A),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // 统计行
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF9F9F9),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Row(
+                            children: [
+                              _StatItem(
+                                label: l10n.deviceIssueStatusInTransit,
+                                value: _countByStatus(state.items, 0).toString(),
+                                color: const Color(0xFFED942F),
+                              ),
+                              _StatItem(
+                                label: l10n.deviceIssueReceived,
+                                value: _countByStatus(state.items, 1).toString(),
+                                color: const Color(0xFF4CAF50),
+                              ),
+                              _StatItem(
+                                label: l10n.deviceIssueWithdrawn,
+                                value: _countByStatus(state.items, 3).toString(),
+                                color: const Color(0xFFE25C5C),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // 设备列表
+                        if (state.items.isEmpty)
+                          Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(24),
+                              child: Text(
+                                l10n.deviceIssueEmpty,
+                                style: const TextStyle(
+                                  color: Color(0xFF999999),
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          )
+                        else
+                          ...state.items.asMap().entries.map((entry) {
+                            final item = entry.value;
+                            final statusColors = _getItemStatusColors(item.status);
+                            return Column(
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 12),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              item.deviceSn,
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                color: Color(0xFF1A1A1A),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              item.opTime,
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                color: Color(0xFF999999),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 8,
+                                          vertical: 3,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: statusColors.background,
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          _getItemStatusLabel(l10n, item.status),
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: statusColors.text,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (entry.key < state.items.length - 1)
+                                  const Divider(height: 1),
+                              ],
+                            );
+                          }),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
-        ],
-      ),
     );
+  }
+
+  int _countByStatus(List<DeviceTransportDetailPageData> items, int status) {
+    return items.where((item) => item.status == status).length;
   }
 
   Future<void> _showTrackingDialog(
@@ -139,27 +288,30 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
     DeviceTransportDetail? detail,
   ) async {
     final l10n = context.l10n;
-    final controller = TextEditingController(text: detail?.trackingNumber ?? '');
+    final controller =
+        TextEditingController(text: detail?.trackingNumber ?? '');
     final result = await showDialog<String>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(l10n.warehouseTransportEditTrackingNumber),
+          title: Text(l10n.deviceIssueTrackingNumber),
           content: TextField(
             controller: controller,
+            autofocus: true,
             decoration: InputDecoration(
-              labelText: l10n.warehouseTransportTrackingNumber,
+              hintText: l10n.deviceIssueEnterTracking,
+              border: const OutlineInputBorder(),
             ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
+              child: Text(l10n.cancel),
             ),
-            ElevatedButton(
+            FilledButton(
               onPressed: () =>
                   Navigator.of(context).pop(controller.text.trim()),
-              child: Text(l10n.warehouseTransportEditTrackingNumber),
+              child: Text(l10n.confirm),
             ),
           ],
         );
@@ -205,11 +357,12 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
     }
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.l10n.warehouseTransportBatchReceiveComplete)),
+      SnackBar(
+          content: Text(context.l10n.warehouseTransportBatchReceiveComplete)),
     );
   }
 
-  String _deviceTypeLabel(AppLocalizations l10n, int? type) {
+  String _getDeviceTypeLabel(AppLocalizations l10n, int? type) {
     switch (type) {
       case 1:
         return l10n.warehouseDeviceTypeBattery;
@@ -222,97 +375,248 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
     }
   }
 
-  String _transportStatusLabel(
-    AppLocalizations l10n,
-    int receivedNum,
-    DeviceTransportDetail detail,
-  ) {
-    if (detail.withdrawNum > 0) {
-      return l10n.warehouseTransportStatusWithdrawn;
-    }
-    if (receivedNum >= detail.deviceNum) {
-      return l10n.warehouseTransportStatusReceived;
-    }
-    if (receivedNum > 0) {
-      return l10n.warehouseTransportStatusPartial;
-    }
-    return l10n.warehouseTransportStatusInTransit;
-  }
-
-  String _detailStatusLabel(AppLocalizations l10n, int status) {
+  String _getItemStatusLabel(AppLocalizations l10n, int status) {
     switch (status) {
       case 0:
-        return l10n.warehouseTransportStatusInTransit;
+        return l10n.deviceIssueStatusInTransit;
       case 1:
-        return l10n.warehouseTransportStatusReceived;
+        return l10n.deviceIssueReceived;
       case 2:
-        return l10n.warehouseTransportStatusPartial;
+        return l10n.deviceIssueStatusPartial;
       case 3:
-        return l10n.warehouseTransportStatusWithdrawn;
+        return l10n.deviceIssueWithdrawn;
       default:
         return '-';
     }
   }
+
+  _StatusColors _getItemStatusColors(int status) {
+    switch (status) {
+      case 0:
+        return const _StatusColors(
+          text: Color(0xFFED942F),
+          background: Color(0xFFFEF7EA),
+        );
+      case 1:
+        return const _StatusColors(
+          text: Color(0xFF4CAF50),
+          background: Color(0xFFEEF7E9),
+        );
+      case 2:
+        return const _StatusColors(
+          text: Color(0xFF2196F3),
+          background: Color(0xFFE3F2FD),
+        );
+      case 3:
+        return const _StatusColors(
+          text: Color(0xFFE25C5C),
+          background: Color(0xFFFDECEC),
+        );
+      default:
+        return const _StatusColors(
+          text: Color(0xFF999999),
+          background: Color(0xFFF5F5F5),
+        );
+    }
+  }
 }
 
-class _InfoTile extends StatelessWidget {
-  const _InfoTile({required this.label, required this.value});
+class _StatusColors {
+  const _StatusColors({required this.text, required this.background});
+  final Color text;
+  final Color background;
+}
 
-  final String label;
-  final String value;
+class _OrderHeaderCard extends StatelessWidget {
+  const _OrderHeaderCard({
+    required this.detail,
+    required this.transferNo,
+    required this.l10n,
+  });
+
+  final DeviceTransportDetail? detail;
+  final String transferNo;
+  final AppLocalizations l10n;
+
+  String _formatTimestamp(int? timestamp) {
+    if (timestamp == null || timestamp == 0) return '';
+    final date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Row(
+    return Container(
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1B5E20),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
         children: [
-          SizedBox(width: 96, child: Text(label)),
-          Expanded(child: Text(value)),
+          // 头部：订单号和日期
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  detail?.transferNo ?? transferNo,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  _formatTimestamp(detail?.sendTime),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Colors.white70,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // 仓库信息
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(12),
+                bottomRight: Radius.circular(12),
+              ),
+            ),
+            child: Column(
+              children: [
+                // 发出仓库
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      children: [
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFED942F),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                        Container(
+                          width: 1,
+                          height: 30,
+                          color: const Color(0xFFE5E5E5),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.deviceIssueWarehouse,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF999999),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            detail?.outWarehouseName ?? '-',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF1A1A1A),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                // 接收仓库
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4CAF50),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.deviceReceiveWarehouse,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF999999),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            detail?.inWarehouseName ?? '-',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF1A1A1A),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class _EmptyCard extends StatelessWidget {
-  const _EmptyCard({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(text),
-      ),
-    );
-  }
-}
-
-class _ReceiveActions extends StatelessWidget {
-  const _ReceiveActions({
-    required this.onReceive,
-    required this.onWithdraw,
-    required this.receiveLabel,
-    required this.withdrawLabel,
+class _StatItem extends StatelessWidget {
+  const _StatItem({
+    required this.label,
+    required this.value,
+    required this.color,
   });
 
-  final VoidCallback onReceive;
-  final VoidCallback onWithdraw;
-  final String receiveLabel;
-  final String withdrawLabel;
+  final String label;
+  final String value;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        TextButton(onPressed: onReceive, child: Text(receiveLabel)),
-        const SizedBox(width: 4),
-        TextButton(onPressed: onWithdraw, child: Text(withdrawLabel)),
-      ],
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF999999),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

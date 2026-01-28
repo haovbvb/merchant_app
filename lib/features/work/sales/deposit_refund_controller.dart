@@ -6,6 +6,7 @@ import 'package:merchant_app/network/api_service.dart';
 class DepositRefundState {
   final bool loading;
   final bool submitting;
+  final bool submitSuccess;
   final DepositRefundInfoBean? info;
   final Deposit? selectedDeposit;
   final bool voucherConfirmed;
@@ -13,6 +14,7 @@ class DepositRefundState {
   const DepositRefundState({
     this.loading = false,
     this.submitting = false,
+    this.submitSuccess = false,
     this.info,
     this.selectedDeposit,
     this.voucherConfirmed = true,
@@ -21,6 +23,7 @@ class DepositRefundState {
   DepositRefundState copyWith({
     bool? loading,
     bool? submitting,
+    bool? submitSuccess,
     DepositRefundInfoBean? info,
     Deposit? selectedDeposit,
     bool? voucherConfirmed,
@@ -28,6 +31,7 @@ class DepositRefundState {
     return DepositRefundState(
       loading: loading ?? this.loading,
       submitting: submitting ?? this.submitting,
+      submitSuccess: submitSuccess ?? this.submitSuccess,
       info: info ?? this.info,
       selectedDeposit: selectedDeposit ?? this.selectedDeposit,
       voucherConfirmed: voucherConfirmed ?? this.voucherConfirmed,
@@ -87,6 +91,13 @@ class DepositRefundNotifier extends Notifier<DepositRefundState> {
       parser: (json) => json ?? Object(),
     );
     state = state.copyWith(submitting: false);
+    if (response.isSuccess) {
+      state = state.copyWith(submitSuccess: true);
+    }
     return response.isSuccess;
+  }
+
+  void reset() {
+    state = const DepositRefundState();
   }
 }

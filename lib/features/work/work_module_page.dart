@@ -13,10 +13,10 @@ import 'package:merchant_app/features/work/cabinet/cabinet_putaway_page.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_unshelve_page.dart';
 import 'package:merchant_app/features/work/device/device_detail_page.dart';
 import 'package:merchant_app/features/work/device/device_search_page.dart';
-import 'package:merchant_app/features/work/device/vehicle_search_page.dart';
 import 'package:merchant_app/features/work/entry/battery_ship_page.dart';
 import 'package:merchant_app/features/work/entry/shipping_entry_page.dart';
 import 'package:merchant_app/features/work/maintenance/maintenance_book_page.dart';
+import 'package:merchant_app/features/work/maintenance/repair_record_create_page.dart';
 import 'package:merchant_app/features/work/maintenance/repair_record_page.dart';
 import 'package:merchant_app/features/work/map/battery_location_page.dart';
 import 'package:merchant_app/features/work/promote/promote_web_page.dart';
@@ -40,6 +40,7 @@ import 'package:merchant_app/features/work/vcu/vcu_search_page.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_detail_page_new.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_list_page_new.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_search_page.dart';
+import 'package:merchant_app/features/work/warehouse/receive_list_page.dart';
 import 'package:merchant_app/features/work/warehouse/transport_controller.dart';
 import 'package:merchant_app/features/work/warehouse/transport_detail_page.dart';
 import 'package:merchant_app/features/work/warehouse/transport_list_page.dart';
@@ -92,11 +93,11 @@ class WorkModulePage extends StatelessWidget {
         return DeviceDetailPage(initialSn: recordNo);
       case 'device_search':
         return const DeviceSearchPage();
-      case 'vehicle_search':
-        return const VehicleSearchPage();
       case 'maintenance_book':
         return const MaintenanceBookPage();
       case 'repair_record':
+        return const RepairRecordCreatePage();
+      case 'repair_record_list':
         return const RepairRecordPage();
       case 'road_assist':
         return const RoadSideListPage();
@@ -159,10 +160,7 @@ class WorkModulePage extends StatelessWidget {
           mode: TransportMode.issue,
         );
       case 'device_transport_receive':
-        return const TransportListPage(
-          initialTabIndex: 2,
-          mode: TransportMode.receive,
-        );
+        return const ReceiveListPage();
       case 'device_transport_detail':
         return TransportDetailPage(transferNo: recordNo ?? '');
       case 'vcu_search':

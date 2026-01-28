@@ -13,6 +13,8 @@ class RentBindState {
   final bool loadingUser;
   final bool loadingDevice;
   final bool submitting;
+  final bool submitSuccess;
+  final String? documentNo;
   final PurchasingUser? user;
   final RentDeviceInfoBean? deviceInfo;
   final Pack? selectedPack;
@@ -24,6 +26,8 @@ class RentBindState {
     this.loadingUser = false,
     this.loadingDevice = false,
     this.submitting = false,
+    this.submitSuccess = false,
+    this.documentNo,
     this.user,
     this.deviceInfo,
     this.selectedPack,
@@ -36,6 +40,8 @@ class RentBindState {
     bool? loadingUser,
     bool? loadingDevice,
     bool? submitting,
+    bool? submitSuccess,
+    String? documentNo,
     PurchasingUser? user,
     RentDeviceInfoBean? deviceInfo,
     Pack? selectedPack,
@@ -47,6 +53,8 @@ class RentBindState {
       loadingUser: loadingUser ?? this.loadingUser,
       loadingDevice: loadingDevice ?? this.loadingDevice,
       submitting: submitting ?? this.submitting,
+      submitSuccess: submitSuccess ?? this.submitSuccess,
+      documentNo: documentNo ?? this.documentNo,
       user: user ?? this.user,
       deviceInfo: deviceInfo ?? this.deviceInfo,
       selectedPack: selectedPack ?? this.selectedPack,
@@ -143,18 +151,20 @@ class RentBindNotifier extends Notifier<RentBindState> {
     required String idNumber,
     required String phone,
     required String deviceSn,
+    String? cardImgUrl,
+    String? personImgUrl,
   }) async {
     final pack = state.selectedPack;
     if (pack == null) return false;
     final deviceInfo = state.deviceInfo;
     final deviceType = _deviceType(deviceInfo);
     state = state.copyWith(submitting: true);
-    final response = await _api.post<Object>(
+    final response = await _api.post<String>(
       ApiPath.rentBind,
       data: {
         'address': address,
         'birthday': birthday,
-        'cardImg': state.cardImgUrl ?? '',
+        'cardImg': cardImgUrl ?? state.cardImgUrl ?? '',
         'cardNum': cardNum,
         'email': email,
         'firstName': firstName,
@@ -162,16 +172,24 @@ class RentBindNotifier extends Notifier<RentBindState> {
         'idNumber': idNumber,
         'phone': phone,
         'payType': 1,
-        'personImg': state.personImgUrl ?? '',
+        'personImg': personImgUrl ?? state.personImgUrl ?? '',
         'infoCode': pack.infoCode ?? '',
         'paySource': state.paySource,
         'deviceSn': deviceSn,
         'type': deviceType,
       },
-      parser: (json) => json ?? Object(),
+      parser: (json) => json?.toString() ?? '',
     );
-    state = state.copyWith(submitting: false);
+    state = state.copyWith(
+      submitting: false,
+      submitSuccess: response.isSuccess,
+      documentNo: response.result,
+    );
     return response.isSuccess;
+  }
+
+  void reset() {
+    state = const RentBindState();
   }
 
   int _deviceType(RentDeviceInfoBean? info) {

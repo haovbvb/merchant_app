@@ -213,6 +213,123 @@ class AppLocalizationsZh extends AppLocalizations {
   String get userSearchHistoryClear => '清空';
 
   @override
+  String get userFilterAll => '全部';
+
+  @override
+  String get userFilterNormal => '正常';
+
+  @override
+  String get userFilterEnded => '已结束';
+
+  @override
+  String get userFilterOverdue => '逾期';
+
+  @override
+  String get userFilterDishonest => '失信';
+
+  @override
+  String get userStatOrder => '订单';
+
+  @override
+  String get userStatConsumption => '总消费';
+
+  @override
+  String get userStatAssets => '资产';
+
+  @override
+  String get userTipNormal => '用户账户状态正常';
+
+  @override
+  String get userTipEnded => '用户服务已结束';
+
+  @override
+  String get userTipOverdue => '用户有待处理的逾期付款';
+
+  @override
+  String get userTipDishonest => '用户已被标记为失信';
+
+  @override
+  String get userTabBasicInfo => '基本信息';
+
+  @override
+  String get userTabOrderRecords => '订单记录';
+
+  @override
+  String get userTabPaymentRecords => '付款记录';
+
+  @override
+  String get userTabSwapRecords => '换电记录';
+
+  @override
+  String get userOrderTabSale => '销售订单';
+
+  @override
+  String get userOrderTabRent => '租赁订单';
+
+  @override
+  String get userOrderTabSwap => '换电订单';
+
+  @override
+  String get userBasicVehicle => '车辆';
+
+  @override
+  String get userBasicBattery => '电池';
+
+  @override
+  String get userBasicRegisterTime => '注册时间';
+
+  @override
+  String get userBasicUserType => '用户类型';
+
+  @override
+  String get userBasicBirthday => '生日';
+
+  @override
+  String get userBasicPhone => '电话';
+
+  @override
+  String get userBasicEmail => '邮箱';
+
+  @override
+  String get userBasicPhotos => '照片';
+
+  @override
+  String get userBasicRemark => '备注';
+
+  @override
+  String get userTypeNormal => '普通';
+
+  @override
+  String get userTypeSenior => '高级';
+
+  @override
+  String get userTypeVip => 'VIP';
+
+  @override
+  String get userPaymentType => '付款类型';
+
+  @override
+  String get userPaymentAmount => '金额';
+
+  @override
+  String get userPaymentTime => '付款时间';
+
+  @override
+  String get userSwapRecord => '换电记录';
+
+  @override
+  String get userSwapTime => '换电时间';
+
+  @override
+  String get userSwapOldBattery => '旧电池';
+
+  @override
+  String get userSwapNewBattery => '新电池';
+
+  @override
+  String get userDetailCall => '拨打电话';
+
+  @override
   String get userDetailTitle => '用户详情';
 
   @override
@@ -402,10 +519,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get maintenanceBookTitle => '维修预约';
 
   @override
-  String get maintenanceSnLabel => '车辆SN';
+  String get maintenanceSnLabel => '车辆SN / VIN';
 
   @override
-  String get maintenanceSnHint => '输入或扫码车辆SN';
+  String get maintenanceSnHint => '输入车辆SN/VIN或扫码';
 
   @override
   String get maintenanceFetchInfo => '获取信息';
@@ -414,16 +531,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get maintenanceVehicleInfo => '车辆信息';
 
   @override
-  String get maintenanceEmptyInfo => '暂无保养信息';
+  String get maintenanceEmptyInfo => '暂无车辆参数信息';
 
   @override
-  String get maintenanceNoteLabel => '维修备注';
+  String get maintenanceNoteLabel => '维修日志';
 
   @override
-  String get maintenanceNoteHint => '填写备注';
+  String get maintenanceNoteHint => '输入维修日志';
 
   @override
-  String get maintenanceSubmit => '提交';
+  String get maintenanceSubmit => '确认';
 
   @override
   String get maintenanceVehicleSn => 'SN';
@@ -444,19 +561,70 @@ class AppLocalizationsZh extends AppLocalizations {
   String get maintenanceSuccessTitle => '维修成功';
 
   @override
-  String get maintenanceSuccessBack => '返回';
+  String get maintenanceSuccessMessage => '维修成功!';
+
+  @override
+  String get maintenanceSuccessBack => '返回工作台';
+
+  @override
+  String get maintenanceBindUser => '绑定用户';
+
+  @override
+  String get maintenanceAppointmentNo => '预约单号';
+
+  @override
+  String get maintenanceAppointmentDate => '预约日期';
+
+  @override
+  String get maintenanceRecords => '维修记录';
+
+  @override
+  String get maintenanceRidingBehavior => '过去30天骑行行为';
+
+  @override
+  String get maintenanceAvgMileage => '日均里程';
+
+  @override
+  String get maintenanceAvgSpeed => '平均速度';
+
+  @override
+  String get maintenanceAvgSwapCount => '平均换电次数';
+
+  @override
+  String get maintenanceCostsTitle => '维修费用';
+
+  @override
+  String get maintenanceTotalLabel => '总计 (\$)';
+
+  @override
+  String get maintenanceTotalHint => '请输入金额（无费用填0）';
+
+  @override
+  String get maintenancePaymentMethods => '支付方式';
+
+  @override
+  String get maintenancePayCash => '现金';
+
+  @override
+  String get maintenancePayOnline => '在线';
+
+  @override
+  String get maintenanceUploadVoucher => '上传凭证';
+
+  @override
+  String get maintenanceMileageNotReached => '车辆里程未达到保养里程';
 
   @override
   String get repairRecordTitle => '维修记录';
 
   @override
-  String get repairRecordAddTitle => '新增维修记录';
+  String get repairRecordAddTitle => '维修登记';
 
   @override
   String get repairRecordDeviceSnLabel => '设备SN';
 
   @override
-  String get repairRecordDeviceSnHint => '输入或扫码设备SN';
+  String get repairRecordDeviceSnHint => '输入设备SN或扫码';
 
   @override
   String get repairRecordFetchDeviceInfo => '获取设备信息';
@@ -465,7 +633,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get repairRecordDeviceInfoTitle => '设备信息';
 
   @override
-  String get repairRecordDeviceInfoEmpty => '暂无设备信息';
+  String get repairRecordDeviceInfoEmpty => '暂无设备参数信息';
 
   @override
   String get repairRecordProjectLabel => '维修项目';
@@ -474,19 +642,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get repairRecordProjectHint => '请选择维修项目';
 
   @override
+  String get repairRecordSelectProject => '选择维修项目';
+
+  @override
   String get repairRecordResultLabel => '维修结果';
 
   @override
   String get repairRecordResultHint => '请选择维修结果';
 
   @override
-  String get repairRecordRemarkLabel => '维修备注';
+  String get repairRecordSelectResult => '选择维修结果';
 
   @override
-  String get repairRecordRemarkHint => '填写维修备注';
+  String get repairRecordRemarkLabel => '备注';
 
   @override
-  String get repairRecordSubmit => '提交';
+  String get repairRecordRemarkHint => '输入备注内容';
+
+  @override
+  String get repairRecordSubmit => '确认';
 
   @override
   String get repairRecordSubmitSuccess => '提交成功';
@@ -498,10 +672,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get repairRecordDeviceSpecLabel => '规格';
 
   @override
-  String get repairRecordDeviceCardNumLabel => '卡号';
+  String get repairRecordDeviceCardNumLabel => '绑定用户ID';
 
   @override
   String get repairRecordDeviceNameLabel => '名称';
+
+  @override
+  String get repairRecordDevicePlateNumber => '车牌号';
+
+  @override
+  String get repairRecordDeviceEntryTime => '入库时间';
+
+  @override
+  String get repairRecordBound => '已绑定';
+
+  @override
+  String get repairRecordUnbound => '未绑定';
+
+  @override
+  String get repairRecordCancel => '取消';
 
   @override
   String get repairRecordSnHint => '输入车辆SN';
@@ -513,13 +702,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get afterSaleBindTitle => '售后绑定';
 
   @override
-  String get afterSaleBindUserSectionTitle => '用户信息';
+  String get afterSaleBindUserSectionTitle => '用户ID';
 
   @override
-  String get afterSaleBindCardNumLabel => '用户卡号';
+  String get afterSaleBindCardNumLabel => '用户ID';
 
   @override
-  String get afterSaleBindCardNumHint => '请输入用户卡号';
+  String get afterSaleBindCardNumHint => '输入用户ID或扫码';
 
   @override
   String get afterSaleBindUserInfoTitle => '用户详情';
@@ -528,25 +717,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String get afterSaleBindUserInfoEmpty => '暂无用户信息';
 
   @override
-  String get afterSaleBindSelectableOrders => '可绑定订单';
+  String get afterSaleBindSelectableOrders => '售后订单';
 
   @override
-  String get afterSaleBindNoOrders => '暂无可绑定订单';
+  String get afterSaleBindNoOrders => '选择售后订单进行绑定';
 
   @override
-  String get afterSaleBindDeviceSectionTitle => '设备信息';
+  String get afterSaleBindSelectOrder => '选择售后订单';
 
   @override
-  String get afterSaleBindDeviceSnLabel => '设备 SN';
+  String get afterSaleBindReselect => '重新选择';
 
   @override
-  String get afterSaleBindDeviceSnHint => '请输入设备 SN 或扫码';
+  String get afterSaleBindOrderNo => '订单号';
+
+  @override
+  String get afterSaleBindOrderType => '订单类型';
+
+  @override
+  String get afterSaleBindOrderStatus => '订单状态';
+
+  @override
+  String get afterSaleBindApplicableDevices => '适用设备';
+
+  @override
+  String get afterSaleBindDeviceSectionTitle => '设备SN';
+
+  @override
+  String get afterSaleBindDeviceSnLabel => '设备SN';
+
+  @override
+  String get afterSaleBindDeviceSnHint => '输入设备SN或扫码';
 
   @override
   String get afterSaleBindDeviceInfoTitle => '设备详情';
 
   @override
-  String get afterSaleBindDeviceInfoEmpty => '暂无设备信息';
+  String get afterSaleBindDeviceInfoEmpty => '暂无设备参数信息';
 
   @override
   String get afterSaleBindConfirm => '确认';
@@ -588,19 +795,46 @@ class AppLocalizationsZh extends AppLocalizations {
   String get afterSaleBindOrderStatusPaid => '已支付';
 
   @override
-  String get afterSaleBindOrderStatusInstallment => '分期中';
+  String get afterSaleBindOrderStatusInstallment => '进行中';
 
   @override
   String get afterSaleBindOrderStatusLease => '租赁';
 
   @override
+  String get afterSaleBindVin => 'VIN';
+
+  @override
+  String get afterSaleBindPlateNumber => '车牌号';
+
+  @override
+  String get afterSaleBindSoc => 'SOC';
+
+  @override
+  String get afterSaleBindSoh => 'SOH';
+
+  @override
+  String get afterSaleBindCycle => '循环次数';
+
+  @override
+  String get afterSaleBindCancel => '取消';
+
+  @override
+  String get afterSaleBindUnableToSubmit => '无法提交';
+
+  @override
+  String get afterSaleBindDeviceMismatch => '设备型号与订单中使用的设备型号不匹配，请修改后重试';
+
+  @override
+  String get afterSaleBindOk => '确定';
+
+  @override
   String get unbindDeviceTitle => '设备解绑';
 
   @override
-  String get unbindDeviceUserIdLabel => '卡号';
+  String get unbindDeviceUserIdLabel => '用户ID';
 
   @override
-  String get unbindDeviceUserIdHint => '输入卡号或扫码';
+  String get unbindDeviceUserIdHint => '输入用户ID或扫码';
 
   @override
   String get unbindDeviceDeviceSnLabel => '设备SN';
@@ -612,25 +846,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get unbindDeviceCheckRemarkLabel => '检查情况';
 
   @override
-  String get unbindDeviceCheckRemarkHint => '输入检查情况';
+  String get unbindDeviceCheckRemarkHint => '输入设备状态';
 
   @override
-  String get unbindDeviceReasonTitle => '解绑原因';
+  String get unbindDeviceReasonTitle => '解绑原因/备注';
 
   @override
-  String get unbindDeviceReasonHint => '选择或填写原因';
+  String get unbindDeviceReasonHint => '输入解绑原因/备注';
 
   @override
-  String get unbindDeviceReasonInputHint => '填写解绑原因';
+  String get unbindDeviceReasonInputHint => '输入解绑原因/备注';
 
   @override
-  String get unbindDeviceReason1 => '设备故障';
+  String get unbindDeviceCommonReasons => '常用原因';
 
   @override
-  String get unbindDeviceReason2 => '用户申请解绑';
+  String get unbindDeviceReason1 => '用户注销,设备正常';
+
+  @override
+  String get unbindDeviceReason2 => '设备故障';
 
   @override
   String get unbindDeviceReason3 => '其他';
+
+  @override
+  String get unbindDeviceConfirmButton => '确认';
 
   @override
   String get unbindDeviceUnfinishedTitle => '存在未完成维保单';
@@ -898,6 +1138,138 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get warehouseTransportWithdrawLabel => '撤回';
+
+  @override
+  String get deviceIssueTitle => '设备发出';
+
+  @override
+  String get deviceReceiveTitle => '设备接收';
+
+  @override
+  String get deviceIssueSearchHint => '输入出入库单号搜索';
+
+  @override
+  String get deviceIssueEmpty => '暂无设备发出信息';
+
+  @override
+  String get deviceIssueCreate => '创建';
+
+  @override
+  String get deviceIssueStatusInTransit => '运输中';
+
+  @override
+  String get deviceIssueStatusReceiveAll => '全部接收';
+
+  @override
+  String get deviceIssueStatusPartial => '部分接收';
+
+  @override
+  String get deviceIssueStatusWithdrawn => '全部撤回';
+
+  @override
+  String get deviceIssueQuantity => '数量';
+
+  @override
+  String get deviceIssueReceived => '已接收';
+
+  @override
+  String get deviceIssueWithdrawn => '已撤回';
+
+  @override
+  String get deviceIssueSearchEmpty => '暂未搜索到相关信息';
+
+  @override
+  String get deviceIssueWarehouse => '发出仓库';
+
+  @override
+  String get deviceReceiveWarehouse => '接收仓库';
+
+  @override
+  String get deviceIssuePleaseSelectWarehouse => '请选择仓库';
+
+  @override
+  String get deviceIssueTrackingNumber => '物流单号';
+
+  @override
+  String get deviceIssuePleaseEnterTracking => '请输入物流单号';
+
+  @override
+  String get deviceIssueEnterTracking => '输入物流单号';
+
+  @override
+  String get deviceIssueSelectBattery => '选择电池';
+
+  @override
+  String get deviceIssueSelectVehicle => '选择车辆';
+
+  @override
+  String get deviceIssueSelectStation => '选择换电柜';
+
+  @override
+  String get deviceIssueSelectDevice => '选择设备';
+
+  @override
+  String get deviceIssueEnterSn => '输入设备SN';
+
+  @override
+  String get deviceIssueScanQrCode => '扫描二维码';
+
+  @override
+  String get deviceIssueTotalIssued => '发出总数';
+
+  @override
+  String get deviceIssueCreateBattery => '创建电池发出';
+
+  @override
+  String get deviceIssueCreateVehicle => '创建车辆发出';
+
+  @override
+  String get deviceIssueCreateStation => '创建换电柜发出';
+
+  @override
+  String get deviceIssueChooseWarehouse => '选择仓库';
+
+  @override
+  String get deviceIssueSearchWarehouse => '输入仓库名称搜索';
+
+  @override
+  String get deviceIssueAllCity => '全部城市';
+
+  @override
+  String get deviceIssueEnterDeviceSn => '输入设备SN';
+
+  @override
+  String get deviceIssueDetailTitle => '发出详情';
+
+  @override
+  String get deviceReceiveDetailTitle => '接收详情';
+
+  @override
+  String get deviceReceiveSearchHint => '输入出入库单号搜索';
+
+  @override
+  String get deviceReceiveEmpty => '暂无设备接收信息';
+
+  @override
+  String get deviceReceiveScanToReceive => '扫码接收';
+
+  @override
+  String get deviceReceiveManualInput => '手动输入设备SN';
+
+  @override
+  String get deviceReceiveSuccess => '接收成功';
+
+  @override
+  String get deviceReceiveNotBelong => '设备不属于该单据';
+
+  @override
+  String get deviceReceiveAction => '接收';
+
+  @override
+  String get deviceReceiveWithdraw => '撤回';
+
+  @override
+  String get searchHistory => '搜索历史';
 
   @override
   String get scanPageTitle => '扫码';
@@ -1560,13 +1932,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roadsideProcessTime => '处理时间';
 
   @override
-  String get roadsideDealTitle => '订单处理';
+  String get roadsideDealTitle => '处理结果';
 
   @override
   String get roadsideDealResultLabel => '处理结果';
 
   @override
-  String get roadsideDealDescLabel => '处理说明';
+  String get roadsideDealDescLabel => '描述';
+
+  @override
+  String get roadsideDealDescHint => '请输入描述...';
 
   @override
   String get roadsideUploadLabel => '上传图片';
@@ -1578,6 +1953,57 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roadsideDealFailed => '提交失败';
 
   @override
+  String get roadsideRescueResult => '救援结果';
+
+  @override
+  String get roadsidePhotoLabel => '照片';
+
+  @override
+  String get roadsideSubmitButton => '提交';
+
+  @override
+  String get roadsideDescRequired => '请输入描述';
+
+  @override
+  String get roadsideDescriptionTitle => '问题描述';
+
+  @override
+  String get roadsideFounderLabel => '创建人';
+
+  @override
+  String get roadsideCreationTimeLabel => '创建时间';
+
+  @override
+  String get roadsideReportSourceLabel => '报告来源';
+
+  @override
+  String get roadsideSourceApp => 'App';
+
+  @override
+  String get roadsideSourceWeb => '网页';
+
+  @override
+  String get roadsideProcessingResultTitle => '处理结果';
+
+  @override
+  String get roadsideCostsTitle => '救援费用';
+
+  @override
+  String get roadsideTotalLabel => '总计';
+
+  @override
+  String get roadsidePaymentMethodLabel => '付款方式';
+
+  @override
+  String get roadsideUploadVoucherLabel => '上传凭证';
+
+  @override
+  String get roadsideNotPayingYet => '暂不付款';
+
+  @override
+  String get roadsideConfirmPayment => '确认付款';
+
+  @override
   String get offlineRegisterTitle => '线下用户注册';
 
   @override
@@ -1587,7 +2013,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get offlineRegisterPhone => '手机号';
 
   @override
+  String get offlineRegisterPhoneHint => '请输入手机号';
+
+  @override
   String get offlineRegisterSmsCode => '验证码';
+
+  @override
+  String get offlineRegisterCodeHint => '请输入验证码';
 
   @override
   String get offlineRegisterSendCode => '发送验证码';
@@ -1596,25 +2028,49 @@ class AppLocalizationsZh extends AppLocalizations {
   String get offlineRegisterPassword => '密码';
 
   @override
+  String get offlineRegisterPasswordHint => '请输入密码';
+
+  @override
   String get offlineRegisterFirstName => '名';
+
+  @override
+  String get offlineRegisterFirstNameHint => '请输入名';
 
   @override
   String get offlineRegisterLastName => '姓';
 
   @override
+  String get offlineRegisterLastNameHint => '请输入姓';
+
+  @override
   String get offlineRegisterUsername => '账号';
+
+  @override
+  String get offlineRegisterUsernameHint => '用于登录';
 
   @override
   String get offlineRegisterBirthday => '生日';
 
   @override
+  String get offlineRegisterBirthdayHint => '请选择生日';
+
+  @override
   String get offlineRegisterEmail => '邮箱';
+
+  @override
+  String get offlineRegisterEmailHint => '请输入邮箱';
 
   @override
   String get offlineRegisterReferrer => '推荐人';
 
   @override
-  String get offlineRegisterSubmit => '注册';
+  String get offlineRegisterReferrerHint => '请输入推荐人ID或扫码';
+
+  @override
+  String get offlineRegisterSelectCountry => '选择国家/地区';
+
+  @override
+  String get offlineRegisterSubmit => '提交';
 
   @override
   String get offlineRegisterPhoneRequired => '请输入手机号';
@@ -1743,6 +2199,111 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sellBindPlanPeriod => '期数';
 
   @override
+  String get sellBindPackage => '套餐';
+
+  @override
+  String get sellBindPackageHint => '搜索套餐';
+
+  @override
+  String get sellBindNoPackageInfo => '暂无套餐信息';
+
+  @override
+  String get sellBindDeviceSnHint => '输入设备SN或扫码';
+
+  @override
+  String get sellBindNoDeviceInfo => '暂无设备信息';
+
+  @override
+  String get sellBindChoosePackage => '选择套餐';
+
+  @override
+  String get sellBindPackageSearchHint => '搜索';
+
+  @override
+  String get sellBindSelectApplicant => '选择申请人';
+
+  @override
+  String get sellBindUserIdHint => '输入用户ID或扫码';
+
+  @override
+  String get sellBindAccount => '账号';
+
+  @override
+  String get sellBindNid => '身份证号';
+
+  @override
+  String get sellBindUploadNidPhoto => '上传身份证照片';
+
+  @override
+  String get sellBindNidPhotoHint => '请上传身份证正反面照片';
+
+  @override
+  String get sellBindPersonalPhoto => '个人照片';
+
+  @override
+  String get sellBindSuccessTitle => '提交成功';
+
+  @override
+  String get sellBindSuccessMessageOnline => '套餐绑定成功。\n请提醒用户在App中支付套餐费用。\n支付完成后套餐生效。';
+
+  @override
+  String get sellBindSuccessMessageCash => '套餐绑定成功。\n请及时将合同凭证提交至后台。';
+
+  @override
+  String get sellBindDocumentNumber => '单据编号';
+
+  @override
+  String get sellBindCopied => '已复制';
+
+  @override
+  String get sellBindReturnWorkbench => '返回工作台';
+
+  @override
+  String get sellBindUnableSubmit => '无法提交';
+
+  @override
+  String get sellBindModelMismatch => '型号不匹配';
+
+  @override
+  String get sellBindSelectPayment => '选择支付';
+
+  @override
+  String get sellBindPaymentMethods => '支付方式';
+
+  @override
+  String get sellBindPaymentPeriod => '支付期限';
+
+  @override
+  String get sellBindFinancial => '财务信息';
+
+  @override
+  String get sellBindPrincipal => '本金';
+
+  @override
+  String get sellBindTotalInterest => '利息总额';
+
+  @override
+  String get sellBindTotal => '总计';
+
+  @override
+  String get sellBindPeriods => '期';
+
+  @override
+  String get sellBindAnnualRate => '年利率';
+
+  @override
+  String get sellBindNext => '下一步';
+
+  @override
+  String get sellBindSelectPeriod => '选择期数';
+
+  @override
+  String get sellBindEmailHint => '请输入邮箱';
+
+  @override
+  String get sellBindAddressHint => '请输入地址';
+
+  @override
   String get rentBindTitle => '租赁绑定';
 
   @override
@@ -1752,7 +2313,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rentBindDeviceSn => '设备SN';
 
   @override
+  String get rentBindDeviceSnHint => '输入设备SN或扫描二维码';
+
+  @override
   String get rentBindDeviceInfo => '设备详情';
+
+  @override
+  String get rentBindNoDeviceInfo => '暂无设备参数信息';
 
   @override
   String get rentBindUserSection => '用户信息';
@@ -1800,6 +2367,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rentBindPayOnline => '线上';
 
   @override
+  String get rentBindPayFull => '全款';
+
+  @override
   String get rentBindSubmit => '提交';
 
   @override
@@ -1816,6 +2386,90 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get rentBindPackAmount => '金额';
+
+  @override
+  String get rentBindPackage => '套餐';
+
+  @override
+  String get rentBindPackageHint => '选择租赁套餐';
+
+  @override
+  String get rentBindNoPackageInfo => '暂无套餐信息';
+
+  @override
+  String get rentBindSelectPackage => '选择套餐';
+
+  @override
+  String get rentBindServicePeriod => '服务周期';
+
+  @override
+  String get rentBindDeposit => '押金';
+
+  @override
+  String get rentBindReselect => '重新选择';
+
+  @override
+  String get rentBindSelectApplicant => '选择申请人';
+
+  @override
+  String get rentBindUserIdHint => '输入用户ID或扫描二维码';
+
+  @override
+  String get rentBindAccount => '账号';
+
+  @override
+  String get rentBindNid => '身份证号';
+
+  @override
+  String get rentBindUploadNidPhoto => '上传身份证照片';
+
+  @override
+  String get rentBindNidPhotoHint => '身份证正反面照片';
+
+  @override
+  String get rentBindPersonalPhoto => '个人照片';
+
+  @override
+  String get rentBindEmailHint => '请填写邮箱地址';
+
+  @override
+  String get rentBindAddressHint => '请填写地址';
+
+  @override
+  String get rentBindSelectPayment => '选择支付';
+
+  @override
+  String get rentBindPaymentMethods => '支付方式';
+
+  @override
+  String get rentBindPaymentPeriod => '支付期限';
+
+  @override
+  String get rentBindLeaseAmount => '租赁金额';
+
+  @override
+  String get rentBindTotal => '总计';
+
+  @override
+  String get rentBindConfirm => '确认';
+
+  @override
+  String get rentBindSuccessTitle => '提交成功';
+
+  @override
+  String get rentBindSuccessMessageOnline => '请在用户App中完成支付，支付时限';
+
+  @override
+  String get rentBindSuccessMessageCash => '请进入订单记录并在时限内提交合同凭证';
+
+  @override
+  String get rentBindDocumentNumber => '单据编号';
+
+  @override
+  String get rentBindCopied => '已复制';
+
+  @override
+  String get rentBindReturnWorkbench => '返回工作台';
 
   @override
   String get swapBindTitle => '换电绑定';
@@ -1866,6 +2520,87 @@ class AppLocalizationsZh extends AppLocalizations {
   String get swapBindPackAmount => '金额';
 
   @override
+  String get swapBindUserId => '用户ID';
+
+  @override
+  String get swapBindUserIdHint => '输入用户ID或扫描二维码';
+
+  @override
+  String get swapBindUserEmpty => '请输入用户ID进行搜索';
+
+  @override
+  String get swapBindBindVehicle => '绑定车辆';
+
+  @override
+  String get swapBindSelectVehicle => '选择车辆';
+
+  @override
+  String get swapBindSelectVehicleTitle => '选择车辆';
+
+  @override
+  String get swapBindBindBattery => '绑定电池';
+
+  @override
+  String get swapBindSelectBattery => '选择电池';
+
+  @override
+  String get swapBindSelectBatteryTitle => '选择电池';
+
+  @override
+  String get swapBindPackage => '套餐';
+
+  @override
+  String get swapBindSelectPackage => '选择套餐';
+
+  @override
+  String get swapBindSelectPackageTitle => '选择套餐';
+
+  @override
+  String get swapBindReselect => '重新选择';
+
+  @override
+  String get swapBindAvailableBattery => '可用电池';
+
+  @override
+  String get swapBindAvailableVehicles => '可用车辆';
+
+  @override
+  String get swapBindServicePeriod => '服务周期';
+
+  @override
+  String get swapBindSwapTime => '换电次数';
+
+  @override
+  String get swapBindSelectPayment => '选择支付方式';
+
+  @override
+  String get swapBindPaymentMethods => '支付方式';
+
+  @override
+  String get swapBindPaymentPeriod => '支付周期';
+
+  @override
+  String get swapBindRemainingDays => '剩余租赁天数';
+
+  @override
+  String get swapBindSuccessTitle => '提交成功';
+
+  @override
+  String get swapBindSuccessOnlineHint => '请在以下时间内前往用户App完成支付';
+
+  @override
+  String get swapBindSuccessCashHint => '请在以下时间内进入订单记录并提交合同凭证';
+
+  @override
+  String get swapBindDocumentNumber => '单据编号';
+
+  @override
+  String get swapBindCopied => '已复制';
+
+  @override
+  String get swapBindReturnWorkbench => '返回工作台';
+
+  @override
   String get depositRefundTitle => '押金退还';
 
   @override
@@ -1875,10 +2610,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get depositRefundUserInfo => '用户信息';
 
   @override
-  String get depositRefundOrderSection => '押金订单';
+  String get depositRefundOrderSection => '押金退还订单';
 
   @override
-  String get depositRefundVoucher => '凭证';
+  String get depositRefundVoucher => '押金凭证';
 
   @override
   String get depositRefundVoucherConfirmed => '凭证已核对';
@@ -1911,7 +2646,43 @@ class AppLocalizationsZh extends AppLocalizations {
   String get depositRefundOrderEmpty => '暂无订单';
 
   @override
-  String get depositRefundAmount => '金额';
+  String get depositRefundAmount => '押金退还金额';
+
+  @override
+  String get depositRefundUserId => '用户ID';
+
+  @override
+  String get depositRefundUserIdHint => '输入用户ID或扫描二维码';
+
+  @override
+  String get depositRefundSelectOrder => '选择退款订单';
+
+  @override
+  String get depositRefundSelectOrderTitle => '选择押金退款订单';
+
+  @override
+  String get depositRefundReselect => '重新选择';
+
+  @override
+  String get depositRefundUnbindingTime => '解绑时间';
+
+  @override
+  String get depositRefundDeposit => '押金';
+
+  @override
+  String get depositRefundRecycled => '已回收';
+
+  @override
+  String get depositRefundViewVoucher => '查看凭证';
+
+  @override
+  String get depositRefundRemarkHint => '请输入备注';
+
+  @override
+  String get depositRefundSuccessTitle => '押金退还成功！';
+
+  @override
+  String get depositRefundReturnWorkbench => '返回工作台';
 
   @override
   String get installmentPayTitle => '分期缴纳';
@@ -2190,7 +2961,67 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetUnshelveFailed => '提交失败';
 
   @override
-  String get cabinetAuthTitle => '柜机授权';
+  String get cabinetAuthTitle => '柜机授权运维';
+
+  @override
+  String get cabinetAuthStationLabel => '柜机';
+
+  @override
+  String get cabinetAuthSelectStation => '选择柜机';
+
+  @override
+  String get cabinetAuthSelectStationTitle => '选择柜机';
+
+  @override
+  String get cabinetAuthStationSearchHint => '输入柜机SN或扫描二维码';
+
+  @override
+  String get cabinetAuthSelectStationRequired => '请选择柜机';
+
+  @override
+  String get cabinetAuthPersonLabel => '授权人员';
+
+  @override
+  String get cabinetAuthSelectPerson => '选择授权人员';
+
+  @override
+  String get cabinetAuthSelectPersonTitle => '选择授权人员';
+
+  @override
+  String get cabinetAuthPersonSearchHint => '输入用户名或手机号';
+
+  @override
+  String get cabinetAuthSelectPersonRequired => '请选择授权人员';
+
+  @override
+  String get cabinetAuthTimeLabel => '授权时间';
+
+  @override
+  String get cabinetAuthConfirmButton => '确认授权';
+
+  @override
+  String get cabinetAuthRecordButton => '授权记录';
+
+  @override
+  String get cabinetAuthRecordTitle => '授权记录';
+
+  @override
+  String get cabinetAuthAllPort => '全部端口';
+
+  @override
+  String get cabinetAuthFaultPort => '故障端口';
+
+  @override
+  String get cabinetAuthDisablePort => '禁用端口';
+
+  @override
+  String get cabinetAuthSwapStandard => '换电标准';
+
+  @override
+  String get cabinetAuthWorkAccount => '运维工作账号';
+
+  @override
+  String get cabinetAuthValidityPeriod => '有效期';
 
   @override
   String get cabinetAuthSn => '电柜SN';
@@ -2256,7 +3087,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetOperateTitle => '柜机运维';
 
   @override
-  String get cabinetOperateAuthorization => '柜机授权';
+  String get cabinetOperateStationOperation => '柜机运维';
+
+  @override
+  String get cabinetOperateBluetoothAuth => '蓝牙钥匙授权';
+
+  @override
+  String get cabinetOperateAuthorization => '柜机授权运维';
+
+  @override
+  String get cabinetOperateOfflineOM => '离线柜机运维';
 
   @override
   String get cabinetOperateOfflineDetail => '离线详情';
@@ -2445,7 +3285,79 @@ class AppLocalizationsZh extends AppLocalizations {
   String get addressPickerSearchHint => '搜索地址';
 
   @override
-  String get bluetoothAuthTitle => '蓝牙授权';
+  String get bluetoothAuthTitle => '授权';
+
+  @override
+  String get bluetoothAuthFindTitle => '查找蓝牙钥匙';
+
+  @override
+  String get bluetoothAuthBluetoothLabel => '蓝牙';
+
+  @override
+  String get bluetoothAuthAvailableDevices => '可用设备';
+
+  @override
+  String get bluetoothAuthScanning => '扫描中...';
+
+  @override
+  String get bluetoothAuthNoDevices => '未发现设备';
+
+  @override
+  String get bluetoothAuthConnected => '蓝牙钥匙已连接';
+
+  @override
+  String get bluetoothAuthAuthorizedStation => '授权柜机';
+
+  @override
+  String get bluetoothAuthSnHint => '输入柜机SN或扫描二维码';
+
+  @override
+  String get bluetoothAuthSnRequired => '请输入柜机SN';
+
+  @override
+  String get bluetoothAuthOpenButton => '开启授权';
+
+  @override
+  String get bluetoothAuthClearButton => '清除授权';
+
+  @override
+  String get bluetoothAuthConfirmOpen => '授权后24小时内可以开柜门，确定授权吗？';
+
+  @override
+  String get bluetoothAuthConfirmClear => '确定清除蓝牙钥匙授权吗？';
+
+  @override
+  String get bluetoothAuthCancel => '取消';
+
+  @override
+  String get bluetoothAuthConfirm => '确认';
+
+  @override
+  String get bluetoothAuthClearSuccess => '授权已清除';
+
+  @override
+  String get bluetoothAuthClearFailed => '清除授权失败';
+
+  @override
+  String get bluetoothAuthTipsTitle => '提示';
+
+  @override
+  String get bluetoothAuthTip1 => '请确保蓝牙钥匙已开启并连接，钥匙显示屏上有蓝牙标志；';
+
+  @override
+  String get bluetoothAuthTip2 => '添加新授权前，建议先清除一次授权，清除不需要的记录；';
+
+  @override
+  String get bluetoothAuthTip3 => '授权成功后，可以关闭手机蓝牙；';
+
+  @override
+  String get bluetoothAuthTip4 => '按下钥匙蓝牙按钮，指示灯进入闪烁状态以解锁；';
+
+  @override
+  String get bluetoothAuthTip5 => '按下钥匙蓝牙按钮，指示灯进入闪烁状态以解锁；';
+
+  @override
+  String get bluetoothAuthTip6 => '授权有效期默认为授权成功后24小时；';
 
   @override
   String get bluetoothAuthSn => '柜机SN';

@@ -213,6 +213,123 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userSearchHistoryClear => 'Clear';
 
   @override
+  String get userFilterAll => 'All';
+
+  @override
+  String get userFilterNormal => 'Normal';
+
+  @override
+  String get userFilterEnded => 'Ended';
+
+  @override
+  String get userFilterOverdue => 'Overdue';
+
+  @override
+  String get userFilterDishonest => 'Dishonest';
+
+  @override
+  String get userStatOrder => 'Order';
+
+  @override
+  String get userStatConsumption => 'Total Consumption';
+
+  @override
+  String get userStatAssets => 'Assets';
+
+  @override
+  String get userTipNormal => 'User account is in normal status';
+
+  @override
+  String get userTipEnded => 'User services have ended';
+
+  @override
+  String get userTipOverdue => 'User has overdue payments pending';
+
+  @override
+  String get userTipDishonest => 'User is flagged as dishonest';
+
+  @override
+  String get userTabBasicInfo => 'Basic Info';
+
+  @override
+  String get userTabOrderRecords => 'Order Records';
+
+  @override
+  String get userTabPaymentRecords => 'Payment Records';
+
+  @override
+  String get userTabSwapRecords => 'Swap Records';
+
+  @override
+  String get userOrderTabSale => 'Sales Order';
+
+  @override
+  String get userOrderTabRent => 'Rental Order';
+
+  @override
+  String get userOrderTabSwap => 'Swap Order';
+
+  @override
+  String get userBasicVehicle => 'Vehicle';
+
+  @override
+  String get userBasicBattery => 'Battery';
+
+  @override
+  String get userBasicRegisterTime => 'Registration Time';
+
+  @override
+  String get userBasicUserType => 'User Type';
+
+  @override
+  String get userBasicBirthday => 'Birthday';
+
+  @override
+  String get userBasicPhone => 'Phone';
+
+  @override
+  String get userBasicEmail => 'Email';
+
+  @override
+  String get userBasicPhotos => 'Photos';
+
+  @override
+  String get userBasicRemark => 'Remark';
+
+  @override
+  String get userTypeNormal => 'Normal';
+
+  @override
+  String get userTypeSenior => 'Senior';
+
+  @override
+  String get userTypeVip => 'VIP';
+
+  @override
+  String get userPaymentType => 'Payment Type';
+
+  @override
+  String get userPaymentAmount => 'Amount';
+
+  @override
+  String get userPaymentTime => 'Payment Time';
+
+  @override
+  String get userSwapRecord => 'Swap Record';
+
+  @override
+  String get userSwapTime => 'Swap Time';
+
+  @override
+  String get userSwapOldBattery => 'Old Battery';
+
+  @override
+  String get userSwapNewBattery => 'New Battery';
+
+  @override
+  String get userDetailCall => 'Call';
+
+  @override
   String get userDetailTitle => 'User Detail';
 
   @override
@@ -399,13 +516,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderVoucherPickCancel => 'Cancel';
 
   @override
-  String get maintenanceBookTitle => 'Maintenance Booking';
+  String get maintenanceBookTitle => 'Schedule Maintenance';
 
   @override
-  String get maintenanceSnLabel => 'Vehicle SN';
+  String get maintenanceSnLabel => 'Vehicle SN / VIN';
 
   @override
-  String get maintenanceSnHint => 'Enter or scan vehicle SN';
+  String get maintenanceSnHint => 'Enter vehicle sn / vin or scan QR code';
 
   @override
   String get maintenanceFetchInfo => 'Fetch Info';
@@ -414,16 +531,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get maintenanceVehicleInfo => 'Vehicle Info';
 
   @override
-  String get maintenanceEmptyInfo => 'No maintenance info';
+  String get maintenanceEmptyInfo => 'No vehicle parameter info';
 
   @override
-  String get maintenanceNoteLabel => 'Maintenance Notes';
+  String get maintenanceNoteLabel => 'Maintenance Log';
 
   @override
-  String get maintenanceNoteHint => 'Enter notes';
+  String get maintenanceNoteHint => 'Enter maintenance log';
 
   @override
-  String get maintenanceSubmit => 'Submit';
+  String get maintenanceSubmit => 'Confirm';
 
   @override
   String get maintenanceVehicleSn => 'SN';
@@ -444,19 +561,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String get maintenanceSuccessTitle => 'Maintenance Success';
 
   @override
-  String get maintenanceSuccessBack => 'Back';
+  String get maintenanceSuccessMessage => 'Maintenance Success!';
+
+  @override
+  String get maintenanceSuccessBack => 'Return to Workbench';
+
+  @override
+  String get maintenanceBindUser => 'Bind User';
+
+  @override
+  String get maintenanceAppointmentNo => 'Appointment No';
+
+  @override
+  String get maintenanceAppointmentDate => 'Appointment Date';
+
+  @override
+  String get maintenanceRecords => 'Maintenance Records';
+
+  @override
+  String get maintenanceRidingBehavior => 'Riding behavior over the past 30 day';
+
+  @override
+  String get maintenanceAvgMileage => 'AVG Mileage /daily';
+
+  @override
+  String get maintenanceAvgSpeed => 'AVG Speed';
+
+  @override
+  String get maintenanceAvgSwapCount => 'AVG Swap Count';
+
+  @override
+  String get maintenanceCostsTitle => 'Maintenance Costs';
+
+  @override
+  String get maintenanceTotalLabel => 'Total (\$)';
+
+  @override
+  String get maintenanceTotalHint => 'Please enter amount  (No fee, fill in 0)';
+
+  @override
+  String get maintenancePaymentMethods => 'Payment Methods';
+
+  @override
+  String get maintenancePayCash => 'Cash';
+
+  @override
+  String get maintenancePayOnline => 'Online';
+
+  @override
+  String get maintenanceUploadVoucher => 'Upload Voucher';
+
+  @override
+  String get maintenanceMileageNotReached => 'The vehicle mileage has not reached the maintenance mileage';
 
   @override
   String get repairRecordTitle => 'Repair Records';
 
   @override
-  String get repairRecordAddTitle => 'Add Repair Record';
+  String get repairRecordAddTitle => 'Repair Registration';
 
   @override
   String get repairRecordDeviceSnLabel => 'Device SN';
 
   @override
-  String get repairRecordDeviceSnHint => 'Enter or scan device SN';
+  String get repairRecordDeviceSnHint => 'Enter device SN or scan  QR code';
 
   @override
   String get repairRecordFetchDeviceInfo => 'Fetch device info';
@@ -465,28 +633,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repairRecordDeviceInfoTitle => 'Device Info';
 
   @override
-  String get repairRecordDeviceInfoEmpty => 'No device info';
+  String get repairRecordDeviceInfoEmpty => 'No device parameter info';
 
   @override
-  String get repairRecordProjectLabel => 'Repair item';
+  String get repairRecordProjectLabel => 'Repair Project';
 
   @override
-  String get repairRecordProjectHint => 'Select repair item';
+  String get repairRecordProjectHint => 'Please select a repair project';
 
   @override
-  String get repairRecordResultLabel => 'Repair result';
+  String get repairRecordSelectProject => 'Select Repair Project';
 
   @override
-  String get repairRecordResultHint => 'Select repair result';
+  String get repairRecordResultLabel => 'Repair Results';
+
+  @override
+  String get repairRecordResultHint => 'Please select a repair  results';
+
+  @override
+  String get repairRecordSelectResult => 'Select Repair Result';
 
   @override
   String get repairRecordRemarkLabel => 'Remark';
 
   @override
-  String get repairRecordRemarkHint => 'Enter remark';
+  String get repairRecordRemarkHint => 'Enter rmark content';
 
   @override
-  String get repairRecordSubmit => 'Submit';
+  String get repairRecordSubmit => 'Confirm';
 
   @override
   String get repairRecordSubmitSuccess => 'Submitted';
@@ -495,13 +669,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repairRecordDeviceModelLabel => 'Model';
 
   @override
-  String get repairRecordDeviceSpecLabel => 'Spec';
+  String get repairRecordDeviceSpecLabel => 'Specification';
 
   @override
-  String get repairRecordDeviceCardNumLabel => 'Card number';
+  String get repairRecordDeviceCardNumLabel => 'Binding User ID';
 
   @override
   String get repairRecordDeviceNameLabel => 'Name';
+
+  @override
+  String get repairRecordDevicePlateNumber => 'Plate Number';
+
+  @override
+  String get repairRecordDeviceEntryTime => 'Entry Time';
+
+  @override
+  String get repairRecordBound => 'Bound';
+
+  @override
+  String get repairRecordUnbound => 'Unbound';
+
+  @override
+  String get repairRecordCancel => 'Cancel';
 
   @override
   String get repairRecordSnHint => 'Enter vehicle SN';
@@ -510,43 +699,61 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repairRecordEmpty => 'No repair records';
 
   @override
-  String get afterSaleBindTitle => 'After-sale Binding';
+  String get afterSaleBindTitle => 'After-sales Binding';
 
   @override
-  String get afterSaleBindUserSectionTitle => 'User Information';
+  String get afterSaleBindUserSectionTitle => 'User ID';
 
   @override
-  String get afterSaleBindCardNumLabel => 'Card Number';
+  String get afterSaleBindCardNumLabel => 'User ID';
 
   @override
-  String get afterSaleBindCardNumHint => 'Enter card number';
+  String get afterSaleBindCardNumHint => 'Enter User ID or scan QR code';
 
   @override
   String get afterSaleBindUserInfoTitle => 'User Details';
 
   @override
-  String get afterSaleBindUserInfoEmpty => 'No user information';
+  String get afterSaleBindUserInfoEmpty => 'No user info';
 
   @override
-  String get afterSaleBindSelectableOrders => 'Selectable Orders';
+  String get afterSaleBindSelectableOrders => 'After-sales Order';
 
   @override
-  String get afterSaleBindNoOrders => 'No orders available';
+  String get afterSaleBindNoOrders => 'Select after-sales order to bind';
 
   @override
-  String get afterSaleBindDeviceSectionTitle => 'Device Information';
+  String get afterSaleBindSelectOrder => 'Select After-sales Order';
+
+  @override
+  String get afterSaleBindReselect => 'Reselect';
+
+  @override
+  String get afterSaleBindOrderNo => 'Order NO';
+
+  @override
+  String get afterSaleBindOrderType => 'Order type';
+
+  @override
+  String get afterSaleBindOrderStatus => 'Order status';
+
+  @override
+  String get afterSaleBindApplicableDevices => 'Applicable devices';
+
+  @override
+  String get afterSaleBindDeviceSectionTitle => 'Device SN';
 
   @override
   String get afterSaleBindDeviceSnLabel => 'Device SN';
 
   @override
-  String get afterSaleBindDeviceSnHint => 'Enter device SN or scan';
+  String get afterSaleBindDeviceSnHint => 'Enter device sn or scan QR code';
 
   @override
   String get afterSaleBindDeviceInfoTitle => 'Device Details';
 
   @override
-  String get afterSaleBindDeviceInfoEmpty => 'No device information';
+  String get afterSaleBindDeviceInfoEmpty => 'No device parameter info';
 
   @override
   String get afterSaleBindConfirm => 'Confirm';
@@ -588,49 +795,82 @@ class AppLocalizationsEn extends AppLocalizations {
   String get afterSaleBindOrderStatusPaid => 'Paid';
 
   @override
-  String get afterSaleBindOrderStatusInstallment => 'Installment';
+  String get afterSaleBindOrderStatusInstallment => 'In-progress';
 
   @override
-  String get afterSaleBindOrderStatusLease => 'Leasing';
+  String get afterSaleBindOrderStatusLease => 'Lease';
 
   @override
-  String get unbindDeviceTitle => 'Unbind Device';
+  String get afterSaleBindVin => 'VIN';
 
   @override
-  String get unbindDeviceUserIdLabel => 'Card Number';
+  String get afterSaleBindPlateNumber => 'Plate Number';
 
   @override
-  String get unbindDeviceUserIdHint => 'Enter card number or scan';
+  String get afterSaleBindSoc => 'SOC';
+
+  @override
+  String get afterSaleBindSoh => 'SOH';
+
+  @override
+  String get afterSaleBindCycle => 'Cycle';
+
+  @override
+  String get afterSaleBindCancel => 'Cancel';
+
+  @override
+  String get afterSaleBindUnableToSubmit => 'Unable to submit';
+
+  @override
+  String get afterSaleBindDeviceMismatch => 'The device model does not match the device model used in the order, please modify it and try again';
+
+  @override
+  String get afterSaleBindOk => 'OK';
+
+  @override
+  String get unbindDeviceTitle => 'Device Unbinding';
+
+  @override
+  String get unbindDeviceUserIdLabel => 'User ID';
+
+  @override
+  String get unbindDeviceUserIdHint => 'Enter User ID or scan QR code';
 
   @override
   String get unbindDeviceDeviceSnLabel => 'Device SN';
 
   @override
-  String get unbindDeviceDeviceSnHint => 'Enter device SN or scan';
+  String get unbindDeviceDeviceSnHint => 'Enter device SN or scan QR code';
 
   @override
-  String get unbindDeviceCheckRemarkLabel => 'Check Remark';
+  String get unbindDeviceCheckRemarkLabel => 'Check Status';
 
   @override
-  String get unbindDeviceCheckRemarkHint => 'Enter check status';
+  String get unbindDeviceCheckRemarkHint => 'Enter device status';
 
   @override
-  String get unbindDeviceReasonTitle => 'Unbind Reason';
+  String get unbindDeviceReasonTitle => 'Reason for Unbinding / Remarks';
 
   @override
-  String get unbindDeviceReasonHint => 'Select or enter reason';
+  String get unbindDeviceReasonHint => 'Enter Unbinding / Remarks';
 
   @override
-  String get unbindDeviceReasonInputHint => 'Enter unbind reason';
+  String get unbindDeviceReasonInputHint => 'Enter Unbinding / Remarks';
 
   @override
-  String get unbindDeviceReason1 => 'Device malfunction';
+  String get unbindDeviceCommonReasons => 'Common Reasons';
 
   @override
-  String get unbindDeviceReason2 => 'User request';
+  String get unbindDeviceReason1 => 'User logs out, device works fine';
+
+  @override
+  String get unbindDeviceReason2 => 'Equipment failure';
 
   @override
   String get unbindDeviceReason3 => 'Other';
+
+  @override
+  String get unbindDeviceConfirmButton => 'Confirm';
 
   @override
   String get unbindDeviceUnfinishedTitle => 'Unfinished maintenance order';
@@ -898,6 +1138,138 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get warehouseTransportWithdrawLabel => 'Withdraw';
+
+  @override
+  String get deviceIssueTitle => 'Device Issue';
+
+  @override
+  String get deviceReceiveTitle => 'Device Receive';
+
+  @override
+  String get deviceIssueSearchHint => 'Enter the in/out number to search';
+
+  @override
+  String get deviceIssueEmpty => 'No information about device issue';
+
+  @override
+  String get deviceIssueCreate => 'Create';
+
+  @override
+  String get deviceIssueStatusInTransit => 'In transit';
+
+  @override
+  String get deviceIssueStatusReceiveAll => 'Receive all';
+
+  @override
+  String get deviceIssueStatusPartial => 'Partial reception';
+
+  @override
+  String get deviceIssueStatusWithdrawn => 'Withdraw all';
+
+  @override
+  String get deviceIssueQuantity => 'Quantity';
+
+  @override
+  String get deviceIssueReceived => 'Received';
+
+  @override
+  String get deviceIssueWithdrawn => 'Withdrawn';
+
+  @override
+  String get deviceIssueSearchEmpty => 'No relevant information found';
+
+  @override
+  String get deviceIssueWarehouse => 'Issue warehouse';
+
+  @override
+  String get deviceReceiveWarehouse => 'Receiving warehouse';
+
+  @override
+  String get deviceIssuePleaseSelectWarehouse => 'Please select a warehouse';
+
+  @override
+  String get deviceIssueTrackingNumber => 'Tracking number';
+
+  @override
+  String get deviceIssuePleaseEnterTracking => 'Please enter the tracking number';
+
+  @override
+  String get deviceIssueEnterTracking => 'Enter Tracking Number';
+
+  @override
+  String get deviceIssueSelectBattery => 'Select Battery';
+
+  @override
+  String get deviceIssueSelectVehicle => 'Select Vehicle';
+
+  @override
+  String get deviceIssueSelectStation => 'Select Station';
+
+  @override
+  String get deviceIssueSelectDevice => 'Select Device';
+
+  @override
+  String get deviceIssueEnterSn => 'Enter Device SN';
+
+  @override
+  String get deviceIssueScanQrCode => 'Scan QR Code';
+
+  @override
+  String get deviceIssueTotalIssued => 'Total Issued';
+
+  @override
+  String get deviceIssueCreateBattery => 'Create Battery Issue';
+
+  @override
+  String get deviceIssueCreateVehicle => 'Create Vehicle Issue';
+
+  @override
+  String get deviceIssueCreateStation => 'Create Station Issue';
+
+  @override
+  String get deviceIssueChooseWarehouse => 'Choose Warehouse';
+
+  @override
+  String get deviceIssueSearchWarehouse => 'Enter warehouse name to search';
+
+  @override
+  String get deviceIssueAllCity => 'All City';
+
+  @override
+  String get deviceIssueEnterDeviceSn => 'Enter Device SN';
+
+  @override
+  String get deviceIssueDetailTitle => 'Issue Details';
+
+  @override
+  String get deviceReceiveDetailTitle => 'Issue Details';
+
+  @override
+  String get deviceReceiveSearchHint => 'Enter the in/out number to search';
+
+  @override
+  String get deviceReceiveEmpty => 'No information about device reception';
+
+  @override
+  String get deviceReceiveScanToReceive => 'Scan to receive';
+
+  @override
+  String get deviceReceiveManualInput => 'Manually enter device SN';
+
+  @override
+  String get deviceReceiveSuccess => 'Received successfully';
+
+  @override
+  String get deviceReceiveNotBelong => 'The device does not belong to this document';
+
+  @override
+  String get deviceReceiveAction => 'Receive';
+
+  @override
+  String get deviceReceiveWithdraw => 'Withdrawn';
+
+  @override
+  String get searchHistory => 'Search history';
 
   @override
   String get scanPageTitle => 'Scan';
@@ -1560,22 +1932,76 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roadsideProcessTime => 'Processed At';
 
   @override
-  String get roadsideDealTitle => 'Process Order';
+  String get roadsideDealTitle => 'Processing Result';
 
   @override
   String get roadsideDealResultLabel => 'Result';
 
   @override
-  String get roadsideDealDescLabel => 'Processing Notes';
+  String get roadsideDealDescLabel => 'Description';
+
+  @override
+  String get roadsideDealDescHint => 'Please enter the description...';
 
   @override
   String get roadsideUploadLabel => 'Upload Images';
 
   @override
-  String get roadsideDealSuccess => 'Submitted';
+  String get roadsideDealSuccess => 'Submitted successfully';
 
   @override
   String get roadsideDealFailed => 'Submit failed';
+
+  @override
+  String get roadsideRescueResult => 'Rescue Result';
+
+  @override
+  String get roadsidePhotoLabel => 'Photo';
+
+  @override
+  String get roadsideSubmitButton => 'Submit';
+
+  @override
+  String get roadsideDescRequired => 'Please enter description';
+
+  @override
+  String get roadsideDescriptionTitle => 'Description';
+
+  @override
+  String get roadsideFounderLabel => 'Founder';
+
+  @override
+  String get roadsideCreationTimeLabel => 'Creation Time';
+
+  @override
+  String get roadsideReportSourceLabel => 'Report Source';
+
+  @override
+  String get roadsideSourceApp => 'App';
+
+  @override
+  String get roadsideSourceWeb => 'Web';
+
+  @override
+  String get roadsideProcessingResultTitle => 'Processing Result';
+
+  @override
+  String get roadsideCostsTitle => 'Maintenance Costs';
+
+  @override
+  String get roadsideTotalLabel => 'Total';
+
+  @override
+  String get roadsidePaymentMethodLabel => 'Payment Methods';
+
+  @override
+  String get roadsideUploadVoucherLabel => 'Upload Voucher';
+
+  @override
+  String get roadsideNotPayingYet => 'Not Paying Yet';
+
+  @override
+  String get roadsideConfirmPayment => 'Confirm Payment';
 
   @override
   String get offlineRegisterTitle => 'Offline User Registration';
@@ -1587,7 +2013,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get offlineRegisterPhone => 'Phone';
 
   @override
-  String get offlineRegisterSmsCode => 'SMS Code';
+  String get offlineRegisterPhoneHint => 'Enter phone number';
+
+  @override
+  String get offlineRegisterSmsCode => 'Code';
+
+  @override
+  String get offlineRegisterCodeHint => 'Enter code';
 
   @override
   String get offlineRegisterSendCode => 'Send Code';
@@ -1596,25 +2028,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get offlineRegisterPassword => 'Password';
 
   @override
+  String get offlineRegisterPasswordHint => 'Enter password';
+
+  @override
   String get offlineRegisterFirstName => 'First Name';
+
+  @override
+  String get offlineRegisterFirstNameHint => 'Enter first name';
 
   @override
   String get offlineRegisterLastName => 'Last Name';
 
   @override
-  String get offlineRegisterUsername => 'Username';
+  String get offlineRegisterLastNameHint => 'Enter last name';
+
+  @override
+  String get offlineRegisterUsername => 'Account';
+
+  @override
+  String get offlineRegisterUsernameHint => 'Used for logging';
 
   @override
   String get offlineRegisterBirthday => 'Birthday';
 
   @override
+  String get offlineRegisterBirthdayHint => 'Select your birthday';
+
+  @override
   String get offlineRegisterEmail => 'Email';
+
+  @override
+  String get offlineRegisterEmailHint => 'Enter your email';
 
   @override
   String get offlineRegisterReferrer => 'Referrer';
 
   @override
-  String get offlineRegisterSubmit => 'Register';
+  String get offlineRegisterReferrerHint => 'Enter the referrer id or scan code';
+
+  @override
+  String get offlineRegisterSelectCountry => 'Select Country / Region';
+
+  @override
+  String get offlineRegisterSubmit => 'Submit';
 
   @override
   String get offlineRegisterPhoneRequired => 'Please enter phone';
@@ -1710,7 +2166,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sellBindPayOnline => 'Online';
 
   @override
-  String get sellBindPayFull => 'Full';
+  String get sellBindPayFull => 'Full Payment';
 
   @override
   String get sellBindPayInstallment => 'Installment';
@@ -1743,7 +2199,112 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sellBindPlanPeriod => 'Period';
 
   @override
-  String get rentBindTitle => 'Rent Binding';
+  String get sellBindPackage => 'Package';
+
+  @override
+  String get sellBindPackageHint => 'Search Package';
+
+  @override
+  String get sellBindNoPackageInfo => 'No package info';
+
+  @override
+  String get sellBindDeviceSnHint => 'Enter device SN or scan';
+
+  @override
+  String get sellBindNoDeviceInfo => 'No device info';
+
+  @override
+  String get sellBindChoosePackage => 'Choose Package';
+
+  @override
+  String get sellBindPackageSearchHint => 'Search';
+
+  @override
+  String get sellBindSelectApplicant => 'Select Applicant';
+
+  @override
+  String get sellBindUserIdHint => 'Enter User ID or scan';
+
+  @override
+  String get sellBindAccount => 'Account';
+
+  @override
+  String get sellBindNid => 'NID';
+
+  @override
+  String get sellBindUploadNidPhoto => 'Upload NID Photo';
+
+  @override
+  String get sellBindNidPhotoHint => 'Please upload the front and back of your NID';
+
+  @override
+  String get sellBindPersonalPhoto => 'Personal Photo';
+
+  @override
+  String get sellBindSuccessTitle => 'Submit successfully';
+
+  @override
+  String get sellBindSuccessMessageOnline => 'The package has been successfully bound.\nPlease remind the user to pay the package fee in the app.\nThe package will take effect after payment.';
+
+  @override
+  String get sellBindSuccessMessageCash => 'The package has been successfully bound.\nPlease submit the contract voucher to the backend in time.';
+
+  @override
+  String get sellBindDocumentNumber => 'Document Number';
+
+  @override
+  String get sellBindCopied => 'Copied';
+
+  @override
+  String get sellBindReturnWorkbench => 'Return to Workbench';
+
+  @override
+  String get sellBindUnableSubmit => 'Unable to submit';
+
+  @override
+  String get sellBindModelMismatch => 'Model mismatch';
+
+  @override
+  String get sellBindSelectPayment => 'Select Payment';
+
+  @override
+  String get sellBindPaymentMethods => 'Payment Methods';
+
+  @override
+  String get sellBindPaymentPeriod => 'Payment Period';
+
+  @override
+  String get sellBindFinancial => 'Financial';
+
+  @override
+  String get sellBindPrincipal => 'Principal';
+
+  @override
+  String get sellBindTotalInterest => 'Total Interest';
+
+  @override
+  String get sellBindTotal => 'Total';
+
+  @override
+  String get sellBindPeriods => 'Periods';
+
+  @override
+  String get sellBindAnnualRate => 'Annual Interest Rate';
+
+  @override
+  String get sellBindNext => 'Next';
+
+  @override
+  String get sellBindSelectPeriod => 'Select Period';
+
+  @override
+  String get sellBindEmailHint => 'Enter your email';
+
+  @override
+  String get sellBindAddressHint => 'Enter your address';
+
+  @override
+  String get rentBindTitle => 'Lease Binding';
 
   @override
   String get rentBindDeviceSection => 'Device Info';
@@ -1752,7 +2313,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rentBindDeviceSn => 'Device SN';
 
   @override
+  String get rentBindDeviceSnHint => 'Enter device sn or scan QR code';
+
+  @override
   String get rentBindDeviceInfo => 'Device Details';
+
+  @override
+  String get rentBindNoDeviceInfo => 'No device parameter info';
 
   @override
   String get rentBindUserSection => 'User Info';
@@ -1800,6 +2367,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rentBindPayOnline => 'Online';
 
   @override
+  String get rentBindPayFull => 'Full Payment';
+
+  @override
   String get rentBindSubmit => 'Submit';
 
   @override
@@ -1816,6 +2386,90 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rentBindPackAmount => 'Amount';
+
+  @override
+  String get rentBindPackage => 'Package';
+
+  @override
+  String get rentBindPackageHint => 'Select the lease package';
+
+  @override
+  String get rentBindNoPackageInfo => 'No package info';
+
+  @override
+  String get rentBindSelectPackage => 'Select Package';
+
+  @override
+  String get rentBindServicePeriod => 'Service Period';
+
+  @override
+  String get rentBindDeposit => 'Deposit';
+
+  @override
+  String get rentBindReselect => 'Reselect';
+
+  @override
+  String get rentBindSelectApplicant => 'Select Applicant';
+
+  @override
+  String get rentBindUserIdHint => 'Enter the user ID or scan QR code';
+
+  @override
+  String get rentBindAccount => 'Account';
+
+  @override
+  String get rentBindNid => 'NID';
+
+  @override
+  String get rentBindUploadNidPhoto => 'Upload NID Photo';
+
+  @override
+  String get rentBindNidPhotoHint => 'Front and back ID photos';
+
+  @override
+  String get rentBindPersonalPhoto => 'Personal Photo';
+
+  @override
+  String get rentBindEmailHint => 'Fill in your email address';
+
+  @override
+  String get rentBindAddressHint => 'Fill in your email address';
+
+  @override
+  String get rentBindSelectPayment => 'Select Payment';
+
+  @override
+  String get rentBindPaymentMethods => 'Payment Methods';
+
+  @override
+  String get rentBindPaymentPeriod => 'Payment Period';
+
+  @override
+  String get rentBindLeaseAmount => 'Lease Amount';
+
+  @override
+  String get rentBindTotal => 'Total';
+
+  @override
+  String get rentBindConfirm => 'Confirm';
+
+  @override
+  String get rentBindSuccessTitle => 'Submit successfully';
+
+  @override
+  String get rentBindSuccessMessageOnline => 'Please proceed to the User App for payment in';
+
+  @override
+  String get rentBindSuccessMessageCash => 'Please enter the order record and submit the contract voucher within';
+
+  @override
+  String get rentBindDocumentNumber => 'Document Number';
+
+  @override
+  String get rentBindCopied => 'Copied';
+
+  @override
+  String get rentBindReturnWorkbench => 'Return to Workbench';
 
   @override
   String get swapBindTitle => 'Swap Binding';
@@ -1866,6 +2520,87 @@ class AppLocalizationsEn extends AppLocalizations {
   String get swapBindPackAmount => 'Amount';
 
   @override
+  String get swapBindUserId => 'User ID';
+
+  @override
+  String get swapBindUserIdHint => 'Enter User ID or scan QR code';
+
+  @override
+  String get swapBindUserEmpty => 'Please enter User ID to search';
+
+  @override
+  String get swapBindBindVehicle => 'Bind Vehicle';
+
+  @override
+  String get swapBindSelectVehicle => 'Select Vehicle';
+
+  @override
+  String get swapBindSelectVehicleTitle => 'Select Vehicle';
+
+  @override
+  String get swapBindBindBattery => 'Bind Battery';
+
+  @override
+  String get swapBindSelectBattery => 'Select Battery';
+
+  @override
+  String get swapBindSelectBatteryTitle => 'Select Battery';
+
+  @override
+  String get swapBindPackage => 'Package';
+
+  @override
+  String get swapBindSelectPackage => 'Select Package';
+
+  @override
+  String get swapBindSelectPackageTitle => 'Select Package';
+
+  @override
+  String get swapBindReselect => 'Reselect';
+
+  @override
+  String get swapBindAvailableBattery => 'Available Battery';
+
+  @override
+  String get swapBindAvailableVehicles => 'Available Vehicles';
+
+  @override
+  String get swapBindServicePeriod => 'Service Period';
+
+  @override
+  String get swapBindSwapTime => 'Swap Time';
+
+  @override
+  String get swapBindSelectPayment => 'Select Payment';
+
+  @override
+  String get swapBindPaymentMethods => 'Payment Methods';
+
+  @override
+  String get swapBindPaymentPeriod => 'Payment Period';
+
+  @override
+  String get swapBindRemainingDays => 'Remaining Rental days';
+
+  @override
+  String get swapBindSuccessTitle => 'Submit successfully';
+
+  @override
+  String get swapBindSuccessOnlineHint => 'Please proceed to the User App for payment in';
+
+  @override
+  String get swapBindSuccessCashHint => 'Please enter the order record and submit the contract voucher within';
+
+  @override
+  String get swapBindDocumentNumber => 'Document Number';
+
+  @override
+  String get swapBindCopied => 'Copied';
+
+  @override
+  String get swapBindReturnWorkbench => 'Return to Workbench';
+
+  @override
   String get depositRefundTitle => 'Deposit Refund';
 
   @override
@@ -1875,10 +2610,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get depositRefundUserInfo => 'User Info';
 
   @override
-  String get depositRefundOrderSection => 'Refund Orders';
+  String get depositRefundOrderSection => 'Deposit Refund Order';
 
   @override
-  String get depositRefundVoucher => 'Voucher';
+  String get depositRefundVoucher => 'Deposit Voucher';
 
   @override
   String get depositRefundVoucherConfirmed => 'Voucher checked';
@@ -1911,7 +2646,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get depositRefundOrderEmpty => 'No orders';
 
   @override
-  String get depositRefundAmount => 'Amount';
+  String get depositRefundAmount => 'Deposit refund amount';
+
+  @override
+  String get depositRefundUserId => 'User ID';
+
+  @override
+  String get depositRefundUserIdHint => 'Enter User ID or scan QR code';
+
+  @override
+  String get depositRefundSelectOrder => 'Select the refund order';
+
+  @override
+  String get depositRefundSelectOrderTitle => 'Select Deposit Refund Order';
+
+  @override
+  String get depositRefundReselect => 'Reselect';
+
+  @override
+  String get depositRefundUnbindingTime => 'Unbinding time';
+
+  @override
+  String get depositRefundDeposit => 'Deposit';
+
+  @override
+  String get depositRefundRecycled => 'Recycled';
+
+  @override
+  String get depositRefundViewVoucher => 'View Voucher';
+
+  @override
+  String get depositRefundRemarkHint => 'Enter the remarks';
+
+  @override
+  String get depositRefundSuccessTitle => 'Deposit Refund Successful!';
+
+  @override
+  String get depositRefundReturnWorkbench => 'Return to Workbench';
 
   @override
   String get installmentPayTitle => 'Installment Payment';
@@ -2190,7 +2961,67 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetUnshelveFailed => 'Submit failed';
 
   @override
-  String get cabinetAuthTitle => 'Cabinet Authorization';
+  String get cabinetAuthTitle => 'Station operation authorization';
+
+  @override
+  String get cabinetAuthStationLabel => 'Station';
+
+  @override
+  String get cabinetAuthSelectStation => 'Select a station';
+
+  @override
+  String get cabinetAuthSelectStationTitle => 'Select station';
+
+  @override
+  String get cabinetAuthStationSearchHint => 'Enter station SN or scan QR code';
+
+  @override
+  String get cabinetAuthSelectStationRequired => 'Please select a station';
+
+  @override
+  String get cabinetAuthPersonLabel => 'Authorized person';
+
+  @override
+  String get cabinetAuthSelectPerson => 'Select authorized person';
+
+  @override
+  String get cabinetAuthSelectPersonTitle => 'Select authorized person';
+
+  @override
+  String get cabinetAuthPersonSearchHint => 'Enter user name or phone number';
+
+  @override
+  String get cabinetAuthSelectPersonRequired => 'Please select authorized person';
+
+  @override
+  String get cabinetAuthTimeLabel => 'Authorization time';
+
+  @override
+  String get cabinetAuthConfirmButton => 'Confirm Authorization';
+
+  @override
+  String get cabinetAuthRecordButton => 'Authorized Record';
+
+  @override
+  String get cabinetAuthRecordTitle => 'Authorized Record';
+
+  @override
+  String get cabinetAuthAllPort => 'All port';
+
+  @override
+  String get cabinetAuthFaultPort => 'Fault port';
+
+  @override
+  String get cabinetAuthDisablePort => 'Disable port';
+
+  @override
+  String get cabinetAuthSwapStandard => 'Swap standard';
+
+  @override
+  String get cabinetAuthWorkAccount => 'Operation and maintenance work account';
+
+  @override
+  String get cabinetAuthValidityPeriod => 'Validity period';
 
   @override
   String get cabinetAuthSn => 'Cabinet SN';
@@ -2253,10 +3084,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetAuthRecordSection => 'Authorization Records';
 
   @override
-  String get cabinetOperateTitle => 'Cabinet Operations';
+  String get cabinetOperateTitle => 'Staion Operation';
 
   @override
-  String get cabinetOperateAuthorization => 'Cabinet Authorization';
+  String get cabinetOperateStationOperation => 'Staion Operation';
+
+  @override
+  String get cabinetOperateBluetoothAuth => 'Bluetooth key authorization';
+
+  @override
+  String get cabinetOperateAuthorization => 'Station operation authorization';
+
+  @override
+  String get cabinetOperateOfflineOM => 'Offline station O&M';
 
   @override
   String get cabinetOperateOfflineDetail => 'Offline Detail';
@@ -2445,7 +3285,79 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addressPickerSearchHint => 'Search location';
 
   @override
-  String get bluetoothAuthTitle => 'Bluetooth Authorization';
+  String get bluetoothAuthTitle => 'Authorization';
+
+  @override
+  String get bluetoothAuthFindTitle => 'Find Bluetooth key';
+
+  @override
+  String get bluetoothAuthBluetoothLabel => 'Bluetooth';
+
+  @override
+  String get bluetoothAuthAvailableDevices => 'Available devices';
+
+  @override
+  String get bluetoothAuthScanning => 'Scanning...';
+
+  @override
+  String get bluetoothAuthNoDevices => 'No devices found';
+
+  @override
+  String get bluetoothAuthConnected => 'Bluetooth key is connected';
+
+  @override
+  String get bluetoothAuthAuthorizedStation => 'Authorized Station';
+
+  @override
+  String get bluetoothAuthSnHint => 'Enter station SN or scan QR code';
+
+  @override
+  String get bluetoothAuthSnRequired => 'Please enter station SN';
+
+  @override
+  String get bluetoothAuthOpenButton => 'Opening Authorization';
+
+  @override
+  String get bluetoothAuthClearButton => 'Clear Authorization';
+
+  @override
+  String get bluetoothAuthConfirmOpen => 'The station door can be opened within 24 hours after authorization. Are you sure to authorized?';
+
+  @override
+  String get bluetoothAuthConfirmClear => 'Make sure to clear the bluetooth key authorization??';
+
+  @override
+  String get bluetoothAuthCancel => 'Cancle';
+
+  @override
+  String get bluetoothAuthConfirm => 'Confirm';
+
+  @override
+  String get bluetoothAuthClearSuccess => 'Authorization cleared';
+
+  @override
+  String get bluetoothAuthClearFailed => 'Clear authorization failed';
+
+  @override
+  String get bluetoothAuthTipsTitle => 'Tips';
+
+  @override
+  String get bluetoothAuthTip1 => 'Please make sure that the Bluetooth key is turned on and connected, and there is a Bluetooth logo on the key display;';
+
+  @override
+  String get bluetoothAuthTip2 => 'Before adding a new authorization, it is recommended to clear the authorization once and clear the records that are not needed;';
+
+  @override
+  String get bluetoothAuthTip3 => 'After successful authorization, you can turn off the Bluetooth of the mobile phone;';
+
+  @override
+  String get bluetoothAuthTip4 => 'ress the key Bluetooth button, the indicator light enters the flash state to unlock the lock;';
+
+  @override
+  String get bluetoothAuthTip5 => 'Press the key Bluetooth button, the indicator light enters the flash state to unlock the lock;';
+
+  @override
+  String get bluetoothAuthTip6 => 'The validity period of the authorization is preset to 24 hours after the authorization is successful;';
 
   @override
   String get bluetoothAuthSn => 'Cabinet SN';

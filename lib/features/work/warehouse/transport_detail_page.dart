@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/device_transport_resp.dart';
 import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
@@ -53,7 +54,7 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
         actions: [
           if (widget.mode == TransportMode.receive)
             IconButton(
-              icon: const Icon(Icons.qr_code_scanner),
+              icon: AppIcons.scanIcon(),
               onPressed: () => _scanAndReceive(context, notifier),
             ),
           if (widget.mode == TransportMode.receive)

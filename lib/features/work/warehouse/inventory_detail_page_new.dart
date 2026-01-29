@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_controller.dart';
@@ -367,7 +368,7 @@ class _InventoryDetailPageNewState
               height: 48,
               child: FilledButton.icon(
                 onPressed: () => _scanDevice(context),
-                icon: const Icon(Icons.qr_code_scanner),
+                icon: AppIcons.scanIcon(color: Colors.white),
                 label: Text(l10n.inventoryScanToReceive),
                 style: FilledButton.styleFrom(
                   backgroundColor: const Color(0xFF4CAF50),

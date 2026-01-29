@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/car_type.dart';
@@ -86,7 +87,7 @@ class _VehicleEntryPageState extends State<VehicleEntryPage> {
                     ),
                     TextButton.icon(
                       onPressed: _addByScan,
-                      icon: const Icon(Icons.qr_code_scanner),
+                      icon: AppIcons.scanIcon(),
                       label: Text(l10n.entryScanAdd),
                     ),
                     const SizedBox(width: 8),

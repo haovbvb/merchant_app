@@ -1,14 +1,175 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
-import 'package:merchant_app/data/models/sale_data.dart';
-import 'package:merchant_app/data/models/shop1_num.dart';
 import 'package:merchant_app/features/work/device/device_detail_page.dart';
 import 'package:merchant_app/features/work/entry/shipping_entry_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/work_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
+
+/// 角色枚举
+enum WorkRole {
+  sale('app_role_sales', 'Sale'),
+  operations('app_role_op', 'Operations'),
+  warehouseKeeper('app_role_store_man', 'Warehouse Keeper');
+
+  const WorkRole(this.roleKey, this.displayName);
+  final String roleKey;
+  final String displayName;
+}
+
+/// 模块定义
+class WorkModule {
+  const WorkModule({
+    required this.key,
+    required this.titleKey,
+    required this.iconPath,
+    this.showAsBottomSheet = false,
+  });
+
+  final String key;
+  final String titleKey;
+  final String iconPath;
+  final bool showAsBottomSheet;
+}
+
+/// 各角色对应的模块
+const Map<WorkRole, List<WorkModule>> _roleModules = {
+  WorkRole.warehouseKeeper: [
+    WorkModule(
+      key: 'shipping_entry',
+      titleKey: 'shippingEntry',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_ship_entry.webp',
+      showAsBottomSheet: true,
+    ),
+    WorkModule(
+      key: 'device_transport_issue',
+      titleKey: 'deviceIssue',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_device_issue.png',
+    ),
+    WorkModule(
+      key: 'device_transport_receive',
+      titleKey: 'deviceReception',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_device_reception.webp',
+    ),
+    WorkModule(
+      key: 'device_inventory',
+      titleKey: 'inventoryCount',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_inventory_count.webp',
+    ),
+    WorkModule(
+      key: 'device_search',
+      titleKey: 'deviceQuery',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_device_query.webp',
+    ),
+  ],
+  WorkRole.sale: [
+    WorkModule(
+      key: 'sell_bind',
+      titleKey: 'salesBinding',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_sale_bind.webp',
+    ),
+    WorkModule(
+      key: 'rent_bind',
+      titleKey: 'leaseBinding',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_lease_bind.png',
+    ),
+    WorkModule(
+      key: 'swap_bind',
+      titleKey: 'swapBinding',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_swap_bind.webp',
+    ),
+    WorkModule(
+      key: 'merchant_replace',
+      titleKey: 'manualSwap',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_manual_swap.png',
+    ),
+    WorkModule(
+      key: 'sale_summary',
+      titleKey: 'salesStatistics',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_sale_statistic.webp',
+    ),
+    WorkModule(
+      key: 'deposit_refund',
+      titleKey: 'depositRefund',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_deposit_refund.webp',
+    ),
+    WorkModule(
+      key: 'offline_user_register',
+      titleKey: 'offlineUserRegistration',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_offline_register.webp',
+    ),
+    WorkModule(
+      key: 'installment_pay',
+      titleKey: 'installmentPayment',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_installment.png',
+    ),
+    WorkModule(
+      key: 'user_list',
+      titleKey: 'userQuery',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_user_query.png',
+    ),
+    WorkModule(
+      key: 'device_search',
+      titleKey: 'deviceQuery',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_device_query.webp',
+    ),
+  ],
+  WorkRole.operations: [
+    WorkModule(
+      key: 'maintenance_book',
+      titleKey: 'scheduleMaintenance',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_schedule_maintenance.png',
+    ),
+    WorkModule(
+      key: 'repair_record',
+      titleKey: 'repairRegistration',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_repair_registration.png',
+    ),
+    WorkModule(
+      key: 'road_assist',
+      titleKey: 'roadsideAssistance',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_roadside_assistance.png',
+    ),
+    WorkModule(
+      key: 'unbind_device',
+      titleKey: 'deviceUnbinding',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_device_unbinding.webp',
+    ),
+    WorkModule(
+      key: 'after_sale_bind',
+      titleKey: 'afterSalesBinding',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_aftersale_binding.webp',
+    ),
+    WorkModule(
+      key: 'cabinet_operate',
+      titleKey: 'cabinetOperation',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_station_operation.png',
+    ),
+    WorkModule(
+      key: 'cabinet_putaway',
+      titleKey: 'cabinetPutaway',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_release_station.png',
+    ),
+    WorkModule(
+      key: 'cabinet_unshelve',
+      titleKey: 'cabinetUnshelve',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_unshelve.png',
+    ),
+    WorkModule(
+      key: 'user_list',
+      titleKey: 'userQuery',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_user_query.png',
+    ),
+    WorkModule(
+      key: 'device_search',
+      titleKey: 'deviceQuery',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_device_query.webp',
+    ),
+  ],
+};
 
 class WorkTab extends ConsumerStatefulWidget {
   const WorkTab({super.key});
@@ -18,6 +179,8 @@ class WorkTab extends ConsumerStatefulWidget {
 }
 
 class _WorkTabState extends ConsumerState<WorkTab> {
+  WorkRole _currentRole = WorkRole.sale;
+
   @override
   void initState() {
     super.initState();
@@ -28,316 +191,462 @@ class _WorkTabState extends ConsumerState<WorkTab> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = context.l10n;
     final state = ref.watch(workbenchProvider);
-    final notifier = ref.read(workbenchProvider.notifier);
-    final sections = const [
-      _WorkSection(
-        title: '入库/登记',
-        modules: [
-          _WorkModule(
-            key: 'shipping_entry',
-            title: 'Shipping Entry',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_ship_entry.webp',
-            showAsBottomSheet: true,
-          ),
-          // _WorkModule(
-          //   key: 'battery_ship',
-          //   title: '电池出库',
-          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_device_issue.png',
-          // ),
-          // _WorkModule(
-          //   key: 'device_transport_issue_list',
-          //   title: '出库列表',
-          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_device_issue.png',
-          // ),
-        ],
-      ),
-      _WorkSection(
-        title: '设备与搜索',
-        modules: [
-          _WorkModule(
-            key: 'device_detail',
-            title: '设备详情',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_device_query.webp',
-          ),
-          _WorkModule(
-            key: 'device_search',
-            title: '设备搜索',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_device_query.webp',
-          ),
-        ],
-      ),
-      _WorkSection(
-        title: '售后/维修',
-        modules: [
-          _WorkModule(
-            key: 'after_sale_bind',
-            title: '售后绑定',
-            iconPath:
-                'assets/android/mipmap-xxhdpi/icon_aftersale_binding.webp',
-          ),
-          _WorkModule(
-            key: 'maintenance_book',
-            title: '维修预约',
-            iconPath:
-                'assets/android/mipmap-xxhdpi/icon_schedule_maintenance.png',
-          ),
-          _WorkModule(
-            key: 'repair_record',
-            title: '维修登记',
-            iconPath:
-                'assets/android/mipmap-xxhdpi/icon_repair_registration.png',
-          ),
-          _WorkModule(
-            key: 'unbind_device',
-            title: '设备解绑',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_device_unbinding.webp',
-          ),
-        ],
-      ),
-      _WorkSection(
-        title: '道路救援',
-        modules: [
-          _WorkModule(
-            key: 'road_assist',
-            title: '道路救援',
-            iconPath:
-                'assets/android/mipmap-xxhdpi/icon_roadside_assistance.png',
-          ),
-          // _WorkModule(
-          //   key: 'road_order_detail',
-          //   title: '救援订单详情',
-          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_request.png',
-          // ),
-          // _WorkModule(
-          //   key: 'road_order_deal',
-          //   title: '救援订单处理',
-          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_response.png',
-          // ),
-        ],
-      ),
-      _WorkSection(
-        title: '用户',
-        modules: [
-          _WorkModule(
-            key: 'user_list',
-            title: '用户列表',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_user_query.png',
-          ),
-          // _WorkModule(
-          //   key: 'user_search',
-          //   title: '用户搜索',
-          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_user_query.png',
-          // ),
-          // _WorkModule(
-          //   key: 'user_detail',
-          //   title: '用户详情',
-          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_user_query.png',
-          // ),
-        ],
-      ),
-      _WorkSection(
-        title: '二维码/扫码',
-        modules: [
-          _WorkModule(
-            key: 'qrcode_list',
-            title: '二维码列表',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_scan.png',
-          ),
-          _WorkModule(
-            key: 'qrcode_scan',
-            title: '扫码',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_scan.png',
-          ),
-        ],
-      ),
-      _WorkSection(
-        title: '仓库/调拨',
-        modules: [
-          _WorkModule(
-            key: 'device_transport_receive',
-            title: '设备调拨-接收',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_device_reception.webp',
-          ),
-          _WorkModule(
-            key: 'device_transport_issue',
-            title: '设备调拨-出库',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_device_issue.png',
-          ),
-          // _WorkModule(
-          //   key: 'device_transport_detail',
-          //   title: '调拨详情',
-          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_warehouse.png',
-          // ),
-          _WorkModule(
-            key: 'device_inventory',
-            title: '设备盘点',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_inventory_count.webp',
-          ),
-          // _WorkModule(
-          //   key: 'device_inventory_detail',
-          //   title: '盘点详情',
-          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_inventory_count.webp',
-          // ),
-          // _WorkModule(
-          //   key: 'device_inventory_search',
-          //   title: '盘点搜索',
-          //   iconPath: 'assets/android/mipmap-xxhdpi/icon_search.webp',
-          // ),
-        ],
-      ),
-      _WorkSection(
-        title: '销售',
-        modules: [
-          _WorkModule(
-            key: 'offline_user_register',
-            title: '线下用户注册',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_offline_register.webp',
-          ),
-          _WorkModule(
-            key: 'sell_bind',
-            title: '销售绑定',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_sale_bind.webp',
-          ),
-          _WorkModule(
-            key: 'rent_bind',
-            title: '租赁绑定',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_lease_bind.png',
-          ),
-          _WorkModule(
-            key: 'deposit_refund',
-            title: '押金退还',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_deposit_refund.webp',
-          ),
-          _WorkModule(
-            key: 'swap_bind',
-            title: '换电绑定',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_swap_bind.webp',
-          ),
-          _WorkModule(
-            key: 'installment_pay',
-            title: '分期付款',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_installment.png',
-          ),
-          _WorkModule(
-            key: 'sale_summary',
-            title: '销售汇总',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_sale_statistic.webp',
-          ),
-          _WorkModule(
-            key: 'merchant_replace',
-            title: '商户置换',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_manual_change.webp',
-          ),
-        ],
-      ),
-      _WorkSection(
-        title: '柜机/上架/授权',
-        modules: [
-          _WorkModule(
-            key: 'cabinet_putaway',
-            title: '柜机上架',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_putaway.png',
-          ),
-          _WorkModule(
-            key: 'cabinet_unshelve',
-            title: '柜机下架',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_unshelve.png',
-          ),
-          _WorkModule(
-            key: 'cabinet_operate',
-            title: '柜机运维',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_station_operation.png',
-          ),
-          _WorkModule(
-            key: 'cabinet_auth_operate',
-            title: '柜机授权运维',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_blue_key_autho.png',
-          ),
-          _WorkModule(
-            key: 'cabinet_offline_detail',
-            title: '离线柜机详情',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_signal_offline.webp',
-          ),
-          _WorkModule(
-            key: 'cabinet_offline_fault',
-            title: '离线故障列表',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_fix.png',
-          ),
-          _WorkModule(
-            key: 'cabinet_scan',
-            title: '柜机扫码',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_scan.png',
-          ),
-          _WorkModule(
-            key: 'bluetooth_auth',
-            title: '蓝牙授权',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_blue_key_autho.png',
-          ),
-          _WorkModule(
-            key: 'bluetooth_operate',
-            title: '蓝牙运维',
-            iconPath:
-                'assets/android/mipmap-xxhdpi/img_bluetooth_operate_icon.webp',
-          ),
-        ],
-      ),
-      _WorkSection(
-        title: 'VCU',
-        modules: [
-          _WorkModule(
-            key: 'vcu_search',
-            title: 'VCU 搜索',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_vcu_testing.png',
-          ),
-          _WorkModule(
-            key: 'vcu_control',
-            title: 'VCU 控制',
-            iconPath: 'assets/android/mipmap-xxhdpi/img_vcu.png',
-          ),
-        ],
-      ),
-      _WorkSection(
-        title: '地图/推广',
-        modules: [
-          _WorkModule(
-            key: 'promote_web',
-            title: '推广页面',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_sale_statistic.webp',
-          ),
-          _WorkModule(
-            key: 'battery_loc',
-            title: '电池定位',
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_battery_loc.png',
-          ),
-        ],
-      ),
-    ];
+    final modules = _roleModules[_currentRole] ?? [];
 
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        _WorkbenchHeader(
-          l10n: l10n,
-          loading: state.loading,
-          onRefresh: notifier.refresh,
-          onScan: _scanAndOpenDetail,
-          saleData: state.saleData,
-          shopNum: state.shopNum,
-        ),
-        const SizedBox(height: 16),
-        ...sections.map(
-          (section) => _WorkSectionCard(
-            section: section,
-            titleStyle: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+      body: Column(
+        children: [
+          // 深绿色渐变顶部
+          _buildHeader(context, state),
+          // 模块列表区域
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.only(top: 0),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF5F5F5),
+              ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                child: _buildModulesCard(context, modules),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
+  }
+
+  Widget _buildHeader(BuildContext context, WorkbenchState state) {
+    final l10n = context.l10n;
+    final saleData = state.saleData;
+    final isSalesRole = _currentRole == WorkRole.sale;
+
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF1B3D2F), Color(0xFF2D5A45)],
+        ),
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // 顶部栏：角色选择 + 扫码按钮
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => _showRoleSelector(context),
+                    child: Row(
+                      children: [
+                        Text(
+                          _currentRole.displayName,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.arrow_drop_down,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: _scanAndOpenDetail,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      child: Image.asset(
+                        'assets/android/mipmap-xxhdpi/icon_scan.png',
+                        width: 24,
+                        height: 24,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // 销售角色显示本月销售卡片
+            if (isSalesRole) ...[
+              const SizedBox(height: 8),
+              _buildSalesCard(l10n, saleData),
+            ],
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSalesCard(AppLocalizations l10n, dynamic saleData) {
+    final now = DateTime.now();
+    final dateStr = DateFormat('MMMM d.yyyy').format(now);
+    final orderIncome = saleData?.orderIncome ?? 0;
+    final orderNum = saleData?.orderNum ?? 0;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.shopping_bag_outlined,
+                size: 18,
+                color: Color(0xFF333333),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                l10n.workbenchThisMonthSales,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF333333),
+                ),
+              ),
+              const Spacer(),
+              Text(
+                dateStr,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF999999),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '\$${orderIncome.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF333333),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.workbenchTransactionAmount,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF999999),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$orderNum',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF333333),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.workbenchOrderQuantity,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF999999),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModulesCard(BuildContext context, List<WorkModule> modules) {
+    return Container(
+      
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          childAspectRatio: 0.85,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 4,
+        ),
+        itemCount: modules.length,
+        itemBuilder: (context, index) {
+          final module = modules[index];
+          return _buildModuleItem(context, module);
+        },
+      ),
+    );
+  }
+
+  Widget _buildModuleItem(BuildContext context, WorkModule module) {
+    final title = _getModuleTitle(context, module.titleKey);
+
+    return GestureDetector(
+      onTap: () => _onModuleTap(module),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.asset(
+                module.iconPath,
+                width: 56,
+                height: 56,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4CAF50),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.apps,
+                      color: Colors.white,
+                      size: 28,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF333333),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getModuleTitle(BuildContext context, String titleKey) {
+    final l10n = context.l10n;
+    switch (titleKey) {
+      case 'shippingEntry':
+        return l10n.workbenchShippingEntry;
+      case 'deviceIssue':
+        return l10n.workbenchDeviceIssue;
+      case 'deviceReception':
+        return l10n.workbenchDeviceReception;
+      case 'inventoryCount':
+        return l10n.workbenchInventoryCount;
+      case 'deviceQuery':
+        return l10n.workbenchDeviceQuery;
+      case 'salesBinding':
+        return l10n.workbenchSalesBinding;
+      case 'leaseBinding':
+        return l10n.workbenchLeaseBinding;
+      case 'swapBinding':
+        return l10n.workbenchSwapBinding;
+      case 'manualSwap':
+        return l10n.workbenchManualSwap;
+      case 'salesStatistics':
+        return l10n.workbenchSalesStatistics;
+      case 'depositRefund':
+        return l10n.workbenchDepositRefund;
+      case 'offlineUserRegistration':
+        return l10n.workbenchOfflineUserRegistration;
+      case 'installmentPayment':
+        return l10n.workbenchInstallmentPayment;
+      case 'userQuery':
+        return l10n.workbenchUserQuery;
+      case 'scheduleMaintenance':
+        return l10n.workbenchScheduleMaintenance;
+      case 'repairRegistration':
+        return l10n.workbenchRepairRegistration;
+      case 'roadsideAssistance':
+        return l10n.workbenchRoadsideAssistance;
+      case 'deviceUnbinding':
+        return l10n.workbenchDeviceUnbinding;
+      case 'afterSalesBinding':
+        return l10n.workbenchAfterSalesBinding;
+      case 'cabinetOperation':
+        return l10n.workbenchCabinetOperation;
+      case 'cabinetPutaway':
+        return l10n.workbenchCabinetPutaway;
+      case 'cabinetUnshelve':
+        return l10n.workbenchCabinetUnshelve;
+      default:
+        return titleKey;
+    }
+  }
+
+  void _onModuleTap(WorkModule module) {
+    if (module.showAsBottomSheet) {
+      ShippingEntryPage.showAsBottomSheet(context);
+    } else {
+      AppRouter.router.push(
+        '${AppRouter.workModulePath}/${module.key}',
+        extra: module.key,
+      );
+    }
+  }
+
+  void _showRoleSelector(BuildContext context) {
+    final l10n = context.l10n;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 20),
+              Text(
+                l10n.workbenchChooseYourRole,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF333333),
+                ),
+              ),
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: WorkRole.values.map((role) {
+                    return _buildRoleOption(context, role, l10n);
+                  }).toList(),
+                ),
+              ),
+              const SizedBox(height: 32),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRoleOption(
+      BuildContext context, WorkRole role, AppLocalizations l10n) {
+    final isSelected = _currentRole == role;
+    final iconData = _getRoleIcon(role);
+    final color = _getRoleColor(role);
+    final displayName = _getRoleDisplayName(role, l10n);
+
+    return GestureDetector(
+      onTap: () {
+        setState(() => _currentRole = role);
+        Navigator.of(context).pop();
+        // 切换到销售角色时刷新数据
+        if (role == WorkRole.sale) {
+          ref.read(workbenchProvider.notifier).refresh();
+        }
+      },
+      child: Container(
+        width: 100,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withValues(alpha: 0.1) : const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(12),
+          border: isSelected ? Border.all(color: color, width: 1) : null,
+        ),
+        child: Column(
+          children: [
+            Icon(iconData, size: 32, color: color),
+            const SizedBox(height: 8),
+            Text(
+              displayName,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: isSelected ? color : const Color(0xFF666666),
+                fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  IconData _getRoleIcon(WorkRole role) {
+    switch (role) {
+      case WorkRole.sale:
+        return Icons.shopping_bag_outlined;
+      case WorkRole.operations:
+        return Icons.apartment;
+      case WorkRole.warehouseKeeper:
+        return Icons.home_outlined;
+    }
+  }
+
+  Color _getRoleColor(WorkRole role) {
+    switch (role) {
+      case WorkRole.sale:
+        return const Color(0xFFFF9800);
+      case WorkRole.operations:
+        return const Color(0xFF2196F3);
+      case WorkRole.warehouseKeeper:
+        return const Color(0xFF4CAF50);
+    }
+  }
+
+  String _getRoleDisplayName(WorkRole role, AppLocalizations l10n) {
+    switch (role) {
+      case WorkRole.sale:
+        return l10n.workbenchRoleSale;
+      case WorkRole.operations:
+        return l10n.workbenchRoleOperations;
+      case WorkRole.warehouseKeeper:
+        return l10n.workbenchRoleWarehouseKeeper;
+    }
   }
 
   Future<void> _scanAndOpenDetail() async {
@@ -349,201 +658,4 @@ class _WorkTabState extends ConsumerState<WorkTab> {
       MaterialPageRoute(builder: (_) => DeviceDetailPage(initialSn: result)),
     );
   }
-}
-
-class _WorkbenchHeader extends StatelessWidget {
-  const _WorkbenchHeader({
-    required this.l10n,
-    required this.loading,
-    required this.onRefresh,
-    required this.onScan,
-    required this.saleData,
-    required this.shopNum,
-  });
-
-  final AppLocalizations l10n;
-  final bool loading;
-  final VoidCallback onRefresh;
-  final VoidCallback onScan;
-  final SaleData? saleData;
-  final Shop1Num? shopNum;
-
-  @override
-  Widget build(BuildContext context) {
-    final sale = saleData;
-    final shop = shopNum;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                l10n.workbenchMonthlyIncomeTitle,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-            IconButton(
-              onPressed: onScan,
-              icon: const Icon(Icons.qr_code_scanner),
-              tooltip: l10n.scanPageTitle,
-            ),
-            TextButton.icon(
-              onPressed: loading ? null : onRefresh,
-              icon: loading
-                  ? const SizedBox(
-                      width: 14,
-                      height: 14,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.refresh, size: 16),
-              label: Text(l10n.workbenchRefresh),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                _MetricTile(
-                  label: l10n.workbenchMonthlyIncomeAmount,
-                  value: _formatAmount(sale?.orderIncome),
-                ),
-                _MetricTile(
-                  label: l10n.workbenchOrderCount,
-                  value: (sale?.orderNum ?? 0).toString(),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          l10n.workbenchShopSummary,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 8),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                _MetricTile(
-                  label: l10n.workbenchShopAll,
-                  value: (shop?.all ?? 0).toString(),
-                ),
-                _MetricTile(
-                  label: l10n.workbenchShopDirect,
-                  value: (shop?.direct ?? 0).toString(),
-                ),
-                _MetricTile(
-                  label: l10n.workbenchShopFranchise,
-                  value: (shop?.franchise ?? 0).toString(),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  String _formatAmount(num? value) {
-    final amount = value ?? 0;
-    return amount.toStringAsFixed(2);
-  }
-}
-
-class _MetricTile extends StatelessWidget {
-  const _MetricTile({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            value,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 4),
-          Text(label, style: const TextStyle(color: Colors.black54)),
-        ],
-      ),
-    );
-  }
-}
-
-class _WorkSectionCard extends StatelessWidget {
-  const _WorkSectionCard({required this.section, required this.titleStyle});
-
-  final _WorkSection section;
-  final TextStyle? titleStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(section.title, style: titleStyle),
-          const SizedBox(height: 12),
-          ...section.modules.map((module) {
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: ListTile(
-                leading: module.iconPath == null
-                    ? null
-                    : Image.asset(module.iconPath!, width: 24, height: 24),
-                title: Text(module.title),
-                subtitle: null,
-                trailing: const Icon(Icons.chevron_right),
-                onTap: () {
-                  if (module.showAsBottomSheet) {
-                    ShippingEntryPage.showAsBottomSheet(context);
-                  } else {
-                    AppRouter.router.push(
-                      '${AppRouter.workModulePath}/${module.key}',
-                      extra: module.title,
-                    );
-                  }
-                },
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-}
-
-class _WorkSection {
-  const _WorkSection({required this.title, required this.modules});
-
-  final String title;
-  final List<_WorkModule> modules;
-}
-
-class _WorkModule {
-  const _WorkModule({
-    required this.key,
-    required this.title,
-    this.iconPath,
-    this.showAsBottomSheet = false,
-  });
-
-  final String key;
-  final String title;
-  final String? iconPath;
-  final bool showAsBottomSheet;
 }

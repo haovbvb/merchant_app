@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
@@ -97,10 +98,10 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
           ),
           // 绿色电池图标
           Container(
-            width: 72,
-            height: 72,
+            // width: 72,
+            // height: 72,
             decoration: BoxDecoration(
-              color: const Color(0xFF4CAF50),
+              // color: const Color(0xFF4CAF50),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -110,10 +111,13 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                 ),
               ],
             ),
-            child: const Icon(
-              Icons.battery_charging_full,
-              color: Colors.white,
-              size: 36,
+            child: Padding(
+              padding: const EdgeInsets.all(0),
+              child: Image.asset(
+                'assets/android/mipmap-xxhdpi/icon_swap_bind.webp',
+                // width: 36,
+                // height: 36,
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -181,10 +185,9 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                 onTap: () => _scanUserId(notifier),
                 child: Container(
                   padding: const EdgeInsets.all(8),
-                  child: const Icon(
-                    Icons.qr_code_scanner,
+                  child: AppIcons.scanIcon(
                     size: 24,
-                    color: Color(0xFF333333),
+                    color: const Color(0xFF333333),
                   ),
                 ),
               ),

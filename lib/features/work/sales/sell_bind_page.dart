@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
@@ -93,13 +94,16 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            color: const Color(0xFFFF6B4A),
             borderRadius: BorderRadius.circular(16),
           ),
-          child: const Icon(
-            Icons.shopping_bag,
-            color: Colors.white,
-            size: 32,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.asset(
+              'assets/android/mipmap-xxhdpi/icon_sale_bind.webp',
+              width: 64,
+              height: 64,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -218,10 +222,9 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
               ),
               GestureDetector(
                 onTap: _scanSn,
-                child: const Icon(
-                  Icons.qr_code_scanner,
-                  color: Color(0xFF333333),
+                child: AppIcons.scanIcon(
                   size: 24,
+                  color: const Color(0xFF333333),
                 ),
               ),
             ],

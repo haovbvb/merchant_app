@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:intl/intl.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/data/models/cabin.dart';
@@ -151,10 +152,9 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
           const SizedBox(width: 8),
           GestureDetector(
             onTap: _scanSn,
-            child: const Icon(
-              Icons.qr_code_scanner,
-              color: Color(0xFF333333),
+            child: AppIcons.scanIcon(
               size: 24,
+              color: const Color(0xFF333333),
             ),
           ),
         ],

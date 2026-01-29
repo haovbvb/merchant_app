@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/constants/storage_keys.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
@@ -102,10 +103,9 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
               const SizedBox(width: 8),
               GestureDetector(
                 onTap: _scan,
-                child: const Icon(
-                  Icons.qr_code_scanner,
-                  color: Color(0xFF333333),
+                child: AppIcons.scanIcon(
                   size: 24,
+                  color: const Color(0xFF333333),
                 ),
               ),
             ],

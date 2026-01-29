@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/constants/storage_keys.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
@@ -128,8 +129,7 @@ class _UserSearchPageState extends ConsumerState<UserSearchPage> {
               'assets/android/mipmap-xxhdpi/icon_scan.webp',
               width: 24,
               height: 24,
-              errorBuilder: (_, __, ___) => const Icon(
-                Icons.qr_code_scanner,
+              errorBuilder: (_, __, ___) => AppIcons.scanIcon(
                 color: Colors.black,
               ),
             ),

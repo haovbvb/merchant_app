@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/constants/storage_keys.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
@@ -51,7 +52,7 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.qr_code_scanner),
+                      icon: AppIcons.scanIcon(),
                       onPressed: state.searching ? null : _scan,
                     ),
                     IconButton(

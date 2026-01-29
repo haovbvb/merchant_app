@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/device_transport_resp.dart';
 import 'package:merchant_app/features/work/warehouse/receive_controller.dart';
@@ -412,7 +413,7 @@ class _DeviceListSection extends StatelessWidget {
                 height: 44,
                 child: FilledButton.icon(
                   onPressed: onScanToReceive,
-                  icon: const Icon(Icons.qr_code_scanner, size: 18),
+                  icon: AppIcons.scanIcon(size: 18, color: Colors.white),
                   label: Text(l10n.deviceReceiveScanToReceive),
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF4CAF50),

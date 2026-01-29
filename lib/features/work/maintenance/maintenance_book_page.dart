@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/styles/colors.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/maintenance.dart';
@@ -65,17 +66,16 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
                       padding: const EdgeInsets.only(bottom: 24),
                       child: Column(
                         children: [
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryColor,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Icon(
-                              Icons.calendar_month_outlined,
-                              color: Colors.white,
-                              size: 40,
+                          SizedBox(
+                            width: 64,
+                            height: 64,
+                            child: ClipRRect(
+                              child: Image.asset(
+                                'assets/android/mipmap-xxhdpi/icon_schedule_maintenance.png',
+                                width: 64,
+                                height: 64,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -251,10 +251,9 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
               if (onScan != null)
                 GestureDetector(
                   onTap: onScan,
-                  child: const Icon(
-                    Icons.qr_code_scanner,
-                    color: Colors.black54,
+                  child: AppIcons.scanIcon(
                     size: 24,
+                    color: Colors.black54,
                   ),
                 ),
             ],

@@ -84,6 +84,93 @@ class AppLocalizationsZh extends AppLocalizations {
   String get workbenchRefresh => '刷新';
 
   @override
+  String get workbenchThisMonthSales => 'This Month\'s Sales';
+
+  @override
+  String get workbenchTransactionAmount => 'Transaction Amount';
+
+  @override
+  String get workbenchOrderQuantity => 'Order Quantity';
+
+  @override
+  String get workbenchChooseYourRole => 'Choose Your Role';
+
+  @override
+  String get workbenchRoleSale => 'Sale';
+
+  @override
+  String get workbenchRoleOperations => 'Operations';
+
+  @override
+  String get workbenchRoleWarehouseKeeper => 'Warehouse\nKeeper';
+
+  @override
+  String get workbenchShippingEntry => 'Shipping Entry';
+
+  @override
+  String get workbenchDeviceIssue => 'Device Issue';
+
+  @override
+  String get workbenchDeviceReception => 'Device Reception';
+
+  @override
+  String get workbenchInventoryCount => 'Inventory Count';
+
+  @override
+  String get workbenchDeviceQuery => 'Device Query';
+
+  @override
+  String get workbenchSalesBinding => 'Sales Binding';
+
+  @override
+  String get workbenchLeaseBinding => 'Lease Binding';
+
+  @override
+  String get workbenchSwapBinding => 'Swap Binding';
+
+  @override
+  String get workbenchManualSwap => 'Manual Swap';
+
+  @override
+  String get workbenchSalesStatistics => 'Sales Statistics';
+
+  @override
+  String get workbenchDepositRefund => 'Deposit Refund';
+
+  @override
+  String get workbenchOfflineUserRegistration => 'Offline User\nRegistration';
+
+  @override
+  String get workbenchInstallmentPayment => 'Installment\nPayment';
+
+  @override
+  String get workbenchUserQuery => 'User Query';
+
+  @override
+  String get workbenchScheduleMaintenance => 'Schedule\nMaintenance';
+
+  @override
+  String get workbenchRepairRegistration => 'Repair\nRegistration';
+
+  @override
+  String get workbenchRoadsideAssistance => 'Roadside\nAssistance';
+
+  @override
+  String get workbenchDeviceUnbinding => 'Device\nUnbinding';
+
+  @override
+  String get workbenchAfterSalesBinding => 'After-sales\nBinding';
+
+  @override
+  String get workbenchCabinetOperation => 'Cabinet\nOperation';
+
+  @override
+  String get workbenchCabinetPutaway => 'Cabinet\nPutaway';
+
+  @override
+  String get workbenchCabinetUnshelve => 'Cabinet\nUnshelve';
+
+  @override
   String get profileGreeting => '在这里管理你的个人信息。';
 
   @override
@@ -2751,6 +2838,69 @@ class AppLocalizationsZh extends AppLocalizations {
   String get installmentPayUploadLimit => '最多上传5张';
 
   @override
+  String get installmentPayUserId => '用户ID';
+
+  @override
+  String get installmentPayUserIdHint => '输入用户ID或扫描二维码';
+
+  @override
+  String get installmentPayOrder => '订单';
+
+  @override
+  String get installmentPayTotalConsumption => '总消费';
+
+  @override
+  String get installmentPayAssets => '资产';
+
+  @override
+  String get installmentPayNoOverdue => '当前分期订单无逾期记录';
+
+  @override
+  String get installmentPayPaymentOrder => '缴费订单';
+
+  @override
+  String get installmentPaySelectOrder => '选择缴费订单';
+
+  @override
+  String get installmentPaySelectOrderTitle => '选择缴费订单';
+
+  @override
+  String get installmentPayReselect => '重新选择';
+
+  @override
+  String get installmentPayDevice => '设备';
+
+  @override
+  String get installmentPayDueDate => '最晚还款日期';
+
+  @override
+  String get installmentPayMonthlyAmount => '月还款金额';
+
+  @override
+  String get installmentPayRemainingAmount => '剩余金额';
+
+  @override
+  String get installmentPayRemainingInstallments => '剩余期数';
+
+  @override
+  String get installmentPayVoucher => '缴费凭证';
+
+  @override
+  String get installmentPaySuccessTitle => '提交成功';
+
+  @override
+  String get installmentPaySuccessHint => '请进入订单记录页面查看';
+
+  @override
+  String get installmentPayDocumentNumber => '单据编号';
+
+  @override
+  String get installmentPayCopied => '已复制';
+
+  @override
+  String get installmentPayReturnWorkbench => '返回工作台';
+
+  @override
   String get merchantReplaceTitle => '商户置换';
 
   @override
@@ -2776,6 +2926,27 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get merchantReplaceSameSn => '新旧电池不能相同';
+
+  @override
+  String get merchantReplaceUserId => 'User ID';
+
+  @override
+  String get merchantReplaceUserIdHint => 'Enter User ID or scan QR code';
+
+  @override
+  String get merchantReplaceBoundBatterySn => 'Bound Battery SN';
+
+  @override
+  String get merchantReplaceBatterySnHint => 'Enter battery SN or scan QR code';
+
+  @override
+  String get merchantReplaceNewBattery => 'New Battery';
+
+  @override
+  String get merchantReplaceReasons => 'Reasons';
+
+  @override
+  String get merchantReplaceReasonsHint => 'Enter reasons for battery swapping';
 
   @override
   String get saleSummaryTitle => '销售汇总';
@@ -2833,6 +3004,39 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get saleSummaryPayWay => '支付方式';
+
+  @override
+  String get saleSummaryTotalSalesAmount => 'Total sales amount(\$)';
+
+  @override
+  String get saleSummaryTransactionOrder => 'Transaction order';
+
+  @override
+  String get saleSummarySigningRateTitle => 'Signing rate & Order value';
+
+  @override
+  String get saleSummaryOrderSigningRate => 'Order signing rate';
+
+  @override
+  String get saleSummaryAverageOrderPrice => 'Average order price';
+
+  @override
+  String get saleSummarySalesAmount => 'Sales Amount';
+
+  @override
+  String get saleSummaryTransactionOrderTab => 'Transaction Order';
+
+  @override
+  String get saleSummarySalesData => 'Sales Data';
+
+  @override
+  String get saleSummaryAfterSalesData => 'After-Sales Data';
+
+  @override
+  String get saleSummarySelectData => 'Select Data Type';
+
+  @override
+  String get saleSummaryViewVoucher => 'View Voucher';
 
   @override
   String get cabinetPutawayTitle => '柜机上架';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/area_country.dart';
@@ -152,14 +153,14 @@ class _OfflineUserRegisterPageState
         Container(
           width: 64,
           height: 64,
-          decoration: BoxDecoration(
-            color: const Color(0xFF2196F3),
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: const Icon(
-            Icons.person_add_alt_1,
-            color: Colors.white,
-            size: 32,
+          
+          child: ClipRRect(
+            child: Image.asset(
+              'assets/android/mipmap-xxhdpi/icon_offline_register.webp',
+              width: 64,
+              height: 64,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -471,10 +472,9 @@ class _OfflineUserRegisterPageState
               ),
               GestureDetector(
                 onTap: _scanReferrer,
-                child: const Icon(
-                  Icons.qr_code_scanner,
-                  color: Color(0xFF999999),
+                child: AppIcons.scanIcon(
                   size: 22,
+                  color: const Color(0xFF999999),
                 ),
               ),
             ],

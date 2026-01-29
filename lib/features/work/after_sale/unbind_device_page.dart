@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/after_sale/unbind_device_controller.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -66,17 +67,16 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                       padding: const EdgeInsets.only(bottom: 24),
                       child: Column(
                         children: [
-                          Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFF6B5B),
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Icon(
-                              Icons.phonelink_erase,
-                              color: Colors.white,
-                              size: 40,
+                          SizedBox(
+                            width: 64,
+                            height: 64,
+                            child: ClipRRect(
+                              child: Image.asset(
+                                'assets/android/mipmap-xxhdpi/icon_device_unbinding.webp',
+                                width: 64,
+                                height: 64,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -294,10 +294,9 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
               if (onScan != null)
                 GestureDetector(
                   onTap: onScan,
-                  child: const Icon(
-                    Icons.qr_code_scanner,
-                    color: Colors.black54,
+                  child: AppIcons.scanIcon(
                     size: 24,
+                    color: Colors.black54,
                   ),
                 ),
             ],

@@ -15,6 +15,8 @@ class InstallmentPayState {
   final List<PeriodOrder> orders;
   final PeriodOrder? selectedOrder;
   final List<String> attachments;
+  final bool submitSuccess;
+  final String? documentNo;
 
   const InstallmentPayState({
     this.loadingUser = false,
@@ -24,6 +26,8 @@ class InstallmentPayState {
     this.orders = const [],
     this.selectedOrder,
     this.attachments = const [],
+    this.submitSuccess = false,
+    this.documentNo,
   });
 
   InstallmentPayState copyWith({
@@ -34,6 +38,8 @@ class InstallmentPayState {
     List<PeriodOrder>? orders,
     PeriodOrder? selectedOrder,
     List<String>? attachments,
+    bool? submitSuccess,
+    String? documentNo,
   }) {
     return InstallmentPayState(
       loadingUser: loadingUser ?? this.loadingUser,
@@ -43,6 +49,8 @@ class InstallmentPayState {
       orders: orders ?? this.orders,
       selectedOrder: selectedOrder ?? this.selectedOrder,
       attachments: attachments ?? this.attachments,
+      submitSuccess: submitSuccess ?? this.submitSuccess,
+      documentNo: documentNo ?? this.documentNo,
     );
   }
 }
@@ -120,7 +128,7 @@ class InstallmentPayNotifier extends Notifier<InstallmentPayState> {
       return false;
     }
     state = state.copyWith(submitting: true);
-    final response = await _api.post<Object>(
+    final response = await _api.post<Map<String, dynamic>>(
       ApiPath.payPeriod,
       data: {
         'cardNum': cardNum,
@@ -128,10 +136,23 @@ class InstallmentPayNotifier extends Notifier<InstallmentPayState> {
         'orderNo': order.orderNo ?? '',
         'period': order.period ?? 0,
       },
-      parser: (json) => json ?? Object(),
+      parser: (json) => json is Map<String, dynamic> ? json : <String, dynamic>{},
     );
+    if (response.isSuccess) {
+      final docNo = response.result?['documentNo'] as String?;
+      state = state.copyWith(
+        submitting: false,
+        submitSuccess: true,
+        documentNo: docNo,
+      );
+      return true;
+    }
     state = state.copyWith(submitting: false);
-    return response.isSuccess;
+    return false;
+  }
+
+  void reset() {
+    state = const InstallmentPayState();
   }
 
   Future<Uint8List?> _compressImage(String path) async {

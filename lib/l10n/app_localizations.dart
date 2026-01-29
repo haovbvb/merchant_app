@@ -245,6 +245,180 @@ abstract class AppLocalizations {
   /// **'Refresh'**
   String get workbenchRefresh;
 
+  /// No description provided for @workbenchThisMonthSales.
+  ///
+  /// In en, this message translates to:
+  /// **'This Month\'s Sales'**
+  String get workbenchThisMonthSales;
+
+  /// No description provided for @workbenchTransactionAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Amount'**
+  String get workbenchTransactionAmount;
+
+  /// No description provided for @workbenchOrderQuantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Order Quantity'**
+  String get workbenchOrderQuantity;
+
+  /// No description provided for @workbenchChooseYourRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose Your Role'**
+  String get workbenchChooseYourRole;
+
+  /// No description provided for @workbenchRoleSale.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale'**
+  String get workbenchRoleSale;
+
+  /// No description provided for @workbenchRoleOperations.
+  ///
+  /// In en, this message translates to:
+  /// **'Operations'**
+  String get workbenchRoleOperations;
+
+  /// No description provided for @workbenchRoleWarehouseKeeper.
+  ///
+  /// In en, this message translates to:
+  /// **'Warehouse\nKeeper'**
+  String get workbenchRoleWarehouseKeeper;
+
+  /// No description provided for @workbenchShippingEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Shipping Entry'**
+  String get workbenchShippingEntry;
+
+  /// No description provided for @workbenchDeviceIssue.
+  ///
+  /// In en, this message translates to:
+  /// **'Device Issue'**
+  String get workbenchDeviceIssue;
+
+  /// No description provided for @workbenchDeviceReception.
+  ///
+  /// In en, this message translates to:
+  /// **'Device Reception'**
+  String get workbenchDeviceReception;
+
+  /// No description provided for @workbenchInventoryCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory Count'**
+  String get workbenchInventoryCount;
+
+  /// No description provided for @workbenchDeviceQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'Device Query'**
+  String get workbenchDeviceQuery;
+
+  /// No description provided for @workbenchSalesBinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Binding'**
+  String get workbenchSalesBinding;
+
+  /// No description provided for @workbenchLeaseBinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Lease Binding'**
+  String get workbenchLeaseBinding;
+
+  /// No description provided for @workbenchSwapBinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap Binding'**
+  String get workbenchSwapBinding;
+
+  /// No description provided for @workbenchManualSwap.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual Swap'**
+  String get workbenchManualSwap;
+
+  /// No description provided for @workbenchSalesStatistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Statistics'**
+  String get workbenchSalesStatistics;
+
+  /// No description provided for @workbenchDepositRefund.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit Refund'**
+  String get workbenchDepositRefund;
+
+  /// No description provided for @workbenchOfflineUserRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline User\nRegistration'**
+  String get workbenchOfflineUserRegistration;
+
+  /// No description provided for @workbenchInstallmentPayment.
+  ///
+  /// In en, this message translates to:
+  /// **'Installment\nPayment'**
+  String get workbenchInstallmentPayment;
+
+  /// No description provided for @workbenchUserQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'User Query'**
+  String get workbenchUserQuery;
+
+  /// No description provided for @workbenchScheduleMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule\nMaintenance'**
+  String get workbenchScheduleMaintenance;
+
+  /// No description provided for @workbenchRepairRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Repair\nRegistration'**
+  String get workbenchRepairRegistration;
+
+  /// No description provided for @workbenchRoadsideAssistance.
+  ///
+  /// In en, this message translates to:
+  /// **'Roadside\nAssistance'**
+  String get workbenchRoadsideAssistance;
+
+  /// No description provided for @workbenchDeviceUnbinding.
+  ///
+  /// In en, this message translates to:
+  /// **'Device\nUnbinding'**
+  String get workbenchDeviceUnbinding;
+
+  /// No description provided for @workbenchAfterSalesBinding.
+  ///
+  /// In en, this message translates to:
+  /// **'After-sales\nBinding'**
+  String get workbenchAfterSalesBinding;
+
+  /// No description provided for @workbenchCabinetOperation.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet\nOperation'**
+  String get workbenchCabinetOperation;
+
+  /// No description provided for @workbenchCabinetPutaway.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet\nPutaway'**
+  String get workbenchCabinetPutaway;
+
+  /// No description provided for @workbenchCabinetUnshelve.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabinet\nUnshelve'**
+  String get workbenchCabinetUnshelve;
+
   /// Helper text in the profile tab.
   ///
   /// In en, this message translates to:
@@ -5579,10 +5753,136 @@ abstract class AppLocalizations {
   /// **'Up to 5 images'**
   String get installmentPayUploadLimit;
 
+  /// No description provided for @installmentPayUserId.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get installmentPayUserId;
+
+  /// No description provided for @installmentPayUserIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter User ID or scan QR code'**
+  String get installmentPayUserIdHint;
+
+  /// No description provided for @installmentPayOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get installmentPayOrder;
+
+  /// No description provided for @installmentPayTotalConsumption.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Consumption'**
+  String get installmentPayTotalConsumption;
+
+  /// No description provided for @installmentPayAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Assets'**
+  String get installmentPayAssets;
+
+  /// No description provided for @installmentPayNoOverdue.
+  ///
+  /// In en, this message translates to:
+  /// **'Orders currently in installments have no overdue records'**
+  String get installmentPayNoOverdue;
+
+  /// No description provided for @installmentPayPaymentOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Order'**
+  String get installmentPayPaymentOrder;
+
+  /// No description provided for @installmentPaySelectOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Select payment order'**
+  String get installmentPaySelectOrder;
+
+  /// No description provided for @installmentPaySelectOrderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Payment Order'**
+  String get installmentPaySelectOrderTitle;
+
+  /// No description provided for @installmentPayReselect.
+  ///
+  /// In en, this message translates to:
+  /// **'Reselect'**
+  String get installmentPayReselect;
+
+  /// No description provided for @installmentPayDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Device'**
+  String get installmentPayDevice;
+
+  /// No description provided for @installmentPayDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'The latest due date'**
+  String get installmentPayDueDate;
+
+  /// No description provided for @installmentPayMonthlyAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly repayment amount'**
+  String get installmentPayMonthlyAmount;
+
+  /// No description provided for @installmentPayRemainingAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining amount'**
+  String get installmentPayRemainingAmount;
+
+  /// No description provided for @installmentPayRemainingInstallments.
+  ///
+  /// In en, this message translates to:
+  /// **'Remaining installments'**
+  String get installmentPayRemainingInstallments;
+
+  /// No description provided for @installmentPayVoucher.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Voucher'**
+  String get installmentPayVoucher;
+
+  /// No description provided for @installmentPaySuccessTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit successfully'**
+  String get installmentPaySuccessTitle;
+
+  /// No description provided for @installmentPaySuccessHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter the order record page to view'**
+  String get installmentPaySuccessHint;
+
+  /// No description provided for @installmentPayDocumentNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Document Number'**
+  String get installmentPayDocumentNumber;
+
+  /// No description provided for @installmentPayCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get installmentPayCopied;
+
+  /// No description provided for @installmentPayReturnWorkbench.
+  ///
+  /// In en, this message translates to:
+  /// **'Return to Workbench'**
+  String get installmentPayReturnWorkbench;
+
   /// No description provided for @merchantReplaceTitle.
   ///
   /// In en, this message translates to:
-  /// **'Merchant Replace'**
+  /// **'Manual Swap'**
   String get merchantReplaceTitle;
 
   /// No description provided for @merchantReplaceCardNum.
@@ -5632,6 +5932,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New battery cannot be same as old'**
   String get merchantReplaceSameSn;
+
+  /// No description provided for @merchantReplaceUserId.
+  ///
+  /// In en, this message translates to:
+  /// **'User ID'**
+  String get merchantReplaceUserId;
+
+  /// No description provided for @merchantReplaceUserIdHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter User ID or scan QR code'**
+  String get merchantReplaceUserIdHint;
+
+  /// No description provided for @merchantReplaceBoundBatterySn.
+  ///
+  /// In en, this message translates to:
+  /// **'Bound Battery SN'**
+  String get merchantReplaceBoundBatterySn;
+
+  /// No description provided for @merchantReplaceBatterySnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter battery SN or scan QR code'**
+  String get merchantReplaceBatterySnHint;
+
+  /// No description provided for @merchantReplaceNewBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'New Battery'**
+  String get merchantReplaceNewBattery;
+
+  /// No description provided for @merchantReplaceReasons.
+  ///
+  /// In en, this message translates to:
+  /// **'Reasons'**
+  String get merchantReplaceReasons;
+
+  /// No description provided for @merchantReplaceReasonsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter reasons for battery swapping'**
+  String get merchantReplaceReasonsHint;
 
   /// No description provided for @saleSummaryTitle.
   ///
@@ -5746,6 +6088,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Pay Way'**
   String get saleSummaryPayWay;
+
+  /// No description provided for @saleSummaryTotalSalesAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Total sales amount(\$)'**
+  String get saleSummaryTotalSalesAmount;
+
+  /// No description provided for @saleSummaryTransactionOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction order'**
+  String get saleSummaryTransactionOrder;
+
+  /// No description provided for @saleSummarySigningRateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Signing rate & Order value'**
+  String get saleSummarySigningRateTitle;
+
+  /// No description provided for @saleSummaryOrderSigningRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Order signing rate'**
+  String get saleSummaryOrderSigningRate;
+
+  /// No description provided for @saleSummaryAverageOrderPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Average order price'**
+  String get saleSummaryAverageOrderPrice;
+
+  /// No description provided for @saleSummarySalesAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Amount'**
+  String get saleSummarySalesAmount;
+
+  /// No description provided for @saleSummaryTransactionOrderTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Transaction Order'**
+  String get saleSummaryTransactionOrderTab;
+
+  /// No description provided for @saleSummarySalesData.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Data'**
+  String get saleSummarySalesData;
+
+  /// No description provided for @saleSummaryAfterSalesData.
+  ///
+  /// In en, this message translates to:
+  /// **'After-Sales Data'**
+  String get saleSummaryAfterSalesData;
+
+  /// No description provided for @saleSummarySelectData.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Data Type'**
+  String get saleSummarySelectData;
+
+  /// No description provided for @saleSummaryViewVoucher.
+  ///
+  /// In en, this message translates to:
+  /// **'View Voucher'**
+  String get saleSummaryViewVoucher;
 
   /// No description provided for @cabinetPutawayTitle.
   ///

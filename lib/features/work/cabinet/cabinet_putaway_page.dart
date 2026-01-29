@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_putaway_controller.dart';
@@ -67,17 +68,16 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
                   padding: const EdgeInsets.only(bottom: 24),
                   child: Column(
                     children: [
-                      Container(
-                        width: 72,
-                        height: 72,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF4CAF50),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Icon(
-                          Icons.arrow_upward,
-                          color: Colors.white,
-                          size: 36,
+                      SizedBox(
+                        width: 64,
+                        height: 64,
+                        child: ClipRRect(
+                          child: Image.asset(
+                            'assets/android/mipmap-xxhdpi/icon_release_station.png',
+                            width: 64,
+                            height: 64,
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -125,10 +125,9 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
                             ),
                             GestureDetector(
                               onTap: _scanSn,
-                              child: const Icon(
-                                Icons.qr_code_scanner,
-                                color: Color(0xFF333333),
+                              child: AppIcons.scanIcon(
                                 size: 24,
+                                color: const Color(0xFF333333),
                               ),
                             ),
                           ],

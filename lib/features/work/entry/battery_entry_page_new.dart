@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/battery_type.dart';
@@ -235,7 +236,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
               Expanded(
                 child: FilledButton.icon(
                   onPressed: _addByScan,
-                  icon: const Icon(Icons.qr_code_scanner, size: 18),
+                  icon: AppIcons.scanIcon(size: 18, color: Colors.white),
                   label: Text(l10n.entryScanEntryButton),
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF333333),
@@ -570,9 +571,8 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
               if (onScan != null)
                 IconButton(
                   onPressed: onScan,
-                  icon: const Icon(
-                    Icons.qr_code_scanner,
-                    color: Color(0xFF666666),
+                  icon: AppIcons.scanIcon(
+                    color: const Color(0xFF666666),
                   ),
                 ),
             ],

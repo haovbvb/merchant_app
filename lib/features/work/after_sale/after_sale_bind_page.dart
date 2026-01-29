@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/after_sale_can_bind_order_bean.dart';
 import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
@@ -59,16 +60,15 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                       child: Column(
                         children: [
                           Container(
-                            width: 80,
-                            height: 80,
-                            decoration: BoxDecoration(
-                              color: AppColors.primaryColor,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: const Icon(
-                              Icons.link,
-                              color: Colors.white,
-                              size: 40,
+                            width: 64,
+                            height: 64,
+                            child: ClipRRect(
+                              child: Image.asset(
+                                'assets/android/mipmap-xxhdpi/icon_aftersale_binding.webp',
+                                width: 64,
+                                height: 64,
+                                fit: BoxFit.cover,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 16),
@@ -263,10 +263,9 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
               if (onScan != null)
                 GestureDetector(
                   onTap: onScan,
-                  child: const Icon(
-                    Icons.qr_code_scanner,
-                    color: Colors.black54,
+                  child: AppIcons.scanIcon(
                     size: 24,
+                    color: Colors.black54,
                   ),
                 ),
             ],

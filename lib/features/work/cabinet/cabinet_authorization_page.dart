@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:merchant_app/app/styles/colors.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/cabinet_authorization_list.dart';
@@ -332,7 +333,7 @@ class _SelectStationPageState extends ConsumerState<_SelectStationPage> {
                 prefixIcon: const Icon(Icons.search, color: Colors.black38),
                 suffixIcon: IconButton(
                   onPressed: _scanQRCode,
-                  icon: const Icon(Icons.qr_code_scanner),
+                  icon: AppIcons.scanIcon(),
                 ),
                 filled: true,
                 fillColor: const Color(0xFFF5F5F5),

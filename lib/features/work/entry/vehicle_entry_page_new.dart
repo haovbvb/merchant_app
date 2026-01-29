@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/car_type.dart';
@@ -163,7 +164,11 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
             children: [
               Expanded(
                 child: _buildActionButton(
-                  icon: Icons.edit_outlined,
+                  icon: const Icon(
+                    Icons.edit_outlined,
+                    size: 18,
+                    color: Color(0xFF4CAF50),
+                  ),
                   label: l10n.entryManualEntryButton,
                   isPrimary: false,
                   onTap: _addManual,
@@ -172,7 +177,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildActionButton(
-                  icon: Icons.qr_code_scanner,
+                  icon: AppIcons.scanIcon(size: 18, color: Colors.white),
                   label: l10n.entryScanEntryButton,
                   isPrimary: true,
                   onTap: _addByScan,
@@ -199,7 +204,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
   }
 
   Widget _buildActionButton({
-    required IconData icon,
+    required Widget icon,
     required String label,
     required bool isPrimary,
     required VoidCallback onTap,
@@ -219,11 +224,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 18,
-              color: isPrimary ? Colors.white : const Color(0xFF4CAF50),
-            ),
+            icon,
             const SizedBox(width: 6),
             Text(
               label,
@@ -517,9 +518,8 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
               if (onScan != null)
                 IconButton(
                   onPressed: onScan,
-                  icon: const Icon(
-                    Icons.qr_code_scanner,
-                    color: Color(0xFF666666),
+                  icon: AppIcons.scanIcon(
+                    color: const Color(0xFF666666),
                   ),
                 ),
             ],

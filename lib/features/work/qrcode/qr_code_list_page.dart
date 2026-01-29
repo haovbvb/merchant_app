@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/qrcode/qr_code_list_controller.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -66,7 +67,7 @@ class _QrCodeListPageState extends ConsumerState<QrCodeListPage> {
           title: Text(widget.title ?? l10n.qrcodeListTitle),
           actions: [
             IconButton(
-              icon: const Icon(Icons.qr_code_scanner),
+              icon: AppIcons.scanIcon(),
               onPressed: () => _scanAndAdd(notifier),
             ),
             if (widget.selectMode)
@@ -141,7 +142,7 @@ class _QrCodeListPageState extends ConsumerState<QrCodeListPage> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () => _scanAndAdd(notifier),
-          child: const Icon(Icons.qr_code_scanner),
+          child: AppIcons.scanIcon(),
         ),
       ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/features/work/entry/ship_success_page.dart';
@@ -101,7 +102,7 @@ class _BatteryShipPageState extends State<BatteryShipPage> {
               ),
               const SizedBox(width: 8),
               IconButton(
-                icon: const Icon(Icons.qr_code_scanner),
+                icon: AppIcons.scanIcon(),
                 onPressed: _scanAndAdd,
               ),
             ],

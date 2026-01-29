@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 
@@ -52,7 +53,7 @@ class _EntryScanPageState extends State<EntryScanPage> {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.qr_code_scanner),
+                  icon: AppIcons.scanIcon(),
                   onPressed: () => _scan(context),
                 ),
               ),

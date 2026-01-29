@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/pack.dart';
@@ -84,13 +85,16 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
           width: 64,
           height: 64,
           decoration: BoxDecoration(
-            color: const Color(0xFFFFA726),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
           ),
-          child: const Icon(
-            Icons.vpn_key,
-            color: Colors.white,
-            size: 32,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16),
+            child: Image.asset(
+              'assets/android/mipmap-xxhdpi/icon_lease_bind.png',
+              width: 64,
+              height: 64,
+              fit: BoxFit.cover,
+            ),
           ),
         ),
         const SizedBox(height: 12),
@@ -153,10 +157,9 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
               ),
               GestureDetector(
                 onTap: _scanSn,
-                child: const Icon(
-                  Icons.qr_code_scanner,
-                  color: Color(0xFF333333),
+                child: AppIcons.scanIcon(
                   size: 24,
+                  color: const Color(0xFF333333),
                 ),
               ),
             ],

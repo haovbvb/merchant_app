@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/deposit_refund_info_bean.dart';
@@ -73,7 +74,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFFE8E8E8), Color(0xFFF5F5F5)],
+          colors: [Color(0xFFF5F5F5), Color(0xFFF5F5F5)],
         ),
       ),
       child: Column(
@@ -88,23 +89,19 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
           ),
           // 图标
           Container(
-            width: 72,
-            height: 72,
+            width: 64,
+            height: 64,
             decoration: BoxDecoration(
-              color: const Color(0xFF3D4A7A),
               borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF3D4A7A).withValues(alpha: 0.3),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
             ),
-            child: const Icon(
-              Icons.receipt_long_outlined,
-              color: Colors.white,
-              size: 36,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(
+                'assets/android/mipmap-xxhdpi/icon_deposit_refund.webp',
+                width: 64,
+                height: 64,
+                fit: BoxFit.cover,
+              ),
             ),
           ),
           const SizedBox(height: 12),
@@ -172,10 +169,9 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
                 onTap: () => _scanUserId(notifier),
                 child: Container(
                   padding: const EdgeInsets.all(8),
-                  child: const Icon(
-                    Icons.qr_code_scanner,
+                  child: AppIcons.scanIcon(
                     size: 24,
-                    color: Color(0xFF333333),
+                    color: const Color(0xFF333333),
                   ),
                 ),
               ),

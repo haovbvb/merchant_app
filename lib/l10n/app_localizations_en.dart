@@ -84,6 +84,93 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workbenchRefresh => 'Refresh';
 
   @override
+  String get workbenchThisMonthSales => 'This Month\'s Sales';
+
+  @override
+  String get workbenchTransactionAmount => 'Transaction Amount';
+
+  @override
+  String get workbenchOrderQuantity => 'Order Quantity';
+
+  @override
+  String get workbenchChooseYourRole => 'Choose Your Role';
+
+  @override
+  String get workbenchRoleSale => 'Sale';
+
+  @override
+  String get workbenchRoleOperations => 'Operations';
+
+  @override
+  String get workbenchRoleWarehouseKeeper => 'Warehouse\nKeeper';
+
+  @override
+  String get workbenchShippingEntry => 'Shipping Entry';
+
+  @override
+  String get workbenchDeviceIssue => 'Device Issue';
+
+  @override
+  String get workbenchDeviceReception => 'Device Reception';
+
+  @override
+  String get workbenchInventoryCount => 'Inventory Count';
+
+  @override
+  String get workbenchDeviceQuery => 'Device Query';
+
+  @override
+  String get workbenchSalesBinding => 'Sales Binding';
+
+  @override
+  String get workbenchLeaseBinding => 'Lease Binding';
+
+  @override
+  String get workbenchSwapBinding => 'Swap Binding';
+
+  @override
+  String get workbenchManualSwap => 'Manual Swap';
+
+  @override
+  String get workbenchSalesStatistics => 'Sales Statistics';
+
+  @override
+  String get workbenchDepositRefund => 'Deposit Refund';
+
+  @override
+  String get workbenchOfflineUserRegistration => 'Offline User\nRegistration';
+
+  @override
+  String get workbenchInstallmentPayment => 'Installment\nPayment';
+
+  @override
+  String get workbenchUserQuery => 'User Query';
+
+  @override
+  String get workbenchScheduleMaintenance => 'Schedule\nMaintenance';
+
+  @override
+  String get workbenchRepairRegistration => 'Repair\nRegistration';
+
+  @override
+  String get workbenchRoadsideAssistance => 'Roadside\nAssistance';
+
+  @override
+  String get workbenchDeviceUnbinding => 'Device\nUnbinding';
+
+  @override
+  String get workbenchAfterSalesBinding => 'After-sales\nBinding';
+
+  @override
+  String get workbenchCabinetOperation => 'Cabinet\nOperation';
+
+  @override
+  String get workbenchCabinetPutaway => 'Cabinet\nPutaway';
+
+  @override
+  String get workbenchCabinetUnshelve => 'Cabinet\nUnshelve';
+
+  @override
   String get profileGreeting => 'Manage your personal settings here.';
 
   @override
@@ -2751,7 +2838,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String get installmentPayUploadLimit => 'Up to 5 images';
 
   @override
-  String get merchantReplaceTitle => 'Merchant Replace';
+  String get installmentPayUserId => 'User ID';
+
+  @override
+  String get installmentPayUserIdHint => 'Enter User ID or scan QR code';
+
+  @override
+  String get installmentPayOrder => 'Order';
+
+  @override
+  String get installmentPayTotalConsumption => 'Total Consumption';
+
+  @override
+  String get installmentPayAssets => 'Assets';
+
+  @override
+  String get installmentPayNoOverdue => 'Orders currently in installments have no overdue records';
+
+  @override
+  String get installmentPayPaymentOrder => 'Payment Order';
+
+  @override
+  String get installmentPaySelectOrder => 'Select payment order';
+
+  @override
+  String get installmentPaySelectOrderTitle => 'Select Payment Order';
+
+  @override
+  String get installmentPayReselect => 'Reselect';
+
+  @override
+  String get installmentPayDevice => 'Device';
+
+  @override
+  String get installmentPayDueDate => 'The latest due date';
+
+  @override
+  String get installmentPayMonthlyAmount => 'Monthly repayment amount';
+
+  @override
+  String get installmentPayRemainingAmount => 'Remaining amount';
+
+  @override
+  String get installmentPayRemainingInstallments => 'Remaining installments';
+
+  @override
+  String get installmentPayVoucher => 'Payment Voucher';
+
+  @override
+  String get installmentPaySuccessTitle => 'Submit successfully';
+
+  @override
+  String get installmentPaySuccessHint => 'Please enter the order record page to view';
+
+  @override
+  String get installmentPayDocumentNumber => 'Document Number';
+
+  @override
+  String get installmentPayCopied => 'Copied';
+
+  @override
+  String get installmentPayReturnWorkbench => 'Return to Workbench';
+
+  @override
+  String get merchantReplaceTitle => 'Manual Swap';
 
   @override
   String get merchantReplaceCardNum => 'Card Number';
@@ -2776,6 +2926,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get merchantReplaceSameSn => 'New battery cannot be same as old';
+
+  @override
+  String get merchantReplaceUserId => 'User ID';
+
+  @override
+  String get merchantReplaceUserIdHint => 'Enter User ID or scan QR code';
+
+  @override
+  String get merchantReplaceBoundBatterySn => 'Bound Battery SN';
+
+  @override
+  String get merchantReplaceBatterySnHint => 'Enter battery SN or scan QR code';
+
+  @override
+  String get merchantReplaceNewBattery => 'New Battery';
+
+  @override
+  String get merchantReplaceReasons => 'Reasons';
+
+  @override
+  String get merchantReplaceReasonsHint => 'Enter reasons for battery swapping';
 
   @override
   String get saleSummaryTitle => 'Sales Summary';
@@ -2833,6 +3004,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get saleSummaryPayWay => 'Pay Way';
+
+  @override
+  String get saleSummaryTotalSalesAmount => 'Total sales amount(\$)';
+
+  @override
+  String get saleSummaryTransactionOrder => 'Transaction order';
+
+  @override
+  String get saleSummarySigningRateTitle => 'Signing rate & Order value';
+
+  @override
+  String get saleSummaryOrderSigningRate => 'Order signing rate';
+
+  @override
+  String get saleSummaryAverageOrderPrice => 'Average order price';
+
+  @override
+  String get saleSummarySalesAmount => 'Sales Amount';
+
+  @override
+  String get saleSummaryTransactionOrderTab => 'Transaction Order';
+
+  @override
+  String get saleSummarySalesData => 'Sales Data';
+
+  @override
+  String get saleSummaryAfterSalesData => 'After-Sales Data';
+
+  @override
+  String get saleSummarySelectData => 'Select Data Type';
+
+  @override
+  String get saleSummaryViewVoucher => 'View Voucher';
 
   @override
   String get cabinetPutawayTitle => 'Cabinet Putaway';

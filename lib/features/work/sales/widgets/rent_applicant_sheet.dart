@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/map/address_picker_page.dart';
 import 'package:merchant_app/features/work/map/address_result.dart';
@@ -165,9 +166,8 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
                         ),
                         GestureDetector(
                           onTap: _scanUserId,
-                          child: const Icon(
-                            Icons.qr_code_scanner,
-                            color: Color(0xFF333333),
+                          child: AppIcons.scanIcon(
+                            color: const Color(0xFF333333),
                           ),
                         ),
                       ],

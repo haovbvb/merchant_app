@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/warehouse_info.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -153,7 +154,11 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
                           children: [
                             Expanded(
                               child: _ActionButton(
-                                icon: Icons.edit_outlined,
+                                icon: const Icon(
+                                  Icons.edit_outlined,
+                                  size: 18,
+                                  color: Color(0xFF666666),
+                                ),
                                 label: l10n.deviceIssueEnterSn,
                                 outlined: true,
                                 onTap: () => _showSnInputDialog(context, l10n, notifier),
@@ -162,7 +167,10 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: _ActionButton(
-                                icon: Icons.qr_code_scanner,
+                                icon: AppIcons.scanIcon(
+                                  size: 18,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
                                 label: l10n.deviceIssueScanQrCode,
                                 outlined: false,
                                 onTap: () => _scanAndAdd(context, notifier),
@@ -520,7 +528,7 @@ class _ActionButton extends StatelessWidget {
     required this.onTap,
   });
 
-  final IconData icon;
+  final Widget icon;
   final String label;
   final bool outlined;
   final VoidCallback onTap;
@@ -543,11 +551,7 @@ class _ActionButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: 18,
-              color: outlined ? const Color(0xFF666666) : primaryColor,
-            ),
+            icon,
             const SizedBox(width: 6),
             Text(
               label,

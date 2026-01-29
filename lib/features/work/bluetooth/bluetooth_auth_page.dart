@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
+import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/bluetooth_permission.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
@@ -420,7 +421,7 @@ class _BluetoothAuthorizationPageState
                     ),
                     suffixIcon: IconButton(
                       onPressed: _scanQRCode,
-                      icon: const Icon(Icons.qr_code_scanner),
+                      icon: AppIcons.scanIcon(),
                     ),
                   ),
                 ),

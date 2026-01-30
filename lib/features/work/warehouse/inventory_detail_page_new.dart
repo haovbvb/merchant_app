@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -63,7 +64,7 @@ class _InventoryDetailPageNewState
     final isCreateMode = widget.createMode && detail?.inventoryNo == null;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F7),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -137,7 +138,7 @@ class _InventoryDetailPageNewState
     if (!widget.createMode && detail != null) {
       return Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF4CAF50),
+          color: AppColors.primaryColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -197,7 +198,7 @@ class _InventoryDetailPageNewState
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF333333),
+                            color: AppColors.black06Text,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -251,7 +252,7 @@ class _InventoryDetailPageNewState
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 if (detail?.warehouseAddress != null) ...[
@@ -297,7 +298,7 @@ class _InventoryDetailPageNewState
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
           const SizedBox(height: 16),
@@ -327,7 +328,7 @@ class _InventoryDetailPageNewState
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                     ],
@@ -350,7 +351,7 @@ class _InventoryDetailPageNewState
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                     ],
@@ -371,7 +372,7 @@ class _InventoryDetailPageNewState
                 icon: AppIcons.scanIcon(color: Colors.white),
                 label: Text(l10n.inventoryScanToReceive),
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF4CAF50),
+                  backgroundColor: AppColors.primaryColor,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -408,7 +409,7 @@ class _InventoryDetailPageNewState
                         item.deviceSn,
                         style: const TextStyle(
                           fontSize: 14,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                     ),
@@ -432,7 +433,7 @@ class _InventoryDetailPageNewState
     switch (status) {
       case 1: // Inventoryed
         label = l10n.inventoryStatusInventoryed;
-        textColor = const Color(0xFF4CAF50);
+        textColor = AppColors.primaryColor;
         bgColor = const Color(0xFFE8F5E9);
         break;
       case 2: // Not in stock
@@ -484,7 +485,7 @@ class _InventoryDetailPageNewState
                   ? null
                   : () => _showRevokeConfirm(l10n, notifier),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF333333),
+                foregroundColor: AppColors.black06Text,
                 side: const BorderSide(color: Color(0xFFDDDDDD)),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -502,8 +503,8 @@ class _InventoryDetailPageNewState
                   ? null
                   : () => _showCompleteConfirm(l10n, notifier),
               style: OutlinedButton.styleFrom(
-                foregroundColor: const Color(0xFF4CAF50),
-                side: const BorderSide(color: Color(0xFF4CAF50)),
+                foregroundColor: AppColors.primaryColor,
+                side: const BorderSide(color: AppColors.primaryColor),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),

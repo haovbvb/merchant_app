@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/warehouse_info.dart';
@@ -42,7 +43,7 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
     final notifier = ref.read(transportCreateProvider.notifier);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         title: Text(_getCreateTitle(l10n)),
       ),
@@ -203,7 +204,7 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
                                         sn,
                                         style: const TextStyle(
                                           fontSize: 14,
-                                          color: Color(0xFF333333),
+                                          color: AppColors.black06Text,
                                         ),
                                       ),
                                     ),
@@ -493,7 +494,7 @@ class _SelectRow extends StatelessWidget {
             label,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
           const Spacer(),
@@ -629,9 +630,9 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Container(
-              height: 40,
+              height: 36,
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F5F5),
+                color: const Color(0xFFF2F4F7),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: TextField(
@@ -678,7 +679,7 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
                         : _selectedCity,
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                   ),
                   const Icon(

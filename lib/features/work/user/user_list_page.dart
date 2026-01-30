@@ -51,7 +51,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -79,7 +79,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
         children: [
           // Filter tabs
           Container(
-            color: Colors.white,
+            color: AppColors.bgColor,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
@@ -96,10 +96,10 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         decoration: BoxDecoration(
-                          color: isSelected ? Colors.transparent : Colors.transparent,
-                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
                           border: Border.all(
-                            color: isSelected ? AppColors.primaryColor : const Color(0xFFDDDDDD),
+                            color: isSelected ? AppColors.primaryColor : Colors.white,
                             width: 1,
                           ),
                         ),
@@ -330,10 +330,8 @@ class _UserCard extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.campaign_outlined,
-                      size: 18,
-                      color: Color(0xFF999999),
+                    Image.asset(
+                      'assets/android/mipmap-xxhdpi/icon_order_notify.png',
                     ),
                     const SizedBox(width: 8),
                     Expanded(

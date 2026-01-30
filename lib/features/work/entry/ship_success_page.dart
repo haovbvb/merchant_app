@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
@@ -19,7 +20,7 @@ class ShipSuccessPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.check_circle, color: Colors.green, size: 72),
+            const Icon(Icons.check_circle, color: AppColors.primaryColor, size: 72),
             const SizedBox(height: 16),
             Text(
               l10n.shipSuccessTitle,

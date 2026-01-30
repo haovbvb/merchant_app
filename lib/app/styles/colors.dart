@@ -17,7 +17,7 @@ class AppColors {
 
   static const Color white09Text = Color(0xE6FFFFFF); // 白 0.9
 
-  static const Color primaryColor = Color(0xFF56B327); // 主色
+  static const Color primaryColor = Color(0xFF08983B); // 主色
   static const Color secondaryColor = Color(0xFFFA4332); // 次要色
 
   static const Color bgColor = Color(0xFFF5F6F7); // 页面背景色
@@ -29,9 +29,9 @@ class AppColors {
   static Color greyBg = Color(0xFFF6F8FC);
 
   // 语义色
-  static const Color success = Color(0xFF22C55E);
+  static const Color success = Color(0xFF08983B);
   static const Color warning = Color(0xFFF59E0B);
-  static const Color danger = Color(0xFFEF4444);
+  static const Color danger = Color(0xFFFA4332);
 
   // 根据背景自动选择对比文本（简化：亮背景用深字，暗背景用白字）
   static Color onColor(Color bg) {

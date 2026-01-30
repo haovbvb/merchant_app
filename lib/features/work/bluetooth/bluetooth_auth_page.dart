@@ -147,7 +147,7 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.bluetoothAuthFindTitle)),
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       body: Column(
         children: [
           // Bluetooth 开关
@@ -378,7 +378,7 @@ class _BluetoothAuthorizationPageState
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.bluetoothAuthTitle)),
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

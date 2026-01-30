@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/camera_permission.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
@@ -143,7 +144,7 @@ class _ReceiveScanPageState extends ConsumerState<ReceiveScanPage>
                     gradient: LinearGradient(
                       colors: [
                         Colors.transparent,
-                        Colors.green.withValues(alpha: 0.8),
+                        AppColors.primaryColor.withValues(alpha: 0.8),
                         Colors.transparent,
                       ],
                     ),
@@ -260,7 +261,7 @@ class _ReceiveScanPageState extends ConsumerState<ReceiveScanPage>
               _resultSuccess
                   ? Icons.check_circle
                   : Icons.cancel,
-              color: _resultSuccess ? Colors.green : Colors.red,
+              color: _resultSuccess ? AppColors.primaryColor : Colors.red,
               size: 20,
             ),
             const SizedBox(width: 8),

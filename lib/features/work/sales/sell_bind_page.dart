@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
@@ -48,7 +49,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -112,7 +113,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF333333),
+            color: AppColors.black06Text,
           ),
         ),
       ],
@@ -137,7 +138,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
             l10n.sellBindPackage,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
           const SizedBox(height: 8),
@@ -193,7 +194,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
             l10n.sellBindDeviceSn,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
           const SizedBox(height: 8),
@@ -211,7 +212,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
                   ),
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                   onSubmitted: (value) {
                     if (value.trim().isNotEmpty) {
@@ -224,7 +225,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
                 onTap: _scanSn,
                 child: AppIcons.scanIcon(
                   size: 24,
-                  color: const Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
             ],
@@ -278,7 +279,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
               ? () => _handleSubmit(context, state, notifier)
               : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF4CAF50),
+            backgroundColor: AppColors.primaryColor,
             disabledBackgroundColor: const Color(0xFFE8F5E9),
             foregroundColor: Colors.white,
             disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
@@ -400,7 +401,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
             child: ElevatedButton(
               onPressed: () => Navigator.of(context).pop(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4CAF50),
+                backgroundColor: AppColors.primaryColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -556,7 +557,7 @@ class _BatteryCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -623,7 +624,7 @@ class _BatteryCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
         ],
@@ -688,7 +689,7 @@ class _VehicleCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -754,7 +755,7 @@ class _VehicleCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
         ],
@@ -783,7 +784,7 @@ class _SuccessPage extends StatelessWidget {
         : l10n.sellBindSuccessMessageCash;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -814,7 +815,7 @@ class _SuccessPage extends StatelessWidget {
                 width: 64,
                 height: 64,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF4CAF50),
+                  color: AppColors.primaryColor,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
@@ -829,7 +830,7 @@ class _SuccessPage extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
               const SizedBox(height: 12),
@@ -877,7 +878,7 @@ class _SuccessPage extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF333333),
+                            color: AppColors.black06Text,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -902,8 +903,8 @@ class _SuccessPage extends StatelessWidget {
               OutlinedButton(
                 onPressed: onReturn,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF4CAF50),
-                  side: const BorderSide(color: Color(0xFF4CAF50)),
+                  foregroundColor: AppColors.primaryColor,
+                  side: const BorderSide(color: AppColors.primaryColor),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),

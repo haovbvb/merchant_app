@@ -48,7 +48,7 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage> {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -250,7 +250,7 @@ class _RoadSideCard extends StatelessWidget {
                             'SN: ${item.deviceSn ?? '-'}',
                             style: const TextStyle(
                               fontSize: 14,
-                              color: Color(0xFF333333),
+                              color: AppColors.black06Text,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -305,7 +305,7 @@ class _RoadSideCard extends StatelessWidget {
                       _resultLabel(l10n, item.result),
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                         fontWeight: FontWeight.w500,
                       ),
                     ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
@@ -128,7 +129,7 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const Spacer(),
@@ -175,7 +176,7 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
                         GestureDetector(
                           onTap: _scanUserId,
                           child: AppIcons.scanIcon(
-                            color: const Color(0xFF333333),
+                            color: AppColors.black06Text,
                           ),
                         ),
                       ],
@@ -302,7 +303,7 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
               child: ElevatedButton(
                 onPressed: _canSubmit() ? _submit : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4CAF50),
+                  backgroundColor: AppColors.primaryColor,
                   disabledBackgroundColor: const Color(0xFFE8F5E9),
                   foregroundColor: Colors.white,
                   disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
@@ -355,7 +356,7 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 if (user.address != null)
@@ -410,7 +411,7 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
                   ),
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/ui.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
@@ -36,7 +37,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
     final notifier = ref.read(merchantReplaceProvider.notifier);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -104,7 +105,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
           const SizedBox(height: 20),
@@ -167,7 +168,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
           label,
           style: const TextStyle(
             fontSize: 14,
-            color: Color(0xFF333333),
+            color: AppColors.black06Text,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -189,7 +190,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
                 ),
                 style: const TextStyle(
                   fontSize: 16,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
             ),
@@ -197,7 +198,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
               onTap: onScan,
               child: Container(
                 padding: const EdgeInsets.all(8),
-                child: AppIcons.scanIcon(size: 24, color: const Color(0xFF333333)),
+                child: AppIcons.scanIcon(size: 24, color: AppColors.black06Text),
               ),
             ),
           ],
@@ -223,7 +224,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
             l10n.merchantReplaceReasons,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -243,7 +244,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
             ),
             style: const TextStyle(
               fontSize: 16,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
         ],
@@ -274,7 +275,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
           child: ElevatedButton(
             onPressed: state.submitting ? null : () => _submit(context, notifier),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4CAF50),
+              backgroundColor: AppColors.primaryColor,
               disabledBackgroundColor: const Color(0xFFB8E6B8),
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(

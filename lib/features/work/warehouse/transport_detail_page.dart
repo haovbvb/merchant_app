@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/device_transport_resp.dart';
@@ -48,7 +49,7 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
         (widget.status == null || (widget.status != 1 && widget.status != 3));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         title: Text(l10n.deviceIssueDetailTitle),
         actions: [
@@ -94,7 +95,7 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
                           l10n.deviceIssueTrackingNumber,
                           style: const TextStyle(
                             fontSize: 14,
-                            color: Color(0xFF333333),
+                            color: AppColors.black06Text,
                           ),
                         ),
                         const Spacer(),
@@ -185,7 +186,7 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
                               _StatItem(
                                 label: l10n.deviceIssueReceived,
                                 value: _countByStatus(state.items, 1).toString(),
-                                color: const Color(0xFF4CAF50),
+                                color: AppColors.primaryColor,
                               ),
                               _StatItem(
                                 label: l10n.deviceIssueWithdrawn,
@@ -400,7 +401,7 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
         );
       case 1:
         return const _StatusColors(
-          text: Color(0xFF4CAF50),
+          text: AppColors.primaryColor,
           background: Color(0xFFEEF7E9),
         );
       case 2:
@@ -450,7 +451,7 @@ class _OrderHeaderCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B5E20),
+        color: AppColors.primaryColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -546,7 +547,7 @@ class _OrderHeaderCard extends StatelessWidget {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF4CAF50),
+                        color: AppColors.primaryColor,
                         borderRadius: BorderRadius.circular(5),
                       ),
                     ),

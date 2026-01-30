@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/sales/rent_bind_controller.dart';
@@ -77,7 +78,7 @@ class _RentPaymentSheetState extends ConsumerState<RentPaymentSheet> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const Spacer(),
@@ -163,7 +164,7 @@ class _RentPaymentSheetState extends ConsumerState<RentPaymentSheet> {
                 child: ElevatedButton(
                   onPressed: _confirm,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4CAF50),
+                    backgroundColor: AppColors.primaryColor,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -230,7 +231,7 @@ class _RentPaymentSheetState extends ConsumerState<RentPaymentSheet> {
               title,
               style: const TextStyle(
                 fontSize: 16,
-                color: Color(0xFF333333),
+                color: AppColors.black06Text,
               ),
             ),
             const Spacer(),
@@ -241,11 +242,11 @@ class _RentPaymentSheetState extends ConsumerState<RentPaymentSheet> {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected
-                      ? const Color(0xFF4CAF50)
+                      ? AppColors.primaryColor
                       : const Color(0xFFDDDDDD),
                   width: 2,
                 ),
-                color: isSelected ? const Color(0xFF4CAF50) : Colors.white,
+                color: isSelected ? AppColors.primaryColor : Colors.white,
               ),
               child: isSelected
                   ? const Icon(Icons.check, color: Colors.white, size: 16)
@@ -280,7 +281,7 @@ class _RentPaymentSheetState extends ConsumerState<RentPaymentSheet> {
             style: TextStyle(
               fontSize: isTotal ? 20 : 14,
               fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-              color: isTotal ? const Color(0xFFFF9800) : const Color(0xFF333333),
+              color: isTotal ? const Color(0xFFFF9800) : AppColors.black06Text,
             ),
           ),
         ],

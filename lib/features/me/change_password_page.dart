@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/network/api_path.dart';
@@ -36,7 +37,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     final user = AuthSession.instance.current;
     final account = _formatAccount(user?.name, user?.emailCode);
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         title: Text(l10n.changePasswordTitle),
         centerTitle: true,
@@ -57,7 +58,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.normal,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ),
@@ -123,8 +124,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   child: ElevatedButton(
                     onPressed: _submitting ? null : _submit,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF56B327),
-                      disabledBackgroundColor: const Color(0xFF56B327),
+                      backgroundColor: AppColors.primaryColor,
+                      disabledBackgroundColor: AppColors.primaryColor,
                       foregroundColor: Colors.white,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
@@ -234,7 +235,7 @@ class _PasswordField extends StatelessWidget {
           label,
           style: const TextStyle(
             fontSize: 14,
-            color: Color(0xFF333333),
+            color: AppColors.black06Text,
             fontWeight: FontWeight.normal,
           ),
         ),

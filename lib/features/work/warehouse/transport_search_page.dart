@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/warehouse/transport_controller.dart';
 import 'package:merchant_app/features/work/warehouse/transport_detail_page.dart';
@@ -74,7 +75,7 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
     final state = ref.watch(transportListProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -90,9 +91,9 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
                   ),
                   Expanded(
                     child: Container(
-                      height: 40,
+                      height: 36,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF5F5F5),
+                        color: const Color(0xFFF2F4F7),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: TextField(
@@ -208,7 +209,7 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
               GestureDetector(
@@ -483,7 +484,7 @@ class _SearchResultCard extends StatelessWidget {
                       item.outWarehouseName,
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -555,7 +556,7 @@ class _SearchResultCard extends StatelessWidget {
         );
       case 1:
         return const _StatusColors(
-          text: Color(0xFF4CAF50),
+          text: AppColors.primaryColor,
           background: Color(0xFFEEF7E9),
         );
       case 2:

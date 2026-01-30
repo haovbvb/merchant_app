@@ -1,17 +1,18 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:merchant_app/app/ui.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/installment_payment_response.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/installment_pay_controller.dart';
 import 'package:merchant_app/features/work/sales/widgets/installment_order_sheet.dart';
-import 'package:merchant_app/app/ui.dart';
 
 class InstallmentPayPage extends ConsumerStatefulWidget {
   const InstallmentPayPage({super.key});
@@ -73,7 +74,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: double.infinity,
       
       child: Column(
@@ -87,7 +88,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
             ),
           ),
           // 绿色钱包图标
-          Container(
+          SizedBox(
             width: 64,
             height: 64,
             child: ClipRRect(
@@ -105,7 +106,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
           const SizedBox(height: 20),
@@ -155,7 +156,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                   ),
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                   onSubmitted: (_) => _searchUser(notifier),
                 ),
@@ -166,7 +167,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                   padding: const EdgeInsets.all(8),
                   child: AppIcons.scanIcon(
                     size: 24,
-                    color: const Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ),
@@ -251,7 +252,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                     ),
                     if (statusText.isNotEmpty) ...[
@@ -264,13 +265,13 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                         decoration: BoxDecoration(
                           color: const Color(0xFFE8F5E9),
                           borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: const Color(0xFF4CAF50)),
+                          border: Border.all(color: AppColors.primaryColor),
                         ),
                         child: Text(
                           statusText,
                           style: const TextStyle(
                             fontSize: 11,
-                            color: Color(0xFF4CAF50),
+                            color: AppColors.primaryColor,
                           ),
                         ),
                       ),
@@ -349,7 +350,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
         ],
@@ -391,7 +392,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
             l10n.installmentPayPaymentOrder,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -450,7 +451,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
             const Icon(
               Icons.description_outlined,
               size: 18,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -459,7 +460,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
             ),
@@ -517,7 +518,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
-                            color: Color(0xFF333333),
+                            color: AppColors.black06Text,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -526,7 +527,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                           spacing: 6,
                           runSpacing: 4,
                           children: [
-                            _buildTag('In installments', const Color(0xFF4CAF50)),
+                            _buildTag('In installments', AppColors.primaryColor),
                             _buildTag('Cash installment', const Color(0xFF999999)),
                             if (order.spec?.isNotEmpty == true)
                               _buildTag(order.spec!, const Color(0xFF999999)),
@@ -555,7 +556,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                     '\$${(order.remainPay ?? 0).toStringAsFixed(2)}',
                     style: const TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                   ),
                 ],
@@ -576,7 +577,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                     '${order.remainPeriod ?? 0}',
                     style: const TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                   ),
                 ],
@@ -597,7 +598,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                     _formatDate(order.rePaymentDate),
                     style: const TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                   ),
                 ],
@@ -692,21 +693,24 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
             l10n.installmentPayVoucher,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
               fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              ...state.attachments.map(
-                (url) => _buildImagePreview(url, () => notifier.removeAttachment(url)),
-              ),
-              if (state.attachments.length < 5)
-                _buildAddButton(state.uploading, () => _pickAttachments(context, notifier, state)),
-            ],
+          SizedBox(
+            width: double.infinity,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                ...state.attachments.map(
+                  (url) => _buildImagePreview(url, () => notifier.removeAttachment(url)),
+                ),
+                if (state.attachments.length < 5)
+                  _buildAddButton(state.uploading, () => _pickAttachments(context, notifier, state)),
+              ],
+            ),
           ),
         ],
       ),
@@ -805,7 +809,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
           child: ElevatedButton(
             onPressed: canSubmit ? () => _submit(context, notifier) : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4CAF50),
+              backgroundColor: AppColors.primaryColor,
               disabledBackgroundColor: const Color(0xFFB8D8B8),
               foregroundColor: Colors.white,
               disabledForegroundColor: Colors.white,
@@ -930,7 +934,7 @@ class _SuccessPage extends StatelessWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -943,7 +947,7 @@ class _SuccessPage extends StatelessWidget {
           style: const TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF333333),
+            color: AppColors.black06Text,
           ),
         ),
         centerTitle: true,
@@ -966,7 +970,7 @@ class _SuccessPage extends StatelessWidget {
                 height: 64,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFF4CAF50),
+                  color: AppColors.primaryColor,
                 ),
                 child: const Icon(
                   Icons.check,
@@ -980,7 +984,7 @@ class _SuccessPage extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
               const SizedBox(height: 12),
@@ -1019,7 +1023,7 @@ class _SuccessPage extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF333333),
+                            color: AppColors.black06Text,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -1046,8 +1050,8 @@ class _SuccessPage extends StatelessWidget {
               OutlinedButton(
                 onPressed: onReturn,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF4CAF50),
-                  side: const BorderSide(color: Color(0xFF4CAF50)),
+                  foregroundColor: AppColors.primaryColor,
+                  side: const BorderSide(color: AppColors.primaryColor),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24),
                   ),

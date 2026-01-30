@@ -5,8 +5,10 @@ import 'package:merchant_app/app/theme.dart';
 import 'package:merchant_app/features/me/providers/language_notifier.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // 预加载语言设置，确保应用启动时使用正确的语言
+  await LanguagePreloader.preload();
   // ProviderScope 注入 Riverpod 的依赖树；MerchantApp 承载路由 / 主题等顶层配置。
   runApp(const ProviderScope(child: MerchantApp()));
 }

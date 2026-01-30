@@ -41,6 +41,8 @@
 	<string>Find nearby devices</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Find nearby devices</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Find nearby devices</string>
 	<key>NSLocationUsageDescription</key>
 	<string>Find nearby devices</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>

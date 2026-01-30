@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
@@ -45,7 +46,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
     final cabinet = state.cabinet;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F7),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -127,7 +128,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
                               onTap: _scanSn,
                               child: AppIcons.scanIcon(
                                 size: 24,
-                                color: const Color(0xFF333333),
+                                color: AppColors.black06Text,
                               ),
                             ),
                           ],
@@ -206,7 +207,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
                               onTap: () => _selectAddress(context),
                               child: const Icon(
                                 Icons.location_on_outlined,
-                                color: Color(0xFF333333),
+                                color: AppColors.black06Text,
                                 size: 24,
                               ),
                             ),
@@ -261,7 +262,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
                             l10n.cabinetPutawayImages,
                             style: const TextStyle(
                               fontSize: 15,
-                              color: Color(0xFF333333),
+                              color: AppColors.black06Text,
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -347,7 +348,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
                     ? null
                     : () => _submit(context, notifier),
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF4CAF50),
+                  backgroundColor: AppColors.primaryColor,
                   disabledBackgroundColor: const Color(0xFFB8E6B8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24),
@@ -499,7 +500,7 @@ class _InputRow extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(fontSize: 15, color: Color(0xFF333333)),
+              style: const TextStyle(fontSize: 15, color: AppColors.black06Text),
             ),
             if (labelSuffix != null)
               Text(
@@ -532,7 +533,7 @@ class _DisplayRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(fontSize: 15, color: Color(0xFF333333)),
+            style: const TextStyle(fontSize: 15, color: AppColors.black06Text),
           ),
           Text(
             value,

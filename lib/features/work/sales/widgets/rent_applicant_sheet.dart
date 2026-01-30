@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
@@ -119,7 +120,7 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const Spacer(),
@@ -167,7 +168,7 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
                         GestureDetector(
                           onTap: _scanUserId,
                           child: AppIcons.scanIcon(
-                            color: const Color(0xFF333333),
+                            color: AppColors.black06Text,
                           ),
                         ),
                       ],
@@ -205,7 +206,7 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFF333333),
+                                    color: AppColors.black06Text,
                                   ),
                                 ),
                                 if (state.user?.address != null &&
@@ -264,7 +265,7 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
                     text: TextSpan(
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                       children: [
                         TextSpan(text: l10n.rentBindUploadNidPhoto),
@@ -304,7 +305,7 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
                     text: TextSpan(
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                       children: [
                         TextSpan(text: l10n.rentBindPersonalPhoto),
@@ -364,7 +365,7 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
               child: ElevatedButton(
                 onPressed: _canSubmit() ? _submit : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4CAF50),
+                  backgroundColor: AppColors.primaryColor,
                   disabledBackgroundColor: const Color(0xFFE8F5E9),
                   foregroundColor: Colors.white,
                   disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
@@ -406,7 +407,7 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
           text: TextSpan(
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
             children: [
               TextSpan(text: label),
@@ -435,7 +436,7 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
               borderSide: BorderSide(color: Color(0xFFEEEEEE)),
             ),
             focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFF4CAF50)),
+              borderSide: BorderSide(color: AppColors.primaryColor),
             ),
           ),
         ),

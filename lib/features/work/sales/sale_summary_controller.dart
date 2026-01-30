@@ -11,6 +11,7 @@ class SaleSummaryState {
   final DateTime startDate;
   final DateTime endDate;
   final int? payWay;
+  final bool showSalesData; // true=Sales Data, false=After-Sales Data
   final SaleSumPageData? summary;
   final SalesBarData? chartData;
   final List<OrderItem> orders;
@@ -23,6 +24,7 @@ class SaleSummaryState {
     this.loadingList = false,
     this.loadingChart = false,
     this.payWay,
+    this.showSalesData = true,
     this.summary,
     this.chartData,
     this.orders = const [],
@@ -36,6 +38,7 @@ class SaleSummaryState {
     DateTime? startDate,
     DateTime? endDate,
     int? payWay,
+    bool? showSalesData,
     SaleSumPageData? summary,
     SalesBarData? chartData,
     List<OrderItem>? orders,
@@ -48,6 +51,7 @@ class SaleSummaryState {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       payWay: payWay ?? this.payWay,
+      showSalesData: showSalesData ?? this.showSalesData,
       summary: summary ?? this.summary,
       chartData: chartData ?? this.chartData,
       orders: orders ?? this.orders,
@@ -85,6 +89,14 @@ class SaleSummaryNotifier extends Notifier<SaleSummaryState> {
 
   void updatePayWay(int? payWay) {
     state = state.copyWith(payWay: payWay);
+  }
+
+  /// Toggle between Sales Data and After-Sales Data
+  void setShowSalesData(bool showSalesData) {
+    if (state.showSalesData != showSalesData) {
+      state = state.copyWith(showSalesData: showSalesData, orders: const []);
+      fetchList();
+    }
   }
 
   Future<void> fetchSummary() async {
@@ -130,8 +142,12 @@ class SaleSummaryNotifier extends Notifier<SaleSummaryState> {
     if (state.payWay != null) {
       params['payWay'] = state.payWay;
     }
+    // Choose API based on showSalesData: true=Sales Data, false=After-Sales Data
+    final apiPath = state.showSalesData
+        ? ApiPath.saleSummaryQueryShopSaleData
+        : ApiPath.saleSummaryQueryAfterSaleData;
     final response = await _api.get<SellDataListResponse>(
-      ApiPath.saleSummaryQueryShopSaleData,
+      apiPath,
       queryParameters: params,
       parser: (json) => SellDataListResponse.fromJson(
         Map<String, dynamic>.from(json as Map),

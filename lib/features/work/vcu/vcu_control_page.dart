@@ -8,10 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:merchant_app/app/styles/colors.dart';
+import 'package:merchant_app/core/constants/storage_keys.dart';
 import 'package:merchant_app/core/utils/bluetooth_permission.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
-import 'package:merchant_app/core/constants/storage_keys.dart';
 import 'package:merchant_app/data/models/vcu_history.dart';
 import 'package:merchant_app/data/models/vcu_version.dart';
 import 'package:merchant_app/features/work/vcu/vcu_ble_command.dart';
@@ -141,7 +142,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
     return DefaultTabController(
       length: 2,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F6F7),
+        backgroundColor: AppColors.bgColor,
         appBar: AppBar(
           title: Text(l10n.vcuControlTitle),
           bottom: TabBar(
@@ -435,7 +436,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
                                     color:
                                         statusText ==
                                             l10n.vcuHistoryStatusSuccess
-                                        ? Colors.green
+                                        ? AppColors.primaryColor
                                         : Colors.redAccent,
                                   ),
                               ],

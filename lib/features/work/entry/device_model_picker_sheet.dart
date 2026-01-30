@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/battery_type.dart';
 import 'package:merchant_app/data/models/car_type.dart';
@@ -142,7 +143,7 @@ class _DeviceModelPickerSheetState extends State<DeviceModelPickerSheet>
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -160,14 +161,14 @@ class _DeviceModelPickerSheetState extends State<DeviceModelPickerSheet>
           // Tab 栏
           TabBar(
             controller: _tabController,
-            labelColor: const Color(0xFF333333),
+            labelColor: AppColors.black06Text,
             unselectedLabelColor: const Color(0xFF999999),
             labelStyle: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
             unselectedLabelStyle: const TextStyle(fontSize: 15),
-            indicatorColor: const Color(0xFF4CAF50),
+            indicatorColor: AppColors.primaryColor,
             indicatorWeight: 3,
             tabs: [
               Tab(text: l10n.deviceTypeVehicle),
@@ -313,7 +314,7 @@ class _DeviceModelPickerSheetState extends State<DeviceModelPickerSheet>
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -341,7 +342,7 @@ class _DeviceModelPickerSheetState extends State<DeviceModelPickerSheet>
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Center(
-        child: Icon(Icons.ev_station, size: 40, color: Color(0xFF4CAF50)),
+        child: Icon(Icons.ev_station, size: 40, color: AppColors.primaryColor),
       ),
     );
   }

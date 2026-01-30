@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
@@ -39,7 +40,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
     final type = _selected;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F7),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -77,7 +78,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                     ),
                   ),
@@ -141,7 +142,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -167,7 +168,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                   icon: const Icon(
                     Icons.edit_outlined,
                     size: 18,
-                    color: Color(0xFF4CAF50),
+                    color: AppColors.primaryColor,
                   ),
                   label: l10n.entryManualEntryButton,
                   isPrimary: false,
@@ -215,11 +216,11 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isPrimary ? const Color(0xFF4CAF50) : Colors.white,
+          color: isPrimary ? AppColors.primaryColor : Colors.white,
           borderRadius: BorderRadius.circular(8),
           border: isPrimary
               ? null
-              : Border.all(color: const Color(0xFF4CAF50), width: 1),
+              : Border.all(color: AppColors.primaryColor, width: 1),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -231,7 +232,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: isPrimary ? Colors.white : const Color(0xFF4CAF50),
+                color: isPrimary ? Colors.white : AppColors.primaryColor,
               ),
             ),
           ],
@@ -291,7 +292,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
           child: FilledButton(
             onPressed: hasItems && !_submitting ? _submit : null,
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF4CAF50),
+              backgroundColor: AppColors.primaryColor,
               disabledBackgroundColor: const Color(0xFFCCEECC),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -373,7 +374,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ),
@@ -479,7 +480,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
         RichText(
           text: TextSpan(
             text: label,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF333333)),
+            style: const TextStyle(fontSize: 14, color: AppColors.black06Text),
             children: isRequired
                 ? const [
                     TextSpan(
@@ -597,7 +598,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -629,7 +630,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                       child: OutlinedButton(
                         onPressed: () => Navigator.of(context).pop(false),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF333333),
+                          foregroundColor: AppColors.black06Text,
                           side: const BorderSide(color: Color(0xFFDDDDDD)),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
@@ -644,7 +645,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                       child: FilledButton(
                         onPressed: () => Navigator.of(context).pop(true),
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF4CAF50),
+                          backgroundColor: AppColors.primaryColor,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -683,7 +684,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -703,7 +704,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                       child: OutlinedButton(
                         onPressed: () => Navigator.of(context).pop(false),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF333333),
+                          foregroundColor: AppColors.black06Text,
                           side: const BorderSide(color: Color(0xFFDDDDDD)),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
@@ -718,7 +719,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                       child: FilledButton(
                         onPressed: () => Navigator.of(context).pop(true),
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF4CAF50),
+                          backgroundColor: AppColors.primaryColor,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -790,7 +791,7 @@ class _DeviceCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
           const SizedBox(height: 8),

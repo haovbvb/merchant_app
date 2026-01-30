@@ -1,18 +1,20 @@
 import 'dart:math';
+import 'dart:ui' as ui;
 
 import 'package:apple_maps_flutter/apple_maps_flutter.dart' as amaps;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
-import 'package:merchant_app/app/styles/colors.dart';
-import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/app/ui.dart';
 import 'package:merchant_app/core/utils/location_permission.dart';
 import 'package:merchant_app/data/models/near_by_vehicle.dart';
 import 'package:merchant_app/features/home/widgets/vehicle_map.dart';
-import 'package:merchant_app/features/work/device/device_detail_page.dart';
+import 'package:merchant_app/features/work/device/device_detail_page_new.dart';
 import 'package:merchant_app/features/work/device/device_search_page.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
@@ -24,7 +26,7 @@ class HomeTab extends ConsumerStatefulWidget {
   ConsumerState<HomeTab> createState() => _HomeTabState();
 }
 
-class _HomeTabState extends ConsumerState<HomeTab> {
+class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   static const double _fallbackLatitude = 22.543099;
   static const double _fallbackLongitude = 114.057868;
   static const int _vehicleCount = 1000;
@@ -44,14 +46,43 @@ class _HomeTabState extends ConsumerState<HomeTab> {
   int? _maintainFlag;
   NearByVehicle? _selectedVehicle;
   gmaps.BitmapDescriptor? _markerIcon;
+  gmaps.BitmapDescriptor? _maintenanceMarkerIcon;
   amaps.BitmapDescriptor? _appleMarkerIcon;
+  amaps.BitmapDescriptor? _appleMaintenanceMarkerIcon;
+  gmaps.BitmapDescriptor? _locationMarkerIcon;
   bool _appleIconLoaded = false;
+  bool _hasLocationPermission = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadMarkerIcon();
     _loadInitialData();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    // 当应用从后台恢复时，检查位置权限是否发生变化
+    if (state == AppLifecycleState.resumed) {
+      _checkPermissionChange();
+    }
+  }
+
+  Future<void> _checkPermissionChange() async {
+    final permission = await ensureLocationPermission(requestPermission: false);
+    if (permission.granted && !_hasLocationPermission) {
+      // 权限从无到有，重新获取位置并刷新数据
+      _hasLocationPermission = true;
+      await _ensureLocation();
+    }
   }
 
   @override
@@ -63,7 +94,11 @@ class _HomeTabState extends ConsumerState<HomeTab> {
   }
 
   Future<void> _loadMarkerIcon() async {
-    final configuration = createLocalImageConfiguration(context);
+    final configuration = createLocalImageConfiguration(
+      context,
+      size: const Size(108, 100),
+    );
+    // 加载正常车辆标记图标
     final icon = await gmaps.BitmapDescriptor.fromAssetImage(
       configuration,
       'assets/android/mipmap-xxhdpi/icon_marker_vehicle.png',
@@ -73,31 +108,87 @@ class _HomeTabState extends ConsumerState<HomeTab> {
         _markerIcon = icon;
       });
     }
+    // 加载需要保养的标记图标
+    final maintenanceIcon = await gmaps.BitmapDescriptor.fromAssetImage(
+      configuration,
+      'assets/android/mipmap-xxhdpi/icon_marker_need_maintenance.png',
+    );
+    if (mounted) {
+      setState(() {
+        _maintenanceMarkerIcon = maintenanceIcon;
+      });
+    }
+    // 加载位置标记图标
+    final locationIcon = await gmaps.BitmapDescriptor.fromAssetImage(
+      configuration,
+      'assets/android/mipmap-xxhdpi/icon_location.webp',
+    );
+    if (mounted) {
+      setState(() {
+        _locationMarkerIcon = locationIcon;
+      });
+    }
   }
 
   Future<void> _loadAppleMarkerIcon() async {
-    final configuration = createLocalImageConfiguration(context);
-    final icon = await amaps.BitmapDescriptor.fromAssetImage(
-      configuration,
+    const targetWidth = 108;
+    const targetHeight = 100;
+    // 加载正常车辆标记图标（按像素缩放，确保 iOS 生效）
+    final icon = await _loadAppleBitmapDescriptor(
       'assets/android/mipmap-xxhdpi/icon_marker_vehicle.png',
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
     );
     if (mounted) {
       setState(() {
         _appleMarkerIcon = icon;
       });
     }
+    // 加载需要保养的标记图标
+    final maintenanceIcon = await _loadAppleBitmapDescriptor(
+      'assets/android/mipmap-xxhdpi/icon_marker_need_maintenance.png',
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
+    );
+    if (mounted) {
+      setState(() {
+        _appleMaintenanceMarkerIcon = maintenanceIcon;
+      });
+    }
+    // iOS 系统已有蓝色位置标记，无需手动加载
+  }
+
+  Future<amaps.BitmapDescriptor> _loadAppleBitmapDescriptor(
+    String assetPath, {
+    required int targetWidth,
+    required int targetHeight,
+  }) async {
+    final data = await rootBundle.load(assetPath);
+    final codec = await ui.instantiateImageCodec(
+      data.buffer.asUint8List(),
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
+    );
+    final frameInfo = await codec.getNextFrame();
+    final byteData = await frameInfo.image.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
+    return amaps.BitmapDescriptor.fromBytes(
+      byteData!.buffer.asUint8List(),
+    );
   }
 
   Future<void> _loadInitialData() async {
-    await _ensureLocation();
+    await _ensureLocation(isInitial: true);
     if (mounted) {
       await _fetchVehicles();
     }
   }
 
-  Future<void> _ensureLocation() async {
+  Future<void> _ensureLocation({bool isInitial = false}) async {
     try {
       final permission = await ensureLocationPermission();
+      _hasLocationPermission = permission.granted;
       if (!permission.granted) {
         setState(() {
           _latitude = _fallbackLatitude;
@@ -108,11 +199,21 @@ class _HomeTabState extends ConsumerState<HomeTab> {
       }
 
       final position = await Geolocator.getCurrentPosition();
+      final latChanged = _latitude != position.latitude;
+      final lngChanged = _longitude != position.longitude;
       setState(() {
         _latitude = position.latitude;
         _longitude = position.longitude;
       });
-      _maybeCenterMap();
+      
+      // 如果位置发生变化，居中地图并刷新数据（非初始化时）
+      if (!isInitial && (latChanged || lngChanged)) {
+        _pendingCenterOnLocation = true;
+        _maybeCenterMap();
+        await _fetchVehicles();
+      } else {
+        _maybeCenterMap();
+      }
     } catch (_) {
       setState(() {
         _latitude = _fallbackLatitude;
@@ -268,7 +369,7 @@ class _HomeTabState extends ConsumerState<HomeTab> {
   Future<void> _openDetail(String? sn) async {
     if (sn == null || sn.trim().isEmpty) return;
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => DeviceDetailPage(initialSn: sn)),
+      MaterialPageRoute(builder: (_) => DeviceDetailPageNew(initialSn: sn)),
     );
   }
 
@@ -294,44 +395,57 @@ class _HomeTabState extends ConsumerState<HomeTab> {
   void _maybeCenterMap() {
     if (!_pendingCenterOnLocation) return;
     if (_googleController == null && _appleController == null) return;
+    // 确保位置数据已获取后再居中地图
+    if (_latitude == null || _longitude == null) return;
     _pendingCenterOnLocation = false;
     _centerMap();
   }
 
   Future<void> _showFilterSheet() async {
     final l10n = context.l10n;
-    final selected = await showModalBottomSheet<int?>(
+    final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
+    final topPadding = MediaQuery.of(context).padding.top;
+    
+    // 计算弹窗位置：右上角筛选按钮下方
+    final RelativeRect position = RelativeRect.fromLTRB(
+      overlay.size.width - 16 - 200, // 右边距16，弹窗宽度200
+      topPadding + 8 + 44 + 8, // 状态栏 + 顶部padding + 搜索栏高度 + 间距
+      16, // 右边距
+      0,
+    );
+
+    final selected = await showMenu<int?>(
       context: context,
-      builder: (context) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text(l10n.homeFilterAll),
-                onTap: () => Navigator.of(context).pop(null),
-                trailing: _maintainFlag == null
-                    ? const Icon(Icons.check, color: AppColors.primaryColor)
-                    : null,
-              ),
-              ListTile(
-                title: Text(l10n.homeFilterNeedMaintenance),
-                onTap: () => Navigator.of(context).pop(1),
-                trailing: _maintainFlag == 1
-                    ? const Icon(Icons.check, color: AppColors.primaryColor)
-                    : null,
-              ),
-              ListTile(
-                title: Text(l10n.homeFilterNormal),
-                onTap: () => Navigator.of(context).pop(0),
-                trailing: _maintainFlag == 0
-                    ? const Icon(Icons.check, color: AppColors.primaryColor)
-                    : null,
-              ),
-            ],
+      position: position,
+      color: const Color(0xFF1E2A3A),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      items: [
+        PopupMenuItem<int?>(
+          value: null,
+          child: _FilterMenuItem(
+            label: l10n.homeFilterAll,
+            isSelected: _maintainFlag == null,
           ),
-        );
-      },
+        ),
+        PopupMenuItem<int?>(
+          value: 0,
+          child: _FilterMenuItem(
+            label: l10n.homeFilterNormal,
+            dotColor: AppColors.primaryColor,
+            isSelected: _maintainFlag == 0,
+          ),
+        ),
+        PopupMenuItem<int?>(
+          value: 1,
+          child: _FilterMenuItem(
+            label: l10n.homeFilterNeedMaintenance,
+            dotColor: const Color(0xFFF44336),
+            isSelected: _maintainFlag == 1,
+          ),
+        ),
+      ],
     );
     if (!mounted) return;
     if (selected != _maintainFlag) {
@@ -341,70 +455,103 @@ class _HomeTabState extends ConsumerState<HomeTab> {
   }
 
   Set<gmaps.Marker> _buildGoogleMarkers() {
-    return _vehicles
+    final markers = _vehicles
         .where((item) =>
             item.latitude != null &&
             item.longitude != null &&
             item.latitude != 0 &&
             item.longitude != 0)
         .map(
-          (item) => gmaps.Marker(
-            markerId: gmaps.MarkerId(
-              item.sn ?? item.cardNum ?? '${item.latitude}-${item.longitude}',
-            ),
-            position: gmaps.LatLng(item.latitude!, item.longitude!),
-            icon: _markerIcon ?? gmaps.BitmapDescriptor.defaultMarker,
-            onTap: () => _selectVehicle(item),
-          ),
+          (item) {
+            // 根据是否需要保养选择不同的图标
+            final markerIcon = item.needMaintenance == true
+                ? (_maintenanceMarkerIcon ?? gmaps.BitmapDescriptor.defaultMarker)
+                : (_markerIcon ?? gmaps.BitmapDescriptor.defaultMarker);
+            return gmaps.Marker(
+              markerId: gmaps.MarkerId(
+                item.sn ?? item.cardNum ?? '${item.latitude}-${item.longitude}',
+              ),
+              position: gmaps.LatLng(item.latitude!, item.longitude!),
+              icon: markerIcon,
+              onTap: () => _selectVehicle(item),
+            );
+          },
         )
         .toSet();
+    
+    // 添加用户当前位置标记
+    final lat = _latitude;
+    final lng = _longitude;
+    if (lat != null && lng != null) {
+      markers.add(
+        gmaps.Marker(
+          markerId: const gmaps.MarkerId('user_location'),
+          position: gmaps.LatLng(lat, lng),
+          icon: _locationMarkerIcon ?? gmaps.BitmapDescriptor.defaultMarkerWithHue(gmaps.BitmapDescriptor.hueAzure),
+          zIndex: 999,
+        ),
+      );
+    }
+    return markers;
   }
 
   Set<amaps.Annotation> _buildAppleAnnotations() {
-    return _vehicles
+    final annotations = _vehicles
         .where((item) =>
             item.latitude != null &&
             item.longitude != null &&
             item.latitude != 0 &&
             item.longitude != 0)
         .map(
-          (item) => amaps.Annotation(
-            annotationId: amaps.AnnotationId(
-              item.sn ?? item.cardNum ?? '${item.latitude}-${item.longitude}',
-            ),
-            position: amaps.LatLng(item.latitude!, item.longitude!),
-            icon: _appleMarkerIcon ?? amaps.BitmapDescriptor.defaultAnnotation,
-            onTap: () => _selectVehicle(item),
-          ),
+          (item) {
+            // 根据是否需要保养选择不同的图标
+            final markerIcon = item.needMaintenance == true
+                ? (_appleMaintenanceMarkerIcon ?? amaps.BitmapDescriptor.defaultAnnotation)
+                : (_appleMarkerIcon ?? amaps.BitmapDescriptor.defaultAnnotation);
+            return amaps.Annotation(
+              annotationId: amaps.AnnotationId(
+                item.sn ?? item.cardNum ?? '${item.latitude}-${item.longitude}',
+              ),
+              position: amaps.LatLng(item.latitude!, item.longitude!),
+              icon: markerIcon,
+              onTap: () => _selectVehicle(item),
+            );
+          },
         )
         .toSet();
+    
+    // iOS 系统已有蓝色位置标记，无需手动添加
+    return annotations;
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final centerLat = _latitude ?? _fallbackLatitude;
-    final centerLng = _longitude ?? _fallbackLongitude;
+    final hasLocation = _latitude != null && _longitude != null;
+    final centerLat = hasLocation ? _latitude! : _fallbackLatitude;
+    final centerLng = hasLocation ? _longitude! : _fallbackLongitude;
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
         children: [
           Positioned.fill(
-            child: VehicleMap(
-              latitude: centerLat,
-              longitude: centerLng,
-              markers: _buildGoogleMarkers(),
-              annotations: _buildAppleAnnotations(),
-              onGoogleMapCreated: (controller) {
-                _googleController = controller;
-                _maybeCenterMap();
-              },
-              onAppleMapCreated: (controller) {
-                _appleController = controller;
-                _maybeCenterMap();
-              },
-            ),
+            child: hasLocation
+                ? VehicleMap(
+                    latitude: centerLat,
+                    longitude: centerLng,
+                    markers: _buildGoogleMarkers(),
+                    annotations: _buildAppleAnnotations(),
+                    onGoogleMapCreated: (controller) {
+                      _googleController = controller;
+                      _maybeCenterMap();
+                    },
+                    onAppleMapCreated: (controller) {
+                      _appleController = controller;
+                      _maybeCenterMap();
+                    },
+                  )
+                : const Center(child: CircularProgressIndicator()),
           ),
           _HomeOverlays(
             title: l10n.homeTitle,
@@ -413,19 +560,9 @@ class _HomeTabState extends ConsumerState<HomeTab> {
             onFilter: _showFilterSheet,
             onLocate: _centerMap,
             onRefresh: _fetchVehicles,
+            isFilterActive: _maintainFlag != null,
           ),
-          if (_selectedVehicle != null)
-            _VehicleDetailPopup(
-              vehicle: _selectedVehicle!,
-              address: _addressFor(_selectedVehicle!),
-              distance: _distanceLabel(_selectedVehicle!),
-              onClose: () => _selectVehicle(null),
-              onViewMore: () async {
-                _selectVehicle(null);
-                await _openDetail(_selectedVehicle?.sn);
-              },
-            )
-          else if (_vehicles.isNotEmpty)
+          if (_vehicles.isNotEmpty && _selectedVehicle == null)
             _VehicleDraggableSheet(
               vehicles: _vehicles,
               loading: _loading,
@@ -433,6 +570,18 @@ class _HomeTabState extends ConsumerState<HomeTab> {
               distanceFor: _distanceLabel,
               onSelected: _openDetail,
               emptyText: l10n.homeEmpty,
+            ),
+          if (_selectedVehicle != null)
+            _VehicleDetailSheet(
+              vehicle: _selectedVehicle!,
+              address: _addressFor(_selectedVehicle!),
+              distance: _distanceLabel(_selectedVehicle!),
+              onClose: () => _selectVehicle(null),
+              onViewMore: () async {
+                final sn = _selectedVehicle?.sn;
+                _selectVehicle(null);
+                await _openDetail(sn);
+              },
             ),
         ],
       ),
@@ -448,6 +597,7 @@ class _HomeOverlays extends StatelessWidget {
     required this.onFilter,
     required this.onLocate,
     required this.onRefresh,
+    this.isFilterActive = false,
   });
 
   final String title;
@@ -456,6 +606,7 @@ class _HomeOverlays extends StatelessWidget {
   final VoidCallback onFilter;
   final VoidCallback onLocate;
   final VoidCallback onRefresh;
+  final bool isFilterActive;
 
   @override
   Widget build(BuildContext context) {
@@ -468,19 +619,19 @@ class _HomeOverlays extends StatelessWidget {
             top: MediaQuery.of(context).padding.top + 8,
             left: 16,
             right: 16,
-            bottom: 12,
+            bottom: 8,
           ),
           child: Row(
             children: [
               Expanded(
                 child: InkWell(
                   onTap: onSearch,
-                  borderRadius: BorderRadius.circular(22),
+                  borderRadius: BorderRadius.circular(8),
                   child: Container(
-                    height: 44,
+                    height: 36,
                     decoration: BoxDecoration(
                       color: const Color(0xFFF2F4F7),
-                      borderRadius: BorderRadius.circular(22),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     alignment: Alignment.centerLeft,
@@ -509,7 +660,11 @@ class _HomeOverlays extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               _CircleIconButton(
-                icon: Icons.filter_alt_outlined,
+                iconWidget: Image.asset(
+                  'assets/android/mipmap-xxhdpi/home_filter.png',
+
+                  color: isFilterActive ? AppColors.primaryColor : null,
+                ),
                 showShadow: false,
                 onPressed: onFilter,
               ),
@@ -572,74 +727,73 @@ class _VehicleDraggableSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
       initialChildSize: 0.35,
-      minChildSize: 0.2,
+      minChildSize: 0.15,
       maxChildSize: 0.85,
+      snap: true,
+      snapSizes: const [0.15, 0.35, 0.85],
       builder: (context, controller) {
-        return Align(
-          alignment: Alignment.bottomCenter,
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(28),
-                topRight: Radius.circular(28),
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.bgColor,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(12),
+              topRight: Radius.circular(12),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0x1F000000),
-                  blurRadius: 14,
-                  offset: Offset(0, -4),
+            ],
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(2),
                 ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const SizedBox(height: 8),
-                Container(
-                  width: 48,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.12),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Expanded(
-                  child: loading
-                      ? const Center(child: CircularProgressIndicator())
-                      : vehicles.isEmpty
-                          ? Center(
-                              child: Text(
-                                emptyText,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodyMedium
-                                    ?.copyWith(color: AppColors.black05Text),
-                              ),
-                            )
-                          : ListView.separated(
-                              controller: controller,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 8,
-                              ),
-                              itemBuilder: (context, index) {
-                                final vehicle = vehicles[index];
-                                return _VehicleCard(
-                                  info: vehicle,
-                                  address: addressFor(vehicle),
-                                  distance: distanceFor(vehicle),
-                                  onSelected: () => onSelected(vehicle.sn),
-                                );
-                              },
-                              separatorBuilder: (_, __) =>
-                                  const SizedBox(height: 12),
-                              itemCount: vehicles.length,
+              ),
+              const SizedBox(height: 8),
+              Expanded(
+                child: loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : vehicles.isEmpty
+                        ? Center(
+                            child: Text(
+                              emptyText,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(color: AppColors.black05Text),
                             ),
-                ),
-              ],
-            ),
+                          )
+                        : ListView.separated(
+                            controller: controller,
+                            physics: const ClampingScrollPhysics(),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            itemBuilder: (context, index) {
+                              final vehicle = vehicles[index];
+                              return _VehicleCard(
+                                info: vehicle,
+                                address: addressFor(vehicle),
+                                distance: distanceFor(vehicle),
+                                onSelected: () => onSelected(vehicle.sn),
+                              );
+                            },
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 10),
+                            itemCount: vehicles.length,
+                          ),
+              ),
+            ],
           ),
         );
       },
@@ -665,21 +819,13 @@ class _VehicleCard extends StatelessWidget {
     final theme = Theme.of(context);
     return InkWell(
       onTap: onSelected,
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(8),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.black.withOpacity(0.05)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 6),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(8),
         ),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -702,7 +848,7 @@ class _VehicleCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Wrap(
-                        spacing: 8,
+                        spacing: 6,
                         runSpacing: 6,
                         children: [
                           if (info.needMaintenance == true)
@@ -714,7 +860,7 @@ class _VehicleCard extends StatelessWidget {
                             ),
                           _StatusChip(
                             label:
-                                '${context.l10n.vehicleSearchBindIdLabel}: ${info.cardNum ?? '-'}',
+                                'ID: ${info.cardNum ?? '-'}',
                             borderColor: AppColors.black02Text,
                             textColor: AppColors.black06Text,
                             fontSize: 12,
@@ -729,7 +875,11 @@ class _VehicleCard extends StatelessWidget {
             const SizedBox(height: 16),
             Row(
               children: [
-                Icon(Icons.location_on, size: 18, color: AppColors.black04Text),
+                Image.asset(
+                  'assets/android/mipmap-xxhdpi/icon_location_item.webp',
+                  width: 18,
+                  height: 18,
+                ),
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
@@ -742,10 +892,10 @@ class _VehicleCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Icon(
-                  Icons.campaign_outlined,
-                  size: 18,
-                  color: AppColors.black04Text,
+                Image.asset(
+                  'assets/android/mipmap-xxhdpi/icon_monitor_distination.png',
+                  width: 18,
+                  height: 18,
                 ),
                 const SizedBox(width: 4),
                 Text(
@@ -772,10 +922,10 @@ class _VehicleImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(6),
       child: Container(
-        width: 72,
-        height: 72,
+        width: 60,
+        height: 60,
         color: Colors.white,
         child: (url ?? '').isEmpty
             ? _fallbackIcon()
@@ -790,11 +940,11 @@ class _VehicleImage extends StatelessWidget {
 
   Widget _fallbackIcon() {
     return Container(
-      color: Colors.grey.shade200,
-      child: const Icon(
-        Icons.electric_scooter,
-        size: 36,
-        color: Colors.grey,
+      color: AppColors.bgColor,
+      child: Image.asset(
+        'assets/android/mipmap-xxhdpi/icon_transport_vehicel.png',
+        width: 30,
+        height: 30,
       ),
     );
   }
@@ -805,11 +955,13 @@ class _CircleIconButton extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.iconWidget,
+    this.iconColor,
     this.showShadow = true,
   });
 
   final IconData? icon;
   final Widget? iconWidget;
+  final Color? iconColor;
   final VoidCallback onPressed;
   final bool showShadow;
 
@@ -818,7 +970,7 @@ class _CircleIconButton extends StatelessWidget {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(6),
         boxShadow: showShadow
             ? [
                 BoxShadow(
@@ -831,7 +983,7 @@ class _CircleIconButton extends StatelessWidget {
       ),
       child: IconButton(
         icon: iconWidget ?? Icon(icon),
-        color: iconWidget == null ? AppColors.black07Text : null,
+        color: iconColor ?? (iconWidget == null ? AppColors.black07Text : null),
         onPressed: onPressed,
       ),
     );
@@ -854,11 +1006,11 @@ class _StatusChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       decoration: BoxDecoration(
-        color: borderColor.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: borderColor.withOpacity(0.5)),
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: borderColor, width: 1),
       ),
       child: Text(
         label,
@@ -872,8 +1024,54 @@ class _StatusChip extends StatelessWidget {
   }
 }
 
-class _VehicleDetailPopup extends StatefulWidget {
-  const _VehicleDetailPopup({
+class _FilterMenuItem extends StatelessWidget {
+  const _FilterMenuItem({
+    required this.label,
+    required this.isSelected,
+    this.dotColor,
+  });
+
+  final String label;
+  final bool isSelected;
+  final Color? dotColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        if (dotColor != null) ...[
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(
+              color: dotColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 10),
+        ],
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+            ),
+          ),
+        ),
+        if (isSelected)
+          const Icon(
+            Icons.check,
+            color: AppColors.primaryColor,
+            size: 20,
+          ),
+      ],
+    );
+  }
+}
+
+class _VehicleDetailSheet extends StatefulWidget {
+  const _VehicleDetailSheet({
     required this.vehicle,
     required this.address,
     required this.distance,
@@ -888,19 +1086,21 @@ class _VehicleDetailPopup extends StatefulWidget {
   final VoidCallback onViewMore;
 
   @override
-  State<_VehicleDetailPopup> createState() => _VehicleDetailPopupState();
+  State<_VehicleDetailSheet> createState() => _VehicleDetailSheetState();
 }
 
-class _VehicleDetailPopupState extends State<_VehicleDetailPopup>
+class _VehicleDetailSheetState extends State<_VehicleDetailSheet>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<Offset> _slideAnimation;
+  final ApiService _api = ApiService();
+  String? _phone;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 250),
       vsync: this,
     );
     _slideAnimation = Tween<Offset>(
@@ -908,9 +1108,29 @@ class _VehicleDetailPopupState extends State<_VehicleDetailPopup>
       end: Offset.zero,
     ).animate(CurvedAnimation(
       parent: _controller,
-      curve: Curves.easeOut,
+      curve: Curves.easeOutCubic,
     ));
     _controller.forward();
+    _fetchPhone();
+  }
+
+  Future<void> _fetchPhone() async {
+    final cardNum = widget.vehicle.cardNum;
+    if (cardNum == null || cardNum.isEmpty) return;
+    try {
+      final response = await _api.get<String>(
+        ApiPath.queryRiderPhone,
+        queryParameters: {'cardNum': cardNum},
+        parser: (json) => json?.toString() ?? '',
+      );
+      if (mounted) {
+        setState(() {
+          _phone = response.result;
+        });
+      }
+    } catch (_) {
+      // ignore
+    }
   }
 
   @override
@@ -928,235 +1148,257 @@ class _VehicleDetailPopupState extends State<_VehicleDetailPopup>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final l10n = context.l10n;
-    
+
     return Positioned(
       left: 0,
       right: 0,
       bottom: 0,
-      top: 0,
-      child: GestureDetector(
-        onTap: _handleClose,
-        child: Container(
-          color: Colors.transparent,
-          child: SlideTransition(
-            position: _slideAnimation,
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: GestureDetector(
-                onTap: () {}, // 阻止点击穿透
-                child: Container(
-                  margin: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F5),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
-                      ),
-                    ],
-                  ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // 关闭按钮
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: _handleClose,
-                      padding: const EdgeInsets.all(16),
-                    ),
-                  ),
-                  // 车辆信息
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _VehicleImage(url: widget.vehicle.img),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'SN: ${widget.vehicle.sn ?? '-'}',
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      color: AppColors.black09Text,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 6,
-                                    children: [
-                                      if (widget.vehicle.needMaintenance == true)
-                                        _StatusChip(
-                                          label: l10n.homeFilterNeedMaintenance,
-                                          borderColor: AppColors.danger,
-                                          textColor: AppColors.danger,
-                                          fontSize: 12,
-                                        ),
-                                      _StatusChip(
-                                        label: 'Binding ID: ${widget.vehicle.cardNum ?? '-'}',
-                                        borderColor: AppColors.black02Text,
-                                        textColor: AppColors.black06Text,
-                                        fontSize: 12,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: GestureDetector(
+          onVerticalDragEnd: (details) {
+            // 下滑关闭
+            if (details.velocity.pixelsPerSecond.dy > 100) {
+              _handleClose();
+            }
+          },
+          child: Container(
+            margin: EdgeInsets.fromLTRB(0, 0, 0,0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // 拖动指示条
+          Container(
+            margin: const EdgeInsets.only(top: 12),
+            width: 40,
+            height: 4,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+          // 车辆信息
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _VehicleImage(url: widget.vehicle.img),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'SN: ${widget.vehicle.sn ?? '-'}',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: AppColors.black09Text,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
                             ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        // 用户手机（如果有）
-                        Row(
-                          children: [
-                            Icon(Icons.phone, size: 18, color: AppColors.black04Text),
-                            const SizedBox(width: 6),
-                            Text(
-                              'User phone: +86 12312231520',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: Colors.blue,
-                                fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        // 地址
-                        Row(
-                          children: [
-                            Icon(Icons.location_on, size: 18, color: AppColors.black04Text),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Text(
-                                widget.address,
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.black06Text,
-                                  height: 1.3,
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 6,
+                            children: [
+                              if (widget.vehicle.needMaintenance == true)
+                                _StatusChip(
+                                  label: l10n.homeFilterNeedMaintenance,
+                                  borderColor: AppColors.danger,
+                                  textColor: AppColors.danger,
                                   fontSize: 12,
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(
-                              Icons.campaign_outlined,
-                              size: 18,
-                              color: AppColors.black04Text,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              widget.distance,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: AppColors.black06Text,
+                              _StatusChip(
+                                label: 'ID: ${widget.vehicle.cardNum ?? '-'}',
+                                borderColor: AppColors.borderColor,
+                                textColor: AppColors.black06Text,
                                 fontSize: 12,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-                        // 车牌和里程信息
-                        Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Plate Number',
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: Colors.white.withOpacity(0.8),
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      'V1490',
-                                      style: theme.textTheme.titleLarge?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 24,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'Mileage',
-                                      style: theme.textTheme.bodySmall?.copyWith(
-                                        color: Colors.white.withOpacity(0.8),
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '${widget.vehicle.mile?.toStringAsFixed(0) ?? '0'}km',
-                                      style: theme.textTheme.titleLarge?.copyWith(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 24,
-                                      ),
-                                    ),
-                                  ],
-                                ),
                               ),
                             ],
                           ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // 用户手机
+                Row(
+                  children: [
+                    Image.asset(
+                      'assets/android/mipmap-xxhdpi/icon_grey_phone.png',
+                      width: 18,
+                      height: 18,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      '${l10n.vehicleDetailUserPhone}:',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.black06Text,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      _phone ?? '-',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: _phone != null && _phone!.isNotEmpty ? Colors.blue : AppColors.black06Text,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                // 地址和距离
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Image.asset(
+                      'assets/android/mipmap-xxhdpi/icon_location_item.webp',
+                      width: 18,
+                      height: 18,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        widget.address,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: AppColors.black06Text,
+                          height: 1.4,
+                          fontSize: 14,
                         ),
-                        const SizedBox(height: 16),
-                        // View More Bound Vehicles 按钮
-                        SizedBox(
-                          width: double.infinity,
-                          child: TextButton(
-                            onPressed: () async {
-                              await _controller.reverse();
-                              widget.onViewMore();
-                            },
-                            style: TextButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                            ),
-                            child: Text(
-                              'View More Bound Vehicles',
-                              style: theme.textTheme.titleMedium?.copyWith(
-                                color: AppColors.black07Text,
-                                fontSize: 16,
-                              ),
-                            ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      children: [
+                        Icon(
+                          Icons.navigation,
+                          size: 20,
+                          color: AppColors.primaryColor,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          widget.distance,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: AppColors.black06Text,
+                            fontSize: 12,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
+                  ],
                 ),
-              ),
+                const SizedBox(height: 16),
+                // 车牌和里程信息卡片
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.vehicleDetailPlateNumber,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.white.withOpacity(0.7),
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'V1490',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 22,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.vehicleDetailMileage,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: Colors.white.withOpacity(0.7),
+                                fontSize: 12,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '${widget.vehicle.mile?.toStringAsFixed(0) ?? '0'} km',
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 22,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // View More 按钮
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      await _controller.reverse();
+                      widget.onViewMore();
+                    },
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      side: BorderSide(color: Colors.grey.shade300),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      l10n.vehicleDetailViewMore,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: AppColors.black07Text,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
+          ),
+        ],
+      ),
           ),
         ),
       ),

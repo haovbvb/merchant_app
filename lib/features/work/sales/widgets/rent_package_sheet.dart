@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/pack.dart';
 
@@ -51,7 +52,7 @@ class RentPackageSheet extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF333333),
+                color: AppColors.black06Text,
               ),
             ),
           ),
@@ -85,7 +86,7 @@ class RentPackageSheet extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: () => Navigator.of(context).pop(),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF333333),
+                    foregroundColor: AppColors.black06Text,
                     side: const BorderSide(color: Color(0xFFDDDDDD)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -125,7 +126,7 @@ class _PackageItem extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color(0xFF4CAF50) : const Color(0xFFEEEEEE),
+            color: isSelected ? AppColors.primaryColor : const Color(0xFFEEEEEE),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -143,7 +144,7 @@ class _PackageItem extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -163,7 +164,7 @@ class _PackageItem extends StatelessWidget {
                     width: 24,
                     height: 24,
                     decoration: const BoxDecoration(
-                      color: Color(0xFF4CAF50),
+                      color: AppColors.primaryColor,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -193,7 +194,7 @@ class _PackageItem extends StatelessWidget {
                         _buildPeriodText(pack),
                         style: const TextStyle(
                           fontSize: 14,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                     ],
@@ -215,7 +216,7 @@ class _PackageItem extends StatelessWidget {
                         '\$${(pack.depositAmount ?? 0).toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 14,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                     ],

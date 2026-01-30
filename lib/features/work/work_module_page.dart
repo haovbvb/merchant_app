@@ -11,7 +11,7 @@ import 'package:merchant_app/features/work/cabinet/cabinet_offline_fault_page.da
 import 'package:merchant_app/features/work/cabinet/cabinet_operate_page.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_putaway_page.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_unshelve_page.dart';
-import 'package:merchant_app/features/work/device/device_detail_page.dart';
+import 'package:merchant_app/features/work/device/device_detail_page_new.dart';
 import 'package:merchant_app/features/work/device/device_search_page.dart';
 import 'package:merchant_app/features/work/entry/battery_ship_page.dart';
 import 'package:merchant_app/features/work/entry/shipping_entry_page.dart';
@@ -90,7 +90,7 @@ class WorkModulePage extends StatelessWidget {
       case 'user_detail':
         return UserDetailPage(cardNum: recordNo ?? '');
       case 'device_detail':
-        return DeviceDetailPage(initialSn: recordNo);
+        return DeviceDetailPageNew(initialSn: recordNo);
       case 'device_search':
         return const DeviceSearchPage();
       case 'maintenance_book':

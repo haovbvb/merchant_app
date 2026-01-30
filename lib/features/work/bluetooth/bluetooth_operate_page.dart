@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/bluetooth_permission.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
@@ -820,7 +821,7 @@ class _DeviceTile extends StatelessWidget {
       title: Text(name),
       subtitle: Text(result.device.remoteId.str),
       trailing: isConnected
-          ? const Icon(Icons.check_circle, color: Colors.green)
+          ? const Icon(Icons.check_circle, color: AppColors.primaryColor)
           : TextButton(
               onPressed: onConnect,
               child: const Text('连接'),

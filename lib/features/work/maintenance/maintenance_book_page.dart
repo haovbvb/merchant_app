@@ -42,7 +42,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
     final canConfirm = state.appointment != null && state.note.trim().isNotEmpty;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,

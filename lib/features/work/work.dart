@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:merchant_app/app/app_router.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
-import 'package:merchant_app/features/work/device/device_detail_page.dart';
+import 'package:merchant_app/features/work/device/device_detail_page_new.dart';
 import 'package:merchant_app/features/work/entry/shipping_entry_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/work_controller.dart';
@@ -168,6 +169,11 @@ const Map<WorkRole, List<WorkModule>> _roleModules = {
       titleKey: 'deviceQuery',
       iconPath: 'assets/android/mipmap-xxhdpi/icon_device_query.webp',
     ),
+    WorkModule(
+      key: 'vcu_control',
+      titleKey: 'vcuControl',
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_vcu_testing.png',
+    ),
   ],
 };
 
@@ -195,7 +201,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
     final modules = _roleModules[_currentRole] ?? [];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       body: Column(
         children: [
           // 深绿色渐变顶部
@@ -204,8 +210,8 @@ class _WorkTabState extends ConsumerState<WorkTab> {
           Expanded(
             child: Container(
               margin: const EdgeInsets.only(top: 0),
-              decoration: const BoxDecoration(
-                color: Color(0xFFF5F5F5),
+              decoration: BoxDecoration(
+                color: AppColors.bgColor,
               ),
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
@@ -265,11 +271,9 @@ class _WorkTabState extends ConsumerState<WorkTab> {
                   GestureDetector(
                     onTap: _scanAndOpenDetail,
                     child: Container(
-                      padding: const EdgeInsets.all(8),
+                      padding: const EdgeInsets.all(0),
                       child: Image.asset(
                         'assets/android/mipmap-xxhdpi/icon_scan.png',
-                        width: 24,
-                        height: 24,
                         color: Colors.white,
                       ),
                     ),
@@ -310,7 +314,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
               const Icon(
                 Icons.shopping_bag_outlined,
                 size: 18,
-                color: Color(0xFF333333),
+                color: AppColors.black06Text,
               ),
               const SizedBox(width: 8),
               Text(
@@ -318,7 +322,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
               const Spacer(),
@@ -343,7 +347,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -366,7 +370,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -421,14 +425,10 @@ class _WorkTabState extends ConsumerState<WorkTab> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Container(
+          SizedBox(
             width: 56,
             height: 56,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-            ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
               child: Image.asset(
                 module.iconPath,
                 width: 56,
@@ -439,7 +439,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF4CAF50),
+                      color: AppColors.primaryColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(
@@ -459,8 +459,8 @@ class _WorkTabState extends ConsumerState<WorkTab> {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              fontSize: 12,
-              color: Color(0xFF333333),
+              fontSize: 13,
+              color: AppColors.black06Text,
             ),
           ),
         ],
@@ -515,6 +515,8 @@ class _WorkTabState extends ConsumerState<WorkTab> {
         return l10n.workbenchCabinetPutaway;
       case 'cabinetUnshelve':
         return l10n.workbenchCabinetUnshelve;
+      case 'vcuControl':
+        return l10n.vcuControlTitle;
       default:
         return titleKey;
     }
@@ -552,7 +554,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
               const SizedBox(height: 24),
@@ -634,7 +636,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
       case WorkRole.operations:
         return const Color(0xFF2196F3);
       case WorkRole.warehouseKeeper:
-        return const Color(0xFF4CAF50);
+        return AppColors.primaryColor;
     }
   }
 
@@ -655,7 +657,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
     );
     if (!mounted || result == null || result.isEmpty) return;
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => DeviceDetailPage(initialSn: result)),
+      MaterialPageRoute(builder: (_) => DeviceDetailPageNew(initialSn: result)),
     );
   }
 }

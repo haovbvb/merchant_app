@@ -24,6 +24,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get logout => '退出登录';
 
   @override
+  String get logoutConfirmMessage => '确定要退出登录吗？';
+
+  @override
   String get tabHome => '首页';
 
   @override
@@ -1095,7 +1098,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get warehouseDeviceTypeVehicle => '车辆';
 
   @override
-  String get warehouseDeviceTypeStation => '充电站';
+  String get warehouseDeviceTypeStation => '换电柜';
 
   @override
   String get warehouseInventoryStatusUnfinished => '未完成';
@@ -1713,7 +1716,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceTypeBattery => '电池';
 
   @override
-  String get deviceTypeStation => '站点';
+  String get deviceTypeStation => '换电柜';
 
   @override
   String get batteryEntryTitle => '电池入库';
@@ -1722,7 +1725,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vehicleEntryTitle => '车辆入库';
 
   @override
-  String get stationEntryTitle => '站点入库';
+  String get stationEntryTitle => '换电柜入库';
 
   @override
   String get batteryShipTitle => '电池出库';
@@ -3673,4 +3676,19 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get deviceDetailRepairMissingParts => '缺件';
+
+  @override
+  String get vehicleDetailBindingId => '绑定 ID';
+
+  @override
+  String get vehicleDetailUserPhone => '用户手机';
+
+  @override
+  String get vehicleDetailPlateNumber => '车牌号';
+
+  @override
+  String get vehicleDetailMileage => '里程';
+
+  @override
+  String get vehicleDetailViewMore => '查看更多';
 }

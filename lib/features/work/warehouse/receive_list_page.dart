@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/device_transport_resp.dart';
@@ -44,7 +45,7 @@ class _ReceiveListPageState extends ConsumerState<ReceiveListPage> {
     final notifier = ref.read(receiveListProvider.notifier);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         title: Text(l10n.deviceReceiveTitle),
       ),
@@ -61,10 +62,10 @@ class _ReceiveListPageState extends ConsumerState<ReceiveListPage> {
                 ),
               ),
               child: Container(
-                height: 40,
+                height: 36,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
+                  color: const Color(0xFFF2F4F7),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -255,14 +256,14 @@ class _FilterChip extends StatelessWidget {
             color: selected ? const Color(0xFFE8F5E9) : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: selected ? const Color(0xFF4CAF50) : const Color(0xFFE5E5E5),
+              color: selected ? AppColors.primaryColor : const Color(0xFFE5E5E5),
             ),
           ),
           child: Text(
             label,
             style: TextStyle(
               fontSize: 13,
-              color: selected ? const Color(0xFF4CAF50) : const Color(0xFF666666),
+              color: selected ? AppColors.primaryColor : const Color(0xFF666666),
             ),
           ),
         ),
@@ -338,7 +339,7 @@ class _ReceiveCard extends StatelessWidget {
                     item.inWarehouseName,
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -401,7 +402,7 @@ class _StatusTag extends StatelessWidget {
       case 0:
         return (l10n.deviceIssueStatusInTransit, const Color(0xFFED942F));
       case 1:
-        return (l10n.deviceIssueStatusReceiveAll, const Color(0xFF4CAF50));
+        return (l10n.deviceIssueStatusReceiveAll, AppColors.primaryColor);
       case 2:
         return (l10n.deviceIssueStatusPartial, const Color(0xFF2196F3));
       case 3:

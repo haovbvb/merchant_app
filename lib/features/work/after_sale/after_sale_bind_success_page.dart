@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 
 class AfterSaleBindSuccessPage extends StatelessWidget {
@@ -15,7 +16,7 @@ class AfterSaleBindSuccessPage extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.check_circle, size: 64, color: Colors.green),
+              const Icon(Icons.check_circle, size: 64, color: AppColors.primaryColor),
               const SizedBox(height: 16),
               Text(
                 l10n.afterSaleBindSuccessMessage,

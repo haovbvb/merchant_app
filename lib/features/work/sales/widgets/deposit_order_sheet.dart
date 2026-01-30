@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/deposit_refund_info_bean.dart';
 
@@ -73,7 +74,7 @@ class _DepositOrderSheetState extends State<DepositOrderSheet> {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF333333),
+                color: AppColors.black06Text,
               ),
             ),
           ),
@@ -102,7 +103,7 @@ class _DepositOrderSheetState extends State<DepositOrderSheet> {
                 child: OutlinedButton(
                   onPressed: () => Navigator.of(context).pop(),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF333333),
+                    foregroundColor: AppColors.black06Text,
                     side: const BorderSide(color: Color(0xFFEEEEEE)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -141,7 +142,7 @@ class _DepositOrderSheetState extends State<DepositOrderSheet> {
           color: const Color(0xFFF9F9F9),
           borderRadius: BorderRadius.circular(12),
           border: isSelected
-              ? Border.all(color: const Color(0xFF4CAF50), width: 1.5)
+              ? Border.all(color: AppColors.primaryColor, width: 1.5)
               : null,
         ),
         child: Column(
@@ -168,7 +169,7 @@ class _DepositOrderSheetState extends State<DepositOrderSheet> {
                     'Order NO: ${deposit.orderNo ?? '-'}',
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -179,7 +180,7 @@ class _DepositOrderSheetState extends State<DepositOrderSheet> {
                     height: 24,
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Color(0xFF4CAF50),
+                      color: AppColors.primaryColor,
                     ),
                     child: const Icon(
                       Icons.check,
@@ -207,7 +208,7 @@ class _DepositOrderSheetState extends State<DepositOrderSheet> {
                   unbindTimeStr,
                   style: const TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ],

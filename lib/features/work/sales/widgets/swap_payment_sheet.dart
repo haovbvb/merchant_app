@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 
 class SwapPaymentSheet extends StatefulWidget {
@@ -74,7 +75,7 @@ class _SwapPaymentSheetState extends State<SwapPaymentSheet> {
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
             ),
@@ -88,7 +89,7 @@ class _SwapPaymentSheetState extends State<SwapPaymentSheet> {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
             ),
@@ -115,7 +116,7 @@ class _SwapPaymentSheetState extends State<SwapPaymentSheet> {
                               : const Color(0xFFF5F5F5),
                           borderRadius: BorderRadius.circular(8),
                           border: isSelected
-                              ? Border.all(color: const Color(0xFF4CAF50))
+                              ? Border.all(color: AppColors.primaryColor)
                               : null,
                         ),
                         child: Row(
@@ -128,7 +129,7 @@ class _SwapPaymentSheetState extends State<SwapPaymentSheet> {
                                 margin: const EdgeInsets.only(right: 6),
                                 decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Color(0xFF4CAF50),
+                                  color: AppColors.primaryColor,
                                 ),
                                 child: const Icon(
                                   Icons.check,
@@ -141,8 +142,8 @@ class _SwapPaymentSheetState extends State<SwapPaymentSheet> {
                               style: TextStyle(
                                 fontSize: 14,
                                 color: isSelected
-                                    ? const Color(0xFF4CAF50)
-                                    : const Color(0xFF333333),
+                                    ? AppColors.primaryColor
+                                    : AppColors.black06Text,
                                 fontWeight: isSelected
                                     ? FontWeight.w600
                                     : FontWeight.normal,
@@ -167,7 +168,7 @@ class _SwapPaymentSheetState extends State<SwapPaymentSheet> {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
             ),
@@ -191,7 +192,7 @@ class _SwapPaymentSheetState extends State<SwapPaymentSheet> {
                               : const Color(0xFFF5F5F5),
                           borderRadius: BorderRadius.circular(8),
                           border: isSelected
-                              ? Border.all(color: const Color(0xFF4CAF50))
+                              ? Border.all(color: AppColors.primaryColor)
                               : null,
                         ),
                         child: Row(
@@ -204,7 +205,7 @@ class _SwapPaymentSheetState extends State<SwapPaymentSheet> {
                                 margin: const EdgeInsets.only(right: 6),
                                 decoration: const BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Color(0xFF4CAF50),
+                                  color: AppColors.primaryColor,
                                 ),
                                 child: const Icon(
                                   Icons.check,
@@ -217,8 +218,8 @@ class _SwapPaymentSheetState extends State<SwapPaymentSheet> {
                               style: TextStyle(
                                 fontSize: 14,
                                 color: isSelected
-                                    ? const Color(0xFF4CAF50)
-                                    : const Color(0xFF333333),
+                                    ? AppColors.primaryColor
+                                    : AppColors.black06Text,
                                 fontWeight: isSelected
                                     ? FontWeight.w600
                                     : FontWeight.normal,
@@ -246,7 +247,7 @@ class _SwapPaymentSheetState extends State<SwapPaymentSheet> {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                   ),
                   Text(
@@ -280,7 +281,7 @@ class _SwapPaymentSheetState extends State<SwapPaymentSheet> {
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4CAF50),
+                    backgroundColor: AppColors.primaryColor,
                     disabledBackgroundColor: const Color(0xFFCCCCCC),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(

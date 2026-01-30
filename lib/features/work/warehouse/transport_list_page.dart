@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/warehouse/device_type_sheet.dart';
 import 'package:merchant_app/features/work/warehouse/transport_controller.dart';
@@ -50,7 +51,7 @@ class _TransportListPageState extends ConsumerState<TransportListPage> {
     final notifier = ref.read(transportListProvider.notifier);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         title: Text(
           widget.mode == TransportMode.issue
@@ -78,10 +79,10 @@ class _TransportListPageState extends ConsumerState<TransportListPage> {
                 ),
               ),
               child: Container(
-                height: 40,
+                height: 36,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F5F5),
+                  color: const Color(0xFFF2F4F7),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -413,7 +414,7 @@ class _TransportCard extends StatelessWidget {
                       item.outWarehouseName,
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -486,7 +487,7 @@ class _TransportCard extends StatelessWidget {
         );
       case 1: // Receive all - green
         return const _StatusColors(
-          text: Color(0xFF4CAF50),
+          text: AppColors.primaryColor,
           background: Color(0xFFEEF7E9),
         );
       case 2: // Partial - blue

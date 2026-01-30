@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
@@ -20,7 +21,6 @@ class SaleSummaryPage extends ConsumerStatefulWidget {
 class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool _showSalesData = true; // true=Sales Data, false=After-Sales Data
 
   @override
   void initState() {
@@ -42,7 +42,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
     final notifier = ref.read(saleSummaryProvider.notifier);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       body: Column(
         children: [
           // 深绿色顶部区域
@@ -50,8 +50,8 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
           // 白色内容区域
           Expanded(
             child: Container(
-              decoration: const BoxDecoration(
-                color: Color(0xFFF5F5F5),
+              decoration: BoxDecoration(
+                color: AppColors.bgColor,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: SingleChildScrollView(
@@ -264,14 +264,14 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
           // Signing rate & Order value 标题
           Row(
             children: [
-              const Icon(Icons.schedule, size: 18, color: Color(0xFF333333)),
+              const Icon(Icons.schedule, size: 18, color: AppColors.black06Text),
               const SizedBox(width: 8),
               Text(
                 l10n.saleSummarySigningRateTitle,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
             ],
@@ -289,7 +289,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -328,7 +328,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -366,7 +366,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
           // Tab切换：Sales Amount / Transaction Order
           TabBar(
             controller: _tabController,
-            labelColor: const Color(0xFF333333),
+            labelColor: AppColors.black06Text,
             unselectedLabelColor: const Color(0xFF999999),
             labelStyle: const TextStyle(
               fontSize: 14,
@@ -376,7 +376,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
               fontSize: 14,
               fontWeight: FontWeight.normal,
             ),
-            indicatorColor: const Color(0xFF4CAF50),
+            indicatorColor: AppColors.primaryColor,
             indicatorWeight: 2,
             tabs: [
               Tab(text: l10n.saleSummarySalesAmount),
@@ -408,6 +408,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
     AppLocalizations l10n,
     SaleSummaryState state,
   ) {
+    final notifier = ref.read(saleSummaryProvider.notifier);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
@@ -420,26 +421,26 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
         children: [
           // Sales Data / After-Sales Data 选择器
           GestureDetector(
-            onTap: () => _showDataTypeSelector(context, l10n),
+            onTap: () => _showDataTypeSelector(context, l10n, state, notifier),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  _showSalesData ? l10n.saleSummarySalesData : l10n.saleSummaryAfterSalesData,
+                  state.showSalesData ? l10n.saleSummarySalesData : l10n.saleSummaryAfterSalesData,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Icon(Icons.keyboard_arrow_down, size: 20, color: Color(0xFF333333)),
+                const Icon(Icons.keyboard_arrow_down, size: 20, color: AppColors.black06Text),
               ],
             ),
           ),
           const SizedBox(height: 16),
           // 支付方式筛选
-          _buildPayWayFilter(l10n, state, ref.read(saleSummaryProvider.notifier)),
+          _buildPayWayFilter(l10n, state, notifier),
           const SizedBox(height: 16),
           // 订单列表
           if (state.loadingList)
@@ -489,13 +490,13 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFE8F5E9) : const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(16),
-          border: isSelected ? Border.all(color: const Color(0xFF4CAF50)) : null,
+          border: isSelected ? Border.all(color: AppColors.primaryColor) : null,
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: 13,
-            color: isSelected ? const Color(0xFF4CAF50) : const Color(0xFF666666),
+            color: isSelected ? AppColors.primaryColor : const Color(0xFF666666),
             fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
           ),
         ),
@@ -562,7 +563,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -585,7 +586,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
               if ((order.attachment ?? '').isNotEmpty) ...[
@@ -631,7 +632,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
           'name': 'Lease',
           'icon': Icons.key,
           'bgColor': const Color(0xFFE8F5E9),
-          'iconColor': const Color(0xFF4CAF50),
+          'iconColor': AppColors.primaryColor,
         };
       case 3:
         return {
@@ -703,7 +704,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
             child: ElevatedButton(
               onPressed: () => Navigator.of(context).pop(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF4CAF50),
+                backgroundColor: AppColors.primaryColor,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -717,7 +718,8 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
     );
   }
 
-  void _showDataTypeSelector(BuildContext context, AppLocalizations l10n) {
+  void _showDataTypeSelector(BuildContext context, AppLocalizations l10n, SaleSummaryState state, SaleSummaryNotifier notifier) {
+    final showSalesData = state.showSalesData;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -737,7 +739,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
               const SizedBox(height: 16),
@@ -745,11 +747,11 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                 title: Text(
                   l10n.saleSummarySalesData,
                   style: TextStyle(
-                    color: _showSalesData ? const Color(0xFF333333) : const Color(0xFF666666),
+                    color: showSalesData ? AppColors.black06Text : const Color(0xFF666666),
                   ),
                 ),
                 onTap: () {
-                  setState(() => _showSalesData = true);
+                  notifier.setShowSalesData(true);
                   Navigator.of(context).pop();
                 },
               ),
@@ -758,11 +760,11 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                 title: Text(
                   l10n.saleSummaryAfterSalesData,
                   style: TextStyle(
-                    color: !_showSalesData ? const Color(0xFF4CAF50) : const Color(0xFF666666),
+                    color: !showSalesData ? AppColors.primaryColor : const Color(0xFF666666),
                   ),
                 ),
                 onTap: () {
-                  setState(() => _showSalesData = false);
+                  notifier.setShowSalesData(false);
                   Navigator.of(context).pop();
                 },
               ),
@@ -775,7 +777,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF333333),
+                      foregroundColor: AppColors.black06Text,
                       side: const BorderSide(color: Color(0xFFEEEEEE)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -886,14 +888,14 @@ class _AmountLineChart extends StatelessWidget {
           LineChartBarData(
             spots: spots,
             isCurved: false,
-            color: const Color(0xFF4CAF50),
+            color: AppColors.primaryColor,
             barWidth: 2,
             dotData: FlDotData(
               show: true,
               getDotPainter: (spot, percent, barData, index) =>
                   FlDotCirclePainter(
                 radius: 4,
-                color: const Color(0xFF4CAF50),
+                color: AppColors.primaryColor,
                 strokeWidth: 2,
                 strokeColor: Colors.white,
               ),

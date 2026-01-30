@@ -84,7 +84,7 @@ class _CabinetAuthorizationPageState
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.cabinetAuthTitle)),
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       body: Column(
         children: [
           // Station 和 Authorized person 选择区域
@@ -317,7 +317,7 @@ class _SelectStationPageState extends ConsumerState<_SelectStationPage> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.cabinetAuthSelectStationTitle)),
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       body: Column(
         children: [
           // Search bar
@@ -456,11 +456,11 @@ class _StationCard extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: isOnline
-                                    ? Colors.green.withOpacity(0.1)
+                                    ? AppColors.primaryColor.withOpacity(0.1)
                                     : Colors.red.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                  color: isOnline ? Colors.green : Colors.red,
+                                  color: isOnline ? AppColors.primaryColor : Colors.red,
                                   width: 0.5,
                                 ),
                               ),
@@ -472,7 +472,7 @@ class _StationCard extends StatelessWidget {
                                         ? Icons.wifi
                                         : Icons.wifi_off,
                                     size: 12,
-                                    color: isOnline ? Colors.green : Colors.red,
+                                    color: isOnline ? AppColors.primaryColor : Colors.red,
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
@@ -480,7 +480,7 @@ class _StationCard extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 11,
                                       color:
-                                          isOnline ? Colors.green : Colors.red,
+                                          isOnline ? AppColors.primaryColor : Colors.red,
                                     ),
                                   ),
                                 ],
@@ -676,7 +676,7 @@ class _SelectPersonPageState extends ConsumerState<_SelectPersonPage> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.cabinetAuthSelectPersonTitle)),
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       body: Column(
         children: [
           // Search bar
@@ -868,7 +868,7 @@ class _AuthorizedRecordPageState extends ConsumerState<_AuthorizedRecordPage> {
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.cabinetAuthRecordTitle)),
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       body: state.loadingRecords
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(

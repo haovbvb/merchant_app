@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
@@ -114,7 +115,7 @@ class _UserSearchPageState extends ConsumerState<UserSearchPage> {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -143,15 +144,16 @@ class _UserSearchPageState extends ConsumerState<UserSearchPage> {
 
   Widget _buildSearchField(AppLocalizations l10n) {
     return Container(
-      height: 40,
+      height: 36,
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFFF2F4F7),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: TextField(
         controller: _searchController,
         focusNode: _focusNode,
         textInputAction: TextInputAction.search,
+        textAlignVertical: TextAlignVertical.center,
         decoration: InputDecoration(
           hintText: l10n.userSearchHint,
           hintStyle: const TextStyle(color: Color(0xFF999999), fontSize: 14),
@@ -169,7 +171,8 @@ class _UserSearchPageState extends ConsumerState<UserSearchPage> {
                 )
               : null,
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          // contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+          isCollapsed: true,
         ),
         onChanged: (value) => setState(() {}),
         onSubmitted: _search,
@@ -315,7 +318,7 @@ class _HistoryChip extends StatelessWidget {
               text,
               style: const TextStyle(
                 fontSize: 13,
-                color: Color(0xFF333333),
+                color: AppColors.black06Text,
               ),
             ),
             const SizedBox(width: 6),
@@ -440,7 +443,12 @@ class _UserCard extends StatelessWidget {
                 padding: const EdgeInsets.all(16),
                 child: Row(
                   children: [
-                    const Icon(Icons.campaign_outlined, size: 18, color: Color(0xFF999999)),
+                    Image.asset(
+                      'assets/android/mipmap-xxhdpi/icon_order_notify.png',
+                      width: 18,
+                      height: 18,
+                      color: const Color(0xFF999999),
+                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(

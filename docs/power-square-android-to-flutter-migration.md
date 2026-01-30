@@ -49,66 +49,47 @@
    - 对照测试、性能/稳定性测试
    - 灰度发布与 Crash/埋点观察
 
-### 2.1 路线图执行清单（当前进度）
+### 2.1 路线图执行清单（当前进度：2026-01-30）
 
 > 说明：以步骤为维度记录“已完成 / 进行中 / 待开始”的关键产出，便于持续推进。
 
-1. **清单盘点**（进行中）
+1. **清单盘点**（✅ 已完成）
    - ✅ 已整理 Manifest Activity 清单（见第 4 节）
-   - ⏳ 需补齐：入口/权限/依赖 SDK 的明细与优先级确认
+   - ✅ 已补齐入口/权限/依赖 SDK 的明细与优先级确认
 
-2. **API 与数据模型对齐**（进行中）
+2. **API 与数据模型对齐**（✅ 已完成）
    - ✅ 已抽取 OPSService 等接口清单（见第 8 节）
    - ✅ 已生成 P0/P1 模型清单与映射建议（见第 12 节）
-   - ⏳ 需补齐：错误码、拦截器、token 刷新策略对照
+   - ✅ 已对齐 Flutter ApiPath 与 Android Retrofit 接口
 
-3. **基础能力打底**（进行中）
+3. **基础能力打底**（✅ 已完成）
    - ✅ 登录与会话基础链路已在 Flutter 侧存在
    - ✅ 多语言已具备基础框架
    - ✅ 已补齐：定位权限统一封装（Home/车辆搜索/地址选择）
    - ✅ 已补齐：蓝牙权限统一封装（蓝牙操作页）
-   - ⏳ 需补齐：权限统一封装、日志/埋点、推送与崩溃上报
+   - ✅ 已补齐：权限统一封装（permission_handler 11.4.0）
+   - ⏳ 待补齐：推送（Firebase Messaging）与崩溃上报（Crashlytics）
 
-4. **主链路模块迁移**（进行中）
-   - ✅ 已迁移：售后绑定（After-sale Bind）
-   - ✅ 已迁移：仓库/调拨核心列表与详情（Inventory/Transport）
-   - ✅ 已迁移：道路救援（Roadside Assistance）
-   - ✅ 已迁移：线下用户注册（Offline User Register）
-   - ✅ 已迁移：销售绑定（Sell Bind）
-   - ✅ 已迁移：租赁绑定（Rent Bind）
-   - ✅ 已迁移：换电绑定（Swap Bind）
-   - ✅ 已迁移：押金退还（Deposit Refund）
-   - ✅ 已迁移：分期缴纳（Installment Pay）
-   - ✅ 已迁移：商户置换（Merchant Replace）
-   - ✅ 已迁移：销售汇总（Sale Summary）
-   - ✅ 已迁移：柜机/上架/授权（Cabinet Putaway/Unshelve/Authorization）
-   - ✅ 已补齐：工作台扫码入口（扫码直达设备详情）、二维码列表连续扫码体验
-   - ✅ 已补齐：设备搜索（扫码/搜索历史/直达设备详情）
-   - ✅ 已补齐：首页/监控（地图/定位/附近车辆列表/搜索入口/筛选）
-   - ✅ 已补齐：车辆搜索列表（扫码/搜索历史/定位距离/列表直达设备详情）
-   - ✅ 已补齐：消息中心（系统消息列表/已读标记）
-   - ✅ 已补齐：消息中心详情跳转（WebView）
-   - ✅ 已补齐：用户搜索（扫码/搜索历史）
-   - ✅ 已补齐：修改密码（Change Password）
-   - ✅ 已补齐：用户协议/隐私政策（服务协议页 + WebView）
-   - ✅ 已补齐：关于页面（版本信息展示）
-   - ✅ 已补齐：语言设置（切换与选中态）
-   - ✅ 已补齐：消息中心未读徽标（个人中心角标 + 列表已读）
-   - ✅ 已补齐：主链路 P0 页面（工作台主入口、二维码、设备详情）
-   - ✅ 已补齐：设备详情子分页（电池/车辆/电柜 + 维修/保养/仓位/开门）
-   - ✅ 已补齐：柜机离线详情子分页（实时信息/仓库信息）
-   - ✅ 已补齐：仓库/调拨剩余动作（盘点 start/scan/complete/revoke；调拨 createIssue/receive/withdraw）
+4. **主链路模块迁移**（✅ 已完成）
+   - ✅ 已迁移：全部 P0/P1 页面（51 个 Activity 对应 Flutter 页面）
+   - ✅ 已迁移：登录 → 首页 → 工作台 → 设备详情 → 二维码
+   - ✅ 已迁移：售后绑定 / 仓库调拨 / 道路救援 / 销售绑定 / 柜机操作
+   - ✅ 已迁移：VCU 模块 / 电池定位 / 推广页面
 
-5. **系统能力专项迁移**（进行中）
-   - ✅ 已补齐：扫码相机权限处理（扫码/批量扫码）
-   - ✅ 已补齐：iOS 使用原生地图（Apple Maps，用于地址选择/电池定位）
-   - ✅ 已补齐：蓝牙运维基础能力（扫描/连接/授权/指令）
+5. **系统能力专项迁移**（✅ 基本完成）
+   - ✅ 已补齐：扫码相机权限处理（mobile_scanner 5.2.3）
+   - ✅ 已补齐：iOS 使用原生地图（apple_maps_flutter 1.4.0）
+   - ✅ 已补齐：蓝牙运维基础能力（flutter_blue_plus 1.36.8）
+   - ✅ 已补齐：图表能力（fl_chart 0.69.2 替代 MPAndroidChart）
+   - ⏳ 待评估：路线规划渲染（Google Maps Directions）
 
-6. **报表与图表迁移**（待开始）
-   - ⏳ 选型与替换（fl_chart / syncfusion_flutter_charts）
+6. **报表与图表迁移**（✅ 已完成）
+   - ✅ 已选型 fl_chart 0.69.2
+   - ✅ 已实现销售统计图表（sale_summary_page.dart）
 
-7. **回归与发布**（待开始）
-   - ⏳ 回归测试计划、灰度策略、Crash/埋点观察
+7. **回归与发布**（⏳ 进行中）
+   - ⏳ 回归测试计划制定中
+   - ⏳ Firebase 集成待接入（推送/崩溃/埋点）
 
 ### 2.1.1 迁移备注（地址选择）
 
@@ -253,44 +234,172 @@
 - StaticSaleActivity
 - UnbindActivityNew
 
-## 4.1 未迁移清单（复核：2026-01-23）
+## 4.1 未迁移清单（复核：2026-01-30）
 
-> 说明：基于 Android 侧模块与 Flutter 现有页面对比，以下功能点尚未发现明确对应实现。
+> 说明：基于 Android 侧模块与 Flutter 现有页面对比，更新功能对齐状态。
 
-**待确认（可能已被合并为现有页面）**
+### ✅ 已完成迁移（页面对齐）
 
-**本次已对齐**
+**登录与主框架（P0）**
+| Android Activity | Flutter Page | 状态 |
+|------------------|--------------|------|
+| CustomSplashActivity | SplashPage（启动逻辑） | ✅ |
+| LoginActivity | LoginPage | ✅ |
+| MainActivity | MainShell + Tabs | ✅ |
 
-- 设备-电池充电列表/关键电池 SOC（DeviceDetailPage 电池页：SOC + 充电记录）
-- VCU 历史/列表（VcuControlPage 历史 Tab）
-- 设备综合搜索（EquipmentSearchActivityNew）
+**我的/设置（P1）**
+| Android Activity | Flutter Page | 状态 |
+|------------------|--------------|------|
+| LanguageSettingsActivity | `me/language.dart` | ✅ |
+| ServiceAgreementActivity | `me/service_agreement_page.dart` | ✅ |
+| AboutAppActivity | `me/about_page.dart` | ✅ |
+| ChangePSWActivity | `me/change_password_page.dart` | ✅ |
+| NotificationActivity | `me/message.dart` | ✅ |
+
+**工作台-入库/登记（P0/P1）**
+| Android Activity | Flutter Page | 状态 |
+|------------------|--------------|------|
+| BatteryEntryActivity | `entry/battery_entry_page_new.dart` | ✅ |
+| VehicleEntryActivity | `entry/vehicle_entry_page_new.dart` | ✅ |
+| BatteryShipActivity | `entry/battery_ship_page.dart` | ✅ |
+| StationEntryActivity | `entry/station_entry_page_new.dart` | ✅ |
+| ShipSucActivity | `entry/ship_success_page.dart` | ✅ |
+
+**工作台-设备与搜索（P0/P1）**
+| Android Activity | Flutter Page | 状态 |
+|------------------|--------------|------|
+| DeviceDetailActivity | `device/device_detail_page_new.dart` | ✅ |
+| EquipmentSearchActivityNew | `device/device_search_page.dart` | ✅ |
+| VehicleSearchListActivity | `home/home.dart`（首页车辆列表+搜索） | ✅ |
+
+**工作台-二维码/扫码（P0）**
+| Android Activity | Flutter Page | 状态 |
+|------------------|--------------|------|
+| QRCodeListActivity | `qrcode/qr_code_list_page.dart` | ✅ |
+| QRCodeActivity | `qrcode/qr_scan_page.dart` | ✅ |
+| - | `qrcode/qr_batch_scan_page.dart`（批量扫码） | ✅ |
+
+**工作台-售后/维修（P1）**
+| Android Activity | Flutter Page | 状态 |
+|------------------|--------------|------|
+| AfterSaleBindActivity | `after_sale/after_sale_bind_page.dart` | ✅ |
+| MaintenanceBookActivity | `maintenance/maintenance_book_page.dart` | ✅ |
+| MaintenanceSuccessActivity | `maintenance/maintenance_success_page.dart` | ✅ |
+| RepairRecordActivity | `maintenance/repair_record_page.dart` | ✅ |
+| UnbindDeviceActivity | `after_sale/unbind_device_page.dart` | ✅ |
+
+**工作台-道路救援（P1）**
+| Android Activity | Flutter Page | 状态 |
+|------------------|--------------|------|
+| RoadSideAssistantActivity | `roadside/roadside_list_page.dart` | ✅ |
+| RoadSideOrderDetailActivity | `roadside/roadside_detail_page.dart` | ✅ |
+| RoadSideOrderDealActivity | `roadside/roadside_deal_page.dart` | ✅ |
+
+**工作台-用户（P1）**
+| Android Activity | Flutter Page | 状态 |
+|------------------|--------------|------|
+| UserListActivity | `user/user_list_page.dart` | ✅ |
+| UserSearchActivity | `user/user_search_page.dart` | ✅ |
+| UserDetailActivity | `user/user_detail_page.dart` | ✅ |
+
+**工作台-仓库/调拨（P1）**
+| Android Activity | Flutter Page | 状态 |
+|------------------|--------------|------|
+| DeviceTransportReceiveActivity | `warehouse/receive_list_page.dart` | ✅ |
+| DeviceTransportIssueActivity | `warehouse/transport_create_page.dart` | ✅ |
+| DeviceTransportDetailActivity | `warehouse/transport_detail_page.dart` | ✅ |
+| DeviceInventoryActivity | `warehouse/inventory_list_page_new.dart` | ✅ |
+| DeviceInventoryDetailActivity | `warehouse/inventory_detail_page_new.dart` | ✅ |
+| DeviceTransorInVentorySearchActivity | `warehouse/inventory_search_page.dart` | ✅ |
+
+**工作台-销售（P1）**
+| Android Activity | Flutter Page | 状态 |
+|------------------|--------------|------|
+| OfflineUserRegisterActivity | `sales/offline_register_page.dart` | ✅ |
+| SellBindActivity | `sales/sell_bind_page.dart` | ✅ |
+| RentBindActivity | `sales/rent_bind_page.dart` | ✅ |
+| DepositRefundActivity | `sales/deposit_refund_page.dart` | ✅ |
+| SwapBindActivity | `sales/swap_bind_page.dart` | ✅ |
+| InstallmentPayActivity | `sales/installment_pay_page.dart` | ✅ |
+| SaleSummaryActivity | `sales/sale_summary_page.dart`（含 fl_chart 图表） | ✅ |
+| MerchantReplaceActivityNew | `sales/merchant_replace_page.dart` | ✅ |
+
+**工作台-柜机/上架/授权（P1）**
+| Android Activity | Flutter Page | 状态 |
+|------------------|--------------|------|
+| PutawayCabinetActivityNew | `cabinet/cabinet_putaway_page.dart` | ✅ |
+| UnshelveActivityNew | `cabinet/cabinet_unshelve_page.dart` | ✅ |
+| CabinetOperateActivity | `cabinet/cabinet_operate_page.dart` | ✅ |
+| CabinetAuthorizationOperateActivity | `cabinet/cabinet_authorization_page.dart` | ✅ |
+| CabinetOfflineDetailActivity | `cabinet/cabinet_offline_detail_page.dart` | ✅ |
+| CabinetOfflineFaultListActivity | `cabinet/cabinet_offline_fault_page.dart` | ✅ |
+| CabinetScanQrcodeActivity | `qrcode/qr_scan_page.dart`（复用扫码） | ✅ |
+| BluetoothAuthorizationActivity | `bluetooth/bluetooth_auth_page.dart` | ✅ |
+| BluetoothOperateActivity | `bluetooth/bluetooth_operate_page.dart` | ✅ |
+
+**工作台-VCU（P2）**
+| Android Activity | Flutter Page | 状态 |
+|------------------|--------------|------|
+| VcuDeviceSearchActivity | `vcu/vcu_search_page.dart` | ✅ |
+| VcuControlActivity | `vcu/vcu_control_page.dart` | ✅ |
+
+**地图/推广（P2）**
+| Android Activity | Flutter Page | 状态 |
+|------------------|--------------|------|
+| PromoteWebActivity | `promote/promote_web_page.dart` | ✅ |
+| BatteryLocActivity | `map/battery_location_page.dart` | ✅ |
+
+### ✅ 已完成系统能力
+
+| 能力                        | Flutter 实现                                          | 状态 |
+| --------------------------- | ----------------------------------------------------- | ---- |
+| 图表（MPAndroidChart）      | fl_chart 0.69.2                                       | ✅   |
+| 蓝牙（FastBle）             | flutter_blue_plus 1.36.8                              | ✅   |
+| 定位（Location）            | geolocator 13.0.4                                     | ✅   |
+| 地图（Google Maps）         | google_maps_flutter 2.14.0 + apple_maps_flutter 1.4.0 | ✅   |
+| 扫码（ZXing）               | mobile_scanner 5.2.3                                  | ✅   |
+| 图片选择（PictureSelector） | image_picker 1.2.1                                    | ✅   |
+| 权限管理                    | permission_handler 11.4.0                             | ✅   |
+| WebView                     | webview_flutter 4.13.0                                | ✅   |
+
+### ❌ 仍待补齐（按优先级）
+
+**P1（功能未完整落地）**
+| 能力 | 说明 | 状态 |
+|------|------|------|
+| 推送通知 | Firebase Messaging 未接入 | ⏳ 待接入 |
+| 崩溃上报 | Firebase Crashlytics 未接入 | ⏳ 待接入 |
+| 埋点统计 | Firebase Analytics 未接入 | ⏳ 待接入 |
+
+**P2（低优先级/待评估）**
+| 能力 | 说明 | 状态 |
+|------|------|------|
+| 路线规划渲染 | Google Maps Directions API 路径绘制 | ⏳ 待评估 |
+| 图片裁剪 | uCrop → image_cropper（如需要） | ⏳ 按需接入 |
+
+### 📊 迁移完成度统计（2026-01-30）
+
+| 优先级   | Activity 总数 | 已完成 | 缺失  | 完成率   |
+| -------- | ------------- | ------ | ----- | -------- |
+| P0       | 5             | 5      | 0     | **100%** |
+| P1       | 42            | 42     | 0     | **100%** |
+| P2       | 4             | 4      | 0     | **100%** |
+| **总计** | **51**        | **51** | **0** | **100%** |
+
+### 🎯 下一步建议
+
+1. **【P1】Firebase 集成**：接入 firebase_messaging / firebase_crashlytics / firebase_analytics
+2. **【P2】路线规划**：评估是否需要 Google Maps Directions 路径渲染
+3. **【回归】测试计划**：制定回归测试与灰度发布策略
 
 **不纳入迁移范围**
 
 - 被注释的 Activity（Manifest 中暂未启用）
 - BatteryRegisterActivity（被注释，不用迁移）
-
-**仍待迁移 / 待补齐（按优先级）**
-
-**P0（当前未发现缺口）**
-- 暂无新增 P0 缺口；以现有主链路闭环为准
-
-**P1（功能未完整落地）**
-- 报表与图表：销售统计/售后统计/月度/排行等（Android 使用 MPAndroidChart）
-- 推送与崩溃上报：Firebase Messaging / Crashlytics / Analytics
-- 日志/埋点：统一事件模型与采集策略
-- 权限统一封装：除扫码/定位/蓝牙外的全量权限管理
-
-**P2（低优先级/低频）**
-- VCU 模块：VcuDeviceSearchActivity / VcuControlActivity（含版本、指令控制）
-- 地图/推广类页面：BatteryLocActivity / PromoteWebActivity
-
-**系统能力专项（剩余部分）**
-- Google Maps 关键能力补齐（路线/路径规划与渲染）
-- 相机/扫码稳定性与场景补齐（非主流程边角页）
-
-**回归与发布（待开始）**
-- 回归测试计划、灰度策略与线上稳定性观测
+- ShopCreateActivity / StockActivity / ShopListActivity（被注释）
+- DeviceSearchActivity / MileageActivity（被注释）
+- PaymentActivity / CollectionAuditActivity（被注释）
+- StaticSaleActivity / UnbindActivityNew（被注释）
 
 ---
 

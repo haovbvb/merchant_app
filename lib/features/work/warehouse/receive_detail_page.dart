@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/device_transport_resp.dart';
@@ -51,7 +52,7 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF5F5F5),
+        backgroundColor: AppColors.bgColor,
         appBar: AppBar(
           title: Text(l10n.deviceReceiveDetailTitle),
           leading: IconButton(
@@ -147,7 +148,7 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(result.message),
-          backgroundColor: result.success ? Colors.green : Colors.red,
+          backgroundColor: result.success ? AppColors.primaryColor : Colors.red,
         ),
       );
     }
@@ -161,7 +162,7 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(success ? 'Withdrawn successfully' : 'Withdraw failed'),
-          backgroundColor: success ? Colors.green : Colors.red,
+          backgroundColor: success ? AppColors.primaryColor : Colors.red,
         ),
       );
     }
@@ -190,7 +191,7 @@ class _OrderHeaderCard extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1B5E20),
+        color: AppColors.primaryColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -270,7 +271,7 @@ class _OrderHeaderCard extends StatelessWidget {
                             detail?.outWarehouseName ?? '',
                             style: const TextStyle(
                               fontSize: 14,
-                              color: Color(0xFF333333),
+                              color: AppColors.black06Text,
                             ),
                           ),
                         ],
@@ -286,7 +287,7 @@ class _OrderHeaderCard extends StatelessWidget {
                       width: 10,
                       height: 10,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF4CAF50),
+                        color: AppColors.primaryColor,
                         borderRadius: BorderRadius.circular(5),
                       ),
                     ),
@@ -307,7 +308,7 @@ class _OrderHeaderCard extends StatelessWidget {
                             detail?.inWarehouseName ?? '',
                             style: const TextStyle(
                               fontSize: 14,
-                              color: Color(0xFF333333),
+                              color: AppColors.black06Text,
                             ),
                           ),
                         ],
@@ -416,7 +417,7 @@ class _DeviceListSection extends StatelessWidget {
                   icon: AppIcons.scanIcon(size: 18, color: Colors.white),
                   label: Text(l10n.deviceReceiveScanToReceive),
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF4CAF50),
+                    backgroundColor: AppColors.primaryColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -492,7 +493,7 @@ class _DeviceItem extends StatelessWidget {
       case 0:
         return (l10n.deviceIssueStatusInTransit, const Color(0xFFED942F));
       case 1:
-        return (l10n.deviceIssueReceived, const Color(0xFF4CAF50));
+        return (l10n.deviceIssueReceived, AppColors.primaryColor);
       case 2:
         return (l10n.deviceIssueWithdrawn, const Color(0xFFE25C5C));
       default:

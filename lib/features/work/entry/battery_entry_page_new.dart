@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
@@ -35,7 +36,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
     final type = _selected;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F7),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -73,7 +74,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                     ),
                   ),
@@ -137,7 +138,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                     ),
                     const SizedBox(height: 4),
@@ -180,7 +181,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                     ],
@@ -203,7 +204,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                     ],
@@ -223,7 +224,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                   icon: const Icon(Icons.edit_outlined, size: 18),
                   label: Text(l10n.entryManualEntryButton),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF333333),
+                    foregroundColor: AppColors.black06Text,
                     side: const BorderSide(color: Color(0xFFDDDDDD)),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -239,7 +240,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                   icon: AppIcons.scanIcon(size: 18, color: Colors.white),
                   label: Text(l10n.entryScanEntryButton),
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF333333),
+                    backgroundColor: AppColors.black06Text,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -265,7 +266,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
         child: Icon(
           Icons.battery_charging_full,
           size: 40,
-          color: Color(0xFF4CAF50),
+          color: AppColors.primaryColor,
         ),
       ),
     );
@@ -337,7 +338,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
           child: FilledButton(
             onPressed: hasItems && !_submitting ? _submit : null,
             style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF4CAF50),
+              backgroundColor: AppColors.primaryColor,
               disabledBackgroundColor: const Color(0xFFCCEECC),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -415,7 +416,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ),
@@ -532,7 +533,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
         RichText(
           text: TextSpan(
             text: label,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF333333)),
+            style: const TextStyle(fontSize: 14, color: AppColors.black06Text),
             children: isRequired
                 ? const [
                     TextSpan(
@@ -650,7 +651,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -682,7 +683,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                       child: OutlinedButton(
                         onPressed: () => Navigator.of(context).pop(false),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF333333),
+                          foregroundColor: AppColors.black06Text,
                           side: const BorderSide(color: Color(0xFFDDDDDD)),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
@@ -697,7 +698,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                       child: FilledButton(
                         onPressed: () => Navigator.of(context).pop(true),
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF4CAF50),
+                          backgroundColor: AppColors.primaryColor,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -736,7 +737,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -756,7 +757,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                       child: OutlinedButton(
                         onPressed: () => Navigator.of(context).pop(false),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: const Color(0xFF333333),
+                          foregroundColor: AppColors.black06Text,
                           side: const BorderSide(color: Color(0xFFDDDDDD)),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
@@ -771,7 +772,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                       child: FilledButton(
                         onPressed: () => Navigator.of(context).pop(true),
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF4CAF50),
+                          backgroundColor: AppColors.primaryColor,
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -832,7 +833,7 @@ class _DeviceCard extends StatelessWidget {
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
           const SizedBox(height: 8),

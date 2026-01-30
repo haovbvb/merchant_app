@@ -35,7 +35,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -59,7 +59,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                       padding: const EdgeInsets.only(bottom: 24),
                       child: Column(
                         children: [
-                          Container(
+                          SizedBox(
                             width: 64,
                             height: 64,
                             child: ClipRRect(

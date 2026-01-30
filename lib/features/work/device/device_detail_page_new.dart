@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:apple_maps_flutter/apple_maps_flutter.dart' as amaps;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:intl/intl.dart';
@@ -63,21 +64,27 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     final state = ref.watch(deviceDetailProvider);
     final detail = state.cabinetDetail;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F7),
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
-          onPressed: () => Navigator.of(context).pop(),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        Navigator.of(context).pop(detail != null);
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.bgColor,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
+            onPressed: () => Navigator.of(context).pop(detail != null),
+          ),
+          titleSpacing: 0,
+          title: _buildSearchBar(l10n),
         ),
-        titleSpacing: 0,
-        title: _buildSearchBar(l10n),
-      ),
-      body: Column(
-        children: [
-          // 设备信息头部
+        body: Column(
+          children: [
+            // 设备信息头部
           if (detail != null) _buildDeviceHeader(detail),
 
           // Tab 切换
@@ -99,17 +106,18 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
           ),
         ],
       ),
+      ),
     );
   }
 
   Widget _buildSearchBar(dynamic l10n) {
     return Container(
-      height: 40,
+      height: 36,
       margin: const EdgeInsets.only(right: 16),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFFF2F4F7),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
         children: [
@@ -154,7 +162,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
             onTap: _scanSn,
             child: AppIcons.scanIcon(
               size: 24,
-              color: const Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
         ],
@@ -199,7 +207,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -214,7 +222,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isOnline ? const Color(0xFF4CAF50) : Colors.grey,
+                      color: isOnline ? AppColors.primaryColor : Colors.grey,
                     ),
                   ),
                   child: Row(
@@ -223,7 +231,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                       Icon(
                         Icons.wifi,
                         size: 14,
-                        color: isOnline ? const Color(0xFF4CAF50) : Colors.grey,
+                        color: isOnline ? AppColors.primaryColor : Colors.grey,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -231,7 +239,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                         style: TextStyle(
                           fontSize: 12,
                           color: isOnline
-                              ? const Color(0xFF4CAF50)
+                              ? AppColors.primaryColor
                               : Colors.grey,
                         ),
                       ),
@@ -251,11 +259,11 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
       color: Colors.white,
       child: TabBar(
         controller: _tabController,
-        labelColor: const Color(0xFF333333),
+        labelColor: AppColors.black06Text,
         unselectedLabelColor: const Color(0xFF999999),
         labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
         unselectedLabelStyle: const TextStyle(fontSize: 14),
-        indicatorColor: const Color(0xFF4CAF50),
+        indicatorColor: AppColors.primaryColor,
         indicatorWeight: 3,
         tabs: [
           Tab(text: l10n.deviceDetailTabBasicInfo),
@@ -276,8 +284,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         mainAxisSize: MainAxisSize.min,
         children: [
           Image.asset(
-            'assets/android/mipmap-xxhdpi/icon_empty_record.png',
-            width: 120,
+            'assets/android/mipmap-xxhdpi/icon_empty_search.png',
           ),
           const SizedBox(height: 16),
           Text(
@@ -331,7 +338,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                       height: 8,
                       decoration: BoxDecoration(
                         color: isOnboarded
-                            ? const Color(0xFF4CAF50)
+                            ? AppColors.primaryColor
                             : const Color(0xFFE57373),
                         shape: BoxShape.circle,
                       ),
@@ -344,7 +351,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                       style: TextStyle(
                         fontSize: 15,
                         color: isOnboarded
-                            ? const Color(0xFF4CAF50)
+                            ? AppColors.primaryColor
                             : const Color(0xFFE57373),
                       ),
                     ),
@@ -376,7 +383,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
             children: [
               Text(
                 l10n.deviceDetailPhotoLabel,
-                style: const TextStyle(fontSize: 15, color: Color(0xFF333333)),
+                style: const TextStyle(fontSize: 15, color: AppColors.black06Text),
               ),
               const SizedBox(height: 12),
               if (detail.installImgSet.isNotEmpty)
@@ -538,7 +545,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                       detail.stationAddress ?? detail.address ?? '-',
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                         height: 1.4,
                       ),
                     ),
@@ -560,7 +567,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                     '${lng.toStringAsFixed(6)}    ${lat.toStringAsFixed(6)}',
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                   ),
                 ],
@@ -576,7 +583,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                   icon: const Icon(Icons.navigation),
                   label: Text(l10n.deviceDetailNavigation),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF333333),
+                    foregroundColor: AppColors.black06Text,
                     side: const BorderSide(color: Color(0xFFEEEEEE)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -651,7 +658,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                     ),
                   ),
@@ -667,7 +674,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                       style: TextStyle(
                         fontSize: 13,
                         color: isCompleted
-                            ? const Color(0xFF4CAF50)
+                            ? AppColors.primaryColor
                             : const Color(0xFFE57373),
                       ),
                     ),
@@ -682,7 +689,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
               const SizedBox(height: 8),
@@ -840,7 +847,7 @@ class _InfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(fontSize: 15, color: Color(0xFF333333)),
+              style: const TextStyle(fontSize: 15, color: AppColors.black06Text),
             ),
           ),
           valueWidget ??
@@ -877,7 +884,7 @@ class _FilterChip extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFF4CAF50)
+                ? AppColors.primaryColor
                 : const Color(0xFFEEEEEE),
           ),
         ),
@@ -886,7 +893,7 @@ class _FilterChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             color: isSelected
-                ? const Color(0xFF4CAF50)
+                ? AppColors.primaryColor
                 : const Color(0xFF666666),
           ),
         ),
@@ -917,7 +924,7 @@ class _PortCard extends StatelessWidget {
     // 电量颜色
     Color socColor;
     if (soc >= 80) {
-      socColor = const Color(0xFF4CAF50);
+      socColor = AppColors.primaryColor;
     } else if (soc >= 40) {
       socColor = const Color(0xFFFFA000);
     } else {
@@ -943,7 +950,7 @@ class _PortCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isDisabled
                       ? const Color(0xFFEEEEEE)
-                      : const Color(0xFF333333),
+                      : AppColors.black06Text,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 alignment: Alignment.center,
@@ -960,13 +967,13 @@ class _PortCard extends StatelessWidget {
               if (!isAvailable && !isDisabled && hasBattery)
                 Row(
                   children: [
-                    const Icon(Icons.bolt, size: 14, color: Color(0xFF4CAF50)),
+                    const Icon(Icons.bolt, size: 14, color: AppColors.primaryColor),
                     const SizedBox(width: 2),
                     Text(
                       l10n.deviceDetailPortReplaceable,
                       style: const TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF4CAF50),
+                        color: AppColors.primaryColor,
                       ),
                     ),
                   ],

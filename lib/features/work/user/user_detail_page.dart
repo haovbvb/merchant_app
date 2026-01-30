@@ -47,7 +47,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage>
     final state = ref.watch(userDetailProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -182,15 +182,7 @@ class _UserHeader extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.phone, color: Colors.white, size: 16),
-                    const SizedBox(width: 6),
-                    Text(
-                      l10n.userDetailCall,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    
                   ],
                 ),
               ),
@@ -232,15 +224,13 @@ class _BasicInfoTab extends StatelessWidget {
           child: Column(
             children: [
               _DeviceRow(
-                icon: Icons.electric_moped_outlined,
                 label: l10n.userBasicVehicle,
                 devices: detail?.vehicleList ?? const [],
                 onTap: () => _showDeviceSheet(context, l10n, l10n.userBasicVehicle,
                     detail?.vehicleList ?? const []),
               ),
-              const Divider(height: 1, indent: 56),
+              Divider(height: 1, indent: 16, color: AppColors.borderColor),
               _DeviceRow(
-                icon: Icons.battery_charging_full_outlined,
                 label: l10n.userBasicBattery,
                 devices: detail?.batteryList ?? const [],
                 onTap: () => _showDeviceSheet(context, l10n, l10n.userBasicBattery,
@@ -256,17 +246,16 @@ class _BasicInfoTab extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(12),
           ),
-          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               _InfoRow(label: l10n.userBasicRegisterTime, value: detail?.createTime ?? '-'),
-              const SizedBox(height: 12),
+              Divider(height: 1, indent: 16, color: AppColors.borderColor),
               _InfoRow(label: l10n.userBasicUserType, value: _getUserType(l10n, detail?.type)),
-              const SizedBox(height: 12),
+              Divider(height: 1, indent: 16, color: AppColors.borderColor),
               _InfoRow(label: l10n.userBasicBirthday, value: detail?.birthday ?? '-'),
-              const SizedBox(height: 12),
+              Divider(height: 1, indent: 16, color: AppColors.borderColor),
               _InfoRow(label: l10n.userBasicPhone, value: detail?.phone ?? '-'),
-              const SizedBox(height: 12),
+              Divider(height: 1, indent: 16, color: AppColors.borderColor),
               _InfoRow(label: l10n.userBasicEmail, value: detail?.email ?? '-'),
             ],
           ),
@@ -287,7 +276,7 @@ class _BasicInfoTab extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF333333),
+                  color: AppColors.black09Text,
                 ),
               ),
               const SizedBox(height: 12),
@@ -311,7 +300,7 @@ class _BasicInfoTab extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF333333),
+                  color: AppColors.black09Text,
                 ),
               ),
               const SizedBox(height: 8),
@@ -319,7 +308,8 @@ class _BasicInfoTab extends StatelessWidget {
                 detail?.remark?.isNotEmpty == true ? detail!.remark! : '-',
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(0xFF666666),
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.black06Text,
                 ),
               ),
             ],
@@ -362,13 +352,11 @@ class _BasicInfoTab extends StatelessWidget {
 
 class _DeviceRow extends StatelessWidget {
   const _DeviceRow({
-    required this.icon,
     required this.label,
     required this.devices,
     required this.onTap,
   });
 
-  final IconData icon;
   final String label;
   final List<BindDevice> devices;
   final VoidCallback onTap;
@@ -381,29 +369,25 @@ class _DeviceRow extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            Icon(icon, color: const Color(0xFF666666), size: 24),
-            const SizedBox(width: 16),
             Expanded(
               child: Text(
                 label,
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(0xFF333333),
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.black09Text,
                 ),
               ),
             ),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(10),
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 2),
+
               child: Text(
                 devices.length.toString(),
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.primaryColor,
-                  fontWeight: FontWeight.w500,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: AppColors.black06Text,
                 ),
               ),
             ),
@@ -458,7 +442,7 @@ class _DeviceSheet extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1),
+          Divider(height: 1, color: AppColors.borderColor),
           Flexible(
             child: devices.isEmpty
                 ? Center(
@@ -529,28 +513,34 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        SizedBox(
-          width: 100,
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF999999),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 110,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.black09Text,
+              ),
             ),
           ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF333333),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: AppColors.black06Text,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -761,7 +751,7 @@ class _SaleOrderCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                   ),
                 ),
@@ -769,7 +759,7 @@ class _SaleOrderCard extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1),
+          Divider(height: 1, color: AppColors.borderColor),
           // Content
           Padding(
             padding: const EdgeInsets.all(16),
@@ -846,7 +836,7 @@ class _RentOrderCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                   ),
                 ),
@@ -854,7 +844,7 @@ class _RentOrderCard extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1),
+          Divider(height: 1, color: AppColors.borderColor),
           // Content
           Padding(
             padding: const EdgeInsets.all(16),
@@ -934,7 +924,7 @@ class _SwapOrderCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                   ),
                 ),
@@ -942,7 +932,7 @@ class _SwapOrderCard extends StatelessWidget {
               ],
             ),
           ),
-          const Divider(height: 1),
+          Divider(height: 1, color: AppColors.borderColor),
           // Content
           Padding(
             padding: const EdgeInsets.all(16),
@@ -1139,13 +1129,13 @@ Widget _orderInfoRow(String label, String value) {
           width: 90,
           child: Text(
             label,
-            style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.black09Text),
           ),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 13, color: Color(0xFF333333)),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: AppColors.black06Text),
           ),
         ),
       ],
@@ -1413,7 +1403,7 @@ void _showVoucherDialog(
                 style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
-            const Divider(height: 1),
+            Divider(height: 1, color: AppColors.borderColor),
             Expanded(
               child: PageView.builder(
                 itemCount: urls.length,

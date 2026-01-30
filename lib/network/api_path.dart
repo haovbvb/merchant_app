@@ -87,6 +87,8 @@ class ApiPath {
   static const String vehicleGetDetail = '/admin/vehicle/getDetail';
   static const String monitorNearByVehicle =
       '/admin/monitor/vehicle/monitorOnMap';
+  static const String queryRiderPhone =
+      '/admin/monitor/vehicle/queryRiderPhone';
 
   // 工作台
   static const String workbenchMonthlyIncome =

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/payment_plan.dart';
@@ -92,7 +93,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const Spacer(),
@@ -176,7 +177,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                                           : l10n.sellBindSelectPeriod,
                                       style: const TextStyle(
                                         fontSize: 14,
-                                        color: Color(0xFF333333),
+                                        color: AppColors.black06Text,
                                       ),
                                     ),
                                     if (_selectedPlan != null)
@@ -205,7 +206,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                             '\$ ${widget.packageAmount.toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 14,
-                              color: Color(0xFF333333),
+                              color: AppColors.black06Text,
                             ),
                           ),
                         ),
@@ -216,7 +217,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                             '\$ ${_calculateInterest().toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 14,
-                              color: Color(0xFF333333),
+                              color: AppColors.black06Text,
                             ),
                           ),
                         ),
@@ -281,7 +282,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
               child: ElevatedButton(
                 onPressed: _canProceed() ? _proceed : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF4CAF50),
+                  backgroundColor: AppColors.primaryColor,
                   disabledBackgroundColor: const Color(0xFFE8F5E9),
                   foregroundColor: Colors.white,
                   disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
@@ -349,7 +350,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
               title,
               style: const TextStyle(
                 fontSize: 16,
-                color: Color(0xFF333333),
+                color: AppColors.black06Text,
               ),
             ),
             const Spacer(),
@@ -360,11 +361,11 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected
-                      ? const Color(0xFF4CAF50)
+                      ? AppColors.primaryColor
                       : const Color(0xFFDDDDDD),
                   width: 2,
                 ),
-                color: isSelected ? const Color(0xFF4CAF50) : Colors.white,
+                color: isSelected ? AppColors.primaryColor : Colors.white,
               ),
               child: isSelected
                   ? const Icon(Icons.check, color: Colors.white, size: 16)
@@ -457,8 +458,8 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
                           color: isSelected
-                              ? const Color(0xFF4CAF50)
-                              : const Color(0xFF333333),
+                              ? AppColors.primaryColor
+                              : AppColors.black06Text,
                         ),
                       ),
                       subtitle: Text(
@@ -484,7 +485,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF333333),
+                      foregroundColor: AppColors.black06Text,
                       side: const BorderSide(color: Color(0xFFDDDDDD)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),

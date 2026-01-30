@@ -302,16 +302,7 @@ class _LoginButton extends StatelessWidget {
           disabledBackgroundColor: AppColors.primaryColor.withOpacity(0.4),
           disabledForegroundColor: Colors.white,
         ),
-        child: isSubmitting
-            ? const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                ),
-              )
-            : Text(
+        child: Text(
                 agreedToTerms ? l10n.loginButtonConfirm : l10n.login,
                 style: const TextStyle(
                   fontSize: 16,

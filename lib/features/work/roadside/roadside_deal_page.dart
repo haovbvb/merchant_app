@@ -40,7 +40,7 @@ class _RoadSideDealPageState extends ConsumerState<RoadSideDealPage> {
     final notifier = ref.read(roadSideDealProvider.notifier);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,

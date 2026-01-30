@@ -1,11 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import 'styles/colors.dart';
 import 'styles/typography.dart';
 
 class BaseTheme {
   // Brand colors
-  static const Color primaryColor = Color(0xFF56B327); // main_color
+  static const Color primaryColor = AppColors.primaryColor; // main_color
   static const Color hiveBrown = Color(0xFF61729D); // color_61729d
   static const Color energyOrange = Color(0xFFFFA034); // color_ffa034
   static const Color paperIvory = Color(0xFFF5F6F7); // color_f5f6f7

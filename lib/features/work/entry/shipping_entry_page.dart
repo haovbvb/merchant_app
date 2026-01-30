@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/battery_type.dart';
 import 'package:merchant_app/data/models/car_type.dart';
@@ -161,14 +162,14 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
           // Tab 栏
           TabBar(
             controller: _tabController,
-            labelColor: const Color(0xFF333333),
+            labelColor: AppColors.black06Text,
             unselectedLabelColor: const Color(0xFF999999),
             labelStyle: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
             unselectedLabelStyle: const TextStyle(fontSize: 15),
-            indicatorColor: const Color(0xFF4CAF50),
+            indicatorColor: AppColors.primaryColor,
             indicatorWeight: 3,
             tabs: [
               Tab(text: l10n.deviceTypeVehicle),
@@ -314,7 +315,7 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 1,
@@ -348,7 +349,7 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Center(
-        child: Icon(Icons.ev_station, size: 40, color: Color(0xFF4CAF50)),
+        child: Icon(Icons.ev_station, size: 40, color: AppColors.primaryColor),
       ),
     );
   }
@@ -516,7 +517,7 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF333333),
+                color: AppColors.black06Text,
               ),
             ),
           ),
@@ -535,14 +536,14 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
           // Tab 栏
           TabBar(
             controller: _tabController,
-            labelColor: const Color(0xFF333333),
+            labelColor: AppColors.black06Text,
             unselectedLabelColor: const Color(0xFF999999),
             labelStyle: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),
             unselectedLabelStyle: const TextStyle(fontSize: 15),
-            indicatorColor: const Color(0xFF4CAF50),
+            indicatorColor: AppColors.primaryColor,
             indicatorWeight: 3,
             tabs: [
               Tab(text: l10n.deviceTypeVehicle),
@@ -688,7 +689,7 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 1,
@@ -722,7 +723,7 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
         borderRadius: BorderRadius.circular(8),
       ),
       child: const Center(
-        child: Icon(Icons.ev_station, size: 40, color: Color(0xFF4CAF50)),
+        child: Icon(Icons.ev_station, size: 40, color: AppColors.primaryColor),
       ),
     );
   }

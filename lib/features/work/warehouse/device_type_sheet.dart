@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
 /// 设备类型选择 BottomSheet
@@ -44,7 +45,7 @@ class DeviceTypeSheet extends StatelessWidget {
                 _DeviceTypeItem(
                   icon: 'assets/android/mipmap-xxhdpi/icon_transport_battery.webp',
                   label: l10n.warehouseDeviceTypeBattery,
-                  color: const Color(0xFF4CAF50),
+                  color: AppColors.primaryColor,
                   onTap: () => Navigator.of(context).pop(1),
                 ),
                 _DeviceTypeItem(

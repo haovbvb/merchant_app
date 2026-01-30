@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter/services.dart';
 import 'package:merchant_app/core/utils/camera_permission.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
@@ -199,7 +200,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
                 height: 56,
                 decoration: BoxDecoration(
                   color: _torchOn
-                      ? const Color(0xFF4CAF50)
+                      ? AppColors.primaryColor
                       : const Color(0x80808080),
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -290,7 +291,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
               height: 52,
               padding: const EdgeInsets.symmetric(horizontal: 20),
               decoration: BoxDecoration(
-                color: const Color(0xFF4CAF50),
+                color: AppColors.primaryColor,
                 borderRadius: BorderRadius.circular(12),
               ),
               alignment: Alignment.center,
@@ -355,7 +356,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
                     FilledButton(
                       onPressed: _checkPermission,
                       style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xFF4CAF50),
+                        backgroundColor: AppColors.primaryColor,
                       ),
                       child: Text(l10n.scanPermissionRetry),
                     ),
@@ -532,6 +533,7 @@ class _ScanCornerPainter extends CustomPainter {
       ..arcToPoint(
         Offset(borderRadius, size.height),
         radius: Radius.circular(borderRadius),
+        clockwise: false,
       )
       ..lineTo(cornerLength, size.height);
     canvas.drawPath(bottomLeftPath, paint);
@@ -543,6 +545,7 @@ class _ScanCornerPainter extends CustomPainter {
       ..arcToPoint(
         Offset(size.width, size.height - borderRadius),
         radius: Radius.circular(borderRadius),
+        clockwise: false,
       )
       ..lineTo(size.width, size.height - cornerLength);
     canvas.drawPath(bottomRightPath, paint);
@@ -567,9 +570,9 @@ class _ScanLinePainter extends CustomPainter {
       end: Alignment.centerRight,
       colors: [
         Colors.transparent,
-        const Color(0xFF4CAF50).withValues(alpha: 0.8),
-        const Color(0xFF4CAF50),
-        const Color(0xFF4CAF50).withValues(alpha: 0.8),
+        AppColors.primaryColor.withValues(alpha: 0.8),
+        AppColors.primaryColor,
+        AppColors.primaryColor.withValues(alpha: 0.8),
         Colors.transparent,
       ],
       stops: const [0.0, 0.2, 0.5, 0.8, 1.0],

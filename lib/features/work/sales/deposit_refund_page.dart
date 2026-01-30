@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
@@ -36,7 +37,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -110,7 +111,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
           const SizedBox(height: 20),
@@ -160,7 +161,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
                   ),
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                   onSubmitted: (_) => _searchUser(notifier),
                 ),
@@ -171,7 +172,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
                   padding: const EdgeInsets.all(8),
                   child: AppIcons.scanIcon(
                     size: 24,
-                    color: const Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ),
@@ -249,7 +250,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -292,7 +293,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
                 l10n.depositRefundOrderSection,
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -375,7 +376,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
                 deposit.orderNo ?? '-',
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -436,7 +437,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
             l10n.depositRefundVoucher,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -455,11 +456,11 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: state.voucherConfirmed
-                            ? const Color(0xFF4CAF50)
+                            ? AppColors.primaryColor
                             : Colors.transparent,
                         border: Border.all(
                           color: state.voucherConfirmed
-                              ? const Color(0xFF4CAF50)
+                              ? AppColors.primaryColor
                               : const Color(0xFFCCCCCC),
                           width: 2,
                         ),
@@ -477,7 +478,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
                       l10n.depositRefundRecycled,
                       style: const TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                     ),
                   ],
@@ -519,7 +520,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
             l10n.depositRefundRemark,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -539,7 +540,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
             ),
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
         ],
@@ -570,7 +571,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
           child: ElevatedButton(
             onPressed: canSubmit ? () => _submit(notifier) : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4CAF50),
+              backgroundColor: AppColors.primaryColor,
               disabledBackgroundColor: const Color(0xFFB8D8B8),
               foregroundColor: Colors.white,
               disabledForegroundColor: Colors.white,
@@ -681,7 +682,7 @@ class _SuccessPage extends ConsumerWidget {
     final notifier = ref.read(depositRefundProvider.notifier);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -697,7 +698,7 @@ class _SuccessPage extends ConsumerWidget {
           style: const TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF333333),
+            color: AppColors.black06Text,
           ),
         ),
         centerTitle: true,
@@ -720,7 +721,7 @@ class _SuccessPage extends ConsumerWidget {
                 height: 64,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFF4CAF50),
+                  color: AppColors.primaryColor,
                 ),
                 child: const Icon(
                   Icons.check,
@@ -734,7 +735,7 @@ class _SuccessPage extends ConsumerWidget {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
               const SizedBox(height: 32),
@@ -745,8 +746,8 @@ class _SuccessPage extends ConsumerWidget {
                   Navigator.of(context).pop();
                 },
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF4CAF50),
-                  side: const BorderSide(color: Color(0xFF4CAF50)),
+                  foregroundColor: AppColors.primaryColor,
+                  side: const BorderSide(color: AppColors.primaryColor),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24),
                   ),

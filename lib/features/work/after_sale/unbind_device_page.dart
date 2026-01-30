@@ -43,7 +43,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
     _syncControllers(state);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,

@@ -125,6 +125,12 @@ abstract class AppLocalizations {
   /// **'Logout'**
   String get logout;
 
+  /// No description provided for @logoutConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to logout?'**
+  String get logoutConfirmMessage;
+
   /// Label for the home tab in the bottom navigation bar.
   ///
   /// In en, this message translates to:
@@ -2966,7 +2972,7 @@ abstract class AppLocalizations {
   /// No description provided for @qrcodeDeviceTypeCabinet.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet'**
+  /// **'Station'**
   String get qrcodeDeviceTypeCabinet;
 
   /// No description provided for @qrcodeDeviceTypeVehicle.
@@ -3170,7 +3176,7 @@ abstract class AppLocalizations {
   /// No description provided for @deviceDetailTabCabinet.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet'**
+  /// **'Station'**
   String get deviceDetailTabCabinet;
 
   /// No description provided for @deviceDetailBatteryBaseInfoTitle.
@@ -3188,7 +3194,7 @@ abstract class AppLocalizations {
   /// No description provided for @deviceDetailCabinetBaseInfoTitle.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet Info'**
+  /// **'Station Info'**
   String get deviceDetailCabinetBaseInfoTitle;
 
   /// No description provided for @deviceDetailFixRecordsTitle.
@@ -3368,19 +3374,19 @@ abstract class AppLocalizations {
   /// No description provided for @deviceDetailStationNameLabel.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet Name'**
+  /// **'Station Name'**
   String get deviceDetailStationNameLabel;
 
   /// No description provided for @deviceDetailStationStatusLabel.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet Status'**
+  /// **'Station Status'**
   String get deviceDetailStationStatusLabel;
 
   /// No description provided for @deviceDetailStationAddressLabel.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet Address'**
+  /// **'Station Address'**
   String get deviceDetailStationAddressLabel;
 
   /// No description provided for @deviceDetailStationOnlineLabel.
@@ -6158,25 +6164,25 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetPutawayTitle.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet Putaway'**
+  /// **'Station Putaway'**
   String get cabinetPutawayTitle;
 
   /// No description provided for @cabinetPutawaySn.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet SN'**
+  /// **'Station SN'**
   String get cabinetPutawaySn;
 
   /// No description provided for @cabinetPutawayInfoTitle.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet Info'**
+  /// **'Station Info'**
   String get cabinetPutawayInfoTitle;
 
   /// No description provided for @cabinetPutawayInfoEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No cabinet info'**
+  /// **'No Station info'**
   String get cabinetPutawayInfoEmpty;
 
   /// No description provided for @cabinetPutawayName.
@@ -6314,7 +6320,7 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetUnshelveInfoTitle.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet Info'**
+  /// **'Station Info'**
   String get cabinetUnshelveInfoTitle;
 
   /// No description provided for @cabinetUnshelveInfoEmpty.
@@ -6536,7 +6542,7 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetAuthSn.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet SN'**
+  /// **'Station SN'**
   String get cabinetAuthSn;
 
   /// No description provided for @cabinetAuthQueryCabinet.
@@ -6554,7 +6560,7 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetAuthCabinetList.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet List'**
+  /// **'Station List'**
   String get cabinetAuthCabinetList;
 
   /// No description provided for @cabinetAuthUserSection.
@@ -6692,13 +6698,13 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetOfflineDetailTitle.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet Offline Detail'**
+  /// **'Station Offline Detail'**
   String get cabinetOfflineDetailTitle;
 
   /// No description provided for @cabinetOfflineFaultTitle.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet Offline Fault'**
+  /// **'Station Offline Fault'**
   String get cabinetOfflineFaultTitle;
 
   /// No description provided for @cabinetOfflinePlaceholder.
@@ -6710,19 +6716,19 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetOfflineSnLabel.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet SN'**
+  /// **'Station SN'**
   String get cabinetOfflineSnLabel;
 
   /// No description provided for @cabinetOfflinePidLabel.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet PID'**
+  /// **'Station PID'**
   String get cabinetOfflinePidLabel;
 
   /// No description provided for @cabinetOfflineName.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet Name'**
+  /// **'Station Name'**
   String get cabinetOfflineName;
 
   /// No description provided for @cabinetOfflineAddressLabel.
@@ -7208,7 +7214,7 @@ abstract class AppLocalizations {
   /// No description provided for @bluetoothAuthSn.
   ///
   /// In en, this message translates to:
-  /// **'Cabinet SN'**
+  /// **'Station SN'**
   String get bluetoothAuthSn;
 
   /// No description provided for @bluetoothAuthPhone.
@@ -7426,6 +7432,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Missing Parts'**
   String get deviceDetailRepairMissingParts;
+
+  /// No description provided for @vehicleDetailBindingId.
+  ///
+  /// In en, this message translates to:
+  /// **'Binding ID'**
+  String get vehicleDetailBindingId;
+
+  /// No description provided for @vehicleDetailUserPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'User phone'**
+  String get vehicleDetailUserPhone;
+
+  /// No description provided for @vehicleDetailPlateNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Plate Number'**
+  String get vehicleDetailPlateNumber;
+
+  /// No description provided for @vehicleDetailMileage.
+  ///
+  /// In en, this message translates to:
+  /// **'Mileage'**
+  String get vehicleDetailMileage;
+
+  /// No description provided for @vehicleDetailViewMore.
+  ///
+  /// In en, this message translates to:
+  /// **'View More'**
+  String get vehicleDetailViewMore;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -24,6 +24,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get logout => 'Logout';
 
   @override
+  String get logoutConfirmMessage => 'Are you sure you want to logout?';
+
+  @override
   String get tabHome => 'Home';
 
   @override
@@ -1443,7 +1446,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qrcodeDeviceTypeBattery => 'Battery';
 
   @override
-  String get qrcodeDeviceTypeCabinet => 'Cabinet';
+  String get qrcodeDeviceTypeCabinet => 'Station';
 
   @override
   String get qrcodeDeviceTypeVehicle => 'Vehicle';
@@ -1545,7 +1548,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceDetailTabVehicle => 'Vehicle';
 
   @override
-  String get deviceDetailTabCabinet => 'Cabinet';
+  String get deviceDetailTabCabinet => 'Station';
 
   @override
   String get deviceDetailBatteryBaseInfoTitle => 'Battery Info';
@@ -1554,7 +1557,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceDetailVehicleBaseInfoTitle => 'Vehicle Info';
 
   @override
-  String get deviceDetailCabinetBaseInfoTitle => 'Cabinet Info';
+  String get deviceDetailCabinetBaseInfoTitle => 'Station Info';
 
   @override
   String get deviceDetailFixRecordsTitle => 'Fix Records';
@@ -1644,13 +1647,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceDetailBatterySnLabel => 'Battery SN';
 
   @override
-  String get deviceDetailStationNameLabel => 'Cabinet Name';
+  String get deviceDetailStationNameLabel => 'Station Name';
 
   @override
-  String get deviceDetailStationStatusLabel => 'Cabinet Status';
+  String get deviceDetailStationStatusLabel => 'Station Status';
 
   @override
-  String get deviceDetailStationAddressLabel => 'Cabinet Address';
+  String get deviceDetailStationAddressLabel => 'Station Address';
 
   @override
   String get deviceDetailStationOnlineLabel => 'Online Status';
@@ -3039,16 +3042,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saleSummaryViewVoucher => 'View Voucher';
 
   @override
-  String get cabinetPutawayTitle => 'Cabinet Putaway';
+  String get cabinetPutawayTitle => 'Station Putaway';
 
   @override
-  String get cabinetPutawaySn => 'Cabinet SN';
+  String get cabinetPutawaySn => 'Station SN';
 
   @override
-  String get cabinetPutawayInfoTitle => 'Cabinet Info';
+  String get cabinetPutawayInfoTitle => 'Station Info';
 
   @override
-  String get cabinetPutawayInfoEmpty => 'No cabinet info';
+  String get cabinetPutawayInfoEmpty => 'No Station info';
 
   @override
   String get cabinetPutawayName => 'Name';
@@ -3117,7 +3120,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetUnshelveSnHint => 'Enter station SN or scan QR code';
 
   @override
-  String get cabinetUnshelveInfoTitle => 'Cabinet Info';
+  String get cabinetUnshelveInfoTitle => 'Station Info';
 
   @override
   String get cabinetUnshelveInfoEmpty => 'No device parameter info';
@@ -3228,7 +3231,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetAuthValidityPeriod => 'Validity period';
 
   @override
-  String get cabinetAuthSn => 'Cabinet SN';
+  String get cabinetAuthSn => 'Station SN';
 
   @override
   String get cabinetAuthQueryCabinet => 'Query Cabinets';
@@ -3237,7 +3240,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetAuthQueryRecord => 'Query Records';
 
   @override
-  String get cabinetAuthCabinetList => 'Cabinet List';
+  String get cabinetAuthCabinetList => 'Station List';
 
   @override
   String get cabinetAuthUserSection => 'Authorized Users';
@@ -3306,22 +3309,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetOperateOfflineDetail => 'Offline Detail';
 
   @override
-  String get cabinetOfflineDetailTitle => 'Cabinet Offline Detail';
+  String get cabinetOfflineDetailTitle => 'Station Offline Detail';
 
   @override
-  String get cabinetOfflineFaultTitle => 'Cabinet Offline Fault';
+  String get cabinetOfflineFaultTitle => 'Station Offline Fault';
 
   @override
   String get cabinetOfflinePlaceholder => 'Coming soon';
 
   @override
-  String get cabinetOfflineSnLabel => 'Cabinet SN';
+  String get cabinetOfflineSnLabel => 'Station SN';
 
   @override
-  String get cabinetOfflinePidLabel => 'Cabinet PID';
+  String get cabinetOfflinePidLabel => 'Station PID';
 
   @override
-  String get cabinetOfflineName => 'Cabinet Name';
+  String get cabinetOfflineName => 'Station Name';
 
   @override
   String get cabinetOfflineAddressLabel => 'Address';
@@ -3564,7 +3567,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bluetoothAuthTip6 => 'The validity period of the authorization is preset to 24 hours after the authorization is successful;';
 
   @override
-  String get bluetoothAuthSn => 'Cabinet SN';
+  String get bluetoothAuthSn => 'Station SN';
 
   @override
   String get bluetoothAuthPhone => 'Phone';
@@ -3673,4 +3676,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deviceDetailRepairMissingParts => 'Missing Parts';
+
+  @override
+  String get vehicleDetailBindingId => 'Binding ID';
+
+  @override
+  String get vehicleDetailUserPhone => 'User phone';
+
+  @override
+  String get vehicleDetailPlateNumber => 'Plate Number';
+
+  @override
+  String get vehicleDetailMileage => 'Mileage';
+
+  @override
+  String get vehicleDetailViewMore => 'View More';
 }

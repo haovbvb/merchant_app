@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/me/providers/language_notifier.dart';
 
@@ -30,7 +31,7 @@ class LanguageSelectionPage extends ConsumerWidget {
                 ),
               ),
               trailing: isSelected
-                  ? const Icon(Icons.check, color: Color(0xFF56B327))
+                  ? const Icon(Icons.check, color: AppColors.primaryColor)
                   : null,
               onTap: () => _onSelect(ref, option.locale, context),
             ),

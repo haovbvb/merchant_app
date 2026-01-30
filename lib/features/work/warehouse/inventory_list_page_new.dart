@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/warehouse/device_type_sheet.dart';
@@ -45,7 +46,7 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
     final notifier = ref.read(inventoryListProvider.notifier);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F7),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -76,9 +77,9 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
             color: Colors.white,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
             child: Container(
-              height: 40,
+              height: 36,
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F6F7),
+                color: const Color(0xFFF2F4F7),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: TextField(
@@ -172,7 +173,7 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
-                ? const Color(0xFF4CAF50)
+                ? AppColors.primaryColor
                 : const Color(0xFFDDDDDD),
           ),
         ),
@@ -181,7 +182,7 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
           style: TextStyle(
             fontSize: 13,
             color: isSelected
-                ? const Color(0xFF4CAF50)
+                ? AppColors.primaryColor
                 : const Color(0xFF666666),
             fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
           ),
@@ -210,7 +211,7 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
               icon: const Icon(Icons.add),
               label: Text(l10n.warehouseTransportCreateAction),
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF4CAF50),
+                backgroundColor: AppColors.primaryColor,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
@@ -353,7 +354,7 @@ class _InventoryCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -386,7 +387,7 @@ class _InventoryCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ],
@@ -413,7 +414,7 @@ class _InventoryCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                     ],
@@ -436,7 +437,7 @@ class _InventoryCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                     ],
@@ -459,7 +460,7 @@ class _InventoryCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                     ],
@@ -479,7 +480,7 @@ class _InventoryCard extends StatelessWidget {
 
     switch (status) {
       case 1: // Completed
-        textColor = const Color(0xFF4CAF50);
+        textColor = AppColors.primaryColor;
         bgColor = const Color(0xFFE8F5E9);
         break;
       case 2: // Revoked

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
@@ -41,7 +42,7 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
     ];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F7),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -63,7 +64,7 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
                   padding: const EdgeInsets.only(bottom: 24),
                   child: Column(
                     children: [
-                      Container(
+                      SizedBox(
                         width: 64,
                         height: 64,
                         child: ClipRRect(
@@ -122,7 +123,7 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
                               onTap: _scanSn,
                               child: AppIcons.scanIcon(
                                 size: 24,
-                                color: const Color(0xFF333333),
+                                color: AppColors.black06Text,
                               ),
                             ),
                           ],
@@ -212,7 +213,7 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
                                   color: isSelected
-                                      ? const Color(0xFF4CAF50)
+                                      ? AppColors.primaryColor
                                       : const Color(0xFFEEEEEE),
                                 ),
                               ),
@@ -221,8 +222,8 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
                                 style: TextStyle(
                                   fontSize: 14,
                                   color: isSelected
-                                      ? const Color(0xFF4CAF50)
-                                      : const Color(0xFF333333),
+                                      ? AppColors.primaryColor
+                                      : AppColors.black06Text,
                                 ),
                               ),
                             ),
@@ -255,7 +256,7 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
                     ? null
                     : () => _showConfirmDialog(context),
                 style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF4CAF50),
+                  backgroundColor: AppColors.primaryColor,
                   disabledBackgroundColor: const Color(0xFFB8E6B8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24),
@@ -312,7 +313,7 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
               const SizedBox(height: 16),
@@ -335,7 +336,7 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
                         onPressed: () => Navigator.of(context).pop(false),
                         style: OutlinedButton.styleFrom(
                           backgroundColor: const Color(0xFFF5F5F5),
-                          foregroundColor: const Color(0xFF333333),
+                          foregroundColor: AppColors.black06Text,
                           side: BorderSide.none,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(22),
@@ -352,7 +353,7 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
                       child: FilledButton(
                         onPressed: () => Navigator.of(context).pop(true),
                         style: FilledButton.styleFrom(
-                          backgroundColor: const Color(0xFF4CAF50),
+                          backgroundColor: AppColors.primaryColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(22),
                           ),
@@ -425,7 +426,7 @@ class _InputRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 15, color: Color(0xFF333333)),
+          style: const TextStyle(fontSize: 15, color: AppColors.black06Text),
         ),
         const SizedBox(height: 8),
         child,
@@ -471,7 +472,7 @@ class _CabinetInfoWidget extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

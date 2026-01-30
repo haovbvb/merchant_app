@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 
 class EntrySuccessPage extends StatelessWidget {
@@ -11,7 +12,7 @@ class EntrySuccessPage extends StatelessWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F7),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -45,7 +46,7 @@ class EntrySuccessPage extends StatelessWidget {
                 width: 72,
                 height: 72,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF4CAF50),
+                  color: AppColors.primaryColor,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.check, color: Colors.white, size: 40),
@@ -58,7 +59,7 @@ class EntrySuccessPage extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
               const SizedBox(height: 32),
@@ -70,8 +71,8 @@ class EntrySuccessPage extends StatelessWidget {
                   Navigator.of(context).popUntil((route) => route.isFirst);
                 },
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF4CAF50),
-                  side: const BorderSide(color: Color(0xFF4CAF50)),
+                  foregroundColor: AppColors.primaryColor,
+                  side: const BorderSide(color: AppColors.primaryColor),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
                     vertical: 12,

@@ -37,7 +37,7 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
     final detail = state.detail;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -588,7 +588,7 @@ class _DateLocationCard extends StatelessWidget {
                     detail.reportTime ?? '-',
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                   ),
                 ),
@@ -611,7 +611,7 @@ class _DateLocationCard extends StatelessWidget {
                     _formatLocation(detail),
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -694,7 +694,7 @@ class _DescriptionCard extends StatelessWidget {
             detail.description ?? '-',
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
               height: 1.5,
             ),
           ),
@@ -888,7 +888,7 @@ class _ProcessingResultCard extends StatelessWidget {
                   detail.payWay == 1 ? l10n.roadsidePayTypeCash : l10n.roadsidePayTypeOnline,
                   style: const TextStyle(
                     fontSize: 14,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ],
@@ -938,7 +938,7 @@ class _InfoRow extends StatelessWidget {
             value,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
         ),

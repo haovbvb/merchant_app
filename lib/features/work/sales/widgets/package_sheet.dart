@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/service_plan.dart';
@@ -70,7 +71,7 @@ class _PackageSheetState extends ConsumerState<PackageSheet> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const Spacer(),
@@ -182,7 +183,7 @@ class _PackageItem extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? const Color(0xFF4CAF50) : const Color(0xFFEEEEEE),
+            color: isSelected ? AppColors.primaryColor : const Color(0xFFEEEEEE),
           ),
         ),
         padding: const EdgeInsets.all(16),
@@ -197,7 +198,7 @@ class _PackageItem extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -226,7 +227,7 @@ class _PackageItem extends StatelessWidget {
                         '$modelType · $model',
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                       ),
                     ],
@@ -239,7 +240,7 @@ class _PackageItem extends StatelessWidget {
                 width: 24,
                 height: 24,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF4CAF50),
+                  color: AppColors.primaryColor,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(

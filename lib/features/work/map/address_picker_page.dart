@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/location_permission.dart';
 import 'package:merchant_app/core/utils/toast.dart';
@@ -210,7 +211,7 @@ class _AddressPickerPageState extends State<AddressPickerPage> {
                     child: Icon(
                       Icons.location_on,
                       size: 48,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                   ),
                 ),
@@ -414,7 +415,7 @@ class _AddressCard extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF333333),
+                          color: AppColors.black06Text,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -609,7 +610,7 @@ class _AddressSearchPageState extends State<_AddressSearchPage> {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F6F7),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -619,12 +620,12 @@ class _AddressSearchPageState extends State<_AddressSearchPage> {
         ),
         titleSpacing: 0,
         title: Container(
-          height: 40,
+          height: 36,
           margin: const EdgeInsets.only(right: 16),
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFFF0F0F0),
-            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xFFF2F4F7),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             children: [
@@ -762,7 +763,7 @@ class _SearchResultItem extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

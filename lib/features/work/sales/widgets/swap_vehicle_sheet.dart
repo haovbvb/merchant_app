@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
 
@@ -73,7 +74,7 @@ class _SwapVehicleSheetState extends State<SwapVehicleSheet> {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF333333),
+                color: AppColors.black06Text,
               ),
             ),
           ),
@@ -105,7 +106,7 @@ class _SwapVehicleSheetState extends State<SwapVehicleSheet> {
                 child: OutlinedButton(
                   onPressed: () => Navigator.of(context).pop(),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF333333),
+                    foregroundColor: AppColors.black06Text,
                     side: const BorderSide(color: Color(0xFFEEEEEE)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -168,7 +169,7 @@ class _SwapVehicleSheetState extends State<SwapVehicleSheet> {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -197,7 +198,7 @@ class _SwapVehicleSheetState extends State<SwapVehicleSheet> {
                             text: '${vehicle.rentDay} days',
                             style: const TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF4CAF50),
+                              color: AppColors.primaryColor,
                             ),
                           ),
                         ],
@@ -213,7 +214,7 @@ class _SwapVehicleSheetState extends State<SwapVehicleSheet> {
                 height: 24,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFF4CAF50),
+                  color: AppColors.primaryColor,
                 ),
                 child: const Icon(
                   Icons.check,

@@ -3,6 +3,7 @@
   "appTitle": "商家端",
   "welcomeMessage": "欢迎使用商家端！",  "cancel": "取消",
   "confirm": "确认",  "logout": "退出登录",
+  "logoutConfirmMessage": "确定要退出登录吗？",
   "tabHome": "首页",
   "@tabHome": {
     "description": "底部导航中首页标签的文案"
@@ -376,7 +377,7 @@
   "warehouseTabRevoked": "已撤销",
   "warehouseDeviceTypeBattery": "电池",
   "warehouseDeviceTypeVehicle": "车辆",
-  "warehouseDeviceTypeStation": "充电站",
+  "warehouseDeviceTypeStation": "换电柜",
   "warehouseInventoryStatusUnfinished": "未完成",
   "warehouseInventoryStatusCompleted": "已完成",
   "warehouseInventoryStatusRevoked": "已撤销",
@@ -582,10 +583,10 @@
   "shippingEntrySubtitle": "选择要录入的设备型号",
   "deviceTypeVehicle": "车辆",
   "deviceTypeBattery": "电池",
-  "deviceTypeStation": "站点",
+  "deviceTypeStation": "换电柜",
   "batteryEntryTitle": "电池入库",
   "vehicleEntryTitle": "车辆入库",
-  "stationEntryTitle": "站点入库",
+  "stationEntryTitle": "换电柜入库",
   "batteryShipTitle": "电池出库",
   "entrySnLabel": "设备SN",
   "entrySnHint": "输入或扫码设备SN",
@@ -1218,5 +1219,10 @@
   "deviceDetailPortSetup": "设置",
   "deviceDetailNavigation": "导航",
   "deviceDetailRepairCompleted": "已完成",
-  "deviceDetailRepairMissingParts": "缺件"
+  "deviceDetailRepairMissingParts": "缺件",
+  "vehicleDetailBindingId": "绑定 ID",
+  "vehicleDetailUserPhone": "用户手机",
+  "vehicleDetailPlateNumber": "车牌号",
+  "vehicleDetailMileage": "里程",
+  "vehicleDetailViewMore": "查看更多"
 }

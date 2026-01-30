@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/bluetooth/bluetooth_auth_page.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_authorization_page.dart';
-import 'package:merchant_app/features/work/device/device_detail_page.dart';
+import 'package:merchant_app/features/work/device/device_detail_page_new.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 
 class CabinetOperatePage extends StatelessWidget {
@@ -13,7 +14,7 @@ class CabinetOperatePage extends StatelessWidget {
     final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(title: Text(l10n.cabinetOperateTitle)),
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -52,7 +53,7 @@ class CabinetOperatePage extends StatelessWidget {
     );
     if (!context.mounted || result == null || result.isEmpty) return;
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => DeviceDetailPage(initialSn: result)),
+      MaterialPageRoute(builder: (_) => DeviceDetailPageNew(initialSn: result)),
     );
   }
 }

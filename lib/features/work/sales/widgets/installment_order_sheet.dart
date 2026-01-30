@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:intl/intl.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/installment_payment_response.dart';
@@ -76,7 +77,7 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF333333),
+                color: AppColors.black06Text,
               ),
             ),
           ),
@@ -107,7 +108,7 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF333333),
+                      foregroundColor: AppColors.black06Text,
                       side: const BorderSide(color: Color(0xFFEEEEEE)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -149,7 +150,7 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: isSelected
-              ? Border.all(color: const Color(0xFF4CAF50), width: 2)
+              ? Border.all(color: AppColors.primaryColor, width: 2)
               : null,
         ),
         child: Column(
@@ -170,7 +171,7 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                   ),
                 ),
@@ -180,7 +181,7 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
                     height: 24,
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Color(0xFF4CAF50),
+                      color: AppColors.primaryColor,
                     ),
                     child: const Icon(
                       Icons.check,
@@ -208,7 +209,7 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
                   deviceInfo,
                   style: const TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ],
@@ -229,7 +230,7 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
                   _formatDate(order.rePaymentDate),
                   style: const TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ],

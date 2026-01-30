@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
@@ -60,7 +61,7 @@ class _OfflineUserRegisterPageState
     final notifier = ref.read(offlineRegisterProvider.notifier);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -150,7 +151,7 @@ class _OfflineUserRegisterPageState
   Widget _buildHeader(AppLocalizations l10n) {
     return Column(
       children: [
-        Container(
+        SizedBox(
           width: 64,
           height: 64,
           
@@ -169,7 +170,7 @@ class _OfflineUserRegisterPageState
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF333333),
+            color: AppColors.black06Text,
           ),
         ),
       ],
@@ -218,7 +219,7 @@ class _OfflineUserRegisterPageState
                       '$countryShort $areaCode',
                       style: const TextStyle(
                         fontSize: 16,
-                        color: Color(0xFF333333),
+                        color: AppColors.black06Text,
                       ),
                     ),
                     const Icon(
@@ -247,7 +248,7 @@ class _OfflineUserRegisterPageState
                   ),
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ),
@@ -285,7 +286,7 @@ class _OfflineUserRegisterPageState
                   ),
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ),
@@ -316,7 +317,7 @@ class _OfflineUserRegisterPageState
                     l10n.offlineRegisterSendCode,
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF4CAF50),
+                      color: AppColors.primaryColor,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -351,7 +352,7 @@ class _OfflineUserRegisterPageState
                   ),
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ),
@@ -398,7 +399,7 @@ class _OfflineUserRegisterPageState
             ),
             style: const TextStyle(
               fontSize: 16,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
         ],
@@ -427,7 +428,7 @@ class _OfflineUserRegisterPageState
                       fontSize: 16,
                       color: _birthdayController.text.isEmpty
                           ? const Color(0xFF999999)
-                          : const Color(0xFF333333),
+                          : AppColors.black06Text,
                     ),
                   ),
                 ),
@@ -466,7 +467,7 @@ class _OfflineUserRegisterPageState
                   ),
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ),
@@ -521,7 +522,7 @@ class _OfflineUserRegisterPageState
           onPressed:
               state.registering ? null : () => _submit(context, notifier),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF4CAF50),
+            backgroundColor: AppColors.primaryColor,
             disabledBackgroundColor: const Color(0xFFE8F5E9),
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
@@ -699,7 +700,7 @@ class _OfflineUserRegisterPageState
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ),
@@ -720,8 +721,8 @@ class _OfflineUserRegisterPageState
                         style: TextStyle(
                           fontSize: 16,
                           color: isSelected
-                              ? const Color(0xFF4CAF50)
-                              : const Color(0xFF333333),
+                              ? AppColors.primaryColor
+                              : AppColors.black06Text,
                         ),
                       ),
                       trailing: Text(
@@ -745,7 +746,7 @@ class _OfflineUserRegisterPageState
                   child: OutlinedButton(
                     onPressed: () => Navigator.of(context).pop(),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF333333),
+                      foregroundColor: AppColors.black06Text,
                       side: const BorderSide(color: Color(0xFFDDDDDD)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
@@ -47,7 +48,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -101,11 +102,11 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
             // width: 72,
             // height: 72,
             decoration: BoxDecoration(
-              // color: const Color(0xFF4CAF50),
+              // color: AppColors.primaryColor,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF4CAF50).withValues(alpha: 0.3),
+                  color: AppColors.primaryColor.withValues(alpha: 0.3),
                   blurRadius: 12,
                   offset: const Offset(0, 4),
                 ),
@@ -126,7 +127,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
             ),
           ),
           const SizedBox(height: 20),
@@ -176,7 +177,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                   ),
                   style: const TextStyle(
                     fontSize: 16,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                   onSubmitted: (_) => _searchUser(notifier),
                 ),
@@ -187,7 +188,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                   padding: const EdgeInsets.all(8),
                   child: AppIcons.scanIcon(
                     size: 24,
-                    color: const Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ),
@@ -265,7 +266,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -305,7 +306,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
             l10n.swapBindBindVehicle,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -386,7 +387,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -415,7 +416,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                             text: '${car.rentDay} days',
                             style: const TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF4CAF50),
+                              color: AppColors.primaryColor,
                             ),
                           ),
                         ],
@@ -456,7 +457,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
             l10n.swapBindBindBattery,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -537,7 +538,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -566,7 +567,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                             text: '${battery.rentDay} days',
                             style: const TextStyle(
                               fontSize: 12,
-                              color: Color(0xFF4CAF50),
+                              color: AppColors.primaryColor,
                             ),
                           ),
                         ],
@@ -606,7 +607,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
             l10n.swapBindPackage,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF333333),
+              color: AppColors.black06Text,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -659,7 +660,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
             gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
-              colors: [Color(0xFF4CAF50), Color(0xFF388E3C)],
+              colors: [AppColors.primaryColor, AppColors.primaryColor],
             ),
             borderRadius: BorderRadius.circular(12),
           ),
@@ -826,7 +827,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
           child: ElevatedButton(
             onPressed: canSubmit ? () => _showPaymentSheet(notifier) : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4CAF50),
+              backgroundColor: AppColors.primaryColor,
               disabledBackgroundColor: const Color(0xFFB8D8B8),
               foregroundColor: Colors.white,
               disabledForegroundColor: Colors.white,
@@ -974,7 +975,7 @@ class _SuccessPage extends StatelessWidget {
     final l10n = context.l10n;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -987,7 +988,7 @@ class _SuccessPage extends StatelessWidget {
           style: const TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF333333),
+            color: AppColors.black06Text,
           ),
         ),
         centerTitle: true,
@@ -1010,7 +1011,7 @@ class _SuccessPage extends StatelessWidget {
                 height: 64,
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Color(0xFF4CAF50),
+                  color: AppColors.primaryColor,
                 ),
                 child: const Icon(
                   Icons.check,
@@ -1024,7 +1025,7 @@ class _SuccessPage extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
               const SizedBox(height: 12),
@@ -1079,7 +1080,7 @@ class _SuccessPage extends StatelessWidget {
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: Color(0xFF333333),
+                            color: AppColors.black06Text,
                           ),
                         ),
                         const SizedBox(width: 8),
@@ -1106,8 +1107,8 @@ class _SuccessPage extends StatelessWidget {
               OutlinedButton(
                 onPressed: onReturn,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF4CAF50),
-                  side: const BorderSide(color: Color(0xFF4CAF50)),
+                  foregroundColor: AppColors.primaryColor,
+                  side: const BorderSide(color: AppColors.primaryColor),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24),
                   ),

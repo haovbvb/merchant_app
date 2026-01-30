@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:merchant_app/app/app_router.dart';
-import 'package:merchant_app/app/styles/colors.dart';
-import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/app/ui.dart';
+import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/login/providers/auth_controller.dart';
 import 'package:merchant_app/features/me/message_controller.dart';
 import 'package:merchant_app/features/me/providers/language_notifier.dart';
-
 class _ProfileAction {
   const _ProfileAction({
     this.icon,
@@ -164,7 +162,17 @@ class _ProfileHeader extends StatelessWidget {
             Align(
               alignment: Alignment.topRight,
               child: TextButton(
-                onPressed: onLogout,
+                onPressed: () async {
+                  final confirmed = await ConfirmDialog.show(
+                    context: context,
+                    message: context.l10n.logoutConfirmMessage,
+                    cancelText: context.l10n.cancel,
+                    confirmText: context.l10n.confirm,
+                  );
+                  if (confirmed) {
+                    await onLogout();
+                  }
+                },
                 style: TextButton.styleFrom(
                   foregroundColor: AppColors.black06Text,
                   padding: EdgeInsets.zero,
@@ -265,7 +273,7 @@ class _ProfileCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: const [
           BoxShadow(
             color: Color(0x11000000),
@@ -279,11 +287,11 @@ class _ProfileCard extends StatelessWidget {
           for (var i = 0; i < actions.length; i++) ...[
             _ProfileActionTile(action: actions[i]),
             if (i != actions.length - 1)
-              const Divider(
+              Divider(
                 height: 1,
                 indent: 16,
                 endIndent: 16,
-                color: Color(0xFFE5E7EB),
+                color: AppColors.borderColor,
               ),
           ],
         ],
@@ -307,9 +315,6 @@ class _ProfileActionTile extends StatelessWidget {
         child: Row(
           children: [
             Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-              ),
               child: action.iconPath != null
                   ? Image.asset(
                       action.iconPath!,

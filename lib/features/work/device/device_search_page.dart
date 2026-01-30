@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/constants/storage_keys.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
@@ -50,12 +51,12 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
         ),
         titleSpacing: 0,
         title: Container(
-          height: 40,
+          height: 36,
           margin: const EdgeInsets.only(right: 16),
           padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
-            color: const Color(0xFFF5F5F5),
-            borderRadius: BorderRadius.circular(20),
+            color: const Color(0xFFF2F4F7),
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Row(
             children: [
@@ -105,7 +106,7 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
                 onTap: _scan,
                 child: AppIcons.scanIcon(
                   size: 24,
-                  color: const Color(0xFF333333),
+                  color: AppColors.black06Text,
                 ),
               ),
             ],
@@ -134,7 +135,7 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF333333),
+                    color: AppColors.black06Text,
                   ),
                 ),
               ),
@@ -172,7 +173,7 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
                     item,
                     style: const TextStyle(
                       fontSize: 14,
-                      color: Color(0xFF333333),
+                      color: AppColors.black06Text,
                     ),
                   ),
                 ),
@@ -230,11 +231,14 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
     }
     final sn = ScanUtils.getDeviceSn(input).trim();
     if (sn.isEmpty) return;
-    await _addHistory(input);
     if (!mounted) return;
-    await Navigator.of(context).push(
+    final hasData = await Navigator.of(context).push<bool>(
       MaterialPageRoute(builder: (_) => DeviceDetailPageNew(initialSn: sn)),
     );
+    if (!mounted) return;
+    if (hasData == true) {
+      await _addHistory(input);
+    }
   }
 
   Future<void> _scan() async {

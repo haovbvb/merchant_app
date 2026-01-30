@@ -87,91 +87,91 @@ class AppLocalizationsZh extends AppLocalizations {
   String get workbenchRefresh => '刷新';
 
   @override
-  String get workbenchThisMonthSales => 'This Month\'s Sales';
+  String get workbenchThisMonthSales => '本月销售';
 
   @override
-  String get workbenchTransactionAmount => 'Transaction Amount';
+  String get workbenchTransactionAmount => '成交金额';
 
   @override
-  String get workbenchOrderQuantity => 'Order Quantity';
+  String get workbenchOrderQuantity => '订单数量';
 
   @override
-  String get workbenchChooseYourRole => 'Choose Your Role';
+  String get workbenchChooseYourRole => '选择你的角色';
 
   @override
-  String get workbenchRoleSale => 'Sale';
+  String get workbenchRoleSale => '销售';
 
   @override
-  String get workbenchRoleOperations => 'Operations';
+  String get workbenchRoleOperations => '运维';
 
   @override
-  String get workbenchRoleWarehouseKeeper => 'Warehouse\nKeeper';
+  String get workbenchRoleWarehouseKeeper => '仓管';
 
   @override
-  String get workbenchShippingEntry => 'Shipping Entry';
+  String get workbenchShippingEntry => '设备入库';
 
   @override
-  String get workbenchDeviceIssue => 'Device Issue';
+  String get workbenchDeviceIssue => '设备异常';
 
   @override
-  String get workbenchDeviceReception => 'Device Reception';
+  String get workbenchDeviceReception => '设备接收';
 
   @override
-  String get workbenchInventoryCount => 'Inventory Count';
+  String get workbenchInventoryCount => '盘点';
 
   @override
-  String get workbenchDeviceQuery => 'Device Query';
+  String get workbenchDeviceQuery => '设备查询';
 
   @override
-  String get workbenchSalesBinding => 'Sales Binding';
+  String get workbenchSalesBinding => '销售绑定';
 
   @override
-  String get workbenchLeaseBinding => 'Lease Binding';
+  String get workbenchLeaseBinding => '租赁绑定';
 
   @override
-  String get workbenchSwapBinding => 'Swap Binding';
+  String get workbenchSwapBinding => '换电绑定';
 
   @override
-  String get workbenchManualSwap => 'Manual Swap';
+  String get workbenchManualSwap => '手动换电';
 
   @override
-  String get workbenchSalesStatistics => 'Sales Statistics';
+  String get workbenchSalesStatistics => '销售统计';
 
   @override
-  String get workbenchDepositRefund => 'Deposit Refund';
+  String get workbenchDepositRefund => '押金退还';
 
   @override
-  String get workbenchOfflineUserRegistration => 'Offline User\nRegistration';
+  String get workbenchOfflineUserRegistration => '线下用户注册';
 
   @override
-  String get workbenchInstallmentPayment => 'Installment\nPayment';
+  String get workbenchInstallmentPayment => '分期支付';
 
   @override
-  String get workbenchUserQuery => 'User Query';
+  String get workbenchUserQuery => '用户查询';
 
   @override
-  String get workbenchScheduleMaintenance => 'Schedule\nMaintenance';
+  String get workbenchScheduleMaintenance => '预约保养';
 
   @override
-  String get workbenchRepairRegistration => 'Repair\nRegistration';
+  String get workbenchRepairRegistration => '维修登记';
 
   @override
-  String get workbenchRoadsideAssistance => 'Roadside\nAssistance';
+  String get workbenchRoadsideAssistance => '道路救援';
 
   @override
-  String get workbenchDeviceUnbinding => 'Device\nUnbinding';
+  String get workbenchDeviceUnbinding => '设备解绑';
 
   @override
-  String get workbenchAfterSalesBinding => 'After-sales\nBinding';
+  String get workbenchAfterSalesBinding => '售后绑定';
 
   @override
-  String get workbenchCabinetOperation => 'Cabinet\nOperation';
+  String get workbenchCabinetOperation => '换电柜运维';
 
   @override
-  String get workbenchCabinetPutaway => 'Cabinet\nPutaway';
+  String get workbenchCabinetPutaway => '换电柜上架';
 
   @override
-  String get workbenchCabinetUnshelve => 'Cabinet\nUnshelve';
+  String get workbenchCabinetUnshelve => '换电柜下架';
 
   @override
   String get profileGreeting => '在这里管理你的个人信息。';
@@ -2931,25 +2931,25 @@ class AppLocalizationsZh extends AppLocalizations {
   String get merchantReplaceSameSn => '新旧电池不能相同';
 
   @override
-  String get merchantReplaceUserId => 'User ID';
+  String get merchantReplaceUserId => '用户ID';
 
   @override
-  String get merchantReplaceUserIdHint => 'Enter User ID or scan QR code';
+  String get merchantReplaceUserIdHint => '输入用户ID或扫码';
 
   @override
-  String get merchantReplaceBoundBatterySn => 'Bound Battery SN';
+  String get merchantReplaceBoundBatterySn => '已绑定电池SN';
 
   @override
-  String get merchantReplaceBatterySnHint => 'Enter battery SN or scan QR code';
+  String get merchantReplaceBatterySnHint => '输入电池SN或扫码';
 
   @override
-  String get merchantReplaceNewBattery => 'New Battery';
+  String get merchantReplaceNewBattery => '新电池';
 
   @override
-  String get merchantReplaceReasons => 'Reasons';
+  String get merchantReplaceReasons => '原因';
 
   @override
-  String get merchantReplaceReasonsHint => 'Enter reasons for battery swapping';
+  String get merchantReplaceReasonsHint => '请输入换电原因';
 
   @override
   String get saleSummaryTitle => '销售汇总';
@@ -3009,37 +3009,37 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saleSummaryPayWay => '支付方式';
 
   @override
-  String get saleSummaryTotalSalesAmount => 'Total sales amount(\$)';
+  String get saleSummaryTotalSalesAmount => '总销售金额(\$)';
 
   @override
-  String get saleSummaryTransactionOrder => 'Transaction order';
+  String get saleSummaryTransactionOrder => '成交订单';
 
   @override
-  String get saleSummarySigningRateTitle => 'Signing rate & Order value';
+  String get saleSummarySigningRateTitle => '签约率&客单价';
 
   @override
-  String get saleSummaryOrderSigningRate => 'Order signing rate';
+  String get saleSummaryOrderSigningRate => '订单签约率';
 
   @override
-  String get saleSummaryAverageOrderPrice => 'Average order price';
+  String get saleSummaryAverageOrderPrice => '平均客单价';
 
   @override
-  String get saleSummarySalesAmount => 'Sales Amount';
+  String get saleSummarySalesAmount => '销售金额';
 
   @override
-  String get saleSummaryTransactionOrderTab => 'Transaction Order';
+  String get saleSummaryTransactionOrderTab => '成交订单';
 
   @override
-  String get saleSummarySalesData => 'Sales Data';
+  String get saleSummarySalesData => '销售数据';
 
   @override
-  String get saleSummaryAfterSalesData => 'After-Sales Data';
+  String get saleSummaryAfterSalesData => '售后数据';
 
   @override
-  String get saleSummarySelectData => 'Select Data Type';
+  String get saleSummarySelectData => '选择数据类型';
 
   @override
-  String get saleSummaryViewVoucher => 'View Voucher';
+  String get saleSummaryViewVoucher => '查看凭证';
 
   @override
   String get cabinetPutawayTitle => '柜机上架';

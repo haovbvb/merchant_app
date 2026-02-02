@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
 import 'package:merchant_app/data/models/service_plan.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -94,9 +95,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
         Container(
           width: 64,
           height: 64,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Image.asset(
@@ -136,10 +135,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
         children: [
           Text(
             l10n.sellBindPackage,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.black06Text,
-            ),
+            style: const TextStyle(fontSize: 14, color: AppColors.black06Text),
           ),
           const SizedBox(height: 8),
           GestureDetector(
@@ -147,9 +143,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: Color(0xFFEEEEEE)),
-                ),
+                border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
               ),
               child: Row(
                 children: [
@@ -192,10 +186,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
         children: [
           Text(
             l10n.sellBindDeviceSn,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.black06Text,
-            ),
+            style: const TextStyle(fontSize: 14, color: AppColors.black06Text),
           ),
           const SizedBox(height: 8),
           Row(
@@ -252,10 +243,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
       child: Center(
         child: Text(
           text,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF999999),
-          ),
+          style: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
         ),
       ),
     );
@@ -290,10 +278,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
           ),
           child: Text(
             l10n.sellBindSubmit,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
           ),
         ),
       ),
@@ -302,9 +287,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
 
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(
-        builder: (_) => const QrScanPage(parseDeviceSn: true),
-      ),
+      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
@@ -346,7 +329,9 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
     if (device != null && plan != null) {
       final deviceModel = device.batteryVo?.model ?? device.carVo?.model;
       final planModel = plan.batteryType ?? plan.carType;
-      if (deviceModel != null && planModel != null && deviceModel != planModel) {
+      if (deviceModel != null &&
+          planModel != null &&
+          deviceModel != planModel) {
         _showModelMismatchDialog(context, l10n);
         return;
       }
@@ -373,44 +358,10 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
   }
 
   void _showModelMismatchDialog(BuildContext context, AppLocalizations l10n) {
-    showDialog(
+    ConfirmDialog.alert(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        title: Text(
-          l10n.sellBindUnableSubmit,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        content: Text(
-          l10n.sellBindModelMismatch,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF666666),
-          ),
-        ),
-        actions: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text(l10n.confirm),
-            ),
-          ),
-        ],
-      ),
+      message: l10n.sellBindModelMismatch,
+      buttonText: l10n.confirm,
     );
   }
 }
@@ -470,10 +421,7 @@ class _PackageCard extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 '$modelType · $model',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white,
-                ),
+                style: const TextStyle(fontSize: 12, color: Colors.white),
               ),
             ],
           ),
@@ -599,10 +547,7 @@ class _BatteryCard extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 12,
-          color: Color(0xFF666666),
-        ),
+        style: const TextStyle(fontSize: 12, color: Color(0xFF666666)),
       ),
     );
   }
@@ -613,10 +558,7 @@ class _BatteryCard extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Color(0xFF999999),
-            ),
+            style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
           ),
           const SizedBox(height: 4),
           Text(
@@ -730,10 +672,7 @@ class _VehicleCard extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 12,
-          color: Color(0xFF666666),
-        ),
+        style: const TextStyle(fontSize: 12, color: Color(0xFF666666)),
       ),
     );
   }
@@ -744,10 +683,7 @@ class _VehicleCard extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Color(0xFF999999),
-            ),
+            style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
           ),
           const SizedBox(height: 4),
           Text(
@@ -818,11 +754,7 @@ class _SuccessPage extends StatelessWidget {
                   color: AppColors.primaryColor,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 40,
-                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 40),
               ),
               const SizedBox(height: 16),
               Text(
@@ -848,7 +780,11 @@ class _SuccessPage extends StatelessWidget {
                       style: TextStyle(color: Color(0xFFFF9800)),
                     ),
                     if (message.split('30').length > 1)
-                      TextSpan(text: message.split('30')[1].replaceFirst(' minutes', '')),
+                      TextSpan(
+                        text: message
+                            .split('30')[1]
+                            .replaceFirst(' minutes', ''),
+                      ),
                   ],
                 ),
               ),

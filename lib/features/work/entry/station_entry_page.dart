@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/data/models/station_type.dart';
 import 'package:merchant_app/features/work/entry/battery_ship_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -33,10 +34,13 @@ class _StationEntryPageState extends State<StationEntryPage> {
     setState(() => _loading = true);
     final response = await _api.get<List<StationType>>(
       ApiPath.stationModelList,
-      parser: (json) => (json as List<dynamic>?)
-              ?.map((item) => StationType.fromJson(
-                    Map<String, dynamic>.from(item as Map),
-                  ))
+      parser: (json) =>
+          (json as List<dynamic>?)
+              ?.map(
+                (item) => StationType.fromJson(
+                  Map<String, dynamic>.from(item as Map),
+                ),
+              )
               .toList() ??
           const <StationType>[],
     );
@@ -64,7 +68,9 @@ class _StationEntryPageState extends State<StationEntryPage> {
                       .map(
                         (type) => DropdownMenuItem(
                           value: type,
-                          child: Text('${type.model ?? '-'} ${type.modelName ?? ''}'),
+                          child: Text(
+                            '${type.model ?? '-'} ${type.modelName ?? ''}',
+                          ),
                         ),
                       )
                       .toList(),
@@ -103,36 +109,36 @@ class _StationEntryPageState extends State<StationEntryPage> {
                   _EmptyCard(text: l10n.entryListEmpty)
                 else
                   ..._items.asMap().entries.map(
-                        (entry) => Card(
-                          child: ListTile(
-                            title: Text(entry.value.sn),
-                            subtitle: Text(
-                              '${l10n.entryImeiLabel}: ${entry.value.imei}\n'
-                              '${l10n.entryIccidLabel}: ${entry.value.iccid}\n'
-                              '${l10n.entryLockDevIdLabel}: ${entry.value.lockDevId}',
+                    (entry) => Card(
+                      child: ListTile(
+                        title: Text(entry.value.sn),
+                        subtitle: Text(
+                          '${l10n.entryImeiLabel}: ${entry.value.imei}\n'
+                          '${l10n.entryIccidLabel}: ${entry.value.iccid}\n'
+                          '${l10n.entryLockDevIdLabel}: ${entry.value.lockDevId}',
+                        ),
+                        trailing: PopupMenuButton<String>(
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              _editItem(entry.key);
+                            } else if (value == 'delete') {
+                              setState(() => _items.removeAt(entry.key));
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Text(l10n.entryEditAction),
                             ),
-                            trailing: PopupMenuButton<String>(
-                              onSelected: (value) {
-                                if (value == 'edit') {
-                                  _editItem(entry.key);
-                                } else if (value == 'delete') {
-                                  setState(() => _items.removeAt(entry.key));
-                                }
-                              },
-                              itemBuilder: (context) => [
-                                PopupMenuItem(
-                                  value: 'edit',
-                                  child: Text(l10n.entryEditAction),
-                                ),
-                                PopupMenuItem(
-                                  value: 'delete',
-                                  child: Text(l10n.entryDeleteAction),
-                                ),
-                              ],
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Text(l10n.entryDeleteAction),
                             ),
-                          ),
+                          ],
                         ),
                       ),
+                    ),
+                  ),
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: _submitting ? null : _submit,
@@ -146,10 +152,7 @@ class _StationEntryPageState extends State<StationEntryPage> {
   Future<void> _addByScan() async {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => const QrScanPage(
-          parseDeviceSn: true,
-          deviceType: 3,
-        ),
+        builder: (_) => const QrScanPage(parseDeviceSn: true, deviceType: 3),
       ),
     );
     if (result == null || result.isEmpty) return;
@@ -173,15 +176,19 @@ class _StationEntryPageState extends State<StationEntryPage> {
     final snController = TextEditingController(text: initial?.sn ?? '');
     final imeiController = TextEditingController(text: initial?.imei ?? '');
     final iccidController = TextEditingController(text: initial?.iccid ?? '');
-    final lockController = TextEditingController(text: initial?.lockDevId ?? '');
+    final lockController = TextEditingController(
+      text: initial?.lockDevId ?? '',
+    );
 
     final result = await showDialog<_StationItem>(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(initial == null
-              ? l10n.entryAddDeviceTitle
-              : l10n.entryEditDeviceTitle),
+          title: Text(
+            initial == null
+                ? l10n.entryAddDeviceTitle
+                : l10n.entryEditDeviceTitle,
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -199,7 +206,9 @@ class _StationEntryPageState extends State<StationEntryPage> {
               ),
               TextField(
                 controller: lockController,
-                decoration: InputDecoration(labelText: l10n.entryLockDevIdLabel),
+                decoration: InputDecoration(
+                  labelText: l10n.entryLockDevIdLabel,
+                ),
               ),
             ],
           ),
@@ -254,13 +263,10 @@ class _StationEntryPageState extends State<StationEntryPage> {
     showToast(l10n.entrySubmitSuccess);
     final goToTransfer = await _showTransferDialog();
     if (!mounted) return;
-    if (goToTransfer == true) {
+    if (goToTransfer) {
       await Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => BatteryShipPage(
-            deviceType: 3,
-            initialSns: sns,
-          ),
+          builder: (_) => BatteryShipPage(deviceType: 3, initialSns: sns),
         ),
       );
     }
@@ -268,26 +274,13 @@ class _StationEntryPageState extends State<StationEntryPage> {
     setState(() => _items.clear());
   }
 
-  Future<bool?> _showTransferDialog() async {
+  Future<bool> _showTransferDialog() async {
     final l10n = context.l10n;
-    return showDialog<bool>(
+    return ConfirmDialog.show(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(l10n.entrySubmitDoneTitle),
-          content: Text(l10n.entrySubmitDoneMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(l10n.entryStayAction),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text(l10n.entryGoToTransferAction),
-            ),
-          ],
-        );
-      },
+      message: l10n.entrySubmitDoneMessage,
+      cancelText: l10n.entryStayAction,
+      confirmText: l10n.entryGoToTransferAction,
     );
   }
 }
@@ -306,11 +299,11 @@ class _StationItem {
   });
 
   Map<String, dynamic> toJson() => {
-        'sn': sn,
-        'imei': imei,
-        'iccid': iccid,
-        'lockDevId': lockDevId,
-      };
+    'sn': sn,
+    'imei': imei,
+    'iccid': iccid,
+    'lockDevId': lockDevId,
+  };
 }
 
 class _EmptyCard extends StatelessWidget {
@@ -321,10 +314,7 @@ class _EmptyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(text),
-      ),
+      child: Padding(padding: const EdgeInsets.all(16), child: Text(text)),
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
@@ -82,47 +83,45 @@ class _InventoryDetailPageNewState
         ),
         centerTitle: true,
       ),
-      body: state.loading && detail == null
-          ? const Center(child: CircularProgressIndicator())
-          : SmartRefresher(
-              controller: _refreshController,
-              enablePullDown: true,
-              enablePullUp: state.hasMore,
-              onRefresh: () async {
-                if (state.inventoryNo.isNotEmpty) {
-                  await notifier.loadDetail(state.inventoryNo);
-                }
-                _refreshController.refreshCompleted();
-              },
-              onLoading: () async {
-                await notifier.loadMore();
-                if (ref.read(inventoryDetailProvider).hasMore) {
-                  _refreshController.loadComplete();
-                } else {
-                  _refreshController.loadNoData();
-                }
-              },
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 头部信息卡片
-                    _buildHeaderCard(l10n, detail, state),
+      body: SmartRefresher(
+        controller: _refreshController,
+        enablePullDown: true,
+        enablePullUp: state.hasMore,
+        onRefresh: () async {
+          if (state.inventoryNo.isNotEmpty) {
+            await notifier.loadDetail(state.inventoryNo);
+          }
+          _refreshController.refreshCompleted();
+        },
+        onLoading: () async {
+          await notifier.loadMore();
+          if (ref.read(inventoryDetailProvider).hasMore) {
+            _refreshController.loadComplete();
+          } else {
+            _refreshController.loadNoData();
+          }
+        },
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 头部信息卡片
+              _buildHeaderCard(l10n, detail, state),
 
-                    const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-                    // Battery 区域
-                    _buildBatterySection(l10n, detail, state, canOperate),
+              // Battery 区域
+              _buildBatterySection(l10n, detail, state, canOperate),
 
-                    const SizedBox(height: 16),
+              const SizedBox(height: 16),
 
-                    // 设备列表
-                    _buildDeviceList(l10n, state),
-                  ],
-                ),
-              ),
-            ),
+              // 设备列表
+              _buildDeviceList(l10n, state),
+            ],
+          ),
+        ),
+      ),
       bottomNavigationBar: canOperate
           ? _buildBottomBar(l10n, detail, notifier)
           : null,
@@ -560,25 +559,14 @@ class _InventoryDetailPageNewState
     AppLocalizations l10n,
     InventoryDetailNotifier notifier,
   ) async {
-    final confirm = await showDialog<bool>(
+    final confirm = await ConfirmDialog.show(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.warehouseInventoryRevokeConfirmTitle),
-        content: Text(l10n.warehouseInventoryRevokeConfirmDesc),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
+      message: l10n.warehouseInventoryRevokeConfirmDesc,
+      cancelText: l10n.cancel,
+      confirmText: l10n.confirm,
     );
 
-    if (confirm == true) {
+    if (confirm) {
       await notifier.revokeInventory();
       if (mounted) {
         Navigator.of(context).pop();
@@ -590,25 +578,14 @@ class _InventoryDetailPageNewState
     AppLocalizations l10n,
     InventoryDetailNotifier notifier,
   ) async {
-    final confirm = await showDialog<bool>(
+    final confirm = await ConfirmDialog.show(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.warehouseInventoryCompleteConfirmTitle),
-        content: Text(l10n.warehouseInventoryCompleteConfirmDesc),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
+      message: l10n.warehouseInventoryCompleteConfirmDesc,
+      cancelText: l10n.cancel,
+      confirmText: l10n.confirm,
     );
 
-    if (confirm == true) {
+    if (confirm) {
       await notifier.completeInventory();
       if (mounted) {
         Navigator.of(context).pop();

@@ -70,13 +70,11 @@ class ApiClient {
             buffer.write(' headers=${options.headers}');
           }
 
-          logI('[$_logTag] ${buffer.toString()}');
+          logI('✅ [$_logTag] ${buffer.toString()}');
           return handler.next(options);
         },
         onResponse: (response, handler) {
-          final buffer = StringBuffer(
-            '✅ status=${response.statusCode} path=${response.realUri.path}',
-          );
+          final buffer = StringBuffer('✅ path=${response.realUri.path}');
           if (response.data != null) {
             buffer.write(' data=${response.data}');
           }
@@ -156,6 +154,25 @@ class ApiClient {
   }) async {
     try {
       return await dio.post(
+        path,
+        data: data,
+        options: Options(
+          extra: {'showHud': showHud, 'notifyOnError': notifyOnError},
+        ),
+      );
+    } catch (e) {
+      throw NetworkExceptions.fromDioException(e);
+    }
+  }
+
+  Future<Response> put(
+    String path, {
+    dynamic data,
+    bool showHud = true,
+    bool notifyOnError = true,
+  }) async {
+    try {
+      return await dio.put(
         path,
         data: data,
         options: Options(

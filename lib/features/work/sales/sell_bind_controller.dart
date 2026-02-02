@@ -90,8 +90,9 @@ class SellBindState {
   }
 }
 
-final sellBindProvider =
-    NotifierProvider<SellBindNotifier, SellBindState>(SellBindNotifier.new);
+final sellBindProvider = NotifierProvider<SellBindNotifier, SellBindState>(
+  SellBindNotifier.new,
+);
 
 class SellBindNotifier extends Notifier<SellBindState> {
   final ApiService _api = ApiService();
@@ -105,14 +106,10 @@ class SellBindNotifier extends Notifier<SellBindState> {
     final response = await _api.get<PurchasingUser>(
       ApiPath.queryUserForSell,
       queryParameters: {'cardNum': cardNum},
-      parser: (json) => PurchasingUser.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
+      parser: (json) =>
+          PurchasingUser.fromJson(Map<String, dynamic>.from(json as Map)),
     );
-    state = state.copyWith(
-      loadingUser: false,
-      user: response.result,
-    );
+    state = state.copyWith(loadingUser: false, user: response.result);
   }
 
   Future<void> queryDevice(String sn) async {
@@ -129,28 +126,19 @@ class SellBindNotifier extends Notifier<SellBindState> {
     final response = await _api.get<BatterOrVehicleInfo>(
       ApiPath.querySaleDeviceInfo,
       queryParameters: params,
-      parser: (json) => BatterOrVehicleInfo.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
+      parser: (json) =>
+          BatterOrVehicleInfo.fromJson(Map<String, dynamic>.from(json as Map)),
     );
-    state = state.copyWith(
-      loadingDevice: false,
-      deviceInfo: response.result,
-    );
+    state = state.copyWith(loadingDevice: false, deviceInfo: response.result);
   }
 
   Future<void> queryPlans(String keyword) async {
     state = state.copyWith(loadingPlans: true);
     final response = await _api.get<ServicePlanInfo>(
       ApiPath.queryServicePlanByName,
-      queryParameters: {
-        'keyword': keyword,
-        'pageNum': 1,
-        'pageSize': 50,
-      },
-      parser: (json) => ServicePlanInfo.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
+      queryParameters: {'keyword': keyword, 'pageNum': 1, 'pageSize': 50},
+      parser: (json) =>
+          ServicePlanInfo.fromJson(Map<String, dynamic>.from(json as Map)),
     );
     state = state.copyWith(
       loadingPlans: false,
@@ -170,10 +158,13 @@ class SellBindNotifier extends Notifier<SellBindState> {
     final response = await _api.get<List<PaymentPlan>>(
       ApiPath.queryPaymentPlanList,
       queryParameters: {'packageAmount': amount},
-      parser: (json) => (json as List<dynamic>?)
-              ?.map((item) => PaymentPlan.fromJson(
-                    Map<String, dynamic>.from(item as Map),
-                  ))
+      parser: (json) =>
+          (json as List<dynamic>?)
+              ?.map(
+                (item) => PaymentPlan.fromJson(
+                  Map<String, dynamic>.from(item as Map),
+                ),
+              )
               .toList() ??
           const <PaymentPlan>[],
     );
@@ -287,5 +278,16 @@ class SellBindNotifier extends Notifier<SellBindState> {
     final extIndex = last.lastIndexOf('.');
     final ext = extIndex == -1 ? 'jpg' : last.substring(extIndex + 1);
     return '${DateTime.now().millisecondsSinceEpoch}.$ext';
+  }
+
+  /// 查询门店支付配置 - 对应 Android 的 getShopPaymentMethod
+  Future<Map<String, dynamic>?> queryShopPayConfig(String shopId) async {
+    if (shopId.isEmpty) return null;
+    final response = await _api.get<Map<String, dynamic>>(
+      ApiPath.queryShopPayConfig,
+      queryParameters: {'shopId': shopId},
+      parser: (json) => Map<String, dynamic>.from(json as Map),
+    );
+    return response.result;
   }
 }

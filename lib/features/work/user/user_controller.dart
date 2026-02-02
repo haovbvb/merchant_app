@@ -5,9 +5,11 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/data/models/power_change.dart';
 import 'package:merchant_app/data/models/user_detail.dart';
 import 'package:merchant_app/data/models/user_info.dart';
 import 'package:merchant_app/data/models/user_order_response.dart';
+import 'package:merchant_app/data/models/user_payment_record.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
@@ -56,8 +58,9 @@ class UserListState {
   }
 }
 
-final userListProvider =
-    NotifierProvider<UserListNotifier, UserListState>(UserListNotifier.new);
+final userListProvider = NotifierProvider<UserListNotifier, UserListState>(
+  UserListNotifier.new,
+);
 
 class UserListNotifier extends Notifier<UserListState> {
   final ApiService _api = ApiService();
@@ -131,38 +134,64 @@ class UserListNotifier extends Notifier<UserListState> {
 
 class UserDetailState {
   final bool loading;
+  final bool loadingPayments;
+  final bool loadingSwaps;
   final String cardNum;
   final UserDetail? detail;
   final List<OrderItem> orders;
   final int total;
+  final List<UserPaymentRecord> payments;
+  final int paymentsTotal;
+  final List<PowerChangeItem> swaps;
+  final int swapsTotal;
 
   const UserDetailState({
     this.loading = false,
+    this.loadingPayments = false,
+    this.loadingSwaps = false,
     this.cardNum = '',
     this.detail,
     this.orders = const [],
     this.total = 0,
+    this.payments = const [],
+    this.paymentsTotal = 0,
+    this.swaps = const [],
+    this.swapsTotal = 0,
   });
 
   UserDetailState copyWith({
     bool? loading,
+    bool? loadingPayments,
+    bool? loadingSwaps,
     String? cardNum,
     UserDetail? detail,
     List<OrderItem>? orders,
     int? total,
+    List<UserPaymentRecord>? payments,
+    int? paymentsTotal,
+    List<PowerChangeItem>? swaps,
+    int? swapsTotal,
   }) {
     return UserDetailState(
       loading: loading ?? this.loading,
+      loadingPayments: loadingPayments ?? this.loadingPayments,
+      loadingSwaps: loadingSwaps ?? this.loadingSwaps,
       cardNum: cardNum ?? this.cardNum,
       detail: detail ?? this.detail,
       orders: orders ?? this.orders,
       total: total ?? this.total,
+      payments: payments ?? this.payments,
+      paymentsTotal: paymentsTotal ?? this.paymentsTotal,
+      swaps: swaps ?? this.swaps,
+      swapsTotal: swapsTotal ?? this.swapsTotal,
     );
   }
 }
 
 final userDetailProvider =
-    NotifierProvider<UserDetailNotifier, UserDetailState>(UserDetailNotifier.new);
+    NotifierProvider<UserDetailNotifier, UserDetailState>(
+      UserDetailNotifier.new,
+    );
 
 class UserDetailNotifier extends Notifier<UserDetailState> {
   final ApiService _api = ApiService();
@@ -196,6 +225,49 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
       detail: detailResponse.result,
       orders: orderResponse.result?.list ?? const [],
       total: orderResponse.result?.total ?? 0,
+    );
+  }
+
+  /// 加载用户付款记录
+  Future<void> loadPayments({String? cardNum, int page = 1}) async {
+    final num = cardNum ?? state.cardNum;
+    if (num.trim().isEmpty) return;
+    state = state.copyWith(loadingPayments: true);
+
+    final response = await _api.get<UserPaymentRecordResponse>(
+      ApiPath.userQueryPayList,
+      queryParameters: {'cardNum': num, 'pageNum': page, 'pageSize': _pageSize},
+      parser: (json) => UserPaymentRecordResponse.fromJson(
+        Map<String, dynamic>.from(json as Map),
+      ),
+      showHud: false,
+    );
+
+    state = state.copyWith(
+      loadingPayments: false,
+      payments: response.result?.list ?? const [],
+      paymentsTotal: response.result?.total ?? 0,
+    );
+  }
+
+  /// 加载用户换电记录
+  Future<void> loadSwaps({String? cardNum, int page = 1}) async {
+    final num = cardNum ?? state.cardNum;
+    if (num.trim().isEmpty) return;
+    state = state.copyWith(loadingSwaps: true);
+
+    final response = await _api.get<PowerChangeResponse>(
+      ApiPath.userQuerySwapPage,
+      queryParameters: {'cardNum': num, 'pageNum': page, 'pageSize': _pageSize},
+      parser: (json) =>
+          PowerChangeResponse.fromJson(Map<String, dynamic>.from(json as Map)),
+      showHud: false,
+    );
+
+    state = state.copyWith(
+      loadingSwaps: false,
+      swaps: response.result?.list ?? const [],
+      swapsTotal: response.result?.total ?? 0,
     );
   }
 
@@ -407,17 +479,16 @@ class _UserListResponse {
   final List<UserInfo> list;
   final int total;
 
-  const _UserListResponse({
-    required this.list,
-    required this.total,
-  });
+  const _UserListResponse({required this.list, required this.total});
 
   factory _UserListResponse.fromJson(Map<String, dynamic> json) {
     return _UserListResponse(
-      list: (json['list'] as List<dynamic>?)
-              ?.map((item) => UserInfo.fromJson(
-                    Map<String, dynamic>.from(item as Map),
-                  ))
+      list:
+          (json['list'] as List<dynamic>?)
+              ?.map(
+                (item) =>
+                    UserInfo.fromJson(Map<String, dynamic>.from(item as Map)),
+              )
               .toList() ??
           const <UserInfo>[],
       total: (json['total'] as num?)?.toInt() ?? 0,

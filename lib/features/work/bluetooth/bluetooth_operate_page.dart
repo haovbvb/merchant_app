@@ -8,6 +8,7 @@ import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/bluetooth_permission.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/data/models/sn_bean.dart';
 import 'package:merchant_app/features/work/bluetooth/ble_command.dart';
 import 'package:merchant_app/features/work/bluetooth/bluetooth_operate_controller.dart';
@@ -34,14 +35,16 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
   final TextEditingController _commandController = TextEditingController();
   final TextEditingController _snController = TextEditingController();
   final TextEditingController _lockDevIdController = TextEditingController();
-    final TextEditingController _lockIcIdController = TextEditingController();
+  final TextEditingController _lockIcIdController = TextEditingController();
   final TextEditingController _keyIdController = TextEditingController();
-  final TextEditingController _userNumController =
-      TextEditingController(text: '00000001');
-  final TextEditingController _authDaysController =
-      TextEditingController(text: '1');
-    final TextEditingController _phoneController = TextEditingController();
-    final TextEditingController _uidController = TextEditingController();
+  final TextEditingController _userNumController = TextEditingController(
+    text: '00000001',
+  );
+  final TextEditingController _authDaysController = TextEditingController(
+    text: '1',
+  );
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _uidController = TextEditingController();
   final ApiService _api = ApiService();
 
   StreamSubscription<List<ScanResult>>? _scanSub;
@@ -136,10 +139,7 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
                 ),
               ),
               const SizedBox(width: 12),
-              OutlinedButton(
-                onPressed: _queryUid,
-                child: const Text('查询UID'),
-              ),
+              OutlinedButton(onPressed: _queryUid, child: const Text('查询UID')),
             ],
           ),
           const SizedBox(height: 8),
@@ -463,7 +463,10 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
   Future<void> _resetAuthorizationTime() async {
     final now = DateTime.now();
     _lastSetKeyTime = _getSetKeyTime(now);
-    final payload = BleCommandBuilder.userPwd + _lastSetKeyTime + BleCommandBuilder.bleKeyBlock;
+    final payload =
+        BleCommandBuilder.userPwd +
+        _lastSetKeyTime +
+        BleCommandBuilder.bleKeyBlock;
     await _sendEncryptedCommand(signal: '0087', payload: payload);
   }
 
@@ -591,9 +594,7 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
       }
       final decryptStr = BleCommandBuilder.extractDecryptStr(unescaped);
       final notifier = ref.read(bluetoothOperateProvider.notifier);
-      notifier
-          .enOrDecrypt(payload: decryptStr, isEncrypt: false)
-          .then((value) {
+      notifier.enOrDecrypt(payload: decryptStr, isEncrypt: false).then((value) {
         if (value == null || value.isEmpty) {
           setState(() => _logs.add('← 解密失败'));
           return;
@@ -659,7 +660,13 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
   }
 
   String _getSetKeyTime(DateTime now) {
-    final dt = DateTime(now.year + 10, now.month, now.day, now.hour, now.minute);
+    final dt = DateTime(
+      now.year + 10,
+      now.month,
+      now.day,
+      now.hour,
+      now.minute,
+    );
     return _getBcd(dt);
   }
 
@@ -704,31 +711,18 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
     AppLocalizations l10n,
     BluetoothPermissionStatus status,
   ) async {
-    final needsSettings = status == BluetoothPermissionStatus.deniedForever ||
+    final needsSettings =
+        status == BluetoothPermissionStatus.deniedForever ||
         status == BluetoothPermissionStatus.restricted;
-    final action = await showDialog<bool>(
+    final action = await ConfirmDialog.show(
       context: context,
-      builder: (_) => AlertDialog(
-        title: Text(l10n.bluetoothPermissionTitle),
-        content: Text(l10n.bluetoothPermissionDesc),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(
-              needsSettings
-                  ? l10n.bluetoothOpenSettings
-                  : l10n.bluetoothPermissionRetry,
-            ),
-          ),
-        ],
-      ),
+      message: l10n.bluetoothPermissionDesc,
+      confirmText: needsSettings
+          ? l10n.bluetoothOpenSettings
+          : l10n.bluetoothPermissionRetry,
     );
 
-    if (action != true || !mounted) return;
+    if (!action || !mounted) return;
     if (needsSettings) {
       await openAppSettings();
     } else {
@@ -774,10 +768,7 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _StatusCard extends StatelessWidget {
-  const _StatusCard({
-    required this.adapterState,
-    required this.isScanning,
-  });
+  const _StatusCard({required this.adapterState, required this.isScanning});
 
   final BluetoothAdapterState adapterState;
   final bool isScanning;
@@ -822,10 +813,7 @@ class _DeviceTile extends StatelessWidget {
       subtitle: Text(result.device.remoteId.str),
       trailing: isConnected
           ? const Icon(Icons.check_circle, color: AppColors.primaryColor)
-          : TextButton(
-              onPressed: onConnect,
-              child: const Text('连接'),
-            ),
+          : TextButton(onPressed: onConnect, child: const Text('连接')),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/data/models/battery_type.dart';
 import 'package:merchant_app/features/work/entry/battery_ship_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -33,10 +34,13 @@ class _BatteryEntryPageState extends State<BatteryEntryPage> {
     setState(() => _loading = true);
     final response = await _api.get<List<BatteryType>>(
       ApiPath.batteryModelList,
-      parser: (json) => (json as List<dynamic>?)
-              ?.map((item) => BatteryType.fromJson(
-                    Map<String, dynamic>.from(item as Map),
-                  ))
+      parser: (json) =>
+          (json as List<dynamic>?)
+              ?.map(
+                (item) => BatteryType.fromJson(
+                  Map<String, dynamic>.from(item as Map),
+                ),
+              )
               .toList() ??
           const <BatteryType>[],
     );
@@ -64,7 +68,9 @@ class _BatteryEntryPageState extends State<BatteryEntryPage> {
                       .map(
                         (type) => DropdownMenuItem(
                           value: type,
-                          child: Text('${type.model ?? '-'} ${type.modelName ?? ''}'),
+                          child: Text(
+                            '${type.model ?? '-'} ${type.modelName ?? ''}',
+                          ),
                         ),
                       )
                       .toList(),
@@ -103,35 +109,35 @@ class _BatteryEntryPageState extends State<BatteryEntryPage> {
                   _EmptyCard(text: l10n.entryListEmpty)
                 else
                   ..._items.asMap().entries.map(
-                        (entry) => Card(
-                          child: ListTile(
-                            title: Text(entry.value.sn),
-                            subtitle: Text(
-                              '${l10n.entryImeiLabel}: ${entry.value.imei}\n'
-                              '${l10n.entryIccidLabel}: ${entry.value.iccid}',
+                    (entry) => Card(
+                      child: ListTile(
+                        title: Text(entry.value.sn),
+                        subtitle: Text(
+                          '${l10n.entryImeiLabel}: ${entry.value.imei}\n'
+                          '${l10n.entryIccidLabel}: ${entry.value.iccid}',
+                        ),
+                        trailing: PopupMenuButton<String>(
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              _editItem(entry.key);
+                            } else if (value == 'delete') {
+                              setState(() => _items.removeAt(entry.key));
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Text(l10n.entryEditAction),
                             ),
-                            trailing: PopupMenuButton<String>(
-                              onSelected: (value) {
-                                if (value == 'edit') {
-                                  _editItem(entry.key);
-                                } else if (value == 'delete') {
-                                  setState(() => _items.removeAt(entry.key));
-                                }
-                              },
-                              itemBuilder: (context) => [
-                                PopupMenuItem(
-                                  value: 'edit',
-                                  child: Text(l10n.entryEditAction),
-                                ),
-                                PopupMenuItem(
-                                  value: 'delete',
-                                  child: Text(l10n.entryDeleteAction),
-                                ),
-                              ],
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Text(l10n.entryDeleteAction),
                             ),
-                          ),
+                          ],
                         ),
                       ),
+                    ),
+                  ),
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: _submitting ? null : _submit,
@@ -145,10 +151,7 @@ class _BatteryEntryPageState extends State<BatteryEntryPage> {
   Future<void> _addByScan() async {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => const QrScanPage(
-          parseDeviceSn: true,
-          deviceType: 1,
-        ),
+        builder: (_) => const QrScanPage(parseDeviceSn: true, deviceType: 1),
       ),
     );
     if (result == null || result.isEmpty) return;
@@ -177,9 +180,11 @@ class _BatteryEntryPageState extends State<BatteryEntryPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(initial == null
-              ? l10n.entryAddDeviceTitle
-              : l10n.entryEditDeviceTitle),
+          title: Text(
+            initial == null
+                ? l10n.entryAddDeviceTitle
+                : l10n.entryEditDeviceTitle,
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -247,13 +252,10 @@ class _BatteryEntryPageState extends State<BatteryEntryPage> {
     showToast(l10n.entrySubmitSuccess);
     final goToTransfer = await _showTransferDialog();
     if (!mounted) return;
-    if (goToTransfer == true) {
+    if (goToTransfer) {
       await Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => BatteryShipPage(
-            deviceType: 1,
-            initialSns: sns,
-          ),
+          builder: (_) => BatteryShipPage(deviceType: 1, initialSns: sns),
         ),
       );
     }
@@ -261,26 +263,13 @@ class _BatteryEntryPageState extends State<BatteryEntryPage> {
     setState(() => _items.clear());
   }
 
-  Future<bool?> _showTransferDialog() async {
+  Future<bool> _showTransferDialog() async {
     final l10n = context.l10n;
-    return showDialog<bool>(
+    return ConfirmDialog.show(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(l10n.entrySubmitDoneTitle),
-          content: Text(l10n.entrySubmitDoneMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(l10n.entryStayAction),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text(l10n.entryGoToTransferAction),
-            ),
-          ],
-        );
-      },
+      message: l10n.entrySubmitDoneMessage,
+      cancelText: l10n.entryStayAction,
+      confirmText: l10n.entryGoToTransferAction,
     );
   }
 }
@@ -290,17 +279,9 @@ class _BatteryItem {
   final String imei;
   final String iccid;
 
-  const _BatteryItem({
-    required this.sn,
-    this.imei = '',
-    this.iccid = '',
-  });
+  const _BatteryItem({required this.sn, this.imei = '', this.iccid = ''});
 
-  Map<String, dynamic> toJson() => {
-        'sn': sn,
-        'imei': imei,
-        'iccid': iccid,
-      };
+  Map<String, dynamic> toJson() => {'sn': sn, 'imei': imei, 'iccid': iccid};
 }
 
 class _EmptyCard extends StatelessWidget {
@@ -311,10 +292,7 @@ class _EmptyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(text),
-      ),
+      child: Padding(padding: const EdgeInsets.all(16), child: Text(text)),
     );
   }
 }

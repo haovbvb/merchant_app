@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
+import 'package:merchant_app/network/api_path.dart';
+import 'package:merchant_app/network/api_service.dart';
 
 class QrCodeListState {
   final bool loading;
@@ -27,8 +29,8 @@ class QrCodeListState {
 
 final qrCodeListProvider =
     NotifierProvider<QrCodeListNotifier, QrCodeListState>(
-  QrCodeListNotifier.new,
-);
+      QrCodeListNotifier.new,
+    );
 
 class QrCodeListNotifier extends Notifier<QrCodeListState> {
   @override
@@ -68,5 +70,22 @@ class QrCodeListNotifier extends Notifier<QrCodeListState> {
   void removeAt(int index) {
     final updated = [...state.items]..removeAt(index);
     state = state.copyWith(items: updated);
+  }
+
+  /// 通过后端查询二维码对应的设备 SN - 对应 Android 的 getDeviceSn
+  Future<String?> queryDeviceSnFromServer(String qrCode) async {
+    if (qrCode.trim().isEmpty) return null;
+    state = state.copyWith(loading: true);
+    final api = ApiService();
+    final response = await api.post<String>(
+      ApiPath.deviceGetDeviceSn,
+      data: {'qrCode': qrCode.trim()},
+      parser: (json) => json?.toString() ?? '',
+    );
+    state = state.copyWith(loading: false);
+    if (response.isSuccess && (response.result?.isNotEmpty ?? false)) {
+      return response.result;
+    }
+    return null;
   }
 }

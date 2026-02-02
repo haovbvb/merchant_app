@@ -108,7 +108,6 @@ class CabinetAuthorizationNotifier extends Notifier<CabinetAuthorizationState> {
     int page = 1,
     int size = 20,
   }) async {
-    if (sn.isEmpty) return;
     state = state.copyWith(loadingRecords: true);
     final response = await _api.get<AuthorizationRecordList>(
       ApiPath.stationQueryPermission,

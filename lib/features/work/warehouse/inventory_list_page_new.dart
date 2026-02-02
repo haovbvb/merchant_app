@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/warehouse/device_type_sheet.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_controller.dart';
@@ -143,9 +143,7 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
                   _refreshController.loadNoData();
                 }
               },
-              child: state.loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : state.items.isEmpty
+              child: state.items.isEmpty && !state.loading
                   ? _buildEmptyState(l10n)
                   : _buildListContent(l10n, state),
             ),

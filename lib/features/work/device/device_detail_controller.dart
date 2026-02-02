@@ -1,11 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/core/utils/logger.dart';
 import 'package:merchant_app/data/models/battery_detail.dart';
 import 'package:merchant_app/data/models/cabin.dart';
 import 'package:merchant_app/data/models/cabinet_detail_base_info_bean.dart';
 import 'package:merchant_app/data/models/charge_history.dart';
 import 'package:merchant_app/data/models/charge_history_response.dart';
 import 'package:merchant_app/data/models/device_fix_record_response.dart';
+import 'package:merchant_app/data/models/device_search_result.dart';
 import 'package:merchant_app/data/models/maintenance.dart';
+import 'package:merchant_app/data/models/static_battery_mile.dart';
 import 'package:merchant_app/data/models/vehicle_detail.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
@@ -19,6 +22,7 @@ class DeviceDetailState {
   final bool portsLoading;
   final String sn;
   final int deviceType;
+  final DeviceSearchResult? searchResult;
   final BatteryDetail? batteryDetail;
   final VehicleDetail? vehicleDetail;
   final CabinetDetailBaseInfoBean? cabinetDetail;
@@ -37,6 +41,7 @@ class DeviceDetailState {
     this.portsLoading = false,
     this.sn = '',
     this.deviceType = 1,
+    this.searchResult,
     this.batteryDetail,
     this.vehicleDetail,
     this.cabinetDetail,
@@ -56,6 +61,7 @@ class DeviceDetailState {
     bool? portsLoading,
     String? sn,
     int? deviceType,
+    DeviceSearchResult? searchResult,
     BatteryDetail? batteryDetail,
     VehicleDetail? vehicleDetail,
     CabinetDetailBaseInfoBean? cabinetDetail,
@@ -74,6 +80,7 @@ class DeviceDetailState {
       portsLoading: portsLoading ?? this.portsLoading,
       sn: sn ?? this.sn,
       deviceType: deviceType ?? this.deviceType,
+      searchResult: searchResult ?? this.searchResult,
       batteryDetail: batteryDetail ?? this.batteryDetail,
       vehicleDetail: vehicleDetail ?? this.vehicleDetail,
       cabinetDetail: cabinetDetail ?? this.cabinetDetail,
@@ -88,8 +95,8 @@ class DeviceDetailState {
 
 final deviceDetailProvider =
     NotifierProvider<DeviceDetailNotifier, DeviceDetailState>(
-  DeviceDetailNotifier.new,
-);
+      DeviceDetailNotifier.new,
+    );
 
 class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
   final ApiService _api = ApiService();
@@ -97,11 +104,110 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
   @override
   DeviceDetailState build() => const DeviceDetailState();
 
+  /// 通用设备搜索 - 对应 Android 的 commonSearch
+  /// 先通过 SN 查询设备类型，再调用对应的详情接口
+  Future<DeviceSearchResult?> commonSearch(String sn) async {
+    final value = sn.trim();
+    if (value.isEmpty) return null;
+
+    state = state.copyWith(
+      loading: true,
+      sn: value,
+      searchResult: null,
+      batteryDetail: null,
+      vehicleDetail: null,
+      cabinetDetail: null,
+      histories: const [],
+      fixRecords: const [],
+      maintenanceRecords: const [],
+      cabinPorts: const [],
+      total: 0,
+    );
+
+    final response = await _api.get<DeviceSearchResult?>(
+      ApiPath.deviceCommonSearch,
+      queryParameters: {'deviceSn': value},
+      parser: (json) => json == null
+          ? null
+          : DeviceSearchResult.fromJson(Map<String, dynamic>.from(json as Map)),
+    );
+
+    final result = response.result;
+    if (result == null) {
+      state = state.copyWith(loading: false);
+      logI('[DeviceDetail] commonSearch: 未找到设备 $value');
+      return null;
+    }
+
+    logI('[DeviceDetail] commonSearch: 设备类型=${result.type}, sn=$value');
+    state = state.copyWith(searchResult: result, deviceType: result.type ?? 1);
+
+    // 根据设备类型加载详情
+    final deviceType = result.type ?? 1;
+    if (deviceType == 1) {
+      // 电池
+      await _loadBatteryDetail(value);
+    } else if (deviceType == 2) {
+      // 车辆
+      await _loadVehicleDetail(value);
+    } else if (deviceType == 3) {
+      // 电柜
+      await _loadCabinetDetail(value);
+    }
+
+    state = state.copyWith(loading: false);
+    return result;
+  }
+
+  Future<void> _loadBatteryDetail(String sn) async {
+    final response = await _api.get<BatteryDetail?>(
+      ApiPath.batterySearchBySn,
+      queryParameters: {'sn': sn},
+      parser: (json) => json == null
+          ? null
+          : BatteryDetail.fromJson(Map<String, dynamic>.from(json as Map)),
+    );
+    state = state.copyWith(batteryDetail: response.result);
+    await loadChargeHistory(sn: sn);
+    await loadFixRecords(sn: sn, deviceType: 1);
+  }
+
+  Future<void> _loadVehicleDetail(String sn) async {
+    final response = await _api.get<VehicleDetail?>(
+      ApiPath.vehicleGetDetail,
+      queryParameters: {'sn': sn},
+      parser: (json) => json == null
+          ? null
+          : VehicleDetail.fromJson(Map<String, dynamic>.from(json as Map)),
+    );
+    state = state.copyWith(vehicleDetail: response.result);
+    await loadFixRecords(sn: sn, deviceType: 2);
+    await loadMaintenanceRecords(sn: sn);
+  }
+
+  Future<void> _loadCabinetDetail(String sn) async {
+    final response = await _api.get<CabinetDetailBaseInfoBean?>(
+      ApiPath.cabinetBaseInfo,
+      queryParameters: {'sn': sn},
+      parser: (json) => json == null
+          ? null
+          : CabinetDetailBaseInfoBean.fromJson(
+              Map<String, dynamic>.from(json as Map),
+            ),
+    );
+    state = state.copyWith(cabinetDetail: response.result);
+    await loadCabinPorts(sn: sn);
+    await loadFixRecords(sn: sn, deviceType: 3);
+  }
+
   Future<void> searchBattery(String sn) async {
     await searchDevice(sn: sn, deviceType: 1);
   }
 
-  Future<void> searchDevice({required String sn, required int deviceType}) async {
+  Future<void> searchDevice({
+    required String sn,
+    required int deviceType,
+  }) async {
     final value = sn.trim();
     if (value.isEmpty) return;
     state = state.copyWith(
@@ -166,11 +272,7 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
     state = state.copyWith(historyLoading: true, sn: value);
     final response = await _api.get<ChargeHistoryResponse>(
       ApiPath.batteryQueryDeviceChargeRecord,
-      queryParameters: {
-        'sn': value,
-        'pageNum': 1,
-        'pageSize': 20,
-      },
+      queryParameters: {'sn': value, 'pageNum': 1, 'pageSize': 20},
       parser: (json) => ChargeHistoryResponse.fromJson(
         Map<String, dynamic>.from(json as Map),
       ),
@@ -197,11 +299,7 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
     state = state.copyWith(fixLoading: true);
     final response = await _api.get<DeviceFixRecordResponse>(
       path,
-      queryParameters: {
-        'sn': value,
-        'pageNum': 1,
-        'pageSize': 20,
-      },
+      queryParameters: {'sn': value, 'pageNum': 1, 'pageSize': 20},
       parser: (json) => DeviceFixRecordResponse.fromJson(
         Map<String, dynamic>.from(json as Map),
       ),
@@ -219,11 +317,7 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
     state = state.copyWith(maintenanceLoading: true);
     final response = await _api.get<DeviceMaintenanceResponse>(
       ApiPath.carQueryMaintainList,
-      queryParameters: {
-        'sn': value,
-        'pageNum': 1,
-        'pageSize': 20,
-      },
+      queryParameters: {'sn': value, 'pageNum': 1, 'pageSize': 20},
       parser: (json) => DeviceMaintenanceResponse.fromJson(
         Map<String, dynamic>.from(json as Map),
       ),
@@ -242,11 +336,11 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
     final response = await _api.get<List<Cabin>>(
       ApiPath.cabinetPortDetail,
       queryParameters: {'sn': value},
-      parser: (json) => (json as List<dynamic>?)
+      parser: (json) =>
+          (json as List<dynamic>?)
               ?.map(
-                (item) => Cabin.fromJson(
-                  Map<String, dynamic>.from(item as Map),
-                ),
+                (item) =>
+                    Cabin.fromJson(Map<String, dynamic>.from(item as Map)),
               )
               .toList() ??
           const <Cabin>[],
@@ -266,10 +360,7 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
     state = state.copyWith(toggling: true);
     final response = await _api.post<Object>(
       ApiPath.batteryTurnDischargeStatus,
-      data: {
-        'sn': state.sn.trim(),
-        'status': nextStatus,
-      },
+      data: {'sn': state.sn.trim(), 'status': nextStatus},
       parser: (json) => json ?? Object(),
     );
     state = state.copyWith(toggling: false);
@@ -301,10 +392,7 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
     if (value.isEmpty) return false;
     final response = await _api.post<Object>(
       ApiPath.cabinetCtrlPort,
-      data: {
-        'sn': value,
-        'port': port,
-      },
+      data: {'sn': value, 'port': port},
       parser: (json) => json ?? Object(),
     );
     return response.isSuccess;
@@ -319,5 +407,18 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
       parser: (json) => json ?? Object(),
     );
     return response.isSuccess;
+  }
+
+  /// 电池里程统计 - 对应 Android 的 staticBatteryMile
+  Future<StaticBatteryMile?> getBatteryMileStats(String sn) async {
+    final value = sn.trim();
+    if (value.isEmpty) return null;
+    final response = await _api.get<StaticBatteryMile>(
+      ApiPath.batteryStaticMile,
+      queryParameters: {'sn': value},
+      parser: (json) =>
+          StaticBatteryMile.fromJson(Map<String, dynamic>.from(json as Map)),
+    );
+    return response.result;
   }
 }

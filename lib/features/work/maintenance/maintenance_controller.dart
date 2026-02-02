@@ -70,8 +70,8 @@ class MaintenanceBookState {
 
 final maintenanceBookProvider =
     NotifierProvider<MaintenanceBookNotifier, MaintenanceBookState>(
-  MaintenanceBookNotifier.new,
-);
+      MaintenanceBookNotifier.new,
+    );
 
 class MaintenanceBookNotifier extends Notifier<MaintenanceBookState> {
   final ApiService _api = ApiService();
@@ -109,11 +109,7 @@ class MaintenanceBookNotifier extends Notifier<MaintenanceBookState> {
   }
 
   void clearCostDialog() {
-    state = state.copyWith(
-      amount: '',
-      paySource: 2,
-      voucherImages: [],
-    );
+    state = state.copyWith(amount: '', paySource: 2, voucherImages: []);
   }
 
   void clearAll() {
@@ -135,15 +131,11 @@ class MaintenanceBookNotifier extends Notifier<MaintenanceBookState> {
     final response = await _api.get<BookMaintenanceBean>(
       ApiPath.maintenanceQueryAppointment,
       queryParameters: {'code': sn},
-      parser: (json) => BookMaintenanceBean.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
+      parser: (json) =>
+          BookMaintenanceBean.fromJson(Map<String, dynamic>.from(json as Map)),
     );
 
-    state = state.copyWith(
-      loading: false,
-      appointment: response.result,
-    );
+    state = state.copyWith(loading: false, appointment: response.result);
   }
 
   Future<bool> submitMaintenance() async {
@@ -206,6 +198,36 @@ class MaintenanceBookNotifier extends Notifier<MaintenanceBookState> {
     final extIndex = last.lastIndexOf('.');
     final ext = extIndex == -1 ? 'jpg' : last.substring(extIndex + 1);
     return '${DateTime.now().millisecondsSinceEpoch}.$ext';
+  }
+
+  /// 生成保养订单（直接创建，不需要预约）
+  /// 对应 Android 的 genMaintainRecord
+  Future<bool> genMaintainRecord({
+    required String cardNum,
+    required String vehicleSn,
+    required String price,
+    required int paySource,
+    String? attachment,
+    String? remark,
+  }) async {
+    if (cardNum.isEmpty || vehicleSn.isEmpty) return false;
+    state = state.copyWith(submitting: true);
+
+    final response = await _api.post<Object>(
+      ApiPath.maintenanceGenRecord,
+      data: {
+        'cardNum': cardNum,
+        'vehicleSn': vehicleSn,
+        'price': price,
+        'paySource': paySource,
+        'attachment': attachment ?? '',
+        'remark': remark ?? '',
+      },
+      parser: (json) => json ?? Object(),
+    );
+
+    state = state.copyWith(submitting: false);
+    return response.isSuccess;
   }
 }
 
@@ -304,8 +326,8 @@ class RepairRecordCreateState {
 
 final repairRecordProvider =
     NotifierProvider<RepairRecordNotifier, RepairRecordState>(
-  RepairRecordNotifier.new,
-);
+      RepairRecordNotifier.new,
+    );
 
 class RepairRecordNotifier extends Notifier<RepairRecordState> {
   final ApiService _api = ApiService();
@@ -319,11 +341,7 @@ class RepairRecordNotifier extends Notifier<RepairRecordState> {
 
     final response = await _api.get<VehicleRepairListResp>(
       ApiPath.maintenanceQueryFixList,
-      queryParameters: {
-        'sn': sn,
-        'pageNum': 1,
-        'pageSize': _pageSize,
-      },
+      queryParameters: {'sn': sn, 'pageNum': 1, 'pageSize': _pageSize},
       parser: (json) => VehicleRepairListResp.fromJson(
         Map<String, dynamic>.from(json as Map),
       ),
@@ -364,8 +382,8 @@ class RepairRecordNotifier extends Notifier<RepairRecordState> {
 
 final repairRecordCreateProvider =
     NotifierProvider<RepairRecordCreateNotifier, RepairRecordCreateState>(
-  RepairRecordCreateNotifier.new,
-);
+      RepairRecordCreateNotifier.new,
+    );
 
 class RepairRecordCreateNotifier extends Notifier<RepairRecordCreateState> {
   final ApiService _api = ApiService();
@@ -402,15 +420,11 @@ class RepairRecordCreateNotifier extends Notifier<RepairRecordCreateState> {
     final response = await _api.get<DeviceFix>(
       ApiPath.repairRecordQueryDeviceForFix,
       queryParameters: {'sn': sn},
-      parser: (json) => DeviceFix.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
+      parser: (json) =>
+          DeviceFix.fromJson(Map<String, dynamic>.from(json as Map)),
     );
 
-    state = state.copyWith(
-      loading: false,
-      deviceFix: response.result,
-    );
+    state = state.copyWith(loading: false, deviceFix: response.result);
   }
 
   Future<bool> submitFixRecord() async {
@@ -435,5 +449,42 @@ class RepairRecordCreateNotifier extends Notifier<RepairRecordCreateState> {
 
     state = state.copyWith(submitting: false);
     return response.isSuccess;
+  }
+
+  /// 上传维修图片 - 对应 Android 的 uploadFixImg
+  Future<String?> uploadFixImage(String filePath) async {
+    final data = await _compressImage(filePath);
+    if (data == null || data.isEmpty) return null;
+    final fileName = _buildFileName(filePath);
+    final formData = FormData.fromMap({
+      'file': MultipartFile.fromBytes(data, filename: fileName),
+    });
+    final response = await _api.postForm<String>(
+      ApiPath.repairRecordUploadImg,
+      data: formData,
+      parser: (json) => json?.toString() ?? '',
+    );
+    if (response.isSuccess && response.result != null) {
+      return response.result;
+    }
+    return null;
+  }
+
+  Future<Uint8List?> _compressImage(String path) async {
+    return FlutterImageCompress.compressWithFile(
+      path,
+      quality: 80,
+      minWidth: 612,
+      minHeight: 816,
+      format: CompressFormat.jpeg,
+    );
+  }
+
+  String _buildFileName(String path) {
+    final segments = path.split('/');
+    final last = segments.isEmpty ? '' : segments.last;
+    final extIndex = last.lastIndexOf('.');
+    final ext = extIndex == -1 ? 'jpg' : last.substring(extIndex + 1);
+    return '${DateTime.now().millisecondsSinceEpoch}.$ext';
   }
 }

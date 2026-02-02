@@ -139,9 +139,7 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                   _refreshController.loadNoData();
                 }
               },
-              child: state.loading && state.items.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
-                  : state.items.isEmpty
+              child: state.items.isEmpty && !state.loading
                       ? _EmptyView(text: l10n.userListEmpty)
                       : ListView.separated(
                           padding: const EdgeInsets.all(16),

@@ -4,7 +4,6 @@ import 'dart:ui' as ui;
 import 'package:apple_maps_flutter/apple_maps_flutter.dart' as amaps;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geocoding/geocoding.dart';
@@ -40,15 +39,17 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   amaps.AppleMapController? _appleController;
   bool _loading = false;
   bool _pendingCenterOnLocation = true;
-  final bool _useMockData = true;
+  final bool _useMockData = false;
   double? _latitude;
   double? _longitude;
   int? _maintainFlag;
   NearByVehicle? _selectedVehicle;
   gmaps.BitmapDescriptor? _markerIcon;
   gmaps.BitmapDescriptor? _maintenanceMarkerIcon;
+  gmaps.BitmapDescriptor? _selectedMarkerIcon;
   amaps.BitmapDescriptor? _appleMarkerIcon;
   amaps.BitmapDescriptor? _appleMaintenanceMarkerIcon;
+  amaps.BitmapDescriptor? _appleSelectedMarkerIcon;
   gmaps.BitmapDescriptor? _locationMarkerIcon;
   bool _appleIconLoaded = false;
   bool _hasLocationPermission = false;
@@ -96,7 +97,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   Future<void> _loadMarkerIcon() async {
     final configuration = createLocalImageConfiguration(
       context,
-      size: const Size(108, 100),
+      size: const Size(108, 110),
     );
     // 加载正常车辆标记图标
     final icon = await gmaps.BitmapDescriptor.fromAssetImage(
@@ -128,16 +129,26 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
         _locationMarkerIcon = locationIcon;
       });
     }
+    // 加载选中车辆标记图标
+    final selectedIcon = await gmaps.BitmapDescriptor.fromAssetImage(
+      configuration,
+      'assets/android/mipmap-xxhdpi/car_map_selected.png',
+    );
+    if (mounted) {
+      setState(() {
+        _selectedMarkerIcon = selectedIcon;
+      });
+    }
   }
 
   Future<void> _loadAppleMarkerIcon() async {
-    const targetWidth = 108;
-    const targetHeight = 100;
+    const targetWidth = 158;
+    const targetHeight = 150;
     // 加载正常车辆标记图标（按像素缩放，确保 iOS 生效）
     final icon = await _loadAppleBitmapDescriptor(
-      'assets/android/mipmap-xxhdpi/icon_marker_vehicle.png',
-      targetWidth: targetWidth,
-      targetHeight: targetHeight,
+      'assets/android/mipmap-xxhdpi/3.0x/icon_marker_vehicle.png',
+      // targetWidth: targetWidth,
+      // targetHeight: targetHeight,
     );
     if (mounted) {
       setState(() {
@@ -146,13 +157,24 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
     }
     // 加载需要保养的标记图标
     final maintenanceIcon = await _loadAppleBitmapDescriptor(
-      'assets/android/mipmap-xxhdpi/icon_marker_need_maintenance.png',
-      targetWidth: targetWidth,
-      targetHeight: targetHeight,
+      'assets/android/mipmap-xxhdpi/3.0x/icon_marker_need_maintenance.png',
+      // targetWidth: targetWidth,
+      // targetHeight: targetHeight,
     );
     if (mounted) {
       setState(() {
         _appleMaintenanceMarkerIcon = maintenanceIcon;
+      });
+    }
+    // 加载选中车辆标记图标
+    final selectedIcon = await _loadAppleBitmapDescriptor(
+      'assets/android/mipmap-xxhdpi/car_map_selected.png',
+      // targetWidth: targetWidth,
+      // targetHeight: targetHeight,
+    );
+    if (mounted) {
+      setState(() {
+        _appleSelectedMarkerIcon = selectedIcon;
       });
     }
     // iOS 系统已有蓝色位置标记，无需手动加载
@@ -160,8 +182,8 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
 
   Future<amaps.BitmapDescriptor> _loadAppleBitmapDescriptor(
     String assetPath, {
-    required int targetWidth,
-    required int targetHeight,
+    int? targetWidth,
+    int? targetHeight,
   }) async {
     final data = await rootBundle.load(assetPath);
     final codec = await ui.instantiateImageCodec(
@@ -332,6 +354,18 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
 
   String _addressKey(double lat, double lng) => '$lat,$lng';
 
+  String _vehicleMarkerId(NearByVehicle vehicle) {
+    final lat = vehicle.latitude;
+    final lng = vehicle.longitude;
+    return vehicle.sn ?? vehicle.cardNum ?? '$lat-$lng';
+  }
+
+  bool _isSelectedVehicle(NearByVehicle vehicle) {
+    final selected = _selectedVehicle;
+    if (selected == null) return false;
+    return _vehicleMarkerId(selected) == _vehicleMarkerId(vehicle);
+  }
+
   String _distanceLabel(NearByVehicle vehicle) {
     final lat = vehicle.latitude;
     final lng = vehicle.longitude;
@@ -364,6 +398,28 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
     setState(() {
       _selectedVehicle = vehicle;
     });
+    if (vehicle != null) {
+      _centerOnVehicle(vehicle);
+    }
+  }
+
+  Future<void> _centerOnVehicle(NearByVehicle vehicle) async {
+    final lat = vehicle.latitude;
+    final lng = vehicle.longitude;
+    if (lat == null || lng == null || kIsWeb) return;
+    if (defaultTargetPlatform == TargetPlatform.android) {
+      final controller = _googleController;
+      if (controller == null) return;
+      await controller.animateCamera(
+        gmaps.CameraUpdate.newLatLng(gmaps.LatLng(lat, lng)),
+      );
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      final controller = _appleController;
+      if (controller == null) return;
+      await controller.animateCamera(
+        amaps.CameraUpdate.newLatLng(amaps.LatLng(lat, lng)),
+      );
+    }
   }
 
   Future<void> _openDetail(String? sn) async {
@@ -467,12 +523,15 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
             final markerIcon = item.needMaintenance == true
                 ? (_maintenanceMarkerIcon ?? gmaps.BitmapDescriptor.defaultMarker)
                 : (_markerIcon ?? gmaps.BitmapDescriptor.defaultMarker);
+            final isSelected = _isSelectedVehicle(item);
+            final selectedIcon = _selectedMarkerIcon ?? markerIcon;
+            final baseMarkerId = _vehicleMarkerId(item);
+            final renderMarkerId = isSelected ? '${baseMarkerId}_selected' : baseMarkerId;
             return gmaps.Marker(
-              markerId: gmaps.MarkerId(
-                item.sn ?? item.cardNum ?? '${item.latitude}-${item.longitude}',
-              ),
+              markerId: gmaps.MarkerId(renderMarkerId),
               position: gmaps.LatLng(item.latitude!, item.longitude!),
-              icon: markerIcon,
+              icon: isSelected ? selectedIcon : markerIcon,
+              zIndex: isSelected ? 1000 : 0,
               onTap: () => _selectVehicle(item),
             );
           },
@@ -508,12 +567,16 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
             final markerIcon = item.needMaintenance == true
                 ? (_appleMaintenanceMarkerIcon ?? amaps.BitmapDescriptor.defaultAnnotation)
                 : (_appleMarkerIcon ?? amaps.BitmapDescriptor.defaultAnnotation);
+            final isSelected = _isSelectedVehicle(item);
+            final selectedIcon = _appleSelectedMarkerIcon ?? markerIcon;
+            final baseMarkerId = _vehicleMarkerId(item);
+            final renderMarkerId = isSelected ? '${baseMarkerId}_selected' : baseMarkerId;
             return amaps.Annotation(
               annotationId: amaps.AnnotationId(
-                item.sn ?? item.cardNum ?? '${item.latitude}-${item.longitude}',
+                renderMarkerId,
               ),
               position: amaps.LatLng(item.latitude!, item.longitude!),
-              icon: markerIcon,
+              icon: isSelected ? selectedIcon : markerIcon,
               onTap: () => _selectVehicle(item),
             );
           },
@@ -1166,7 +1229,7 @@ class _VehicleDetailSheetState extends State<_VehicleDetailSheet>
             margin: EdgeInsets.fromLTRB(0, 0, 0,0),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
@@ -1310,12 +1373,13 @@ class _VehicleDetailSheetState extends State<_VehicleDetailSheet>
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
+                    image: const DecorationImage(
+                      image: AssetImage(
+                        'assets/android/mipmap-xxhdpi/car_map_info_bg.png',
+                      ),
+                      fit: BoxFit.cover,
                     ),
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
                     children: [
@@ -1381,7 +1445,7 @@ class _VehicleDetailSheetState extends State<_VehicleDetailSheet>
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       side: BorderSide(color: Colors.grey.shade300),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     child: Text(

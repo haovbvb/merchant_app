@@ -348,9 +348,7 @@ class _SelectStationPageState extends ConsumerState<_SelectStationPage> {
 
           // Station list
           Expanded(
-            child: state.loadingCabinet
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
+            child: ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: items.length,
                     itemBuilder: (context, index) {
@@ -703,9 +701,7 @@ class _SelectPersonPageState extends ConsumerState<_SelectPersonPage> {
 
           // Person list
           Expanded(
-            child: state.loadingUsers
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
+            child: ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: items.length,
                     itemBuilder: (context, index) {
@@ -869,9 +865,7 @@ class _AuthorizedRecordPageState extends ConsumerState<_AuthorizedRecordPage> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.cabinetAuthRecordTitle)),
       backgroundColor: AppColors.bgColor,
-      body: state.loadingRecords
-          ? const Center(child: CircularProgressIndicator())
-          : ListView.builder(
+      body: ListView.builder(
               padding: const EdgeInsets.all(16),
               itemCount: items.length,
               itemBuilder: (context, index) {

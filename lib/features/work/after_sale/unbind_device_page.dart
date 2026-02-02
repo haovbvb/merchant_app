@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/features/work/after_sale/unbind_device_controller.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
@@ -13,8 +14,7 @@ class UnbindDevicePage extends ConsumerStatefulWidget {
   const UnbindDevicePage({super.key});
 
   @override
-  ConsumerState<UnbindDevicePage> createState() =>
-      _UnbindDevicePageState();
+  ConsumerState<UnbindDevicePage> createState() => _UnbindDevicePageState();
 }
 
 class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
@@ -201,7 +201,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                           content: state.appointmentNo.isEmpty
                               ? l10n.unbindDeviceUnfinishedDesc
                               : '${l10n.unbindDeviceUnfinishedDesc}\n'
-                                  '${state.appointmentNo}',
+                                    '${state.appointmentNo}',
                         ),
                       ),
                   ],
@@ -221,8 +221,9 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                       : () => _submit(context, l10n, notifier),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
-                    disabledBackgroundColor:
-                        AppColors.primaryColor.withOpacity(0.5),
+                    disabledBackgroundColor: AppColors.primaryColor.withOpacity(
+                      0.5,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
@@ -294,10 +295,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
               if (onScan != null)
                 GestureDetector(
                   onTap: onScan,
-                  child: AppIcons.scanIcon(
-                    size: 24,
-                    color: Colors.black54,
-                  ),
+                  child: AppIcons.scanIcon(size: 24, color: Colors.black54),
                 ),
             ],
           ),
@@ -338,9 +336,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
 
   Future<void> _scanCardNum() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(
-        builder: (_) => const QrScanPage(parseDeviceSn: true),
-      ),
+      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
     );
     if (!mounted || result == null || result.isEmpty) return;
     ref.read(unbindDeviceProvider.notifier).updateCardNum(result);
@@ -348,9 +344,9 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
   }
 
   Future<void> _scanDeviceSn() async {
-    final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
-    );
+    final result = await Navigator.of(
+      context,
+    ).push<String>(MaterialPageRoute(builder: (_) => const QrScanPage()));
     if (!mounted || result == null || result.isEmpty) return;
     ref.read(unbindDeviceProvider.notifier).updateDeviceSn(result);
     _debounceCheck();
@@ -380,24 +376,12 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
     }
 
     if (state.hasUnfinishedOrder) {
-      final confirm = await showDialog<bool>(
+      final confirm = await ConfirmDialog.show(
         context: context,
-        builder: (_) => AlertDialog(
-          title: Text(l10n.unbindDeviceUnfinishedTitle),
-          content: Text(l10n.unbindDeviceUnfinishedDesc),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(MaterialLocalizations.of(context).cancelButtonLabel),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text(l10n.unbindDeviceConfirm),
-            ),
-          ],
-        ),
+        message: l10n.unbindDeviceUnfinishedDesc,
+        confirmText: l10n.unbindDeviceConfirm,
       );
-      if (confirm != true) return;
+      if (!confirm) return;
     }
 
     final success = await notifier.unbindDevice();
@@ -411,9 +395,9 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
   }
 
   void _showSnack(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 }
 
@@ -435,7 +419,9 @@ class _ReasonChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: selected ? AppColors.primaryColor.withOpacity(0.1) : Colors.white,
+          color: selected
+              ? AppColors.primaryColor.withOpacity(0.1)
+              : Colors.white,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: selected ? AppColors.primaryColor : Colors.grey.shade300,

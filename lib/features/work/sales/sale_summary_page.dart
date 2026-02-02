@@ -2,10 +2,11 @@ import 'dart:math' as math;
 
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/data/models/sales_bar_data.dart';
 import 'package:merchant_app/data/models/sell_data_list_response.dart';
 import 'package:merchant_app/features/work/sales/sale_summary_controller.dart';
@@ -96,7 +97,11 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
               children: [
                 IconButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+                  icon: const Icon(
+                    Icons.arrow_back_ios,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
                 const Expanded(
                   child: Text(
@@ -117,11 +122,18 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
             GestureDetector(
               onTap: () => _pickDateRange(context, notifier, state),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.calendar_today, color: Colors.white70, size: 16),
+                    const Icon(
+                      Icons.calendar_today,
+                      color: Colors.white70,
+                      size: 16,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       '${_formatDate(state.startDate)} ~ ${_formatDate(state.endDate)}',
@@ -131,7 +143,11 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                       ),
                     ),
                     const SizedBox(width: 4),
-                    const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 18),
+                    const Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Colors.white70,
+                      size: 18,
+                    ),
                   ],
                 ),
               ),
@@ -176,17 +192,12 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
           children: [
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Colors.white70,
-              ),
+              style: const TextStyle(fontSize: 13, color: Colors.white70),
             ),
             const SizedBox(width: 4),
             GestureDetector(
               onTap: () => _showInfoDialog(
-                showInfo
-                    ? 'Total Sales Amount'
-                    : 'Transaction Order',
+                showInfo ? 'Total Sales Amount' : 'Transaction Order',
                 showInfo
                     ? 'The cumulative amount of orders executed within the selected time period'
                     : 'The number of successfully executed orders within the selected time period',
@@ -218,7 +229,11 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.emoji_events, size: 14, color: Color(0xFFFFB800)),
+              const Icon(
+                Icons.emoji_events,
+                size: 14,
+                color: Color(0xFFFFB800),
+              ),
               const SizedBox(width: 4),
               Text(
                 'Store Ranking',
@@ -264,7 +279,11 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
           // Signing rate & Order value 标题
           Row(
             children: [
-              const Icon(Icons.schedule, size: 18, color: AppColors.black06Text),
+              const Icon(
+                Icons.schedule,
+                size: 18,
+                color: AppColors.black06Text,
+              ),
               const SizedBox(width: 8),
               Text(
                 l10n.saleSummarySigningRateTitle,
@@ -426,7 +445,9 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  state.showSalesData ? l10n.saleSummarySalesData : l10n.saleSummaryAfterSalesData,
+                  state.showSalesData
+                      ? l10n.saleSummarySalesData
+                      : l10n.saleSummaryAfterSalesData,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -434,7 +455,11 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                   ),
                 ),
                 const SizedBox(width: 4),
-                const Icon(Icons.keyboard_arrow_down, size: 20, color: AppColors.black06Text),
+                const Icon(
+                  Icons.keyboard_arrow_down,
+                  size: 20,
+                  color: AppColors.black06Text,
+                ),
               ],
             ),
           ),
@@ -496,7 +521,9 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
           label,
           style: TextStyle(
             fontSize: 13,
-            color: isSelected ? AppColors.primaryColor : const Color(0xFF666666),
+            color: isSelected
+                ? AppColors.primaryColor
+                : const Color(0xFF666666),
             fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
           ),
         ),
@@ -511,10 +538,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
         child: Center(
           child: Text(
             l10n.saleSummaryListEmpty,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF999999),
-            ),
+            style: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
           ),
         ),
       );
@@ -596,7 +620,10 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                     // TODO: View Voucher
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 2,
+                    ),
                     decoration: BoxDecoration(
                       border: Border.all(color: const Color(0xFFEEEEEE)),
                       borderRadius: BorderRadius.circular(4),
@@ -681,44 +708,15 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
   }
 
   void _showInfoDialog(String title, String content) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        content: Text(
-          content,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF666666),
-          ),
-        ),
-        actions: [
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: const Text('OK'),
-            ),
-          ),
-        ],
-      ),
-    );
+    ConfirmDialog.alert(context: context, message: content);
   }
 
-  void _showDataTypeSelector(BuildContext context, AppLocalizations l10n, SaleSummaryState state, SaleSummaryNotifier notifier) {
+  void _showDataTypeSelector(
+    BuildContext context,
+    AppLocalizations l10n,
+    SaleSummaryState state,
+    SaleSummaryNotifier notifier,
+  ) {
     final showSalesData = state.showSalesData;
     showModalBottomSheet(
       context: context,
@@ -747,7 +745,9 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                 title: Text(
                   l10n.saleSummarySalesData,
                   style: TextStyle(
-                    color: showSalesData ? AppColors.black06Text : const Color(0xFF666666),
+                    color: showSalesData
+                        ? AppColors.black06Text
+                        : const Color(0xFF666666),
                   ),
                 ),
                 onTap: () {
@@ -760,7 +760,9 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                 title: Text(
                   l10n.saleSummaryAfterSalesData,
                   style: TextStyle(
-                    color: !showSalesData ? AppColors.primaryColor : const Color(0xFF666666),
+                    color: !showSalesData
+                        ? AppColors.primaryColor
+                        : const Color(0xFF666666),
                   ),
                 ),
                 onTap: () {
@@ -894,11 +896,11 @@ class _AmountLineChart extends StatelessWidget {
               show: true,
               getDotPainter: (spot, percent, barData, index) =>
                   FlDotCirclePainter(
-                radius: 4,
-                color: AppColors.primaryColor,
-                strokeWidth: 2,
-                strokeColor: Colors.white,
-              ),
+                    radius: 4,
+                    color: AppColors.primaryColor,
+                    strokeWidth: 2,
+                    strokeColor: Colors.white,
+                  ),
             ),
             belowBarData: BarAreaData(show: false),
           ),
@@ -925,7 +927,9 @@ class _OrderBarChart extends StatelessWidget {
               toY: data.numList[i].toDouble(),
               color: const Color(0xFF3FA9FC),
               width: 16,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(4),
+              ),
             ),
           ],
         ),
@@ -994,8 +998,20 @@ String _formatDateLabel(String raw) {
       final parts = raw.split('-');
       if (parts.length >= 2) {
         final month = int.parse(parts[1]);
-        final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
-                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        final months = [
+          'Jan',
+          'Feb',
+          'Mar',
+          'Apr',
+          'May',
+          'Jun',
+          'Jul',
+          'Aug',
+          'Sep',
+          'Oct',
+          'Nov',
+          'Dec',
+        ];
         return months[month - 1];
       }
     } catch (_) {}
@@ -1018,7 +1034,10 @@ SideTitleWidget _buildBottomTitle(
   final text = labels[index];
   return SideTitleWidget(
     axisSide: meta.axisSide,
-    child: Text(_formatDateLabel(text), style: const TextStyle(fontSize: 10, color: Color(0xFF999999))),
+    child: Text(
+      _formatDateLabel(text),
+      style: const TextStyle(fontSize: 10, color: Color(0xFF999999)),
+    ),
   );
 }
 

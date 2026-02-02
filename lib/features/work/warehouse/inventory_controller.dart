@@ -52,8 +52,8 @@ class InventoryListState {
 
 final inventoryListProvider =
     NotifierProvider<InventoryListNotifier, InventoryListState>(
-  InventoryListNotifier.new,
-);
+      InventoryListNotifier.new,
+    );
 
 class InventoryListNotifier extends Notifier<InventoryListState> {
   final ApiService _api = ApiService();
@@ -171,8 +171,8 @@ class InventoryDetailState {
 
 final inventoryDetailProvider =
     NotifierProvider<InventoryDetailNotifier, InventoryDetailState>(
-  InventoryDetailNotifier.new,
-);
+      InventoryDetailNotifier.new,
+    );
 
 class InventoryDetailNotifier extends Notifier<InventoryDetailState> {
   final ApiService _api = ApiService();
@@ -192,10 +192,7 @@ class InventoryDetailNotifier extends Notifier<InventoryDetailState> {
 
     final response = await _api.post<DeviceInventoryDetail>(
       ApiPath.inventoryStart,
-      data: {
-        'deviceType': deviceType,
-        'warehouseNo': warehouseNo,
-      },
+      data: {'deviceType': deviceType, 'warehouseNo': warehouseNo},
       parser: (json) => DeviceInventoryDetail.fromJson(
         Map<String, dynamic>.from(json as Map),
       ),
@@ -240,10 +237,7 @@ class InventoryDetailNotifier extends Notifier<InventoryDetailState> {
     if (state.inventoryNo.isEmpty) return null;
     final response = await _api.post<DeviceInventoryScanResult>(
       ApiPath.inventoryScan,
-      data: {
-        'deviceSn': deviceSn,
-        'inventoryNo': state.inventoryNo,
-      },
+      data: {'deviceSn': deviceSn, 'inventoryNo': state.inventoryNo},
       parser: (json) => DeviceInventoryScanResult.fromJson(
         Map<String, dynamic>.from(json as Map),
       ),
@@ -304,10 +298,24 @@ class InventoryDetailNotifier extends Notifier<InventoryDetailState> {
   Future<WarehouseInfo?> _loadMyWarehouseInfo() async {
     final response = await _api.get<WarehouseInfo>(
       ApiPath.transportQueryMyWarehouseInfo,
-      parser: (json) => WarehouseInfo.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
+      parser: (json) =>
+          WarehouseInfo.fromJson(Map<String, dynamic>.from(json as Map)),
     );
     return response.result;
   }
 }
+
+/// 盘点仓库列表 Provider
+final inventoryWarehouseListProvider = FutureProvider<List<WarehouseInfo>>((
+  ref,
+) async {
+  final api = ApiService();
+  final response = await api.get<List<WarehouseInfo>>(
+    ApiPath.inventoryQueryInventoryHouseList,
+    parser: (json) => (json as List<dynamic>? ?? [])
+        .map((e) => WarehouseInfo.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList(),
+    showHud: false,
+  );
+  return response.result ?? [];
+});

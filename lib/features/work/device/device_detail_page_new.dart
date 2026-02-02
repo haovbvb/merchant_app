@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:apple_maps_flutter/apple_maps_flutter.dart' as amaps;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:intl/intl.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
@@ -43,9 +43,8 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         if (!mounted || _autoSearched) return;
         final value = _controller.text.trim();
         if (value.isEmpty) return;
-        ref
-            .read(deviceDetailProvider.notifier)
-            .searchDevice(sn: value, deviceType: 3);
+        // 使用 commonSearch 自动识别设备类型
+        ref.read(deviceDetailProvider.notifier).commonSearch(value);
         _autoSearched = true;
       });
     }
@@ -276,9 +275,6 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   Widget _buildEmptyState(dynamic l10n, bool loading) {
-    if (loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -482,9 +478,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
         // 端口网格
         Expanded(
-          child: state.portsLoading
-              ? const Center(child: CircularProgressIndicator())
-              : filteredPorts.isEmpty
+          child: filteredPorts.isEmpty && !state.portsLoading
               ? Center(
                   child: Text(
                     l10n.deviceDetailCabinPortEmpty,
@@ -601,11 +595,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   Widget _buildRepairRecordsTab(dynamic l10n, DeviceDetailState state) {
     final records = state.fixRecords;
 
-    if (state.fixLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (records.isEmpty) {
+    if (records.isEmpty && !state.fixLoading) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -781,7 +771,8 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     if (input.isEmpty) return;
     final sn = ScanUtils.getDeviceSn(input).trim();
     if (sn.isEmpty) return;
-    ref.read(deviceDetailProvider.notifier).searchDevice(sn: sn, deviceType: 3);
+    // 使用 commonSearch 自动识别设备类型
+    ref.read(deviceDetailProvider.notifier).commonSearch(sn);
   }
 
   Future<void> _scanSn() async {

@@ -37,6 +37,7 @@ class ApiPath {
   static const String cabinetConfig = '/admin/station/config';
   static const String cabinetLayoutHistory = '/admin/stations/{sn}/history';
   static const String cabinetFaultList = '/admin/faultReport/queryBySnAndPort';
+  static const String cabinetUpdateConfig = '/admin/stations/{pid}/config';
 
   // 售后绑定
   static const String afterSaleQueryUserForBindOrder =
@@ -78,6 +79,7 @@ class ApiPath {
   static const String batteryTurnDischargeStatus =
       '/admin/battery/turnDischargeStatus';
   static const String batteryQueryFixList = '/admin/battery/queryFixList';
+  static const String batteryStaticMile = '/admin/battery/staticBatteryMile';
   static const String carQueryFixList = '/admin/car/queryFixList';
   static const String cabinetQueryFixList = '/admin/station/queryFixList';
   static const String carQueryMaintainList = '/admin/car/queryMaintainList';
@@ -116,6 +118,7 @@ class ApiPath {
   static const String queryUserForRent = '/admin/trade/queryUserForRent';
   static const String sellBind = '/admin/trade/sellDevice';
   static const String rentBind = '/admin/trade/rentDevice';
+  static const String batterySell = '/admin/battery/sell';
   static const String uploadCardImg = '/admin/sell/uploadCardImg';
   static const String queryRentDeviceInfo = '/admin/trade/queryRentDeviceInfo';
   static const String queryUserForSwap = '/admin/trade/queryUserForSwap';
@@ -178,4 +181,99 @@ class ApiPath {
   static const String vcuSendCommand = '/admin/car/ctrlVehicle';
   static const String vcuVersionList = '/admin/car/queryVceVersionList';
   static const String deviceCommonSearch = '/admin/device/commonSearch';
+
+  // 个人信息
+  static const String accountDetail = '/admin/sys/account/detail';
+  static const String accountChangeNickName =
+      '/admin/sys/account/changeNickName';
+  static const String accountChangeAvatar = '/admin/sys/account/changeAvatar';
+
+  // 门店管理
+  static const String shopCreate = '/admin/shop/create';
+  static const String shopQueryList = '/admin/shop/queryList';
+  static const String shopQueryDetail = '/admin/shop/queryDetail';
+  static const String shopTurn = '/admin/shop/turn';
+  static const String shopEdit = '/admin/shop/edit';
+
+  // 库存管理
+  static const String stockIndex = '/admin/shop/stock/index';
+  static const String stockQueryList = '/admin/shop/stock/queryList';
+  static const String stockQueryShopByName =
+      '/admin/shop/stock/queryShopByName';
+  static const String stockQueryTransferBatteryBySn =
+      '/admin/shop/stock/queryTransferBatteryBySn';
+  static const String stockTransfer = '/admin/shop/stock/transfer';
+  static const String stockQueryDetail = '/admin/shop/stock/queryDetail';
+
+  // 收款审核
+  static const String paymentQueryOrderByNo = '/admin/payment/queryOrderByNo';
+  static const String paymentConfirm = '/admin/payment/confirm';
+  static const String paymentQueryList = '/admin/payment/queryList';
+
+  // 保险
+  static const String insuranceQueryUser =
+      '/admin/manager/queryUserForInsurance';
+  static const String insuranceQueryDevice =
+      '/admin/manager/queryDeviceForInsurance';
+  static const String insuranceQueryPlan = '/admin/manager/queryInsurancePlan';
+  static const String insuranceApply = '/admin/manager/applyInsurance';
+
+  // 门店销售统计
+  static const String shopStaticIndex = '/admin/shop/static/index';
+  static const String shopStaticQueryList = '/admin/shop/static/queryList';
+  static const String shopStaticQueryDetail = '/admin/shop/static/queryDetail';
+
+  // 用户记录
+  static const String userQueryPayList = '/admin/user/queryUserPayList';
+  static const String userQuerySwapPage = '/admin/user/queryUserSwapPage';
+
+  // 车辆保养
+  static const String maintenanceGenRecord = '/admin/op/genMaintainRecord';
+
+  // 消息
+  static const String messageGetUnReadCount = '/admin/sys/msg/getUnReadMsgNum';
+
+  // 电柜远程操作
+  static const String cabinetForbiddenStorageReason =
+      '/admin/station/remote/forbiddenStorageReason';
+  static const String cabinetSetPorts = '/admin/station/remote/setPorts';
+  static const String cabinetOpenDoor = '/admin/station/remote/openDoor';
+  static const String cabinetModifyInfo = '/admin/stations/{sn}';
+  static const String cabinetAddManager = '/admin/station/manager/add';
+  static const String cabinetRelation = '/admin/station/relation/{pid}';
+  static const String cabinetSetElectricCurrent =
+      '/admin/station/remote/setElectricCurrent';
+  static const String cabinetGetConfig = '/admin/stations/{pid}/config';
+  static const String cabinetRestart = '/admin/station/remote/restart';
+  static const String cabinetAccountInfo = '/admin/station/accountInfo';
+  static const String cabinetQueryAndroidTime =
+      '/admin/station/remote/queryAndroidTime';
+  static const String cabinetOpenLock = '/admin/station/remote/openLock';
+  static const String cabinetShutDown = '/admin/station/remote/shutDown';
+  static const String cabinetQueryVersion =
+      '/admin/station/remote/queryVersion';
+  static const String cabinetQuerySnapshotData =
+      '/admin/station/remote/querySnapshotData';
+
+  // 运维人员
+  static const String opsAccountList = '/admin/sys/accounts';
+
+  // 系统配置
+  static const String sysUpload = '/admin/sys/upload';
+  static const String sysConfigLocation = '/admin/sys/config/location';
+
+  // 城市
+  static const String cityList = '/admin/tenant/city/list';
+  static const String cityCodes = '/admin/citys';
+
+  // 摄像头
+  static const String cameraVerifyBound =
+      '/admin/operations/verifyStationLocation';
+  static const String cameraUnbind = '/admin/operations/unBindDevice';
+
+  // 上架电柜
+  static const String operationsLocation = '/admin/operations/location';
+
+  // 修改手机号
+  static const String changePhoneSendSms = 'user/sendChangePhoneSms';
 }

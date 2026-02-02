@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/constants/storage_keys.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
@@ -121,7 +121,11 @@ class _UserSearchPageState extends ConsumerState<UserSearchPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () {
+            // 返回时清空 keyword，查询全部
+            ref.read(userListProvider.notifier).refresh(keyword: '');
+            Navigator.of(context).pop();
+          },
         ),
         title: _buildSearchField(l10n),
         actions: [
@@ -236,11 +240,7 @@ class _UserSearchPageState extends ConsumerState<UserSearchPage> {
   }
 
   Widget _buildResults(AppLocalizations l10n) {
-    if (_isSearching) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_results.isEmpty) {
+    if (_results.isEmpty && !_isSearching) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

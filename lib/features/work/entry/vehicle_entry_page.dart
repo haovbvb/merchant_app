@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/data/models/car_type.dart';
 import 'package:merchant_app/features/work/entry/battery_ship_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -33,10 +34,12 @@ class _VehicleEntryPageState extends State<VehicleEntryPage> {
     setState(() => _loading = true);
     final response = await _api.get<List<CarType>>(
       ApiPath.vehicleModelList,
-      parser: (json) => (json as List<dynamic>?)
-              ?.map((item) => CarType.fromJson(
-                    Map<String, dynamic>.from(item as Map),
-                  ))
+      parser: (json) =>
+          (json as List<dynamic>?)
+              ?.map(
+                (item) =>
+                    CarType.fromJson(Map<String, dynamic>.from(item as Map)),
+              )
               .toList() ??
           const <CarType>[],
     );
@@ -64,7 +67,9 @@ class _VehicleEntryPageState extends State<VehicleEntryPage> {
                       .map(
                         (type) => DropdownMenuItem(
                           value: type,
-                          child: Text('${type.model ?? '-'} ${type.modelName ?? ''}'),
+                          child: Text(
+                            '${type.model ?? '-'} ${type.modelName ?? ''}',
+                          ),
                         ),
                       )
                       .toList(),
@@ -103,35 +108,35 @@ class _VehicleEntryPageState extends State<VehicleEntryPage> {
                   _EmptyCard(text: l10n.entryListEmpty)
                 else
                   ..._items.asMap().entries.map(
-                        (entry) => Card(
-                          child: ListTile(
-                            title: Text(entry.value.sn),
-                            subtitle: Text(
-                              '${l10n.entryVinLabel}: ${entry.value.vin}\n'
-                              '${l10n.entryCtrlIdLabel}: ${entry.value.ctrlId}',
+                    (entry) => Card(
+                      child: ListTile(
+                        title: Text(entry.value.sn),
+                        subtitle: Text(
+                          '${l10n.entryVinLabel}: ${entry.value.vin}\n'
+                          '${l10n.entryCtrlIdLabel}: ${entry.value.ctrlId}',
+                        ),
+                        trailing: PopupMenuButton<String>(
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              _editItem(entry.key);
+                            } else if (value == 'delete') {
+                              setState(() => _items.removeAt(entry.key));
+                            }
+                          },
+                          itemBuilder: (context) => [
+                            PopupMenuItem(
+                              value: 'edit',
+                              child: Text(l10n.entryEditAction),
                             ),
-                            trailing: PopupMenuButton<String>(
-                              onSelected: (value) {
-                                if (value == 'edit') {
-                                  _editItem(entry.key);
-                                } else if (value == 'delete') {
-                                  setState(() => _items.removeAt(entry.key));
-                                }
-                              },
-                              itemBuilder: (context) => [
-                                PopupMenuItem(
-                                  value: 'edit',
-                                  child: Text(l10n.entryEditAction),
-                                ),
-                                PopupMenuItem(
-                                  value: 'delete',
-                                  child: Text(l10n.entryDeleteAction),
-                                ),
-                              ],
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: Text(l10n.entryDeleteAction),
                             ),
-                          ),
+                          ],
                         ),
                       ),
+                    ),
+                  ),
                 const SizedBox(height: 24),
                 FilledButton(
                   onPressed: _submitting ? null : _submit,
@@ -145,10 +150,7 @@ class _VehicleEntryPageState extends State<VehicleEntryPage> {
   Future<void> _addByScan() async {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => const QrScanPage(
-          parseDeviceSn: true,
-          deviceType: 2,
-        ),
+        builder: (_) => const QrScanPage(parseDeviceSn: true, deviceType: 2),
       ),
     );
     if (result == null || result.isEmpty) return;
@@ -177,9 +179,11 @@ class _VehicleEntryPageState extends State<VehicleEntryPage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(initial == null
-              ? l10n.entryAddDeviceTitle
-              : l10n.entryEditDeviceTitle),
+          title: Text(
+            initial == null
+                ? l10n.entryAddDeviceTitle
+                : l10n.entryEditDeviceTitle,
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -252,13 +256,10 @@ class _VehicleEntryPageState extends State<VehicleEntryPage> {
     showToast(l10n.entrySubmitSuccess);
     final goToTransfer = await _showTransferDialog();
     if (!mounted) return;
-    if (goToTransfer == true) {
+    if (goToTransfer) {
       await Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (_) => BatteryShipPage(
-            deviceType: 2,
-            initialSns: sns,
-          ),
+          builder: (_) => BatteryShipPage(deviceType: 2, initialSns: sns),
         ),
       );
     }
@@ -266,26 +267,13 @@ class _VehicleEntryPageState extends State<VehicleEntryPage> {
     setState(() => _items.clear());
   }
 
-  Future<bool?> _showTransferDialog() async {
+  Future<bool> _showTransferDialog() async {
     final l10n = context.l10n;
-    return showDialog<bool>(
+    return ConfirmDialog.show(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(l10n.entrySubmitDoneTitle),
-          content: Text(l10n.entrySubmitDoneMessage),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
-              child: Text(l10n.entryStayAction),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
-              child: Text(l10n.entryGoToTransferAction),
-            ),
-          ],
-        );
-      },
+      message: l10n.entrySubmitDoneMessage,
+      cancelText: l10n.entryStayAction,
+      confirmText: l10n.entryGoToTransferAction,
     );
   }
 }
@@ -295,17 +283,9 @@ class _VehicleItem {
   final String vin;
   final String ctrlId;
 
-  const _VehicleItem({
-    required this.sn,
-    this.vin = '',
-    this.ctrlId = '',
-  });
+  const _VehicleItem({required this.sn, this.vin = '', this.ctrlId = ''});
 
-  Map<String, dynamic> toJson() => {
-        'sn': sn,
-        'vin': vin,
-        'ctrlId': ctrlId,
-      };
+  Map<String, dynamic> toJson() => {'sn': sn, 'vin': vin, 'ctrlId': ctrlId};
 }
 
 class _EmptyCard extends StatelessWidget {
@@ -316,10 +296,7 @@ class _EmptyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(text),
-      ),
+      child: Padding(padding: const EdgeInsets.all(16), child: Text(text)),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/foundation.dart';
 
 enum LogLevel { info, warn, error }
@@ -14,6 +16,10 @@ String _ts() {
 void _printInChunks(String message) {
   if (message.isEmpty) {
     debugPrint(message);
+    // Use stdout print to ensure visibility in Flutter run/Xcode consoles.
+    // ignore: avoid_print
+    print(message);
+    developer.log(message, name: 'logger');
     return;
   }
 
@@ -23,7 +29,11 @@ void _printInChunks(String message) {
     final end = (start + _maxChunkLength) < length
         ? start + _maxChunkLength
         : length;
-    debugPrint(message.substring(start, end));
+    final chunk = message.substring(start, end);
+    debugPrint(chunk);
+    // ignore: avoid_print
+    print(chunk);
+    developer.log(chunk, name: 'logger');
     start = end;
   }
 }

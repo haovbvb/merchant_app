@@ -87,6 +87,37 @@ class ApiService {
     return result;
   }
 
+  Future<BaseResponse<T>> put<T>(
+    String path, {
+    dynamic data,
+    required T Function(dynamic json) parser,
+    bool showHud = true,
+    bool notifyOnError = true,
+    bool toastOnBusinessError = true,
+  }) async {
+    final response = await _client.put(
+      path,
+      data: data,
+      showHud: showHud,
+      notifyOnError: notifyOnError,
+    );
+    final payload = response.data;
+
+    if (payload is Map<String, dynamic> && payload.containsKey('code')) {
+      final result = BaseResponse.fromJson(payload, parser);
+      await _handleBusinessError(result, toastOnBusinessError && notifyOnError);
+      return result;
+    }
+
+    final result = BaseResponse.fromJson({
+      'code': response.statusCode ?? 0,
+      'msg': response.statusMessage ?? '',
+      'result': payload,
+    }, parser);
+    await _handleBusinessError(result, toastOnBusinessError && notifyOnError);
+    return result;
+  }
+
   Future<BaseResponse<T>> postForm<T>(
     String path, {
     required FormData data,

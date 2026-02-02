@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/data/models/after_sale_can_bind_order_bean.dart';
 import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
 import 'package:merchant_app/features/work/after_sale/after_sale_bind_controller.dart';
@@ -110,7 +111,9 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                               phone: state.userDetail?.phone ?? '-',
                             )
                           else
-                            _EmptyInfoCard(text: l10n.afterSaleBindUserInfoEmpty),
+                            _EmptyInfoCard(
+                              text: l10n.afterSaleBindUserInfoEmpty,
+                            ),
                         ],
                       ),
                     ),
@@ -130,8 +133,10 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                             hint: l10n.afterSaleBindNoOrders,
                             orders: state.orders,
                             selectedOrder: state.selectedOrder,
-                            onTap: () => _showOrderSelector(context, state, notifier),
-                            onReselect: () => _showOrderSelector(context, state, notifier),
+                            onTap: () =>
+                                _showOrderSelector(context, state, notifier),
+                            onReselect: () =>
+                                _showOrderSelector(context, state, notifier),
                             l10n: l10n,
                           ),
                         ],
@@ -163,7 +168,9 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                               l10n: l10n,
                             )
                           else
-                            _EmptyInfoCard(text: l10n.afterSaleBindDeviceInfoEmpty),
+                            _EmptyInfoCard(
+                              text: l10n.afterSaleBindDeviceInfoEmpty,
+                            ),
                         ],
                       ),
                     ),
@@ -179,7 +186,8 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                 width: double.infinity,
                 height: 50,
                 child: FilledButton(
-                  onPressed: state.binding ||
+                  onPressed:
+                      state.binding ||
                           state.cardNum.trim().isEmpty ||
                           state.deviceSn.trim().isEmpty ||
                           state.selectedOrder == null
@@ -187,8 +195,9 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                       : () => _submit(context, l10n, notifier),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
-                    disabledBackgroundColor:
-                        AppColors.primaryColor.withOpacity(0.5),
+                    disabledBackgroundColor: AppColors.primaryColor.withOpacity(
+                      0.5,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
@@ -263,10 +272,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
               if (onScan != null)
                 GestureDetector(
                   onTap: onScan,
-                  child: AppIcons.scanIcon(
-                    size: 24,
-                    color: Colors.black54,
-                  ),
+                  child: AppIcons.scanIcon(size: 24, color: Colors.black54),
                 ),
             ],
           ),
@@ -278,16 +284,16 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
   String _getUserName(AfterSaleBindState state) {
     final detail = state.userDetail;
     if (detail == null) return '-';
-    final name =
-        [detail.firstName, detail.lastName].where((e) => e?.isNotEmpty == true);
+    final name = [
+      detail.firstName,
+      detail.lastName,
+    ].where((e) => e?.isNotEmpty == true);
     return name.isEmpty ? '-' : name.join(' ');
   }
 
   Future<void> _scanCardNum() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(
-        builder: (_) => const QrScanPage(parseDeviceSn: true),
-      ),
+      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _cardController.text = result;
@@ -296,9 +302,9 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
   }
 
   Future<void> _scanDeviceSn() async {
-    final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
-    );
+    final result = await Navigator.of(
+      context,
+    ).push<String>(MaterialPageRoute(builder: (_) => const QrScanPage()));
     if (!mounted || result == null || result.isEmpty) return;
     _deviceController.text = result;
     ref.read(afterSaleBindProvider.notifier).updateDeviceSn(result);
@@ -338,37 +344,18 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
     if (!success) {
       final state = ref.read(afterSaleBindProvider);
       if (state.errorMessage != null) {
-        showDialog(
+        await ConfirmDialog.alert(
           context: context,
-          builder: (_) => AlertDialog(
-            title: Text(l10n.afterSaleBindUnableToSubmit),
-            content: Text(state.errorMessage ?? l10n.afterSaleBindDeviceMismatch),
-            actions: [
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text(l10n.afterSaleBindOk),
-                ),
-              ),
-            ],
-          ),
+          message: state.errorMessage ?? l10n.afterSaleBindDeviceMismatch,
+          buttonText: l10n.afterSaleBindOk,
         );
       }
       return;
     }
 
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => const AfterSaleBindSuccessPage(),
-      ),
-    );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const AfterSaleBindSuccessPage()));
   }
 }
 
@@ -420,10 +407,7 @@ class _UserInfoCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   'Phone: $phone',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
               ],
             ),
@@ -453,10 +437,7 @@ class _EmptyInfoCard extends StatelessWidget {
         child: Center(
           child: Text(
             text,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
           ),
         ),
       ),
@@ -508,16 +489,10 @@ class _OrderSelector extends StatelessWidget {
                   Expanded(
                     child: Text(
                       hint,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        color: Colors.grey,
-                      ),
+                      style: const TextStyle(fontSize: 15, color: Colors.grey),
                     ),
                   ),
-                  const Icon(
-                    Icons.keyboard_arrow_down,
-                    color: Colors.grey,
-                  ),
+                  const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
                 ],
               ),
             ),
@@ -547,10 +522,7 @@ class _OrderSelector extends StatelessWidget {
                 onTap: onReselect,
                 child: Text(
                   l10n.afterSaleBindReselect,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.primaryColor,
-                  ),
+                  style: TextStyle(fontSize: 14, color: AppColors.primaryColor),
                 ),
               ),
             ],
@@ -558,7 +530,11 @@ class _OrderSelector extends StatelessWidget {
           const SizedBox(height: 12),
           Row(
             children: [
-              const Icon(Icons.description_outlined, size: 20, color: Colors.grey),
+              const Icon(
+                Icons.description_outlined,
+                size: 20,
+                color: Colors.grey,
+              ),
               const SizedBox(width: 8),
               Text(
                 selectedOrder!.orderNo ?? '-',
@@ -573,10 +549,7 @@ class _OrderSelector extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             '${_orderTypeLabel(selectedOrder!.type)} | ${_orderStatusLabel(selectedOrder!.status)}',
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
           ),
           const Divider(height: 24),
           Row(
@@ -584,10 +557,7 @@ class _OrderSelector extends StatelessWidget {
             children: [
               Text(
                 l10n.afterSaleBindApplicableDevices,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
               Text(
                 _getApplicableDevices(),
@@ -693,10 +663,7 @@ class _OrderSelectorSheet extends StatelessWidget {
                   ),
                   child: Text(
                     l10n.afterSaleBindCancel,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
+                    style: const TextStyle(fontSize: 16, color: Colors.black),
                   ),
                 ),
               ),
@@ -743,7 +710,11 @@ class _OrderCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.description_outlined, size: 20, color: Colors.grey),
+                    const Icon(
+                      Icons.description_outlined,
+                      size: 20,
+                      color: Colors.grey,
+                    ),
                     const SizedBox(width: 8),
                     Text(
                       '${l10n.afterSaleBindOrderNo}: ${order.orderNo ?? '-'}',
@@ -763,16 +734,29 @@ class _OrderCard extends StatelessWidget {
                       color: AppColors.primaryColor,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.check, size: 16, color: Colors.white),
+                    child: const Icon(
+                      Icons.check,
+                      size: 16,
+                      color: Colors.white,
+                    ),
                   ),
               ],
             ),
             const SizedBox(height: 12),
-            _buildInfoRow(l10n.afterSaleBindOrderType, _orderTypeLabel(order.type)),
+            _buildInfoRow(
+              l10n.afterSaleBindOrderType,
+              _orderTypeLabel(order.type),
+            ),
             const SizedBox(height: 8),
-            _buildInfoRow(l10n.afterSaleBindOrderStatus, _orderStatusLabel(order.status)),
+            _buildInfoRow(
+              l10n.afterSaleBindOrderStatus,
+              _orderStatusLabel(order.status),
+            ),
             const SizedBox(height: 8),
-            _buildInfoRow(l10n.afterSaleBindApplicableDevices, _getApplicableDevices()),
+            _buildInfoRow(
+              l10n.afterSaleBindApplicableDevices,
+              _getApplicableDevices(),
+            ),
           ],
         ),
       ),
@@ -783,14 +767,8 @@ class _OrderCard extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
-        ),
-        Text(
-          value,
-          style: const TextStyle(fontSize: 14, color: Colors.black),
-        ),
+        Text(label, style: const TextStyle(fontSize: 14, color: Colors.grey)),
+        Text(value, style: const TextStyle(fontSize: 14, color: Colors.black)),
       ],
     );
   }
@@ -817,10 +795,7 @@ class _OrderCard extends StatelessWidget {
 }
 
 class _DeviceInfoCard extends StatelessWidget {
-  const _DeviceInfoCard({
-    required this.deviceInfo,
-    required this.l10n,
-  });
+  const _DeviceInfoCard({required this.deviceInfo, required this.l10n});
 
   final BatterOrVehicleInfo deviceInfo;
   final AppLocalizations l10n;
@@ -866,7 +841,11 @@ class _BatteryCard extends StatelessWidget {
                     ),
                     child: battery?.img != null && battery!.img!.isNotEmpty
                         ? Image.network(battery!.img!, fit: BoxFit.contain)
-                        : const Icon(Icons.battery_full, size: 32, color: Colors.grey),
+                        : const Icon(
+                            Icons.battery_full,
+                            size: 32,
+                            color: Colors.grey,
+                          ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -885,7 +864,10 @@ class _BatteryCard extends StatelessWidget {
                         Wrap(
                           spacing: 8,
                           children: [
-                            _Tag(text: '${l10n.afterSaleBindBatteryLabel} · ${battery?.model ?? '-'}'),
+                            _Tag(
+                              text:
+                                  '${l10n.afterSaleBindBatteryLabel} · ${battery?.model ?? '-'}',
+                            ),
                             _Tag(text: battery?.spec ?? '-'),
                           ],
                         ),
@@ -964,7 +946,11 @@ class _VehicleCard extends StatelessWidget {
                     ),
                     child: vehicle?.img != null && vehicle!.img!.isNotEmpty
                         ? Image.network(vehicle!.img!, fit: BoxFit.contain)
-                        : const Icon(Icons.electric_moped, size: 32, color: Colors.grey),
+                        : const Icon(
+                            Icons.electric_moped,
+                            size: 32,
+                            color: Colors.grey,
+                          ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -983,7 +969,10 @@ class _VehicleCard extends StatelessWidget {
                         Wrap(
                           spacing: 8,
                           children: [
-                            _Tag(text: '${l10n.afterSaleBindVehicleLabel} · ${vehicle?.model ?? '-'}'),
+                            _Tag(
+                              text:
+                                  '${l10n.afterSaleBindVehicleLabel} · ${vehicle?.model ?? '-'}',
+                            ),
                             _Tag(text: vehicle?.spec ?? '-'),
                           ],
                         ),
@@ -1057,10 +1046,7 @@ class _StatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-        ),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
         const SizedBox(height: 4),
         Text(
           value,

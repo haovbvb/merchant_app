@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
@@ -320,9 +320,9 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
                   : null,
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   border: Border(
-                    bottom: BorderSide(color: Color(0xFFEEEEEE)),
+                    bottom: BorderSide(color: AppColors.borderColor),
                   ),
                 ),
                 child: Row(
@@ -557,10 +557,10 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
-          top: BorderSide(color: Color(0xFFEEEEEE)),
+          top: BorderSide(color: AppColors.borderColor),
         ),
       ),
       child: SafeArea(

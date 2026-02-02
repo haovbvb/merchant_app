@@ -142,8 +142,8 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
             onTap: () => _showPackageSheet(context, notifier),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 8),
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
+              decoration: BoxDecoration(
+                border: Border(bottom: BorderSide(color: AppColors.borderColor)),
               ),
               child: Row(
                 children: [

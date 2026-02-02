@@ -557,8 +557,8 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFEEEEEE))),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: AppColors.borderColor)),
       ),
       child: Row(
         children: [

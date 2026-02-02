@@ -508,9 +508,9 @@ class _DeviceItem extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Color(0xFFF5F5F5)),
+          bottom: BorderSide(color: AppColors.borderColor),
         ),
       ),
       child: Column(

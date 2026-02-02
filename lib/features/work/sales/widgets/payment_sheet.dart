@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/payment_plan.dart';
 import 'package:merchant_app/features/work/sales/sell_bind_controller.dart';
@@ -224,10 +224,10 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                         Container(
                           height: 1,
                           margin: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             border: Border(
                               bottom: BorderSide(
-                                color: Color(0xFFEEEEEE),
+                                color: AppColors.borderColor,
                                 style: BorderStyle.solid,
                               ),
                             ),

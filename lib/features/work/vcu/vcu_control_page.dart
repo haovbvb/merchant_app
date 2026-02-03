@@ -1707,6 +1707,51 @@ const List<_VcuCommand> _commands = [
     icon: Icons.lock_open,
   ),
   _VcuCommand(
+    16,
+    '复位',
+    bleId: VcuBleCommandIds.reset,
+    bleValue: 1,
+    icon: Icons.restart_alt,
+  ),
+  // 4轮车命令
+  _VcuCommand(
+    8,
+    '锁车+断电(4轮)',
+    bleId: VcuBleCommandIds.lockCut4,
+    bleValue: 1,
+    icon: Icons.power_off,
+  ),
+  _VcuCommand(
+    9,
+    '解锁(4轮)',
+    bleId: VcuBleCommandIds.unlockCut4,
+    bleValue: 1,
+    icon: Icons.power,
+  ),
+  _VcuCommand(
+    10,
+    '找车(4轮)',
+    bleId: VcuBleCommandIds.find4,
+    bleValue: 1,
+    icon: Icons.location_searching,
+  ),
+  // 高尔夫车命令
+  _VcuCommand(
+    14,
+    '高尔夫解锁',
+    bleId: VcuBleCommandIds.golfCommand,
+    bleValue: 1,
+    icon: Icons.sports_golf,
+  ),
+  _VcuCommand(
+    15,
+    '高尔夫锁车',
+    bleId: VcuBleCommandIds.golfCommand,
+    bleValue: 0,
+    icon: Icons.sports_golf_outlined,
+  ),
+  // 查询命令
+  _VcuCommand(
     109,
     '查询车辆状态',
     bleId: VcuBleCommandIds.queryStatus,

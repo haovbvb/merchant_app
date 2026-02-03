@@ -856,6 +856,42 @@ class _AuthorizedRecordPageState extends ConsumerState<_AuthorizedRecordPage> {
     });
   }
 
+  Future<void> _cancelAuthorization(Map<String, dynamic> record) async {
+    final l10n = context.l10n;
+    final sn = record['stationSn']?.toString() ?? record['sn']?.toString() ?? '';
+    final permissionId = (record['id'] as num?)?.toInt() ?? 0;
+    
+    if (sn.isEmpty || permissionId <= 0) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.cabinetAuthCancelTitle),
+        content: Text(l10n.cabinetAuthCancelConfirm),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true || !mounted) return;
+
+    final notifier = ref.read(cabinetAuthorizationProvider.notifier);
+    final ok = await notifier.cancelPermission(sn: sn, permissionId: permissionId);
+    if (!mounted) return;
+    showToast(ok ? l10n.cabinetAuthCancelSuccess : l10n.cabinetAuthCancelFailed);
+    if (ok) {
+      notifier.queryRecords('', '');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
@@ -870,7 +906,15 @@ class _AuthorizedRecordPageState extends ConsumerState<_AuthorizedRecordPage> {
               itemCount: items.length,
               itemBuilder: (context, index) {
                 final item = items[index];
-                return _RecordCard(record: item);
+                final permissionStatus = (item['permissionStatus'] as num?)?.toInt();
+                // permissionStatus == 1 表示授权有效，可以取消
+                return _RecordCard(
+                  record: item,
+                  canCancel: permissionStatus == 1,
+                  onCancel: permissionStatus == 1
+                      ? () => _cancelAuthorization(item)
+                      : null,
+                );
               },
             ),
     );
@@ -879,18 +923,40 @@ class _AuthorizedRecordPageState extends ConsumerState<_AuthorizedRecordPage> {
 
 /// 记录卡片
 class _RecordCard extends StatelessWidget {
-  const _RecordCard({required this.record});
+  const _RecordCard({
+    required this.record,
+    this.canCancel = false,
+    this.onCancel,
+  });
 
   final Map<String, dynamic> record;
+  final bool canCancel;
+  final VoidCallback? onCancel;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final sn = record['sn']?.toString() ?? '-';
-    final authTime = record['createTime']?.toString() ?? '-';
-    final person = record['accountNo']?.toString() ?? '-';
-    final beginTime = record['beginTime']?.toString() ?? '-';
-    final endTime = record['endTime']?.toString() ?? '-';
+    final sn = record['stationSn']?.toString() ?? record['sn']?.toString() ?? '-';
+    final actionTime = record['actionTime'];
+    final authTime = actionTime != null
+        ? DateTime.fromMillisecondsSinceEpoch((actionTime as num).toInt())
+            .toString()
+            .substring(0, 19)
+        : '-';
+    final person = record['bePermissionName']?.toString() ?? 
+        record['accountNo']?.toString() ?? '-';
+    final beginTimeMs = record['beginTime'] as num?;
+    final endTimeMs = record['expireTime'] ?? record['endTime'] as num?;
+    final beginTime = beginTimeMs != null
+        ? DateTime.fromMillisecondsSinceEpoch(beginTimeMs.toInt())
+            .toString()
+            .substring(0, 16)
+        : '-';
+    final endTime = endTimeMs != null
+        ? DateTime.fromMillisecondsSinceEpoch((endTimeMs as num).toInt())
+            .toString()
+            .substring(0, 16)
+        : '-';
     final img = record['standardImg']?.toString();
 
     return Card(
@@ -898,93 +964,97 @@ class _RecordCard extends StatelessWidget {
       color: Colors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header
-            Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    width: 56,
-                    height: 56,
-                    color: Colors.grey.shade100,
-                    child: img != null && img.isNotEmpty
-                        ? Image.network(
-                            img,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const Icon(
+      child: InkWell(
+        onTap: canCancel ? onCancel : null,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header
+              Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Container(
+                      width: 56,
+                      height: 56,
+                      color: Colors.grey.shade100,
+                      child: img != null && img.isNotEmpty
+                          ? Image.network(
+                              img,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => const Icon(
+                                Icons.electrical_services,
+                                color: Colors.grey,
+                              ),
+                            )
+                          : const Icon(
                               Icons.electrical_services,
                               color: Colors.grey,
                             ),
-                          )
-                        : const Icon(
-                            Icons.electrical_services,
-                            color: Colors.grey,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'SN: $sn',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
                           ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'SN: $sn',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${l10n.cabinetAuthTimeLabel}: $authTime',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
+                        const SizedBox(height: 4),
+                        Text(
+                          '${l10n.cabinetAuthTimeLabel}: $authTime',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.black54,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+                ],
+              ),
+              const SizedBox(height: 12),
 
-            // Authorized person
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.cabinetAuthPersonLabel,
-                  style: const TextStyle(fontSize: 13, color: Colors.black54),
-                ),
-                Text(
-                  person,
-                  style: const TextStyle(fontSize: 13, color: Colors.black87),
-                ),
-              ],
-            ),
-            const Divider(height: 24),
+              // Authorized person
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.cabinetAuthPersonLabel,
+                    style: const TextStyle(fontSize: 13, color: Colors.black54),
+                  ),
+                  Text(
+                    person,
+                    style: const TextStyle(fontSize: 13, color: Colors.black87),
+                  ),
+                ],
+              ),
+              const Divider(height: 24),
 
-            // Validity period
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.cabinetAuthValidityPeriod,
-                  style: const TextStyle(fontSize: 13, color: Colors.black54),
-                ),
-                Text(
-                  '$beginTime ~ $endTime',
-                  style: const TextStyle(fontSize: 13, color: Colors.black87),
-                ),
-              ],
-            ),
-          ],
+              // Validity period
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.cabinetAuthValidityPeriod,
+                    style: const TextStyle(fontSize: 13, color: Colors.black54),
+                  ),
+                  Text(
+                    '$beginTime ~ $endTime',
+                    style: const TextStyle(fontSize: 13, color: Colors.black87),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -10,8 +10,10 @@ import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
+import 'package:merchant_app/data/models/battery_detail.dart';
 import 'package:merchant_app/data/models/cabin.dart';
 import 'package:merchant_app/data/models/cabinet_detail_base_info_bean.dart';
+import 'package:merchant_app/data/models/vehicle_detail.dart';
 import 'package:merchant_app/features/work/device/device_detail_controller.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 
@@ -28,14 +30,14 @@ class DeviceDetailPageNew extends ConsumerStatefulWidget {
 class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     with SingleTickerProviderStateMixin {
   final TextEditingController _controller = TextEditingController();
-  late TabController _tabController;
+  TabController? _tabController;
   bool _autoSearched = false;
   String _portFilter = 'all';
+  int _currentDeviceType = 0;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
     final initial = widget.initialSn?.trim() ?? '';
     if (initial.isNotEmpty) {
       _controller.text = initial;
@@ -50,10 +52,19 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     }
   }
 
+  void _updateTabController(int deviceType) {
+    if (_currentDeviceType == deviceType && _tabController != null) return;
+    _currentDeviceType = deviceType;
+    _tabController?.dispose();
+    // 电池: 3 tabs, 车辆: 3 tabs, 电柜: 4 tabs
+    final tabCount = deviceType == 3 ? 4 : 3;
+    _tabController = TabController(length: tabCount, vsync: this);
+  }
+
   @override
   void dispose() {
     _controller.dispose();
-    _tabController.dispose();
+    _tabController?.dispose();
     super.dispose();
   }
 
@@ -61,13 +72,21 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final state = ref.watch(deviceDetailProvider);
-    final detail = state.cabinetDetail;
+    final deviceType = state.deviceType;
+    final hasData = state.cabinetDetail != null ||
+        state.batteryDetail != null ||
+        state.vehicleDetail != null;
+
+    // 根据设备类型更新 TabController
+    if (hasData) {
+      _updateTabController(deviceType);
+    }
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        Navigator.of(context).pop(detail != null);
+        Navigator.of(context).pop(hasData);
       },
       child: Scaffold(
         backgroundColor: AppColors.bgColor,
@@ -76,7 +95,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
-            onPressed: () => Navigator.of(context).pop(detail != null),
+            onPressed: () => Navigator.of(context).pop(hasData),
           ),
           titleSpacing: 0,
           title: _buildSearchBar(l10n),
@@ -84,29 +103,112 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         body: Column(
           children: [
             // 设备信息头部
-          if (detail != null) _buildDeviceHeader(detail),
+            if (hasData) _buildDeviceHeaderByType(state, l10n),
 
-          // Tab 切换
-          if (detail != null) _buildTabBar(l10n),
+            // Tab 切换
+            if (hasData && _tabController != null) _buildTabBarByType(l10n, deviceType),
 
-          // Tab 内容
-          Expanded(
-            child: detail == null
-                ? _buildEmptyState(l10n, state.loading)
-                : TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildBasicInfoTab(l10n, detail),
-                      _buildPortDetailTab(l10n, state),
-                      _buildAddressTab(l10n, detail),
-                      _buildRepairRecordsTab(l10n, state),
-                    ],
-                  ),
-          ),
-        ],
-      ),
+            // Tab 内容
+            Expanded(
+              child: !hasData
+                  ? _buildEmptyState(l10n, state.loading)
+                  : _tabController == null
+                      ? const SizedBox.shrink()
+                      : TabBarView(
+                          controller: _tabController,
+                          children: _buildTabViewsByType(l10n, state, deviceType),
+                        ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  /// 根据设备类型构建头部
+  Widget _buildDeviceHeaderByType(DeviceDetailState state, dynamic l10n) {
+    if (state.deviceType == 3 && state.cabinetDetail != null) {
+      return _buildDeviceHeader(state.cabinetDetail!);
+    } else if (state.deviceType == 2 && state.vehicleDetail != null) {
+      return _buildVehicleHeader(state.vehicleDetail!, l10n);
+    } else if (state.deviceType == 1 && state.batteryDetail != null) {
+      return _buildBatteryHeader(state.batteryDetail!, l10n);
+    }
+    return const SizedBox.shrink();
+  }
+
+  /// 根据设备类型构建 Tab Bar
+  Widget _buildTabBarByType(dynamic l10n, int deviceType) {
+    List<Tab> tabs;
+    if (deviceType == 1) {
+      // 电池: 基础信息、位置信息、维修记录
+      tabs = [
+        Tab(text: l10n.deviceDetailTabBasicInfo),
+        Tab(text: l10n.deviceDetailTabAddress),
+        Tab(text: l10n.deviceDetailTabRepairRecords),
+      ];
+    } else if (deviceType == 2) {
+      // 车辆: 基础信息、维修记录、保养记录
+      tabs = [
+        Tab(text: l10n.deviceDetailTabBasicInfo),
+        Tab(text: l10n.deviceDetailTabRepairRecords),
+        Tab(text: l10n.deviceDetailTabMaintenance),
+      ];
+    } else {
+      // 电柜: 基础信息、仓位信息、位置信息、维修记录
+      tabs = [
+        Tab(text: l10n.deviceDetailTabBasicInfo),
+        Tab(text: l10n.deviceDetailTabPortDetail),
+        Tab(text: l10n.deviceDetailTabAddress),
+        Tab(text: l10n.deviceDetailTabRepairRecords),
+      ];
+    }
+
+    return Container(
+      color: Colors.white,
+      child: TabBar(
+        controller: _tabController,
+        labelColor: AppColors.black06Text,
+        unselectedLabelColor: const Color(0xFF999999),
+        labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        unselectedLabelStyle: const TextStyle(fontSize: 14),
+        indicatorColor: AppColors.primaryColor,
+        indicatorWeight: 3,
+        tabs: tabs,
+      ),
+    );
+  }
+
+  /// 根据设备类型构建 Tab 内容
+  List<Widget> _buildTabViewsByType(
+    dynamic l10n,
+    DeviceDetailState state,
+    int deviceType,
+  ) {
+    if (deviceType == 1 && state.batteryDetail != null) {
+      // 电池: 基础信息、位置信息、维修记录
+      return [
+        _buildBatteryBasicInfoTab(l10n, state.batteryDetail!),
+        _buildBatteryLocationTab(l10n, state.batteryDetail!),
+        _buildRepairRecordsTab(l10n, state),
+      ];
+    } else if (deviceType == 2 && state.vehicleDetail != null) {
+      // 车辆: 基础信息、维修记录、保养记录
+      return [
+        _buildVehicleBasicInfoTab(l10n, state.vehicleDetail!),
+        _buildRepairRecordsTab(l10n, state),
+        _buildMaintenanceRecordsTab(l10n, state),
+      ];
+    } else if (state.cabinetDetail != null) {
+      // 电柜: 基础信息、仓位信息、位置信息、维修记录
+      return [
+        _buildBasicInfoTab(l10n, state.cabinetDetail!),
+        _buildPortDetailTab(l10n, state),
+        _buildAddressTab(l10n, state.cabinetDetail!),
+        _buildRepairRecordsTab(l10n, state),
+      ];
+    }
+    return [];
   }
 
   Widget _buildSearchBar(dynamic l10n) {
@@ -170,7 +272,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   Widget _buildDeviceHeader(CabinetDetailBaseInfoBean detail) {
-    final isOnline = detail.online == 1 || detail.showOnlineStatus == 'Online';
+    final isOnline = detail.online == '1' || detail.showOnlineStatus == 'Online';
 
     return Container(
       color: Colors.white,
@@ -253,23 +355,168 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     );
   }
 
-  Widget _buildTabBar(dynamic l10n) {
+  /// 电池头部
+  Widget _buildBatteryHeader(BatteryDetail detail, dynamic l10n) {
+    final isOnline = detail.online == 1;
+
     return Container(
       color: Colors.white,
-      child: TabBar(
-        controller: _tabController,
-        labelColor: AppColors.black06Text,
-        unselectedLabelColor: const Color(0xFF999999),
-        labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-        unselectedLabelStyle: const TextStyle(fontSize: 14),
-        indicatorColor: AppColors.primaryColor,
-        indicatorWeight: 3,
-        tabs: [
-          Tab(text: l10n.deviceDetailTabBasicInfo),
-          Tab(text: l10n.deviceDetailTabPortDetail),
-          Tab(text: l10n.deviceDetailTabAddress),
-          Tab(text: l10n.deviceDetailTabRepairRecords),
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F5F5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: detail.img != null && detail.img!.isNotEmpty
+                ? Image.network(
+                    detail.img!,
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.battery_charging_full,
+                      size: 40,
+                      color: Color(0xFF999999),
+                    ),
+                  )
+                : const Icon(
+                    Icons.battery_charging_full,
+                    size: 40,
+                    color: Color(0xFF999999),
+                  ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'SN: ${detail.deviceSn ?? '-'}',
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black06Text,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _buildStatusBadge(
+                      isOnline ? l10n.online : l10n.offline,
+                      isOnline ? AppColors.primaryColor : Colors.grey,
+                    ),
+                    const SizedBox(width: 8),
+                    if (detail.soc != null)
+                      Text(
+                        'SOC: ${detail.soc}%',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF666666),
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ],
+      ),
+    );
+  }
+
+  /// 车辆头部
+  Widget _buildVehicleHeader(VehicleDetail detail, dynamic l10n) {
+    final hasOwner = detail.ownerName != null && detail.ownerName!.isNotEmpty;
+
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Container(
+            width: 72,
+            height: 72,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F5F5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: detail.img != null && detail.img!.isNotEmpty
+                ? Image.network(
+                    detail.img!,
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.electric_moped,
+                      size: 40,
+                      color: Color(0xFF999999),
+                    ),
+                  )
+                : const Icon(
+                    Icons.electric_moped,
+                    size: 40,
+                    color: Color(0xFF999999),
+                  ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'SN: ${detail.sn ?? '-'}',
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black06Text,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _buildStatusBadge(
+                      hasOwner ? l10n.deviceDetailBound : l10n.deviceDetailUnbound,
+                      hasOwner ? AppColors.primaryColor : Colors.grey,
+                    ),
+                    if (detail.carNumber != null && detail.carNumber!.isNotEmpty) ...[
+                      const SizedBox(width: 8),
+                      Text(
+                        detail.carNumber!,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF666666),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusBadge(String text, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(fontSize: 12, color: color),
       ),
     );
   }
@@ -707,6 +954,222 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     );
   }
 
+  /// 电池基础信息 Tab
+  Widget _buildBatteryBasicInfoTab(dynamic l10n, BatteryDetail detail) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _CardSection(
+          child: Column(
+            children: [
+              _InfoRow(
+                label: l10n.deviceDetailSnLabel,
+                value: detail.deviceSn ?? '-',
+              ),
+              _InfoRow(
+                label: l10n.deviceDetailBatterySocLabel,
+                value: detail.soc != null ? '${detail.soc}%' : '-',
+              ),
+              _InfoRow(
+                label: l10n.deviceDetailBatteryCycleLabel,
+                value: detail.cycle?.toString() ?? '-',
+              ),
+              _InfoRow(
+                label: l10n.deviceDetailBatteryMileLabel,
+                value: detail.mile != null ? '${detail.mile} km' : '-',
+              ),
+              _InfoRow(
+                label: l10n.deviceDetailBatteryTodayMileLabel,
+                value: detail.todayMile != null ? '${detail.todayMile} km' : '-',
+              ),
+              _InfoRow(
+                label: l10n.deviceDetailBatteryAvgSpeedLabel,
+                value: detail.avgSpeed != null
+                    ? '${detail.avgSpeed} km/h'
+                    : '-',
+              ),
+              _InfoRow(
+                label: l10n.deviceDetailBatteryColorLabel,
+                value: detail.color?.toString() ?? '-',
+              ),
+              _InfoRow(
+                label: l10n.deviceDetailSignalTimeLabel,
+                value: detail.signalTime != null
+                    ? _formatTimestamp(detail.signalTime)
+                    : '-',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 电池位置 Tab
+  Widget _buildBatteryLocationTab(dynamic l10n, BatteryDetail detail) {
+    final lat = detail.latitude ?? 0.0;
+    final lng = detail.longitude ?? 0.0;
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _CardSection(
+          child: Column(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: SizedBox(height: 200, child: _buildMap(lat, lng)),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.my_location,
+                    color: Color(0xFF999999),
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '${lng.toStringAsFixed(6)}    ${lat.toStringAsFixed(6)}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.black06Text,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                height: 44,
+                child: OutlinedButton.icon(
+                  onPressed: () => _openNavigation(lat, lng),
+                  icon: const Icon(Icons.navigation),
+                  label: Text(l10n.deviceDetailNavigation),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.black06Text,
+                    side: const BorderSide(color: Color(0xFFEEEEEE)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 车辆基础信息 Tab
+  Widget _buildVehicleBasicInfoTab(dynamic l10n, VehicleDetail detail) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        _CardSection(
+          child: Column(
+            children: [
+              _InfoRow(
+                label: l10n.deviceDetailSnLabel,
+                value: detail.sn ?? '-',
+              ),
+              _InfoRow(
+                label: l10n.vehicleDetailPlateNumber,
+                value: detail.carNumber ?? '-',
+              ),
+              _InfoRow(
+                label: l10n.vehicleDetailVin,
+                value: detail.vin ?? '-',
+              ),
+              _InfoRow(
+                label: l10n.vehicleDetailOwner,
+                value: detail.ownerName ?? '-',
+              ),
+              _InfoRow(
+                label: l10n.vehicleDetailUserPhone,
+                value: detail.phone ?? '-',
+              ),
+              _InfoRow(
+                label: l10n.vehicleDetailMileage,
+                value: detail.mile != null ? '${detail.mile} km' : '-',
+              ),
+              _InfoRow(
+                label: l10n.deviceDetailInputTimeLabel,
+                value: detail.createTime ?? '-',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 保养记录 Tab
+  Widget _buildMaintenanceRecordsTab(dynamic l10n, DeviceDetailState state) {
+    final records = state.maintenanceRecords;
+
+    if (records.isEmpty && !state.maintenanceLoading) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/android/mipmap-xxhdpi/icon_empty_record.png',
+              width: 120,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.deviceDetailMaintenanceEmpty,
+              style: const TextStyle(color: Color(0xFF999999)),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: records.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final record = records[index];
+
+        return _CardSection(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                record.itemName ?? '-',
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black06Text,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                record.log ?? '-',
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xFF666666),
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                record.date ?? (record.createTime != null
+                    ? _formatTimestamp(record.createTime)
+                    : '-'),
+                style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   String _formatTimestamp(int? timestamp) {
     if (timestamp == null || timestamp == 0) return '-';
     final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
@@ -787,7 +1250,180 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   void _setupPort(Cabin port) {
-    // TODO: 实现端口设置功能
+    final l10n = context.l10n;
+    final isDisabled = port.status == 2 || port.status == 0;
+    final isDoorOpen = port.doorStatus == 1;
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 标题
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  '${l10n.deviceDetailPortLabel} ${port.portNo ?? 0}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // 开仓门按钮
+              ListTile(
+                leading: const Icon(Icons.door_front_door_outlined),
+                title: Text(
+                  isDoorOpen
+                      ? l10n.deviceDetailPortOpened
+                      : l10n.deviceDetailPortOpen,
+                  style: TextStyle(
+                    color: isDoorOpen ? Colors.grey : null,
+                  ),
+                ),
+                onTap: isDoorOpen
+                    ? null
+                    : () {
+                        Navigator.pop(ctx);
+                        _confirmOpenDoor(port);
+                      },
+              ),
+
+              // 启用/禁用按钮
+              ListTile(
+                leading: Icon(
+                  isDisabled ? Icons.check_circle_outline : Icons.block,
+                  color: isDisabled ? AppColors.primaryColor : Colors.red,
+                ),
+                title: Text(
+                  isDisabled
+                      ? l10n.deviceDetailPortEnable
+                      : l10n.deviceDetailPortDisable,
+                  style: TextStyle(
+                    color: isDisabled ? AppColors.primaryColor : Colors.red,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pop(ctx);
+                  _confirmTogglePort(port, isDisabled);
+                },
+              ),
+
+              const SizedBox(height: 8),
+
+              // 取消按钮
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    style: OutlinedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                    ),
+                    child: Text(l10n.cancel),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmOpenDoor(Cabin port) async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.confirm),
+        content: Text(l10n.deviceDetailPortOpenConfirm(port.portNo ?? 0)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final success = await ref
+        .read(deviceDetailProvider.notifier)
+        .openCabinDoor(port: port.portNo ?? 0);
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? l10n.deviceDetailPortOpenSuccess
+              : l10n.deviceDetailPortOpenFailed,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmTogglePort(Cabin port, bool enable) async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.confirm),
+        content: Text(
+          enable
+              ? l10n.deviceDetailPortEnableConfirm
+              : l10n.deviceDetailPortDisableConfirm,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final notifier = ref.read(deviceDetailProvider.notifier);
+    final success = enable
+        ? await notifier.enableCabinPort(port: port.portNo ?? 0)
+        : await notifier.disableCabinPort(port: port.portNo ?? 0);
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? (enable
+                  ? l10n.deviceDetailPortEnableSuccess
+                  : l10n.deviceDetailPortDisableSuccess)
+              : l10n.deviceDetailToggleFailed,
+        ),
+      ),
+    );
   }
 
   void _openNavigation(double lat, double lng) {

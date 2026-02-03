@@ -4,9 +4,10 @@ import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_offline_controller.dart';
 
 class CabinetOfflineFaultPage extends ConsumerStatefulWidget {
-  const CabinetOfflineFaultPage({super.key, this.sn});
+  const CabinetOfflineFaultPage({super.key, this.sn, this.port});
 
   final String? sn;
+  final int? port;
 
   @override
   ConsumerState<CabinetOfflineFaultPage> createState() =>
@@ -23,6 +24,9 @@ class _CabinetOfflineFaultPageState
     super.initState();
     if ((widget.sn ?? '').isNotEmpty) {
       _snController.text = widget.sn ?? '';
+    }
+    if (widget.port != null && widget.port! > 0) {
+      _portController.text = widget.port.toString();
     }
   }
 

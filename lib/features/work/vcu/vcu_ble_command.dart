@@ -57,6 +57,15 @@ class VcuBleCommandIds {
   static const String editFrequencyVehicle = '043110019';
   static const String editFrequencyVehicle1 = '043110020';
   static const String editFrequencyGps = '043110021';
+  // 4轮车命令
+  static const String lockCut4 = '043010005';
+  static const String unlockCut4 = '043010004';
+  static const String find4 = '043010006';
+  // 高尔夫车命令 (解锁和锁车使用相同的 BLE ID，通过 bleValue 区分)
+  static const String golfCommand = '043010007';
+  // 其他命令
+  static const String electronicFence = '044010013';
+  static const String reset = '043110004';
 }
 
 class VcuBleUpDataIds {
@@ -84,4 +93,13 @@ const Map<String, String> vcuBleIdToLabel = {
   VcuBleCommandIds.editFrequencyVehicle: '设置车辆上传频率',
   VcuBleCommandIds.editFrequencyVehicle1: '设置车辆上传频率(锂电池)',
   VcuBleCommandIds.editFrequencyGps: '设置 GPS 频率',
+  // 4轮车命令
+  VcuBleCommandIds.lockCut4: '一键锁车+断电(4轮车)',
+  VcuBleCommandIds.unlockCut4: '一键解锁(4轮车)',
+  VcuBleCommandIds.find4: '一键找车(4轮车)',
+  // 高尔夫车命令
+  VcuBleCommandIds.golfCommand: '高尔夫电门控制',
+  // 其他命令
+  VcuBleCommandIds.electronicFence: '电子围栏',
+  VcuBleCommandIds.reset: '复位',
 };

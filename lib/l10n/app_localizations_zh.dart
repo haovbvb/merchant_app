@@ -3213,6 +3213,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetAuthRecordTitle => '授权记录';
 
   @override
+  String get cabinetAuthCancelTitle => '取消授权';
+
+  @override
+  String get cabinetAuthCancelConfirm => '确定要取消此授权吗？';
+
+  @override
+  String get cabinetAuthCancelSuccess => '取消成功';
+
+  @override
+  String get cabinetAuthCancelFailed => '取消失败';
+
+  @override
   String get cabinetAuthAllPort => '全部端口';
 
   @override
@@ -3282,12 +3294,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetAuthCancel => '取消授权';
 
   @override
-  String get cabinetAuthCancelSuccess => '取消成功';
-
-  @override
-  String get cabinetAuthCancelFailed => '取消失败';
-
-  @override
   String get cabinetAuthRecordSection => '授权记录';
 
   @override
@@ -3301,6 +3307,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cabinetOperateAuthorization => '柜机授权运维';
+
+  @override
+  String get cabinetOperateOpenDoor => '电柜开门';
+
+  @override
+  String get cabinetOperateOpenDoorConfirmTitle => '开门确认';
+
+  @override
+  String get cabinetOperateOpenDoorConfirmContent => '确定要打开该电柜后门吗？';
+
+  @override
+  String get cabinetOperateOpenDoorSuccess => '开门成功';
+
+  @override
+  String get cabinetOperateOpenDoorFailed => '开门失败';
 
   @override
   String get cabinetOperateOfflineOM => '离线柜机运维';
@@ -3385,6 +3406,98 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cabinetOfflinePortLabel => '仓门号';
+
+  @override
+  String get cabinetOfflineDeviceInfoTab => '设备信息';
+
+  @override
+  String get cabinetOfflineSlotModel => '仓位型号';
+
+  @override
+  String get cabinetOfflineSwapThreshold => '换电阈值';
+
+  @override
+  String get cabinetOfflineApn => 'APN';
+
+  @override
+  String get cabinetOfflineVolume => '音量';
+
+  @override
+  String get cabinetOfflinePlatformUrl => '平台地址';
+
+  @override
+  String get cabinetOfflineRestart => '重启';
+
+  @override
+  String get cabinetOfflineOpenDoor => '开柜门';
+
+  @override
+  String get cabinetOfflineRestartTitle => '确认重启';
+
+  @override
+  String get cabinetOfflineRestartConfirm => '确定要重启电柜吗？';
+
+  @override
+  String get cabinetOfflineOpenDoorTitle => '确认开门';
+
+  @override
+  String get cabinetOfflineOpenDoorConfirm => '确定要打开柜门吗？请确保蓝牙已连接。';
+
+  @override
+  String get cabinetOfflineSmokeAlarm => '烟雾报警';
+
+  @override
+  String get cabinetOfflineWaterAlarm => '漏水报警';
+
+  @override
+  String get cabinetOfflineChargerStatus => '充电器状态';
+
+  @override
+  String get cabinetOfflineNoAlarm => '无报警';
+
+  @override
+  String get cabinetOfflineNormal => '正常';
+
+  @override
+  String get cabinetOfflineCabinEmpty => '暂无仓位信息';
+
+  @override
+  String cabinetOfflineCabinSlot(int portNo) {
+    return '仓位 $portNo';
+  }
+
+  @override
+  String get cabinetOfflineCabinCanUse => '可换电';
+
+  @override
+  String get cabinetOfflineCabinNoUse => '不可用';
+
+  @override
+  String get cabinetOfflineCabinNoBattery => '无电池';
+
+  @override
+  String get cabinetOfflineCabinOpenDoor => '开门';
+
+  @override
+  String get cabinetOfflineCabinCloseDoor => '关门';
+
+  @override
+  String get cabinetOfflineCabinEnable => '启用';
+
+  @override
+  String get cabinetOfflineCabinDisable => '禁用';
+
+  @override
+  String get cabinetOfflineCabinCheckFault => '查看故障';
+
+  @override
+  String get cabinetOfflineCabinOperateTitle => '仓位操作';
+
+  @override
+  String get cabinetOfflineBleConnected => '蓝牙已连接';
+
+  @override
+  String get cabinetOfflineBleDisconnected => '蓝牙未连接';
 
   @override
   String get cabinetOfflineFaultEmpty => '暂无故障记录';
@@ -3624,6 +3737,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceDetailTabRepairRecords => '维修记录';
 
   @override
+  String get deviceDetailTabMaintenance => '保养记录';
+
+  @override
   String get deviceDetailInputTimeLabel => '入库时间';
 
   @override
@@ -3643,6 +3759,45 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get deviceDetailPhotoLabel => '现场照片';
+
+  @override
+  String get deviceDetailBatterySocLabel => '电量';
+
+  @override
+  String get deviceDetailBatteryCycleLabel => '循环次数';
+
+  @override
+  String get deviceDetailBatteryMileLabel => '总里程';
+
+  @override
+  String get deviceDetailBatteryTodayMileLabel => '今日里程';
+
+  @override
+  String get deviceDetailBatteryAvgSpeedLabel => '平均速度';
+
+  @override
+  String get deviceDetailBatteryColorLabel => '颜色';
+
+  @override
+  String get deviceDetailSignalTimeLabel => '最后信号时间';
+
+  @override
+  String get deviceDetailBound => '已绑定';
+
+  @override
+  String get deviceDetailUnbound => '未绑定';
+
+  @override
+  String get online => '在线';
+
+  @override
+  String get offline => '离线';
+
+  @override
+  String get sale => '销售';
+
+  @override
+  String get lease => '租赁';
 
   @override
   String get deviceDetailPortFilterAll => '全部';
@@ -3669,6 +3824,44 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceDetailPortSetup => '设置';
 
   @override
+  String get deviceDetailPortLabel => '仓位';
+
+  @override
+  String get deviceDetailPortOpen => '开仓门';
+
+  @override
+  String get deviceDetailPortOpened => '已开门';
+
+  @override
+  String get deviceDetailPortEnable => '启用';
+
+  @override
+  String get deviceDetailPortDisable => '禁用';
+
+  @override
+  String deviceDetailPortOpenConfirm(Object portNo) {
+    return '确认开启 $portNo 号仓门？';
+  }
+
+  @override
+  String get deviceDetailPortEnableConfirm => '确认启用该仓位？';
+
+  @override
+  String get deviceDetailPortDisableConfirm => '确认禁用该仓位？';
+
+  @override
+  String get deviceDetailPortOpenSuccess => '开仓门成功';
+
+  @override
+  String get deviceDetailPortOpenFailed => '开仓门失败';
+
+  @override
+  String get deviceDetailPortEnableSuccess => '启用成功';
+
+  @override
+  String get deviceDetailPortDisableSuccess => '禁用成功';
+
+  @override
   String get deviceDetailNavigation => '导航';
 
   @override
@@ -3688,6 +3881,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vehicleDetailMileage => '里程';
+
+  @override
+  String get vehicleDetailVin => 'VIN 码';
+
+  @override
+  String get vehicleDetailOwner => '车主姓名';
 
   @override
   String get vehicleDetailViewMore => '查看更多';

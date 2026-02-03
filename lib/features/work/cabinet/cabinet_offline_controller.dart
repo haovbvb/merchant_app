@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/data/models/cabin_fault.dart';
+import 'package:merchant_app/data/models/cabinet_cabin.dart';
 import 'package:merchant_app/data/models/cabinet_detail_base_info_bean.dart';
 import 'package:merchant_app/data/models/layout_cabinet_info.dart';
 import 'package:merchant_app/network/api_path.dart';
@@ -11,6 +12,12 @@ class CabinetOfflineState {
   final String? secretKey;
   final bool layoutLoading;
   final LayoutCabinetInfo? layoutInfo;
+  /// 蓝牙连接状态
+  final bool bleConnected;
+  /// 仓位列表 (蓝牙获取)
+  final List<CabinetCabin> cabins;
+  /// 换电阈值
+  final int swapThreshold;
 
   const CabinetOfflineState({
     this.loading = false,
@@ -18,6 +25,9 @@ class CabinetOfflineState {
     this.secretKey,
     this.layoutLoading = false,
     this.layoutInfo,
+    this.bleConnected = false,
+    this.cabins = const [],
+    this.swapThreshold = 100,
   });
 
   CabinetOfflineState copyWith({
@@ -26,6 +36,9 @@ class CabinetOfflineState {
     String? secretKey,
     bool? layoutLoading,
     LayoutCabinetInfo? layoutInfo,
+    bool? bleConnected,
+    List<CabinetCabin>? cabins,
+    int? swapThreshold,
   }) {
     return CabinetOfflineState(
       loading: loading ?? this.loading,
@@ -33,6 +46,9 @@ class CabinetOfflineState {
       secretKey: secretKey ?? this.secretKey,
       layoutLoading: layoutLoading ?? this.layoutLoading,
       layoutInfo: layoutInfo ?? this.layoutInfo,
+      bleConnected: bleConnected ?? this.bleConnected,
+      cabins: cabins ?? this.cabins,
+      swapThreshold: swapThreshold ?? this.swapThreshold,
     );
   }
 }
@@ -85,6 +101,80 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
       layoutLoading: false,
       layoutInfo: response.result,
     );
+  }
+
+  /// 根据仓位数量初始化仓位列表
+  void initCabins(int storeNum) {
+    if (storeNum <= 0) return;
+    final cabins = List.generate(
+      storeNum,
+      (i) => CabinetCabin(
+        portNo: i + 1,
+        slotName: '仓位 ${i + 1}',
+      ),
+    );
+    state = state.copyWith(cabins: cabins);
+  }
+
+  /// 更新蓝牙连接状态
+  void setBleConnected(bool connected) {
+    state = state.copyWith(bleConnected: connected);
+  }
+
+  /// 更新仓位电池状态
+  void updateCabinBatteryStatus(int portNo, int batteryStatus) {
+    final cabins = state.cabins.map((c) {
+      if (c.portNo == portNo) {
+        return c.copyWith(batteryStatus: batteryStatus == 0 ? 0 : 1);
+      }
+      return c;
+    }).toList();
+    state = state.copyWith(cabins: cabins);
+  }
+
+  /// 更新仓位电池SN
+  void updateCabinBatterySn(int portNo, String batterySn) {
+    final cabins = state.cabins.map((c) {
+      if (c.portNo == portNo) {
+        return c.copyWith(batterySn: batterySn);
+      }
+      return c;
+    }).toList();
+    state = state.copyWith(cabins: cabins);
+  }
+
+  /// 更新仓位电池电量
+  void updateCabinBatterySoc(int portNo, int soc) {
+    final threshold = state.swapThreshold;
+    final cabins = state.cabins.map((c) {
+      if (c.portNo == portNo) {
+        return c.copyWith(
+          batterySoc: soc,
+          swapFlag: soc >= threshold ? 1 : 0,
+        );
+      }
+      return c;
+    }).toList();
+    state = state.copyWith(cabins: cabins);
+  }
+
+  /// 更新仓门状态
+  void updateCabinDoorStatus(int portNo, int status) {
+    final cabins = state.cabins.map((c) {
+      if (c.portNo == portNo) {
+        return c.copyWith(status: status);
+      }
+      return c;
+    }).toList();
+    state = state.copyWith(cabins: cabins);
+  }
+
+  /// 更新换电阈值
+  void updateSwapThreshold(int threshold) {
+    final cabins = state.cabins.map((c) {
+      return c.copyWith(swapFlag: c.batterySoc >= threshold ? 1 : 0);
+    }).toList();
+    state = state.copyWith(swapThreshold: threshold, cabins: cabins);
   }
 }
 

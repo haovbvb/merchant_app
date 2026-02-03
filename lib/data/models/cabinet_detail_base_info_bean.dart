@@ -39,6 +39,13 @@ class CabinetDetailBaseInfoBean {
   final String? macId;
   final String? mark;
   final String? online;
+  final String? stationModelName;
+  final int? swapThreshold;
+  final String? apn;
+  final int? volume;
+  final String? platformUrl;
+  final int? maxChargeSoc;
+  final int? hasPermission;
   final List<Map<String, dynamic>> stationManagerList;
 
   const CabinetDetailBaseInfoBean({
@@ -79,6 +86,13 @@ class CabinetDetailBaseInfoBean {
     this.macId,
     this.mark,
     this.online,
+    this.stationModelName,
+    this.swapThreshold,
+    this.apn,
+    this.volume,
+    this.platformUrl,
+    this.maxChargeSoc,
+    this.hasPermission,
     this.stationManagerList = const [],
   });
 
@@ -125,6 +139,13 @@ class CabinetDetailBaseInfoBean {
       macId: json['macId']?.toString(),
       mark: json['mark']?.toString(),
       online: json['online']?.toString(),
+      stationModelName: json['stationModelName']?.toString(),
+      swapThreshold: (json['swapThreshold'] as num?)?.toInt(),
+      apn: json['apn']?.toString(),
+      volume: (json['volume'] as num?)?.toInt(),
+      platformUrl: json['platformUrl']?.toString(),
+      maxChargeSoc: (json['maxChargeSoc'] as num?)?.toInt(),
+      hasPermission: (json['hasPermission'] as num?)?.toInt(),
       stationManagerList: managerList is List
           ? managerList
               .whereType<Map<String, dynamic>>()
@@ -172,6 +193,13 @@ class CabinetDetailBaseInfoBean {
         'macId': macId,
         'mark': mark,
         'online': online,
+        'stationModelName': stationModelName,
+        'swapThreshold': swapThreshold,
+        'apn': apn,
+        'volume': volume,
+        'platformUrl': platformUrl,
+        'maxChargeSoc': maxChargeSoc,
+        'hasPermission': hasPermission,
         'stationManagerList': stationManagerList,
       };
 }

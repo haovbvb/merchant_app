@@ -387,15 +387,33 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
     return response.isSuccess;
   }
 
-  Future<bool> openCabinDoor({required int port}) async {
+  /// 端口控制 - 对应 Android 的 openCabinDoor
+  /// [type]: 1=开仓门, 2=禁用端口, 3=启用端口
+  Future<bool> controlCabinPort({required int port, required int type}) async {
     final value = state.sn.trim();
     if (value.isEmpty) return false;
     final response = await _api.post<Object>(
       ApiPath.cabinetCtrlPort,
-      data: {'sn': value, 'port': port},
+      data: {'sn': value, 'port': port, 'type': type},
       parser: (json) => json ?? Object(),
     );
+    if (response.isSuccess) {
+      // 刷新端口列表
+      await loadCabinPorts(sn: value);
+    }
     return response.isSuccess;
+  }
+
+  Future<bool> openCabinDoor({required int port}) async {
+    return controlCabinPort(port: port, type: 1);
+  }
+
+  Future<bool> disableCabinPort({required int port}) async {
+    return controlCabinPort(port: port, type: 2);
+  }
+
+  Future<bool> enableCabinPort({required int port}) async {
+    return controlCabinPort(port: port, type: 3);
   }
 
   Future<bool> openCabinBackDoor() async {

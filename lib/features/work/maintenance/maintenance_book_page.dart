@@ -290,8 +290,9 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
   }
 
   void _viewRecords(String sn) {
+    if (sn.isEmpty) return;
     AppRouter.router.push(
-      '${AppRouter.workModulePath}/device_detail',
+      '${AppRouter.workModulePath}/device_detail?recordNo=$sn',
       extra: 'Device Detail',
     );
   }

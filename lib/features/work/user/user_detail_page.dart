@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:merchant_app/app/router.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/bind_device.dart';
@@ -469,31 +470,47 @@ class _DeviceSheet extends StatelessWidget {
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final device = devices[index];
-                      return Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8F8F8),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              device.deviceSn ?? '-',
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w500,
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pop();
+                          _navigateToDeviceDetail(context, device);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8F8F8),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      device.deviceSn ?? '-',
+                                      style: const TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      device.modelName ?? device.model ?? '-',
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        color: Color(0xFF999999),
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              device.modelName ?? device.model ?? '-',
-                              style: const TextStyle(
-                                fontSize: 13,
+                              const Icon(
+                                Icons.chevron_right,
                                 color: Color(0xFF999999),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     },
@@ -501,6 +518,16 @@ class _DeviceSheet extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _navigateToDeviceDetail(BuildContext context, BindDevice device) {
+    if (device.deviceSn == null || device.deviceSn!.isEmpty) return;
+    // deviceType: 1=电池, 2=车辆, 3=电柜
+    final typeParam = device.deviceType?.toString() ?? '1';
+    AppRouter.router.push(
+      '${AppRouter.workModulePath}/device_detail?recordNo=${device.deviceSn}&type=$typeParam',
+      extra: 'Device Detail',
     );
   }
 }

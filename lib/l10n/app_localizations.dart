@@ -6503,6 +6503,30 @@ abstract class AppLocalizations {
   /// **'Authorized Record'**
   String get cabinetAuthRecordTitle;
 
+  /// No description provided for @cabinetAuthCancelTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel Authorization'**
+  String get cabinetAuthCancelTitle;
+
+  /// No description provided for @cabinetAuthCancelConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to cancel this authorization?'**
+  String get cabinetAuthCancelConfirm;
+
+  /// No description provided for @cabinetAuthCancelSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled'**
+  String get cabinetAuthCancelSuccess;
+
+  /// No description provided for @cabinetAuthCancelFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel failed'**
+  String get cabinetAuthCancelFailed;
+
   /// No description provided for @cabinetAuthAllPort.
   ///
   /// In en, this message translates to:
@@ -6641,18 +6665,6 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get cabinetAuthCancel;
 
-  /// No description provided for @cabinetAuthCancelSuccess.
-  ///
-  /// In en, this message translates to:
-  /// **'Canceled'**
-  String get cabinetAuthCancelSuccess;
-
-  /// No description provided for @cabinetAuthCancelFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'Cancel failed'**
-  String get cabinetAuthCancelFailed;
-
   /// No description provided for @cabinetAuthRecordSection.
   ///
   /// In en, this message translates to:
@@ -6682,6 +6694,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Station operation authorization'**
   String get cabinetOperateAuthorization;
+
+  /// No description provided for @cabinetOperateOpenDoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Cabinet Door'**
+  String get cabinetOperateOpenDoor;
+
+  /// No description provided for @cabinetOperateOpenDoorConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Open Door'**
+  String get cabinetOperateOpenDoorConfirmTitle;
+
+  /// No description provided for @cabinetOperateOpenDoorConfirmContent.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to open the cabinet back door?'**
+  String get cabinetOperateOpenDoorConfirmContent;
+
+  /// No description provided for @cabinetOperateOpenDoorSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Door opened successfully'**
+  String get cabinetOperateOpenDoorSuccess;
+
+  /// No description provided for @cabinetOperateOpenDoorFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to open door'**
+  String get cabinetOperateOpenDoorFailed;
 
   /// No description provided for @cabinetOperateOfflineOM.
   ///
@@ -6850,6 +6892,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Port'**
   String get cabinetOfflinePortLabel;
+
+  /// No description provided for @cabinetOfflineDeviceInfoTab.
+  ///
+  /// In en, this message translates to:
+  /// **'Device Info'**
+  String get cabinetOfflineDeviceInfoTab;
+
+  /// No description provided for @cabinetOfflineSlotModel.
+  ///
+  /// In en, this message translates to:
+  /// **'Slot Model'**
+  String get cabinetOfflineSlotModel;
+
+  /// No description provided for @cabinetOfflineSwapThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap Threshold'**
+  String get cabinetOfflineSwapThreshold;
+
+  /// No description provided for @cabinetOfflineApn.
+  ///
+  /// In en, this message translates to:
+  /// **'APN'**
+  String get cabinetOfflineApn;
+
+  /// No description provided for @cabinetOfflineVolume.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume'**
+  String get cabinetOfflineVolume;
+
+  /// No description provided for @cabinetOfflinePlatformUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform URL'**
+  String get cabinetOfflinePlatformUrl;
+
+  /// No description provided for @cabinetOfflineRestart.
+  ///
+  /// In en, this message translates to:
+  /// **'Restart'**
+  String get cabinetOfflineRestart;
+
+  /// No description provided for @cabinetOfflineOpenDoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Door'**
+  String get cabinetOfflineOpenDoor;
+
+  /// No description provided for @cabinetOfflineRestartTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Restart'**
+  String get cabinetOfflineRestartTitle;
+
+  /// No description provided for @cabinetOfflineRestartConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to restart the cabinet?'**
+  String get cabinetOfflineRestartConfirm;
+
+  /// No description provided for @cabinetOfflineOpenDoorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Open Door'**
+  String get cabinetOfflineOpenDoorTitle;
+
+  /// No description provided for @cabinetOfflineOpenDoorConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to open the door? Please ensure Bluetooth is connected.'**
+  String get cabinetOfflineOpenDoorConfirm;
+
+  /// No description provided for @cabinetOfflineSmokeAlarm.
+  ///
+  /// In en, this message translates to:
+  /// **'Smoke Alarm'**
+  String get cabinetOfflineSmokeAlarm;
+
+  /// No description provided for @cabinetOfflineWaterAlarm.
+  ///
+  /// In en, this message translates to:
+  /// **'Water Leak Alarm'**
+  String get cabinetOfflineWaterAlarm;
+
+  /// No description provided for @cabinetOfflineChargerStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Charger Status'**
+  String get cabinetOfflineChargerStatus;
+
+  /// No description provided for @cabinetOfflineNoAlarm.
+  ///
+  /// In en, this message translates to:
+  /// **'No Alarm'**
+  String get cabinetOfflineNoAlarm;
+
+  /// No description provided for @cabinetOfflineNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get cabinetOfflineNormal;
+
+  /// No description provided for @cabinetOfflineCabinEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No cabin info'**
+  String get cabinetOfflineCabinEmpty;
+
+  /// No description provided for @cabinetOfflineCabinSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Slot {portNo}'**
+  String cabinetOfflineCabinSlot(int portNo);
+
+  /// No description provided for @cabinetOfflineCabinCanUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Available'**
+  String get cabinetOfflineCabinCanUse;
+
+  /// No description provided for @cabinetOfflineCabinNoUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get cabinetOfflineCabinNoUse;
+
+  /// No description provided for @cabinetOfflineCabinNoBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'No Battery'**
+  String get cabinetOfflineCabinNoBattery;
+
+  /// No description provided for @cabinetOfflineCabinOpenDoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Door'**
+  String get cabinetOfflineCabinOpenDoor;
+
+  /// No description provided for @cabinetOfflineCabinCloseDoor.
+  ///
+  /// In en, this message translates to:
+  /// **'Close Door'**
+  String get cabinetOfflineCabinCloseDoor;
+
+  /// No description provided for @cabinetOfflineCabinEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get cabinetOfflineCabinEnable;
+
+  /// No description provided for @cabinetOfflineCabinDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get cabinetOfflineCabinDisable;
+
+  /// No description provided for @cabinetOfflineCabinCheckFault.
+  ///
+  /// In en, this message translates to:
+  /// **'Check Fault'**
+  String get cabinetOfflineCabinCheckFault;
+
+  /// No description provided for @cabinetOfflineCabinOperateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cabin Operation'**
+  String get cabinetOfflineCabinOperateTitle;
+
+  /// No description provided for @cabinetOfflineBleConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Connected'**
+  String get cabinetOfflineBleConnected;
+
+  /// No description provided for @cabinetOfflineBleDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Disconnected'**
+  String get cabinetOfflineBleDisconnected;
 
   /// No description provided for @cabinetOfflineFaultEmpty.
   ///
@@ -7325,6 +7547,12 @@ abstract class AppLocalizations {
   /// **'Repair Records'**
   String get deviceDetailTabRepairRecords;
 
+  /// No description provided for @deviceDetailTabMaintenance.
+  ///
+  /// In en, this message translates to:
+  /// **'Maintenance'**
+  String get deviceDetailTabMaintenance;
+
   /// No description provided for @deviceDetailInputTimeLabel.
   ///
   /// In en, this message translates to:
@@ -7366,6 +7594,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Photos'**
   String get deviceDetailPhotoLabel;
+
+  /// No description provided for @deviceDetailBatterySocLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'SOC'**
+  String get deviceDetailBatterySocLabel;
+
+  /// No description provided for @deviceDetailBatteryCycleLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle Count'**
+  String get deviceDetailBatteryCycleLabel;
+
+  /// No description provided for @deviceDetailBatteryMileLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Mileage'**
+  String get deviceDetailBatteryMileLabel;
+
+  /// No description provided for @deviceDetailBatteryTodayMileLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Today Mileage'**
+  String get deviceDetailBatteryTodayMileLabel;
+
+  /// No description provided for @deviceDetailBatteryAvgSpeedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg Speed'**
+  String get deviceDetailBatteryAvgSpeedLabel;
+
+  /// No description provided for @deviceDetailBatteryColorLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Color'**
+  String get deviceDetailBatteryColorLabel;
+
+  /// No description provided for @deviceDetailSignalTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Last Signal Time'**
+  String get deviceDetailSignalTimeLabel;
+
+  /// No description provided for @deviceDetailBound.
+  ///
+  /// In en, this message translates to:
+  /// **'Bound'**
+  String get deviceDetailBound;
+
+  /// No description provided for @deviceDetailUnbound.
+  ///
+  /// In en, this message translates to:
+  /// **'Unbound'**
+  String get deviceDetailUnbound;
+
+  /// No description provided for @online.
+  ///
+  /// In en, this message translates to:
+  /// **'Online'**
+  String get online;
+
+  /// No description provided for @offline.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline'**
+  String get offline;
+
+  /// No description provided for @sale.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale'**
+  String get sale;
+
+  /// No description provided for @lease.
+  ///
+  /// In en, this message translates to:
+  /// **'Lease'**
+  String get lease;
 
   /// No description provided for @deviceDetailPortFilterAll.
   ///
@@ -7415,6 +7721,78 @@ abstract class AppLocalizations {
   /// **'Set up'**
   String get deviceDetailPortSetup;
 
+  /// No description provided for @deviceDetailPortLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Port'**
+  String get deviceDetailPortLabel;
+
+  /// No description provided for @deviceDetailPortOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Door'**
+  String get deviceDetailPortOpen;
+
+  /// No description provided for @deviceDetailPortOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Door Opened'**
+  String get deviceDetailPortOpened;
+
+  /// No description provided for @deviceDetailPortEnable.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable'**
+  String get deviceDetailPortEnable;
+
+  /// No description provided for @deviceDetailPortDisable.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable'**
+  String get deviceDetailPortDisable;
+
+  /// No description provided for @deviceDetailPortOpenConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm to open port {portNo} door?'**
+  String deviceDetailPortOpenConfirm(Object portNo);
+
+  /// No description provided for @deviceDetailPortEnableConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm to enable this port?'**
+  String get deviceDetailPortEnableConfirm;
+
+  /// No description provided for @deviceDetailPortDisableConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm to disable this port?'**
+  String get deviceDetailPortDisableConfirm;
+
+  /// No description provided for @deviceDetailPortOpenSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Door opened successfully'**
+  String get deviceDetailPortOpenSuccess;
+
+  /// No description provided for @deviceDetailPortOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to open door'**
+  String get deviceDetailPortOpenFailed;
+
+  /// No description provided for @deviceDetailPortEnableSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Port enabled successfully'**
+  String get deviceDetailPortEnableSuccess;
+
+  /// No description provided for @deviceDetailPortDisableSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Port disabled successfully'**
+  String get deviceDetailPortDisableSuccess;
+
   /// No description provided for @deviceDetailNavigation.
   ///
   /// In en, this message translates to:
@@ -7456,6 +7834,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Mileage'**
   String get vehicleDetailMileage;
+
+  /// No description provided for @vehicleDetailVin.
+  ///
+  /// In en, this message translates to:
+  /// **'VIN'**
+  String get vehicleDetailVin;
+
+  /// No description provided for @vehicleDetailOwner.
+  ///
+  /// In en, this message translates to:
+  /// **'Owner Name'**
+  String get vehicleDetailOwner;
 
   /// No description provided for @vehicleDetailViewMore.
   ///

@@ -3213,6 +3213,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetAuthRecordTitle => 'Authorized Record';
 
   @override
+  String get cabinetAuthCancelTitle => 'Cancel Authorization';
+
+  @override
+  String get cabinetAuthCancelConfirm => 'Are you sure you want to cancel this authorization?';
+
+  @override
+  String get cabinetAuthCancelSuccess => 'Canceled';
+
+  @override
+  String get cabinetAuthCancelFailed => 'Cancel failed';
+
+  @override
   String get cabinetAuthAllPort => 'All port';
 
   @override
@@ -3282,12 +3294,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetAuthCancel => 'Cancel';
 
   @override
-  String get cabinetAuthCancelSuccess => 'Canceled';
-
-  @override
-  String get cabinetAuthCancelFailed => 'Cancel failed';
-
-  @override
   String get cabinetAuthRecordSection => 'Authorization Records';
 
   @override
@@ -3301,6 +3307,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cabinetOperateAuthorization => 'Station operation authorization';
+
+  @override
+  String get cabinetOperateOpenDoor => 'Open Cabinet Door';
+
+  @override
+  String get cabinetOperateOpenDoorConfirmTitle => 'Confirm Open Door';
+
+  @override
+  String get cabinetOperateOpenDoorConfirmContent => 'Are you sure you want to open the cabinet back door?';
+
+  @override
+  String get cabinetOperateOpenDoorSuccess => 'Door opened successfully';
+
+  @override
+  String get cabinetOperateOpenDoorFailed => 'Failed to open door';
 
   @override
   String get cabinetOperateOfflineOM => 'Offline station O&M';
@@ -3385,6 +3406,98 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cabinetOfflinePortLabel => 'Port';
+
+  @override
+  String get cabinetOfflineDeviceInfoTab => 'Device Info';
+
+  @override
+  String get cabinetOfflineSlotModel => 'Slot Model';
+
+  @override
+  String get cabinetOfflineSwapThreshold => 'Swap Threshold';
+
+  @override
+  String get cabinetOfflineApn => 'APN';
+
+  @override
+  String get cabinetOfflineVolume => 'Volume';
+
+  @override
+  String get cabinetOfflinePlatformUrl => 'Platform URL';
+
+  @override
+  String get cabinetOfflineRestart => 'Restart';
+
+  @override
+  String get cabinetOfflineOpenDoor => 'Open Door';
+
+  @override
+  String get cabinetOfflineRestartTitle => 'Confirm Restart';
+
+  @override
+  String get cabinetOfflineRestartConfirm => 'Are you sure you want to restart the cabinet?';
+
+  @override
+  String get cabinetOfflineOpenDoorTitle => 'Confirm Open Door';
+
+  @override
+  String get cabinetOfflineOpenDoorConfirm => 'Are you sure you want to open the door? Please ensure Bluetooth is connected.';
+
+  @override
+  String get cabinetOfflineSmokeAlarm => 'Smoke Alarm';
+
+  @override
+  String get cabinetOfflineWaterAlarm => 'Water Leak Alarm';
+
+  @override
+  String get cabinetOfflineChargerStatus => 'Charger Status';
+
+  @override
+  String get cabinetOfflineNoAlarm => 'No Alarm';
+
+  @override
+  String get cabinetOfflineNormal => 'Normal';
+
+  @override
+  String get cabinetOfflineCabinEmpty => 'No cabin info';
+
+  @override
+  String cabinetOfflineCabinSlot(int portNo) {
+    return 'Slot $portNo';
+  }
+
+  @override
+  String get cabinetOfflineCabinCanUse => 'Available';
+
+  @override
+  String get cabinetOfflineCabinNoUse => 'Unavailable';
+
+  @override
+  String get cabinetOfflineCabinNoBattery => 'No Battery';
+
+  @override
+  String get cabinetOfflineCabinOpenDoor => 'Open Door';
+
+  @override
+  String get cabinetOfflineCabinCloseDoor => 'Close Door';
+
+  @override
+  String get cabinetOfflineCabinEnable => 'Enable';
+
+  @override
+  String get cabinetOfflineCabinDisable => 'Disable';
+
+  @override
+  String get cabinetOfflineCabinCheckFault => 'Check Fault';
+
+  @override
+  String get cabinetOfflineCabinOperateTitle => 'Cabin Operation';
+
+  @override
+  String get cabinetOfflineBleConnected => 'Bluetooth Connected';
+
+  @override
+  String get cabinetOfflineBleDisconnected => 'Bluetooth Disconnected';
 
   @override
   String get cabinetOfflineFaultEmpty => 'No fault records';
@@ -3624,6 +3737,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceDetailTabRepairRecords => 'Repair Records';
 
   @override
+  String get deviceDetailTabMaintenance => 'Maintenance';
+
+  @override
   String get deviceDetailInputTimeLabel => 'Input Time';
 
   @override
@@ -3643,6 +3759,45 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deviceDetailPhotoLabel => 'Photos';
+
+  @override
+  String get deviceDetailBatterySocLabel => 'SOC';
+
+  @override
+  String get deviceDetailBatteryCycleLabel => 'Cycle Count';
+
+  @override
+  String get deviceDetailBatteryMileLabel => 'Total Mileage';
+
+  @override
+  String get deviceDetailBatteryTodayMileLabel => 'Today Mileage';
+
+  @override
+  String get deviceDetailBatteryAvgSpeedLabel => 'Avg Speed';
+
+  @override
+  String get deviceDetailBatteryColorLabel => 'Color';
+
+  @override
+  String get deviceDetailSignalTimeLabel => 'Last Signal Time';
+
+  @override
+  String get deviceDetailBound => 'Bound';
+
+  @override
+  String get deviceDetailUnbound => 'Unbound';
+
+  @override
+  String get online => 'Online';
+
+  @override
+  String get offline => 'Offline';
+
+  @override
+  String get sale => 'Sale';
+
+  @override
+  String get lease => 'Lease';
 
   @override
   String get deviceDetailPortFilterAll => 'All';
@@ -3669,6 +3824,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceDetailPortSetup => 'Set up';
 
   @override
+  String get deviceDetailPortLabel => 'Port';
+
+  @override
+  String get deviceDetailPortOpen => 'Open Door';
+
+  @override
+  String get deviceDetailPortOpened => 'Door Opened';
+
+  @override
+  String get deviceDetailPortEnable => 'Enable';
+
+  @override
+  String get deviceDetailPortDisable => 'Disable';
+
+  @override
+  String deviceDetailPortOpenConfirm(Object portNo) {
+    return 'Confirm to open port $portNo door?';
+  }
+
+  @override
+  String get deviceDetailPortEnableConfirm => 'Confirm to enable this port?';
+
+  @override
+  String get deviceDetailPortDisableConfirm => 'Confirm to disable this port?';
+
+  @override
+  String get deviceDetailPortOpenSuccess => 'Door opened successfully';
+
+  @override
+  String get deviceDetailPortOpenFailed => 'Failed to open door';
+
+  @override
+  String get deviceDetailPortEnableSuccess => 'Port enabled successfully';
+
+  @override
+  String get deviceDetailPortDisableSuccess => 'Port disabled successfully';
+
+  @override
   String get deviceDetailNavigation => 'Navigation';
 
   @override
@@ -3688,6 +3881,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vehicleDetailMileage => 'Mileage';
+
+  @override
+  String get vehicleDetailVin => 'VIN';
+
+  @override
+  String get vehicleDetailOwner => 'Owner Name';
 
   @override
   String get vehicleDetailViewMore => 'View More';

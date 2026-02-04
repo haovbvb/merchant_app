@@ -1,4 +1,4 @@
-package com.example.merchant_app
+package com.okla.merchant
 
 import io.flutter.embedding.android.FlutterActivity
 

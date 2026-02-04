@@ -64,17 +64,18 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        centerTitle: false,
+        centerTitle: true,
       ),
       body: Column(
         children: [
           // Filter tabs
           Container(
-            color: Colors.white,
+            color: Colors.transparent,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: List.generate(tabs.length, (index) {
                   final isSelected = _selectedTabIndex == index;
                   return Padding(
@@ -85,16 +86,23 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage> {
                         notifier.refresh(status: _statusForTab(index));
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primaryColor : const Color(0xFFF5F5F5),
-                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(
+                            color: isSelected
+                                ? AppColors.primaryColor
+                                : Colors.white,
+                          ),
                         ),
                         child: Text(
                           tabs[index],
                           style: TextStyle(
                             fontSize: 14,
-                            color: isSelected ? Colors.white : const Color(0xFF666666),
+                            color: isSelected
+                                ? AppColors.primaryColor
+                                : const Color(0xFF666666),
                             fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
                           ),
                         ),

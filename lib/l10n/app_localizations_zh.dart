@@ -1638,6 +1638,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceDetailPhoneLabel => '手机';
 
   @override
+  String get deviceDetailInsuranceNumberLabel => '保险号';
+
+  @override
+  String get deviceDetailBindingTimeLabel => '绑定时间';
+
+  @override
   String get deviceDetailMotorNumberLabel => '电机编号';
 
   @override
@@ -3871,10 +3877,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceDetailRepairMissingParts => '缺件';
 
   @override
-  String get vehicleDetailBindingId => '绑定 ID';
+  String get vehicleDetailBindingId => '绑定用户';
 
   @override
-  String get vehicleDetailUserPhone => '用户手机';
+  String get vehicleDetailUserPhone => '用户手机号';
 
   @override
   String get vehicleDetailPlateNumber => '车牌号';
@@ -3886,7 +3892,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vehicleDetailVin => 'VIN 码';
 
   @override
-  String get vehicleDetailOwner => '车主姓名';
+  String get vehicleDetailOwner => '用户姓名';
 
   @override
   String get vehicleDetailViewMore => '查看更多';

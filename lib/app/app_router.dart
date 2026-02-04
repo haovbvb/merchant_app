@@ -101,22 +101,22 @@ class AppRouter {
     redirect: (context, state) {
       final ref = ProviderScope.containerOf(context, listen: false);
       final authState = ref.read(authNotifierProvider);
-      // logI(
-      //   '[AppRouter] redirect stateXXX=${authState.token} location=${state.matchedLocation}',
-      // );
-      final splash = state.matchedLocation == splashPath;
-      final loggingIn = state.matchedLocation == loginPath;
+      final location = state.matchedLocation;
+      final publicLocations = <String>{
+        splashPath,
+        loginPath,
+        userAgreementPath,
+        privacyPolicyPath,
+        serviceAgreementPath,
+      };
+      final isLogin = location == loginPath;
+      final isPublic = publicLocations.contains(location);
 
-      if (splash) {
-        // Splash 页面自己决定后续跳转。
-        return null;
+      if (!authState.isAuthenticated) {
+        return isPublic ? null : splashPath;
       }
 
-      if (!authState.isAuthenticated && !loggingIn) {
-        return splashPath;
-      }
-
-      if (authState.isAuthenticated && loggingIn) {
+      if (authState.isAuthenticated && isLogin) {
         return homePath;
       }
 

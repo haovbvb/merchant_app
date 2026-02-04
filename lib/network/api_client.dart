@@ -70,7 +70,7 @@ class ApiClient {
             buffer.write(' headers=${options.headers}');
           }
 
-          logI('✅ [$_logTag] ${buffer.toString()}');
+          logI('➡️ [$_logTag] ${buffer.toString()}');
           return handler.next(options);
         },
         onResponse: (response, handler) {

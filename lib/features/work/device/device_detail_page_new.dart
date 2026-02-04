@@ -13,6 +13,7 @@ import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/data/models/battery_detail.dart';
 import 'package:merchant_app/data/models/cabin.dart';
 import 'package:merchant_app/data/models/cabinet_detail_base_info_bean.dart';
+import 'package:merchant_app/data/models/device_search_result.dart';
 import 'package:merchant_app/data/models/vehicle_detail.dart';
 import 'package:merchant_app/features/work/device/device_detail_controller.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -195,7 +196,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     } else if (deviceType == 2 && state.vehicleDetail != null) {
       // 车辆: 基础信息、维修记录、保养记录
       return [
-        _buildVehicleBasicInfoTab(l10n, state.vehicleDetail!),
+        _buildVehicleBasicInfoTab(l10n, state),
         _buildRepairRecordsTab(l10n, state),
         _buildMaintenanceRecordsTab(l10n, state),
       ];
@@ -432,7 +433,21 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
   /// 车辆头部
   Widget _buildVehicleHeader(VehicleDetail detail, dynamic l10n) {
-    final hasOwner = detail.ownerName != null && detail.ownerName!.isNotEmpty;
+    final deviceInfo = ref.read(deviceDetailProvider).searchResult?.deviceInfo;
+    final bindStatus = deviceInfo?.deviceBindStatus;
+    final isBound = bindStatus == null
+        ? (detail.ownerName != null && detail.ownerName!.isNotEmpty)
+        : bindStatus != 0;
+    final bindSource = deviceInfo?.bindSource;
+    String? sourceLabel;
+    Color? sourceColor;
+    if (bindSource == 1) {
+      sourceLabel = l10n.deviceDetailSale;
+      sourceColor = AppColors.primaryColor;
+    } else if (bindSource == 2) {
+      sourceLabel = l10n.deviceDetailLease;
+      sourceColor = const Color(0xFFF49300);
+    }
 
     return Container(
       color: Colors.white,
@@ -483,9 +498,15 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                 Row(
                   children: [
                     _buildStatusBadge(
-                      hasOwner ? l10n.deviceDetailBound : l10n.deviceDetailUnbound,
-                      hasOwner ? AppColors.primaryColor : Colors.grey,
+                      isBound
+                          ? l10n.deviceDetailBound
+                          : l10n.deviceDetailUnbound,
+                      isBound ? AppColors.primaryColor : Colors.grey,
                     ),
+                    if (sourceLabel != null && sourceColor != null) ...[
+                      const SizedBox(width: 8),
+                      _buildStatusBadge(sourceLabel, sourceColor),
+                    ],
                     if (detail.carNumber != null && detail.carNumber!.isNotEmpty) ...[
                       const SizedBox(width: 8),
                       Text(
@@ -1063,7 +1084,25 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   /// 车辆基础信息 Tab
-  Widget _buildVehicleBasicInfoTab(dynamic l10n, VehicleDetail detail) {
+  Widget _buildVehicleBasicInfoTab(dynamic l10n, DeviceDetailState state) {
+    final detail = state.vehicleDetail!;
+    final deviceInfo = state.searchResult?.deviceInfo;
+    final spec = deviceInfo?.showDeviceModel ?? detail.spec ?? detail.carSpec;
+    final model = deviceInfo?.deviceModel ?? detail.model ?? detail.carModel;
+    final inputTime = _formatTimeString(
+      deviceInfo?.createTime ?? detail.createTime,
+      withSeconds: true,
+    );
+    final bindUserId = deviceInfo?.bindUserId;
+    final bindUserName = deviceInfo?.bindUserName ?? detail.ownerName;
+    final bindUserPhone = deviceInfo?.bindUserPhone ?? detail.phone;
+    final bindTime = _formatTimeString(
+      deviceInfo?.bindTime,
+      withSeconds: true,
+    );
+    final insuranceNumber = deviceInfo?.insuranceNumber;
+    final photos = _collectDevicePhotos(deviceInfo);
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -1075,29 +1114,120 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                 value: detail.sn ?? '-',
               ),
               _InfoRow(
-                label: l10n.vehicleDetailPlateNumber,
-                value: detail.carNumber ?? '-',
+                label: l10n.deviceDetailSpecLabel,
+                value: spec?.isNotEmpty == true ? spec : '-',
               ),
+              _InfoRow(
+                label: l10n.deviceDetailModelLabel,
+                value: model?.isNotEmpty == true ? model : '-',
+              ),
+              _InfoRow(
+                label: l10n.deviceDetailInputTimeLabel,
+                value: inputTime,
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        _CardSection(
+          child: Column(
+            children: [
               _InfoRow(
                 label: l10n.vehicleDetailVin,
                 value: detail.vin ?? '-',
               ),
               _InfoRow(
+                label: l10n.vehicleDetailPlateNumber,
+                value: detail.carNumber ?? '-',
+              ),
+              _InfoRow(
+                label: l10n.deviceDetailInsuranceNumberLabel,
+                value: insuranceNumber ?? '-',
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        _CardSection(
+          child: Column(
+            children: [
+              _InfoRow(
+                label: l10n.vehicleDetailBindingId,
+                value: bindUserId ?? '-',
+              ),
+              _InfoRow(
                 label: l10n.vehicleDetailOwner,
-                value: detail.ownerName ?? '-',
+                valueWidget: Text(
+                  bindUserName ?? '-',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF0B61D9),
+                  ),
+                ),
               ),
               _InfoRow(
                 label: l10n.vehicleDetailUserPhone,
-                value: detail.phone ?? '-',
+                valueWidget: Text(
+                  bindUserPhone ?? '-',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF0B61D9),
+                  ),
+                ),
               ),
               _InfoRow(
-                label: l10n.vehicleDetailMileage,
-                value: detail.mile != null ? '${detail.mile} km' : '-',
+                label: l10n.deviceDetailBindingTimeLabel,
+                value: bindTime,
               ),
-              _InfoRow(
-                label: l10n.deviceDetailInputTimeLabel,
-                value: detail.createTime ?? '-',
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        _CardSection(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.deviceDetailPhotoLabel,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AppColors.black06Text,
+                ),
               ),
+              const SizedBox(height: 12),
+              if (photos.isNotEmpty)
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: photos.map((url) {
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        url,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          width: 100,
+                          height: 100,
+                          color: const Color(0xFFEEEEEE),
+                          child: const Icon(Icons.image_not_supported),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                )
+              else
+                const Text(
+                  '-',
+                  style: TextStyle(fontSize: 15, color: Color(0xFF999999)),
+                ),
             ],
           ),
         ),
@@ -1170,10 +1300,29 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     );
   }
 
-  String _formatTimestamp(int? timestamp) {
+  String _formatTimestamp(int? timestamp, {bool withSeconds = false}) {
     if (timestamp == null || timestamp == 0) return '-';
     final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    return DateFormat('yyyy-MM-dd HH:mm').format(date);
+    final pattern = withSeconds ? 'yyyy-MM-dd HH:mm:ss' : 'yyyy-MM-dd HH:mm';
+    return DateFormat(pattern).format(date);
+  }
+
+  String _formatTimeString(String? value, {bool withSeconds = false}) {
+    if (value == null || value.trim().isEmpty) return '-';
+    final trimmed = value.trim();
+    final asInt = int.tryParse(trimmed);
+    if (asInt != null) {
+      return _formatTimestamp(asInt, withSeconds: withSeconds);
+    }
+    return trimmed;
+  }
+
+  List<String> _collectDevicePhotos(DeviceInfo? info) {
+    final photos = <String>[];
+    if (info != null) {
+      photos.addAll(info.installImgSet);
+    }
+    return photos.toSet().toList();
   }
 
   Widget _buildMap(double lat, double lng) {

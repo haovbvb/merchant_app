@@ -149,7 +149,7 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
       await _loadBatteryDetail(value);
     } else if (deviceType == 2) {
       // 车辆
-      await _loadVehicleDetail(value);
+      await _loadVehicleDetailFromSearch(value, result.deviceInfo);
     } else if (deviceType == 3) {
       // 电柜
       await _loadCabinetDetail(value);
@@ -172,17 +172,30 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
     await loadFixRecords(sn: sn, deviceType: 1);
   }
 
-  Future<void> _loadVehicleDetail(String sn) async {
-    final response = await _api.get<VehicleDetail?>(
-      ApiPath.vehicleGetDetail,
-      queryParameters: {'sn': sn},
-      parser: (json) => json == null
-          ? null
-          : VehicleDetail.fromJson(Map<String, dynamic>.from(json as Map)),
-    );
-    state = state.copyWith(vehicleDetail: response.result);
+  Future<void> _loadVehicleDetailFromSearch(
+    String sn,
+    DeviceInfo? info,
+  ) async {
+    if (info != null) {
+      state = state.copyWith(vehicleDetail: _vehicleFromSearch(info));
+    }
+
     await loadFixRecords(sn: sn, deviceType: 2);
     await loadMaintenanceRecords(sn: sn);
+  }
+
+  VehicleDetail _vehicleFromSearch(DeviceInfo info) {
+    return VehicleDetail(
+      sn: info.sn,
+      vin: info.vin,
+      carNumber: info.carNumber,
+      img: info.img,
+      latitude: info.latitude,
+      longitude: info.longitude,
+      createTime: info.createTime,
+      ownerName: info.bindUserName,
+      phone: info.bindUserPhone,
+    );
   }
 
   Future<void> _loadCabinetDetail(String sn) async {
@@ -225,16 +238,8 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
     );
 
     if (deviceType == 2) {
-      final response = await _api.get<VehicleDetail?>(
-        ApiPath.vehicleGetDetail,
-        queryParameters: {'sn': value},
-        parser: (json) => json == null
-            ? null
-            : VehicleDetail.fromJson(Map<String, dynamic>.from(json as Map)),
-      );
-      state = state.copyWith(loading: false, vehicleDetail: response.result);
-      await loadFixRecords(sn: value, deviceType: deviceType);
-      await loadMaintenanceRecords(sn: value);
+      await _loadVehicleDetailFromSearch(value, state.searchResult?.deviceInfo);
+      state = state.copyWith(loading: false);
       return;
     }
 

@@ -3353,6 +3353,18 @@ abstract class AppLocalizations {
   /// **'Phone'**
   String get deviceDetailPhoneLabel;
 
+  /// No description provided for @deviceDetailInsuranceNumberLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Insurance number'**
+  String get deviceDetailInsuranceNumberLabel;
+
+  /// No description provided for @deviceDetailBindingTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Binding time'**
+  String get deviceDetailBindingTimeLabel;
+
   /// No description provided for @deviceDetailMotorNumberLabel.
   ///
   /// In en, this message translates to:

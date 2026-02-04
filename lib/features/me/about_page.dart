@@ -69,10 +69,14 @@ class _AboutPageState extends State<AboutPage> {
           Column(
             children: [
               SizedBox(height: MediaQuery.of(context).padding.top + 60),
-                Image.asset(
-                  'assets/android/mipmap-xxhdpi/icon_logo_login.png',
-                  width: 88,
-                  height: 88,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.asset(
+                    'assets/images/AppIcon_logo.png',
+                    width: 88,
+                    height: 88,
+                    fit: BoxFit.contain,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(

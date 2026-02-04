@@ -60,17 +60,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       height: 80,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Image.asset(
-                        'assets/images/logo.png',
+                        'assets/images/AppIcon_logo.png',
                         fit: BoxFit.contain,
                         errorBuilder: (_, __, ___) => Icon(
                           Icons.eco,
@@ -291,16 +284,12 @@ class _LoginButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isActive ? onPressed : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isActive
-              ? AppColors.primaryColor
-              : AppColors.primaryColor.withOpacity(0.4),
+          backgroundColor:  AppColors.primaryColor,
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(26),
+            borderRadius: BorderRadius.circular(8),
           ),
-          disabledBackgroundColor: AppColors.primaryColor.withOpacity(0.4),
-          disabledForegroundColor: Colors.white,
         ),
         child: Text(
                 agreedToTerms ? l10n.loginButtonConfirm : l10n.login,

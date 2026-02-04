@@ -1638,6 +1638,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceDetailPhoneLabel => 'Phone';
 
   @override
+  String get deviceDetailInsuranceNumberLabel => 'Insurance number';
+
+  @override
+  String get deviceDetailBindingTimeLabel => 'Binding time';
+
+  @override
   String get deviceDetailMotorNumberLabel => 'Motor No.';
 
   @override
@@ -3871,13 +3877,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceDetailRepairMissingParts => 'Missing Parts';
 
   @override
-  String get vehicleDetailBindingId => 'Binding ID';
+  String get vehicleDetailBindingId => 'Bind user';
 
   @override
-  String get vehicleDetailUserPhone => 'User phone';
+  String get vehicleDetailUserPhone => 'User phone number';
 
   @override
-  String get vehicleDetailPlateNumber => 'Plate Number';
+  String get vehicleDetailPlateNumber => 'Number plate';
 
   @override
   String get vehicleDetailMileage => 'Mileage';
@@ -3886,7 +3892,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vehicleDetailVin => 'VIN';
 
   @override
-  String get vehicleDetailOwner => 'Owner Name';
+  String get vehicleDetailOwner => 'User Name';
 
   @override
   String get vehicleDetailViewMore => 'View More';

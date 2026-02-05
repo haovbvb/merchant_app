@@ -96,7 +96,8 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
                     size: 20,
                   ),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
                 ),
                 onSubmitted: (value) {
                   notifier.refresh(

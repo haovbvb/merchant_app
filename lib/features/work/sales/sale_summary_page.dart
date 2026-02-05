@@ -3,9 +3,9 @@ import 'dart:math' as math;
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/data/models/sales_bar_data.dart';
 import 'package:merchant_app/data/models/sell_data_list_response.dart';
@@ -472,7 +472,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(20),
-                child: CircularProgressIndicator(),
+                child: const SizedBox.shrink(),
               ),
             )
           else
@@ -817,7 +817,10 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
   }
 
   String _formatDate(DateTime date) {
-    return DateFormat('MMM d').format(date);
+    return DateFormatUtils.format(
+      date,
+      pattern: 'MMM d',
+    );
   }
 
   String _formatAmount(double amount) {

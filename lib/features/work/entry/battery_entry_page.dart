@@ -58,7 +58,7 @@ class _BatteryEntryPageState extends State<BatteryEntryPage> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.batteryEntryTitle)),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: const SizedBox.shrink())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/cabinet_authorization_list.dart';
 import 'package:merchant_app/data/models/user_authorization_list.dart';
@@ -27,7 +27,10 @@ class _CabinetAuthorizationPageState
   final DateTime _endTime = DateTime.now().add(const Duration(hours: 24));
 
   String _formatDateTime(DateTime dt) {
-    return DateFormat('yyyy-MM-dd HH:mm:ss').format(dt);
+    return DateFormatUtils.format(
+      dt,
+      pattern: 'yyyy-MM-dd HH:mm:ss',
+    );
   }
 
   Future<void> _selectStation() async {
@@ -177,10 +180,7 @@ class _CabinetAuthorizationPageState
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
+                            child: const SizedBox.shrink(),
                           )
                         : Text(
                             l10n.cabinetAuthConfirmButton,

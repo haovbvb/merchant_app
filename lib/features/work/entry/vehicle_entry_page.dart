@@ -57,7 +57,7 @@ class _VehicleEntryPageState extends State<VehicleEntryPage> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.vehicleEntryTitle)),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: const SizedBox.shrink())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [

@@ -81,7 +81,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
         resizeToAvoidBottomInset: true,
         body: _checkingPermission
             ? const Center(
-                child: CircularProgressIndicator(color: Colors.white),
+                child: const SizedBox.shrink(),
               )
             : hasPermission
             ? _buildScannerView(context)

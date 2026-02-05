@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/area_country.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -534,10 +534,7 @@ class _OfflineUserRegisterPageState
               ? const SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
+                  child: const SizedBox.shrink(),
                 )
               : Text(
                   l10n.offlineRegisterSubmit,
@@ -651,7 +648,10 @@ class _OfflineUserRegisterPageState
     );
     if (picked == null || !mounted) return;
     setState(() {
-      _birthdayController.text = DateFormat('yyyy-MM-dd').format(picked);
+      _birthdayController.text = DateFormatUtils.format(
+        picked,
+        pattern: 'yyyy-MM-dd',
+      );
     });
   }
 

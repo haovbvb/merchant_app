@@ -10,6 +10,8 @@ class Cabin {
   final int? lockStatus;
   final int? chargeStatus;
   final int? batterySoc;
+  final int? batteryStatus;
+  final int? swapFlag;
   final double? voltage;
   final double? temperature;
 
@@ -22,6 +24,8 @@ class Cabin {
     this.lockStatus,
     this.chargeStatus,
     this.batterySoc,
+    this.batteryStatus,
+    this.swapFlag,
     this.voltage,
     this.temperature,
   });
@@ -36,6 +40,8 @@ class Cabin {
       lockStatus: (json['lockStatus'] as num?)?.toInt(),
       chargeStatus: (json['chargeStatus'] as num?)?.toInt(),
       batterySoc: (json['batterySoc'] as num?)?.toInt(),
+      batteryStatus: (json['batteryStatus'] as num?)?.toInt(),
+      swapFlag: (json['swapFlag'] as num?)?.toInt(),
       voltage: (json['voltage'] as num?)?.toDouble(),
       temperature: (json['temperature'] as num?)?.toDouble(),
     );
@@ -50,6 +56,8 @@ class Cabin {
         'lockStatus': lockStatus,
         'chargeStatus': chargeStatus,
         'batterySoc': batterySoc,
+        'batteryStatus': batteryStatus,
+        'swapFlag': swapFlag,
         'voltage': voltage,
         'temperature': temperature,
       };

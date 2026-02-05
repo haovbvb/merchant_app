@@ -71,7 +71,7 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
             const SizedBox(height: 24),
             Expanded(
               child: _loadingHistory
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(child: const SizedBox.shrink())
                   : hasHistory
                   ? _VcuSearchHistory(
                       title: l10n.deviceSearchHistoryTitle,

@@ -84,7 +84,7 @@ class _QrBatchScanPageState extends ConsumerState<QrBatchScanPage> {
           ],
         ),
         body: _checkingPermission
-            ? const Center(child: CircularProgressIndicator())
+            ? const Center(child: const SizedBox.shrink())
             : hasPermission
                 ? Stack(
                     children: [

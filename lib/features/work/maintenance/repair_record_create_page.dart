@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
 import 'package:merchant_app/data/models/device_fix.dart';
@@ -12,7 +12,9 @@ import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
 class RepairRecordCreatePage extends ConsumerStatefulWidget {
-  const RepairRecordCreatePage({super.key});
+  const RepairRecordCreatePage({super.key, this.isStation = false});
+
+  final bool isStation;
 
   @override
   ConsumerState<RepairRecordCreatePage> createState() =>
@@ -98,8 +100,12 @@ class _RepairRecordCreatePageState
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           _buildInputField(
-                            label: l10n.repairRecordDeviceSnLabel,
-                            hint: l10n.repairRecordDeviceSnHint,
+                            label: widget.isStation
+                                ? l10n.repairRecordStationSnLabel
+                                : l10n.repairRecordDeviceSnLabel,
+                            hint: widget.isStation
+                                ? l10n.repairRecordStationSnHint
+                                : l10n.repairRecordDeviceSnHint,
                             controller: _snController,
                             onChanged: notifier.updateSn,
                             onScan: _scanSn,
@@ -214,10 +220,7 @@ class _RepairRecordCreatePageState
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
+                          child: const SizedBox.shrink(),
                         )
                       : Text(
                           l10n.repairRecordSubmit,
@@ -550,6 +553,8 @@ class _DeviceInfoCard extends StatelessWidget {
       return _BatteryInfoCard(battery: deviceFix.batteryVo, l10n: l10n);
     } else if (deviceFix.deviceType == 2) {
       return _VehicleInfoCard(vehicle: deviceFix.carVo, l10n: l10n);
+    } else if (deviceFix.deviceType == 3) {
+      return _StationInfoCard(station: deviceFix.stationVo, l10n: l10n);
     }
     return _EmptyInfoCard(text: l10n.repairRecordDeviceInfoEmpty);
   }
@@ -649,7 +654,7 @@ class _BatteryInfoCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   _InfoRow(
                     label: l10n.repairRecordDeviceEntryTime,
-                    value: _formatDate(battery?.createTime),
+                    value: _formatDateValue(battery?.createTime),
                   ),
                 ],
               ),
@@ -658,16 +663,6 @@ class _BatteryInfoCard extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  String _formatDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return '-';
-    try {
-      final date = DateTime.parse(dateStr);
-      return DateFormat('dd MMM, yyyy').format(date);
-    } catch (_) {
-      return dateStr;
-    }
   }
 }
 
@@ -770,7 +765,7 @@ class _VehicleInfoCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   _InfoRow(
                     label: l10n.repairRecordDeviceEntryTime,
-                    value: _formatDate(vehicle?.createTime),
+                    value: _formatDateValue(vehicle?.createTime),
                   ),
                 ],
               ),
@@ -780,15 +775,137 @@ class _VehicleInfoCard extends StatelessWidget {
       ),
     );
   }
+}
 
-  String _formatDate(String? dateStr) {
-    if (dateStr == null || dateStr.isEmpty) return '-';
-    try {
-      final date = DateTime.parse(dateStr);
-      return DateFormat('dd MMM, yyyy').format(date);
-    } catch (_) {
-      return dateStr;
-    }
+class _StationInfoCard extends StatelessWidget {
+  const _StationInfoCard({required this.station, required this.l10n});
+
+  final StationVo? station;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final isOnline = (station?.onlineFlag ?? 0) != 0;
+    final storeNum = station?.storeNum?.trim() ?? '';
+    final specText = storeNum.isEmpty
+        ? '-'
+        : '$storeNum ${l10n.cabinetOfflinePortLabel}';
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: station?.img != null && station!.img!.isNotEmpty
+                        ? Image.network(station!.img!, fit: BoxFit.contain)
+                        : const Icon(
+                            Icons.ev_station,
+                            size: 32,
+                            color: Colors.grey,
+                          ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          station?.name ?? '-',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            _StatusTag(isOnline: isOnline, l10n: l10n),
+                            const SizedBox(width: 8),
+                            _Tag(text: specText),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+              child: Column(
+                children: [
+                  _InfoRow(
+                    label: l10n.cabinetOfflineAddressLabel,
+                    value: station?.address ?? '-',
+                  ),
+                  const SizedBox(height: 8),
+                  _InfoRow(
+                    label: l10n.repairRecordDeviceEntryTime,
+                    value: _formatDateValue(station?.createTime),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+String _formatDateValue(String? raw) {
+  if (raw == null || raw.trim().isEmpty) return '-';
+  final formatted = DateFormatUtils.formatString(
+    raw,
+    pattern: 'dd MMM, yyyy',
+    fallback: raw,
+  );
+  return formatted;
+}
+
+class _StatusTag extends StatelessWidget {
+  const _StatusTag({required this.isOnline, required this.l10n});
+
+  final bool isOnline;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isOnline ? AppColors.primaryColor : Colors.red;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color),
+      ),
+      child: Text(
+        isOnline ? l10n.online : l10n.offline,
+        style: TextStyle(fontSize: 12, color: color),
+      ),
+    );
   }
 }
 
@@ -897,4 +1014,3 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
-

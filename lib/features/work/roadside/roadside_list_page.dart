@@ -135,7 +135,7 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage> {
                 }
               },
               child: state.loading && state.items.isEmpty
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(child: const SizedBox.shrink())
                   : state.items.isEmpty
                       ? _EmptyView(text: l10n.roadsideEmpty)
                       : ListView.separated(

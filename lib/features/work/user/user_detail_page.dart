@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/data/models/bind_device.dart';
 import 'package:merchant_app/data/models/user_detail.dart';
 import 'package:merchant_app/data/models/user_order_response.dart';
@@ -67,7 +68,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage>
         centerTitle: true,
       ),
       body: state.loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: const SizedBox.shrink())
           : Column(
               children: [
                 // User header
@@ -1171,10 +1172,9 @@ Widget _orderInfoRow(String label, String value) {
 }
 
 String _formatDate(int? timestamp) {
-  if (timestamp == null || timestamp == 0) return '-';
-  final value = timestamp > 1000000000000 ? timestamp : timestamp * 1000;
-  return DateFormat('yyyy-MM-dd HH:mm').format(
-    DateTime.fromMillisecondsSinceEpoch(value),
+  return DateFormatUtils.formatTimestamp(
+    timestamp,
+    pattern: 'yyyy-MM-dd HH:mm',
   );
 }
 

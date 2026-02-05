@@ -9,6 +9,9 @@ class AppLocalizationsZh extends AppLocalizations {
   AppLocalizationsZh([String locale = 'zh']) : super(locale);
 
   @override
+  String get profileAvatar => '头像';
+
+  @override
   String get appTitle => '商家端';
 
   @override
@@ -165,7 +168,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get workbenchAfterSalesBinding => '售后绑定';
 
   @override
-  String get workbenchCabinetOperation => '换电柜运维';
+  String get workbenchCabinetOperation => '电柜操作';
 
   @override
   String get workbenchCabinetPutaway => '换电柜上架';
@@ -174,7 +177,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get workbenchCabinetUnshelve => '换电柜下架';
 
   @override
+  String get workbenchStationRepairRegistration => '电柜维修登记';
+
+  @override
+  String get workbenchStationQuery => '电柜查询';
+
+  @override
   String get profileGreeting => '在这里管理你的个人信息。';
+
+  @override
+  String get profileEditNicknameTitle => '修改昵称';
+
+  @override
+  String get profileEditNicknameHint => '请输入昵称';
+
+  @override
+  String get profileEditNicknameEmpty => '请输入昵称';
 
   @override
   String get login => '登录';
@@ -715,6 +733,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get repairRecordDeviceSnHint => '输入设备SN或扫码';
+
+  @override
+  String get repairRecordStationSnLabel => '电柜SN';
+
+  @override
+  String get repairRecordStationSnHint => '输入电柜SN或扫码';
 
   @override
   String get repairRecordFetchDeviceInfo => '获取设备信息';
@@ -1470,6 +1494,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceSearchHint => '输入设备 SN 或关键字';
 
   @override
+  String get deviceSearchStationHint => '输入电柜SN或扫码';
+
+  @override
   String get deviceSearchEmpty => '暂无结果';
 
   @override
@@ -1564,6 +1591,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get deviceDetailFixRecordsEmpty => '暂无维修记录';
+
+  @override
+  String get deviceDetailSale => '销售';
+
+  @override
+  String get deviceDetailLease => '租赁';
 
   @override
   String get deviceDetailFixResultLabel => '维修结果';
@@ -3048,7 +3081,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saleSummaryViewVoucher => '查看凭证';
 
   @override
-  String get cabinetPutawayTitle => '柜机上架';
+  String get cabinetPutawayTitle => '换电柜上架';
 
   @override
   String get cabinetPutawaySn => '电柜SN';
@@ -3117,7 +3150,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetPutawayFailed => '提交失败';
 
   @override
-  String get cabinetUnshelveTitle => '柜机下架';
+  String get cabinetUnshelveTitle => '换电柜下架';
 
   @override
   String get cabinetUnshelveSn => '站点SN';
@@ -3174,22 +3207,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetUnshelveFailed => '提交失败';
 
   @override
-  String get cabinetAuthTitle => '柜机授权运维';
+  String get cabinetAuthTitle => '电柜操作授权';
 
   @override
-  String get cabinetAuthStationLabel => '柜机';
+  String get cabinetAuthStationLabel => '电柜';
 
   @override
-  String get cabinetAuthSelectStation => '选择柜机';
+  String get cabinetAuthSelectStation => '选择电柜';
 
   @override
-  String get cabinetAuthSelectStationTitle => '选择柜机';
+  String get cabinetAuthSelectStationTitle => '选择电柜';
 
   @override
-  String get cabinetAuthStationSearchHint => '输入柜机SN或扫描二维码';
+  String get cabinetAuthStationSearchHint => '输入电柜SN或扫描二维码';
 
   @override
-  String get cabinetAuthSelectStationRequired => '请选择柜机';
+  String get cabinetAuthSelectStationRequired => '请选择电柜';
 
   @override
   String get cabinetAuthPersonLabel => '授权人员';
@@ -3225,10 +3258,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetAuthCancelConfirm => '确定要取消此授权吗？';
 
   @override
-  String get cabinetAuthCancelSuccess => '取消成功';
+  String get cabinetAuthCancelSuccess => '取消授权成功';
 
   @override
-  String get cabinetAuthCancelFailed => '取消失败';
+  String get cabinetAuthCancelFailed => '取消授权失败';
 
   @override
   String get cabinetAuthAllPort => '全部端口';
@@ -3303,16 +3336,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetAuthRecordSection => '授权记录';
 
   @override
-  String get cabinetOperateTitle => '柜机运维';
+  String get cabinetOperateTitle => '电柜操作';
 
   @override
-  String get cabinetOperateStationOperation => '柜机运维';
+  String get cabinetOperateStationOperation => '电柜操作';
 
   @override
   String get cabinetOperateBluetoothAuth => '蓝牙钥匙授权';
 
   @override
-  String get cabinetOperateAuthorization => '柜机授权运维';
+  String get cabinetOperateAuthorization => '电柜操作授权';
 
   @override
   String get cabinetOperateOpenDoor => '电柜开门';
@@ -3330,7 +3363,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetOperateOpenDoorFailed => '开门失败';
 
   @override
-  String get cabinetOperateOfflineOM => '离线柜机运维';
+  String get cabinetOperateOfflineOM => '离线电柜O&M';
 
   @override
   String get cabinetOperateOfflineDetail => '离线详情';
@@ -3345,13 +3378,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetOfflinePlaceholder => '功能开发中';
 
   @override
-  String get cabinetOfflineSnLabel => '柜机SN';
+  String get cabinetOfflineSnLabel => '电柜SN';
 
   @override
-  String get cabinetOfflinePidLabel => '柜机PID';
+  String get cabinetOfflinePidLabel => '电柜PID';
 
   @override
-  String get cabinetOfflineName => '柜机名称';
+  String get cabinetOfflineName => '电柜名称';
 
   @override
   String get cabinetOfflineAddressLabel => '地址';
@@ -3809,13 +3842,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceDetailPortFilterAll => '全部';
 
   @override
-  String get deviceDetailPortFilterAvailable => '可用';
+  String get deviceDetailPortFilterAvailable => '空闲';
 
   @override
   String get deviceDetailPortFilterDisabled => '禁用';
 
   @override
-  String get deviceDetailPortFilterInUse => '使用中';
+  String get deviceDetailPortFilterInUse => '占用';
 
   @override
   String get deviceDetailPortReplaceable => '可换电';

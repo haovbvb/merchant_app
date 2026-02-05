@@ -80,7 +80,7 @@ class _CabinetOfflineFaultPageState
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: const SizedBox.shrink(),
                   )
                 : Text(l10n.cabinetOfflineQueryAction),
           ),

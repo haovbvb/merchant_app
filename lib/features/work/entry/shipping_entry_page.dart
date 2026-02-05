@@ -196,7 +196,7 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
 
   Widget _buildVehicleTab() {
     if (_loadingVehicle) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: const SizedBox.shrink());
     }
     if (_vehicleTypes.isEmpty) {
       return _buildEmptyState();
@@ -212,7 +212,7 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
 
   Widget _buildBatteryTab() {
     if (_loadingBattery) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: const SizedBox.shrink());
     }
     if (_batteryTypes.isEmpty) {
       return _buildEmptyState();
@@ -228,7 +228,7 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
 
   Widget _buildStationTab() {
     if (_loadingStation) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: const SizedBox.shrink());
     }
     if (_stationTypes.isEmpty) {
       return _buildEmptyState();
@@ -570,7 +570,7 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
 
   Widget _buildVehicleTab() {
     if (_loadingVehicle) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: const SizedBox.shrink());
     }
     if (_vehicleTypes.isEmpty) {
       return _buildEmptyState();
@@ -586,7 +586,7 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
 
   Widget _buildBatteryTab() {
     if (_loadingBattery) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: const SizedBox.shrink());
     }
     if (_batteryTypes.isEmpty) {
       return _buildEmptyState();
@@ -602,7 +602,7 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
 
   Widget _buildStationTab() {
     if (_loadingStation) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: const SizedBox.shrink());
     }
     if (_stationTypes.isEmpty) {
       return _buildEmptyState();

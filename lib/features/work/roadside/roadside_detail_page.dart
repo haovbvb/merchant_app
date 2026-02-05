@@ -56,7 +56,7 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
         centerTitle: false,
       ),
       body: state.loading && detail == null
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: const SizedBox.shrink())
           : detail == null
               ? _EmptyView(text: l10n.roadsideDetailEmpty)
               : Column(

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/data/models/device_transport_resp.dart';
 import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -67,7 +68,7 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
         ],
       ),
       body: state.loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: const SizedBox.shrink())
           : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -236,7 +237,12 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
-                                              item.opTime,
+                                              DateFormatUtils.formatString(
+                                                item.opTime,
+                                                pattern:
+                                                    DateFormatUtils.defaultPattern,
+                                                fallback: item.opTime,
+                                              ),
                                               style: const TextStyle(
                                                 fontSize: 12,
                                                 color: Color(0xFF999999),
@@ -441,9 +447,11 @@ class _OrderHeaderCard extends StatelessWidget {
   final AppLocalizations l10n;
 
   String _formatTimestamp(int? timestamp) {
-    if (timestamp == null || timestamp == 0) return '';
-    final date = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+    return DateFormatUtils.formatTimestamp(
+      timestamp,
+      pattern: DateFormatUtils.defaultPattern,
+      fallback: '',
+    );
   }
 
   @override

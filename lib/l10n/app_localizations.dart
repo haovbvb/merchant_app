@@ -95,6 +95,12 @@ abstract class AppLocalizations {
     Locale('zh')
   ];
 
+  /// No description provided for @profileAvatar.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar'**
+  String get profileAvatar;
+
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
@@ -425,11 +431,41 @@ abstract class AppLocalizations {
   /// **'Cabinet\nUnshelve'**
   String get workbenchCabinetUnshelve;
 
+  /// No description provided for @workbenchStationRepairRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Station\nRepair'**
+  String get workbenchStationRepairRegistration;
+
+  /// No description provided for @workbenchStationQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'Station\nQuery'**
+  String get workbenchStationQuery;
+
   /// Helper text in the profile tab.
   ///
   /// In en, this message translates to:
   /// **'Manage your personal settings here.'**
   String get profileGreeting;
+
+  /// No description provided for @profileEditNicknameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Nickname'**
+  String get profileEditNicknameTitle;
+
+  /// No description provided for @profileEditNicknameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter nickname'**
+  String get profileEditNicknameHint;
+
+  /// No description provided for @profileEditNicknameEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a nickname'**
+  String get profileEditNicknameEmpty;
 
   /// No description provided for @login.
   ///
@@ -1510,6 +1546,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter device SN or scan  QR code'**
   String get repairRecordDeviceSnHint;
+
+  /// No description provided for @repairRecordStationSnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Station SN'**
+  String get repairRecordStationSnLabel;
+
+  /// No description provided for @repairRecordStationSnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter station SN or scan QR code'**
+  String get repairRecordStationSnHint;
 
   /// No description provided for @repairRecordFetchDeviceInfo.
   ///
@@ -3017,6 +3065,12 @@ abstract class AppLocalizations {
   /// **'Enter device SN or keyword'**
   String get deviceSearchHint;
 
+  /// No description provided for @deviceSearchStationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter station SN or scan QR code'**
+  String get deviceSearchStationHint;
+
   /// No description provided for @deviceSearchEmpty.
   ///
   /// In en, this message translates to:
@@ -3208,6 +3262,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No fix records'**
   String get deviceDetailFixRecordsEmpty;
+
+  /// No description provided for @deviceDetailSale.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale'**
+  String get deviceDetailSale;
+
+  /// No description provided for @deviceDetailLease.
+  ///
+  /// In en, this message translates to:
+  /// **'Lease'**
+  String get deviceDetailLease;
 
   /// No description provided for @deviceDetailFixResultLabel.
   ///
@@ -6530,13 +6596,13 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetAuthCancelSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Canceled'**
+  /// **'Authorization cancelled'**
   String get cabinetAuthCancelSuccess;
 
   /// No description provided for @cabinetAuthCancelFailed.
   ///
   /// In en, this message translates to:
-  /// **'Cancel failed'**
+  /// **'Failed to cancel authorization'**
   String get cabinetAuthCancelFailed;
 
   /// No description provided for @cabinetAuthAllPort.
@@ -7724,7 +7790,7 @@ abstract class AppLocalizations {
   /// No description provided for @deviceDetailPortAvailable.
   ///
   /// In en, this message translates to:
-  /// **'Available'**
+  /// **'Empty'**
   String get deviceDetailPortAvailable;
 
   /// No description provided for @deviceDetailPortSetup.
@@ -7826,19 +7892,19 @@ abstract class AppLocalizations {
   /// No description provided for @vehicleDetailBindingId.
   ///
   /// In en, this message translates to:
-  /// **'Binding ID'**
+  /// **'Bind user'**
   String get vehicleDetailBindingId;
 
   /// No description provided for @vehicleDetailUserPhone.
   ///
   /// In en, this message translates to:
-  /// **'User phone'**
+  /// **'User phone number'**
   String get vehicleDetailUserPhone;
 
   /// No description provided for @vehicleDetailPlateNumber.
   ///
   /// In en, this message translates to:
-  /// **'Plate Number'**
+  /// **'Number plate'**
   String get vehicleDetailPlateNumber;
 
   /// No description provided for @vehicleDetailMileage.
@@ -7856,7 +7922,7 @@ abstract class AppLocalizations {
   /// No description provided for @vehicleDetailOwner.
   ///
   /// In en, this message translates to:
-  /// **'Owner Name'**
+  /// **'User Name'**
   String get vehicleDetailOwner;
 
   /// No description provided for @vehicleDetailViewMore.

@@ -136,12 +136,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
-                            ),
+                            child: const SizedBox.shrink(),
                           )
                         : Text(
                             l10n.changePasswordConfirmAction,

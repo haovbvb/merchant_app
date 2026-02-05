@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/app/ui.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/toast.dart';
@@ -179,7 +179,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(20),
-                child: CircularProgressIndicator(),
+                child: const SizedBox.shrink(),
               ),
             )
           else if (info != null)
@@ -662,15 +662,17 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
   }
 
   String _formatDate(int? timestamp) {
-    if (timestamp == null || timestamp == 0) return '-';
-    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    return DateFormat('MMM dd, yyyy').format(date);
+    return DateFormatUtils.formatTimestamp(
+      timestamp,
+      pattern: 'MMM dd, yyyy',
+    );
   }
 
   String _formatDateTime(int? timestamp) {
-    if (timestamp == null || timestamp == 0) return '-';
-    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    return DateFormat('yyyy.MM.dd HH:mm:ss').format(date);
+    return DateFormatUtils.formatTimestamp(
+      timestamp,
+      pattern: 'yyyy.MM.dd HH:mm:ss',
+    );
   }
 
   Widget _buildVoucherSection(BuildContext context) {
@@ -772,7 +774,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                 child: SizedBox(
                   width: 24,
                   height: 24,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: const SizedBox.shrink(),
                 ),
               )
             : const Icon(
@@ -821,10 +823,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
+                    child: const SizedBox.shrink(),
                   )
                 : Text(
                     l10n.installmentPaySubmit,

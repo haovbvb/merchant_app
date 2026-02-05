@@ -7,11 +7,11 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/storage_keys.dart';
 import 'package:merchant_app/core/utils/bluetooth_permission.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/vcu_history.dart';
 import 'package:merchant_app/data/models/vcu_version.dart';
@@ -45,7 +45,6 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   final TextEditingController _gpsFrequencyController = TextEditingController();
   final TextEditingController _dataFrequencyController =
       TextEditingController();
-  final DateFormat _timeFormatter = DateFormat('yyyy-MM-dd HH:mm:ss');
 
   static final Guid _serviceUuid = Guid('00001802-0000-1000-8000-00805F9B34FB');
   static final Guid _readUuid = Guid('00002a06-0000-1000-8000-00805F9B34FB');
@@ -446,8 +445,9 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
                           ],
                         ),
                         trailing: Text(
-                          _timeFormatter.format(
-                            DateTime.fromMillisecondsSinceEpoch(item.timestamp),
+                          DateFormatUtils.formatTimestamp(
+                            item.timestamp,
+                            pattern: 'yyyy-MM-dd HH:mm:ss',
                           ),
                           style: Theme.of(context).textTheme.bodySmall,
                         ),

@@ -198,7 +198,7 @@ class _AddressPickerPageState extends State<AddressPickerPage> {
         ],
       ),
       body: _center == null
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: const SizedBox.shrink())
           : Stack(
               children: [
                 // 地图
@@ -408,7 +408,7 @@ class _AddressCard extends StatelessWidget {
                     ? const SizedBox(
                         width: 16,
                         height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: const SizedBox.shrink(),
                       )
                     : Text(
                         placeName,
@@ -674,7 +674,7 @@ class _AddressSearchPageState extends State<_AddressSearchPage> {
         ),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: const SizedBox.shrink())
           : ListView.separated(
               padding: const EdgeInsets.only(top: 12),
               itemCount: _results.length,

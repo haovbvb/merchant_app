@@ -126,7 +126,7 @@ class _PackageSheetState extends ConsumerState<PackageSheet> {
           // Package list
           Expanded(
             child: state.loadingPlans
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: const SizedBox.shrink())
                 : plans.isEmpty
                     ? Center(
                         child: Text(

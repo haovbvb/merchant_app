@@ -90,13 +90,17 @@ class WorkModulePage extends StatelessWidget {
       case 'user_detail':
         return UserDetailPage(cardNum: recordNo ?? '');
       case 'device_detail':
-        return DeviceDetailPageNew(initialSn: recordNo);
+        return DeviceDetailPageNew(initialSn: recordNo, readOnly: true);
       case 'device_search':
         return const DeviceSearchPage();
+      case 'station_search':
+        return const DeviceSearchPage(deviceType: 3, readOnly: true);
       case 'maintenance_book':
         return const MaintenanceBookPage();
       case 'repair_record':
         return const RepairRecordCreatePage();
+      case 'station_repair_record':
+        return const RepairRecordCreatePage(isStation: true);
       case 'repair_record_list':
         return const RepairRecordPage();
       case 'road_assist':

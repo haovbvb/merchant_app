@@ -261,7 +261,7 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
 
   Widget _buildSearchResults(AppLocalizations l10n, TransportListState state) {
     if (state.loading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: const SizedBox.shrink());
     }
 
     if (state.items.isEmpty) {

@@ -79,7 +79,7 @@ class _CabinetOfflineDetailPageState
                   ? const SizedBox(
                       width: 18,
                       height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      child: const SizedBox.shrink(),
                     )
                   : Text(l10n.cabinetOfflineQueryAction),
             ),
@@ -289,7 +289,7 @@ class _WarehouseTab extends StatelessWidget {
     
     // 否则显示布局历史信息
     if (state.layoutLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: const SizedBox.shrink());
     }
     final items = state.layoutInfo?.list ?? const [];
     if (items.isEmpty) {

@@ -201,7 +201,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(20),
-                child: CircularProgressIndicator(),
+                child: const SizedBox.shrink(),
               ),
             )
           else if (info != null)
@@ -840,10 +840,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
+                    child: const SizedBox.shrink(),
                   )
                 : Text(
                     l10n.swapBindSubmit,

@@ -5,10 +5,10 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
-import 'package:intl/intl.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/data/models/battery_detail.dart';
 import 'package:merchant_app/data/models/cabin.dart';
@@ -19,9 +19,14 @@ import 'package:merchant_app/features/work/device/device_detail_controller.dart'
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 
 class DeviceDetailPageNew extends ConsumerStatefulWidget {
-  const DeviceDetailPageNew({super.key, this.initialSn});
+  const DeviceDetailPageNew({
+    super.key,
+    this.initialSn,
+    this.readOnly = false,
+  });
 
   final String? initialSn;
+  final bool readOnly;
 
   @override
   ConsumerState<DeviceDetailPageNew> createState() =>
@@ -29,12 +34,13 @@ class DeviceDetailPageNew extends ConsumerStatefulWidget {
 }
 
 class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   final TextEditingController _controller = TextEditingController();
   TabController? _tabController;
   bool _autoSearched = false;
   String _portFilter = 'all';
   int _currentDeviceType = 0;
+  bool _disposed = false;
 
   @override
   void initState() {
@@ -53,17 +59,30 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     }
   }
 
-  void _updateTabController(int deviceType) {
-    if (_currentDeviceType == deviceType && _tabController != null) return;
+  void _updateTabController(int deviceType, {required bool cabinetHasWarehouse}) {
+    if (_currentDeviceType == deviceType &&
+        _tabController != null &&
+        _tabController!.length ==
+            (deviceType == 3 ? (cabinetHasWarehouse ? 4 : 2) : 3)) {
+      return;
+    }
     _currentDeviceType = deviceType;
-    _tabController?.dispose();
-    // 电池: 3 tabs, 车辆: 3 tabs, 电柜: 4 tabs
-    final tabCount = deviceType == 3 ? 4 : 3;
+    // 电池: 3 tabs, 车辆: 3 tabs, 电柜: 2/4 tabs
+    final tabCount =
+        deviceType == 3 ? (cabinetHasWarehouse ? 4 : 2) : 3;
+    final previous = _tabController;
     _tabController = TabController(length: tabCount, vsync: this);
+    if (previous != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_disposed) return;
+        previous.dispose();
+      });
+    }
   }
 
   @override
   void dispose() {
+    _disposed = true;
     _controller.dispose();
     _tabController?.dispose();
     super.dispose();
@@ -76,11 +95,18 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     final deviceType = state.deviceType;
     final hasData = state.cabinetDetail != null ||
         state.batteryDetail != null ||
-        state.vehicleDetail != null;
+        state.vehicleDetail != null ||
+        (state.deviceType == 3 && state.searchResult?.deviceInfo != null);
+    final cabinetHasWarehouse = deviceType == 3
+        ? _cabinetHasWarehouse(state.searchResult?.deviceInfo)
+        : true;
 
     // 根据设备类型更新 TabController
     if (hasData) {
-      _updateTabController(deviceType);
+      _updateTabController(
+        deviceType,
+        cabinetHasWarehouse: cabinetHasWarehouse,
+      );
     }
 
     return PopScope(
@@ -107,7 +133,12 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
             if (hasData) _buildDeviceHeaderByType(state, l10n),
 
             // Tab 切换
-            if (hasData && _tabController != null) _buildTabBarByType(l10n, deviceType),
+            if (hasData && _tabController != null)
+              _buildTabBarByType(
+                l10n,
+                deviceType,
+                cabinetHasWarehouse: cabinetHasWarehouse,
+              ),
 
             // Tab 内容
             Expanded(
@@ -117,7 +148,12 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                       ? const SizedBox.shrink()
                       : TabBarView(
                           controller: _tabController,
-                          children: _buildTabViewsByType(l10n, state, deviceType),
+                          children: _buildTabViewsByType(
+                            l10n,
+                            state,
+                            deviceType,
+                            cabinetHasWarehouse: cabinetHasWarehouse,
+                          ),
                         ),
             ),
           ],
@@ -128,8 +164,13 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
   /// 根据设备类型构建头部
   Widget _buildDeviceHeaderByType(DeviceDetailState state, dynamic l10n) {
-    if (state.deviceType == 3 && state.cabinetDetail != null) {
-      return _buildDeviceHeader(state.cabinetDetail!);
+    if (state.deviceType == 3 &&
+        (state.cabinetDetail != null || state.searchResult?.deviceInfo != null)) {
+      return _buildCabinetHeader(
+        state.searchResult?.deviceInfo,
+        state.cabinetDetail,
+        l10n,
+      );
     } else if (state.deviceType == 2 && state.vehicleDetail != null) {
       return _buildVehicleHeader(state.vehicleDetail!, l10n);
     } else if (state.deviceType == 1 && state.batteryDetail != null) {
@@ -139,7 +180,11 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   /// 根据设备类型构建 Tab Bar
-  Widget _buildTabBarByType(dynamic l10n, int deviceType) {
+  Widget _buildTabBarByType(
+    dynamic l10n,
+    int deviceType, {
+    required bool cabinetHasWarehouse,
+  }) {
     List<Tab> tabs;
     if (deviceType == 1) {
       // 电池: 基础信息、位置信息、维修记录
@@ -156,13 +201,18 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         Tab(text: l10n.deviceDetailTabMaintenance),
       ];
     } else {
-      // 电柜: 基础信息、仓位信息、位置信息、维修记录
-      tabs = [
-        Tab(text: l10n.deviceDetailTabBasicInfo),
-        Tab(text: l10n.deviceDetailTabPortDetail),
-        Tab(text: l10n.deviceDetailTabAddress),
-        Tab(text: l10n.deviceDetailTabRepairRecords),
-      ];
+      // 电柜: 基础信息、仓位信息、位置信息、维修记录（未上架仅基础信息+维修记录）
+      tabs = cabinetHasWarehouse
+          ? [
+              Tab(text: l10n.deviceDetailTabBasicInfo),
+              Tab(text: l10n.deviceDetailTabPortDetail),
+              Tab(text: l10n.deviceDetailTabAddress),
+              Tab(text: l10n.deviceDetailTabRepairRecords),
+            ]
+          : [
+              Tab(text: l10n.deviceDetailTabBasicInfo),
+              Tab(text: l10n.deviceDetailTabRepairRecords),
+            ];
     }
 
     return Container(
@@ -184,7 +234,9 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   List<Widget> _buildTabViewsByType(
     dynamic l10n,
     DeviceDetailState state,
-    int deviceType,
+    int deviceType, {
+    required bool cabinetHasWarehouse,
+  }
   ) {
     if (deviceType == 1 && state.batteryDetail != null) {
       // 电池: 基础信息、位置信息、维修记录
@@ -200,12 +252,20 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         _buildRepairRecordsTab(l10n, state),
         _buildMaintenanceRecordsTab(l10n, state),
       ];
-    } else if (state.cabinetDetail != null) {
-      // 电柜: 基础信息、仓位信息、位置信息、维修记录
+    } else if (state.cabinetDetail != null || state.searchResult?.deviceInfo != null) {
+      // 电柜: 基础信息、仓位信息、位置信息、维修记录（未上架仅基础信息+维修记录）
+      final info = state.searchResult?.deviceInfo;
+      final detail = state.cabinetDetail;
+      if (!cabinetHasWarehouse) {
+        return [
+          _buildCabinetBasicInfoTab(l10n, info, detail),
+          _buildRepairRecordsTab(l10n, state),
+        ];
+      }
       return [
-        _buildBasicInfoTab(l10n, state.cabinetDetail!),
+        _buildCabinetBasicInfoTab(l10n, info, detail),
         _buildPortDetailTab(l10n, state),
-        _buildAddressTab(l10n, state.cabinetDetail!),
+        _buildCabinetAddressTab(l10n, info, detail),
         _buildRepairRecordsTab(l10n, state),
       ];
     }
@@ -272,8 +332,29 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     );
   }
 
-  Widget _buildDeviceHeader(CabinetDetailBaseInfoBean detail) {
-    final isOnline = detail.online == '1' || detail.showOnlineStatus == 'Online';
+  Widget _buildCabinetHeader(
+    DeviceInfo? info,
+    CabinetDetailBaseInfoBean? detail,
+    dynamic l10n,
+  ) {
+    final isOnline = info?.onlineStatus == 1 ||
+        info?.showOnlineStatus == 'Online' ||
+        detail?.online == '1' ||
+        detail?.showOnlineStatus == 'Online';
+    final headerImg = (info?.img?.trim().isNotEmpty == true)
+        ? info!.img!.trim()
+        : info == null
+            ? (detail?.standardImg?.trim().isNotEmpty == true)
+                ? detail!.standardImg!.trim()
+                : (detail?.installImgSet.isNotEmpty == true
+                    ? detail!.installImgSet.first
+                    : null)
+            : null;
+    final stationName = info?.stationName?.trim();
+    final sn = info?.sn ?? detail?.stationSn ?? '-';
+    final title =
+        (stationName != null && stationName.isNotEmpty) ? stationName : 'SN: $sn';
+    final showOperate = info?.hasPermission == 1 && !widget.readOnly;
 
     return Container(
       color: Colors.white,
@@ -288,31 +369,45 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               color: const Color(0xFFF5F5F5),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Image.asset(
-              'assets/android/mipmap-xxhdpi/icon_cabinet.png',
-              width: 72,
-              height: 72,
-              errorBuilder: (_, __, ___) => const Icon(
-                Icons.ev_station,
-                size: 40,
-                color: Color(0xFF999999),
-              ),
-            ),
+            child: headerImg != null
+                ? Image.network(
+                    headerImg,
+                    width: 72,
+                    height: 72,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.ev_station,
+                      size: 40,
+                      color: Color(0xFF999999),
+                    ),
+                  )
+                : const Icon(
+                    Icons.ev_station,
+                    size: 40,
+                    color: Color(0xFF999999),
+                  ),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  detail.stationName ?? '-',
-                  style: const TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black06Text,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black06Text,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (showOperate) _buildCabinetOperateButton(),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 Container(
@@ -337,7 +432,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        isOnline ? 'Online' : 'Offline',
+                        isOnline ? l10n.online : l10n.offline,
                         style: TextStyle(
                           fontSize: 12,
                           color: isOnline
@@ -351,7 +446,44 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               ],
             ),
           ),
+          if (showOperate)
+            GestureDetector(
+              onTap: _confirmOpenCabinetBackDoor,
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: const Color(0x330C0C0D)),
+                ),
+                child: const Icon(
+                  Icons.door_front_door_outlined,
+                  size: 20,
+                  color: AppColors.black06Text,
+                ),
+              ),
+            ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCabinetOperateButton() {
+    return GestureDetector(
+      onTap: _confirmOpenBackDoor,
+      child: Container(
+        margin: const EdgeInsets.only(left: 8),
+        width: 32,
+        height: 32,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: const Color(0x330C0C0D)),
+        ),
+        padding: const EdgeInsets.all(6),
+        child: Image.asset(
+          'assets/android/mipmap-xxhdpi/icon_station_operation.png',
+          fit: BoxFit.contain,
+        ),
       ),
     );
   }
@@ -560,8 +692,34 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     );
   }
 
-  Widget _buildBasicInfoTab(dynamic l10n, CabinetDetailBaseInfoBean detail) {
-    final isOnboarded = detail.stationStatus == 1;
+  Widget _buildCabinetBasicInfoTab(
+    dynamic l10n,
+    DeviceInfo? info,
+    CabinetDetailBaseInfoBean? detail,
+  ) {
+    final installStatus = info?.installStatus;
+    final isOnboarded = installStatus != null && installStatus != 0;
+    final spec = info != null ? info.showDeviceModel : detail?.stationSpec;
+    final model = info != null ? info.deviceModel : detail?.stationModel;
+    final inputTime = _formatTimeString(
+      info != null ? info.createTime : detail?.createTime,
+      withSeconds: true,
+    );
+    final onboardTime = _formatTimeString(
+      info != null
+          ? info.installTime
+          : (detail?.putOnShelvesTime != null
+              ? detail!.putOnShelvesTime.toString()
+              : null),
+      withSeconds: true,
+    );
+    final managerName = info?.managerList?.isNotEmpty == true
+        ? info!.managerList!.first.showName
+        : null;
+    final photos = <String>[
+      if (info != null) ..._collectDevicePhotos(info),
+      if (info == null && detail != null) ...detail.installImgSet,
+    ].where((item) => item.isNotEmpty).toSet().toList();
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -572,15 +730,15 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
             children: [
               _InfoRow(
                 label: l10n.deviceDetailSpecLabel,
-                value: detail.stationSpec ?? '-',
+                value: spec?.isNotEmpty == true ? spec : '-',
               ),
               _InfoRow(
                 label: l10n.deviceDetailModelLabel,
-                value: detail.stationModel ?? '-',
+                value: model?.isNotEmpty == true ? model : '-',
               ),
               _InfoRow(
                 label: l10n.deviceDetailInputTimeLabel,
-                value: detail.createTime ?? '-',
+                value: inputTime,
               ),
             ],
           ),
@@ -592,47 +750,49 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         _CardSection(
           child: Column(
             children: [
-              _InfoRow(
-                label: l10n.deviceDetailBindingStateLabel,
-                valueWidget: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: isOnboarded
-                            ? AppColors.primaryColor
-                            : const Color(0xFFE57373),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      isOnboarded
-                          ? l10n.deviceDetailOnboarded
-                          : l10n.deviceDetailNotBoarded,
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: isOnboarded
-                            ? AppColors.primaryColor
-                            : const Color(0xFFE57373),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (isOnboarded)
+              if (installStatus == null)
                 _InfoRow(
-                  label: l10n.deviceDetailOnboardedTimeLabel,
-                  value: detail.createTime ?? '-',
+                  label: l10n.deviceDetailBindingStateLabel,
+                  value: '-',
+                )
+              else
+                _InfoRow(
+                  label: l10n.deviceDetailBindingStateLabel,
+                  valueWidget: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: isOnboarded
+                              ? AppColors.primaryColor
+                              : const Color(0xFFE57373),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        isOnboarded
+                            ? l10n.deviceDetailOnboarded
+                            : l10n.deviceDetailNotBoarded,
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: isOnboarded
+                              ? AppColors.primaryColor
+                              : const Color(0xFFE57373),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+              _InfoRow(
+                label: l10n.deviceDetailOnboardedTimeLabel,
+                value: onboardTime,
+              ),
               _InfoRow(
                 label: l10n.deviceDetailResponsibleLabel,
-                value: detail.stationManagerList.isNotEmpty
-                    ? detail.stationManagerList.first['trueName']?.toString() ??
-                          '-'
-                    : '-',
+                value: (managerName ?? '-').isNotEmpty ? managerName ?? '-' : '-',
               ),
             ],
           ),
@@ -650,11 +810,11 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                 style: const TextStyle(fontSize: 15, color: AppColors.black06Text),
               ),
               const SizedBox(height: 12),
-              if (detail.installImgSet.isNotEmpty)
+              if (photos.isNotEmpty)
                 Wrap(
                   spacing: 12,
                   runSpacing: 12,
-                  children: detail.installImgSet.map((url) {
+                  children: photos.map((url) {
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network(
@@ -686,23 +846,29 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
   Widget _buildPortDetailTab(dynamic l10n, DeviceDetailState state) {
     final ports = state.cabinPorts;
+    final info = state.searchResult?.deviceInfo;
+    final hasPermission = info?.hasPermission ??
+        (info == null ? state.cabinetDetail?.hasPermission : null);
+    final showSetup = hasPermission == 1 && !widget.readOnly;
 
     // 统计各状态数量
-    final availableCount = ports.where((p) => p.status == 0).length;
-    final disabledCount = ports.where((p) => p.status == 2).length;
-    final inUseCount = ports.where((p) => p.status == 1).length;
+    final freeCount = ports.where((p) => (p.batteryStatus ?? 0) == 0).length;
+    final disabledCount = ports.where((p) => p.status == 0).length;
+    final occupiedCount = ports.where((p) => (p.batteryStatus ?? 0) == 1).length;
 
     // 过滤端口
     List<Cabin> filteredPorts;
     switch (_portFilter) {
       case 'available':
-        filteredPorts = ports.where((p) => p.status == 0).toList();
+        filteredPorts =
+            ports.where((p) => (p.batteryStatus ?? 0) == 0).toList();
         break;
       case 'disabled':
-        filteredPorts = ports.where((p) => p.status == 2).toList();
+        filteredPorts = ports.where((p) => p.status == 0).toList();
         break;
       case 'inuse':
-        filteredPorts = ports.where((p) => p.status == 1).toList();
+        filteredPorts =
+            ports.where((p) => (p.batteryStatus ?? 0) == 1).toList();
         break;
       default:
         filteredPorts = ports;
@@ -724,7 +890,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               const SizedBox(width: 8),
               _FilterChip(
                 label:
-                    '${l10n.deviceDetailPortFilterAvailable}  $availableCount',
+                    '${l10n.deviceDetailPortFilterAvailable}  $freeCount',
                 isSelected: _portFilter == 'available',
                 onTap: () => setState(() => _portFilter = 'available'),
               ),
@@ -736,7 +902,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               ),
               const SizedBox(width: 8),
               _FilterChip(
-                label: '${l10n.deviceDetailPortFilterInUse}  $inUseCount',
+                label: '${l10n.deviceDetailPortFilterInUse}  $occupiedCount',
                 isSelected: _portFilter == 'inuse',
                 onTap: () => setState(() => _portFilter = 'inuse'),
               ),
@@ -746,38 +912,57 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
         // 端口网格
         Expanded(
-          child: filteredPorts.isEmpty && !state.portsLoading
-              ? Center(
-                  child: Text(
-                    l10n.deviceDetailCabinPortEmpty,
-                    style: const TextStyle(color: Color(0xFF999999)),
+          child: RefreshIndicator(
+            onRefresh: () =>
+                ref.read(deviceDetailProvider.notifier).loadCabinPorts(),
+            child: filteredPorts.isEmpty && !state.portsLoading
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(vertical: 80),
+                    children: [
+                      Center(
+                        child: Text(
+                          l10n.deviceDetailCabinPortEmpty,
+                          style: const TextStyle(color: Color(0xFF999999)),
+                        ),
+                      ),
+                    ],
+                  )
+                : GridView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 0.85,
+                    ),
+                    itemCount: filteredPorts.length,
+                    itemBuilder: (context, index) {
+                      return _PortCard(
+                        port: filteredPorts[index],
+                        l10n: l10n,
+                        showSetup: showSetup,
+                        onSetup: () => _setupPort(filteredPorts[index]),
+                      );
+                    },
                   ),
-                )
-              : GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 12,
-                    crossAxisSpacing: 12,
-                    childAspectRatio: 0.85,
-                  ),
-                  itemCount: filteredPorts.length,
-                  itemBuilder: (context, index) {
-                    return _PortCard(
-                      port: filteredPorts[index],
-                      l10n: l10n,
-                      onSetup: () => _setupPort(filteredPorts[index]),
-                    );
-                  },
-                ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildAddressTab(dynamic l10n, CabinetDetailBaseInfoBean detail) {
-    final lat = detail.latitude ?? 0.0;
-    final lng = detail.longitude ?? 0.0;
+  Widget _buildCabinetAddressTab(
+    dynamic l10n,
+    DeviceInfo? info,
+    CabinetDetailBaseInfoBean? detail,
+  ) {
+    final lat = info?.latitude ?? detail?.latitude ?? 0.0;
+    final lng = info?.longitude ?? detail?.longitude ?? 0.0;
+    final address =
+        info?.address ?? detail?.stationAddress ?? detail?.address ?? '-';
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -804,7 +989,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      detail.stationAddress ?? detail.address ?? '-',
+                      address,
                       style: const TextStyle(
                         fontSize: 14,
                         color: AppColors.black06Text,
@@ -1085,7 +1270,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
   /// 车辆基础信息 Tab
   Widget _buildVehicleBasicInfoTab(dynamic l10n, DeviceDetailState state) {
-    final detail = state.vehicleDetail!;
+    final detail = state.vehicleDetail;
+    if (detail == null) {
+      return const SizedBox.shrink();
+    }
     final deviceInfo = state.searchResult?.deviceInfo;
     final spec = deviceInfo?.showDeviceModel ?? detail.spec ?? detail.carSpec;
     final model = deviceInfo?.deviceModel ?? detail.model ?? detail.carModel;
@@ -1301,20 +1489,30 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   String _formatTimestamp(int? timestamp, {bool withSeconds = false}) {
-    if (timestamp == null || timestamp == 0) return '-';
-    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    final pattern = withSeconds ? 'yyyy-MM-dd HH:mm:ss' : 'yyyy-MM-dd HH:mm';
-    return DateFormat(pattern).format(date);
+    final pattern =
+        withSeconds ? 'yyyy/MM/dd HH:mm:ss' : 'yyyy/MM/dd HH:mm';
+    return DateFormatUtils.formatTimestamp(
+      timestamp,
+      pattern: pattern,
+    );
   }
 
   String _formatTimeString(String? value, {bool withSeconds = false}) {
     if (value == null || value.trim().isEmpty) return '-';
     final trimmed = value.trim();
-    final asInt = int.tryParse(trimmed);
-    if (asInt != null) {
-      return _formatTimestamp(asInt, withSeconds: withSeconds);
+    final pattern =
+        withSeconds ? 'yyyy/MM/dd HH:mm:ss' : 'yyyy/MM/dd HH:mm';
+    final parsed = DateFormatUtils.parse(trimmed);
+    if (parsed != null) {
+      return DateFormatUtils.format(parsed, pattern: pattern);
     }
     return trimmed;
+  }
+
+  bool _cabinetHasWarehouse(DeviceInfo? info) {
+    final status = info?.installStatus;
+    if (status == null) return false;
+    return status != 0;
   }
 
   List<String> _collectDevicePhotos(DeviceInfo? info) {
@@ -1400,7 +1598,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
   void _setupPort(Cabin port) {
     final l10n = context.l10n;
-    final isDisabled = port.status == 2 || port.status == 0;
+    final isDisabled = port.status == 0;
     final isDoorOpen = port.doorStatus == 1;
 
     showModalBottomSheet(
@@ -1525,6 +1723,80 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
           success
               ? l10n.deviceDetailPortOpenSuccess
               : l10n.deviceDetailPortOpenFailed,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmOpenCabinetBackDoor() async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.cabinetOperateOpenDoorConfirmTitle),
+        content: Text(l10n.cabinetOperateOpenDoorConfirmContent),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.cabinetOfflineCabinOpenDoor),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final success =
+        await ref.read(deviceDetailProvider.notifier).openCabinBackDoor();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? l10n.cabinetOperateOpenDoorSuccess
+              : l10n.cabinetOperateOpenDoorFailed,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmOpenBackDoor() async {
+    final l10n = context.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.cabinetOperateOpenDoorConfirmTitle),
+        content: Text(l10n.cabinetOperateOpenDoorConfirmContent),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(l10n.confirm),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true || !mounted) return;
+
+    final success =
+        await ref.read(deviceDetailProvider.notifier).openCabinBackDoor();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? l10n.deviceDetailCabinOpenBackDoorSuccess
+              : l10n.deviceDetailCabinOpenBackDoorFailed,
         ),
       ),
     );
@@ -1683,29 +1955,35 @@ class _PortCard extends StatelessWidget {
   const _PortCard({
     required this.port,
     required this.l10n,
+    required this.showSetup,
     required this.onSetup,
   });
 
   final Cabin port;
   final dynamic l10n;
+  final bool showSetup;
   final VoidCallback onSetup;
 
   @override
   Widget build(BuildContext context) {
-    final isAvailable = port.status == 0;
-    final isDisabled = port.status == 2;
-    final hasBattery = port.batterySn != null && port.batterySn!.isNotEmpty;
+    final isDisabled = port.status == 0;
+    final batteryStatus = port.batteryStatus ?? 0;
+    final hasBattery = batteryStatus == 1;
     final soc = port.batterySoc ?? 0;
+    final swapFlag = port.swapFlag ?? 0;
 
-    // 电量颜色
-    Color socColor;
-    if (soc >= 80) {
-      socColor = AppColors.primaryColor;
-    } else if (soc >= 40) {
-      socColor = const Color(0xFFFFA000);
-    } else {
-      socColor = const Color(0xFFE57373);
-    }
+    // 电量颜色（与 Android 逻辑一致：禁用灰，低于阈值红，否则绿）
+    final socColor = isDisabled
+        ? const Color(0x330C0C0D)
+        : (swapFlag == 0
+            ? const Color(0xFFFA4B51)
+            : const Color(0xFF0ABF83));
+
+    final portBadgeColor = isDisabled
+        ? const Color(0x330C0C0D)
+        : hasBattery
+            ? const Color(0xE60C0C0D)
+            : const Color(0x330C0C0D);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -1724,32 +2002,30 @@ class _PortCard extends StatelessWidget {
                 width: 28,
                 height: 28,
                 decoration: BoxDecoration(
-                  color: isDisabled
-                      ? const Color(0xFFEEEEEE)
-                      : AppColors.black06Text,
+                  color: portBadgeColor,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   '${port.portNo ?? 0}',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: isDisabled ? const Color(0xFF999999) : Colors.white,
+                    color: Colors.white,
                   ),
                 ),
               ),
               const Spacer(),
-              if (!isAvailable && !isDisabled && hasBattery)
+              if (!isDisabled && hasBattery && swapFlag == 1)
                 Row(
                   children: [
-                    const Icon(Icons.bolt, size: 14, color: AppColors.primaryColor),
+                    const Icon(Icons.bolt, size: 14, color: Color(0xFF0ABF83)),
                     const SizedBox(width: 2),
                     Text(
                       l10n.deviceDetailPortReplaceable,
                       style: const TextStyle(
                         fontSize: 12,
-                        color: AppColors.primaryColor,
+                        color: Color(0xFF0ABF83),
                       ),
                     ),
                   ],
@@ -1757,13 +2033,13 @@ class _PortCard extends StatelessWidget {
               if (isDisabled)
                 Row(
                   children: [
-                    const Icon(Icons.block, size: 14, color: Color(0xFF999999)),
+                    const Icon(Icons.block, size: 14, color: Color(0xE60C0C0D)),
                     const SizedBox(width: 2),
                     Text(
                       l10n.deviceDetailPortDisabled,
                       style: const TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF999999),
+                        color: Color(0xE60C0C0D),
                       ),
                     ),
                   ],
@@ -1781,9 +2057,9 @@ class _PortCard extends StatelessWidget {
                 Text(
                   '$soc%',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 17,
                     fontWeight: FontWeight.w600,
-                    color: isDisabled ? const Color(0xFF999999) : socColor,
+                    color: socColor,
                   ),
                 ),
               ],
@@ -1792,10 +2068,8 @@ class _PortCard extends StatelessWidget {
             Text(
               l10n.deviceDetailPortAvailable,
               style: TextStyle(
-                fontSize: 14,
-                color: isDisabled
-                    ? const Color(0xFF999999)
-                    : const Color(0xFF666666),
+                fontSize: 17,
+                color: const Color(0x800C0C0D),
               ),
             ),
           const SizedBox(height: 4),
@@ -1807,8 +2081,8 @@ class _PortCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 color: isDisabled
-                    ? const Color(0xFFCCCCCC)
-                    : const Color(0xFF999999),
+                    ? const Color(0x330C0C0D)
+                    : const Color(0x800C0C0D),
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -1816,40 +2090,41 @@ class _PortCard extends StatelessWidget {
           const Spacer(),
 
           // 设置按钮
-          SizedBox(
-            width: double.infinity,
-            height: 32,
-            child: OutlinedButton.icon(
-              onPressed: onSetup,
-              icon: Icon(
-                Icons.settings_outlined,
-                size: 16,
-                color: isDisabled
-                    ? const Color(0xFFCCCCCC)
-                    : const Color(0xFF666666),
-              ),
-              label: Text(
-                l10n.deviceDetailPortSetup,
-                style: TextStyle(
-                  fontSize: 13,
+          if (showSetup)
+            SizedBox(
+              width: double.infinity,
+              height: 32,
+              child: OutlinedButton.icon(
+                onPressed: onSetup,
+                icon: Icon(
+                  Icons.settings_outlined,
+                  size: 16,
                   color: isDisabled
                       ? const Color(0xFFCCCCCC)
                       : const Color(0xFF666666),
                 ),
-              ),
-              style: OutlinedButton.styleFrom(
-                padding: EdgeInsets.zero,
-                side: BorderSide(
-                  color: isDisabled
-                      ? const Color(0xFFEEEEEE)
-                      : const Color(0xFFDDDDDD),
+                label: Text(
+                  l10n.deviceDetailPortSetup,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: isDisabled
+                        ? const Color(0xFFCCCCCC)
+                        : const Color(0xFF666666),
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  side: BorderSide(
+                    color: isDisabled
+                        ? const Color(0xFFEEEEEE)
+                        : const Color(0xFFDDDDDD),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

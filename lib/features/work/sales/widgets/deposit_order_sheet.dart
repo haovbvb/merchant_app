@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/data/models/deposit_refund_info_bean.dart';
 
 class DepositOrderSheet extends StatefulWidget {
@@ -242,9 +243,9 @@ class _DepositOrderSheetState extends State<DepositOrderSheet> {
   }
 
   String _formatUnbindTime(int? timestamp) {
-    if (timestamp == null) return '-';
-    final dt = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    return '${dt.year}.${dt.month.toString().padLeft(2, '0')}.${dt.day.toString().padLeft(2, '0')} '
-        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
+    return DateFormatUtils.formatTimestamp(
+      timestamp,
+      pattern: 'yyyy.MM.dd HH:mm:ss',
+    );
   }
 }

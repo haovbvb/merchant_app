@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/widgets/common_webview_page.dart';
 import 'package:merchant_app/data/models/message_list_response.dart';
 import 'package:merchant_app/features/me/message_controller.dart';
@@ -15,7 +15,6 @@ class MessagePage extends ConsumerStatefulWidget {
 }
 
 class _MessagePageState extends ConsumerState<MessagePage> {
-  final DateFormat _timeFormatter = DateFormat('yyyy-MM-dd HH:mm');
   late final RefreshController _refreshController;
 
   @override
@@ -82,10 +81,9 @@ class _MessagePageState extends ConsumerState<MessagePage> {
   }
 
   String _formatTime(int? value) {
-    if (value == null || value == 0) return '-';
-    final timestamp = value > 1000000000000 ? value : value * 1000;
-    return _timeFormatter.format(
-      DateTime.fromMillisecondsSinceEpoch(timestamp),
+    return DateFormatUtils.formatTimestamp(
+      value,
+      pattern: 'yyyy-MM-dd HH:mm',
     );
   }
 

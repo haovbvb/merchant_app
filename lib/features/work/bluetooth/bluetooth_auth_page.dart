@@ -202,10 +202,7 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
                           const SizedBox(
                             width: 16,
                             height: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColors.primaryColor,
-                            ),
+                            child: const SizedBox.shrink(),
                           ),
                       ],
                     ),
@@ -243,10 +240,7 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
                                     ? const SizedBox(
                                         width: 20,
                                         height: 20,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: AppColors.primaryColor,
-                                        ),
+                                        child: const SizedBox.shrink(),
                                       )
                                     : null,
                                 onTap: isConnecting
@@ -443,10 +437,7 @@ class _BluetoothAuthorizationPageState
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Colors.white,
-                            ),
+                            child: const SizedBox.shrink(),
                           )
                         : Text(
                             l10n.bluetoothAuthOpenButton,
@@ -472,7 +463,7 @@ class _BluetoothAuthorizationPageState
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: const SizedBox.shrink(),
                           )
                         : Text(
                             l10n.bluetoothAuthClearButton,

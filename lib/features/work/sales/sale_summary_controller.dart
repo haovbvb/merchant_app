@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/data/models/sales_bar_data.dart';
 import 'package:merchant_app/data/models/sell_data_list_response.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
@@ -161,8 +162,9 @@ class SaleSummaryNotifier extends Notifier<SaleSummaryState> {
   }
 
   String _formatDate(DateTime date) {
-    final month = date.month.toString().padLeft(2, '0');
-    final day = date.day.toString().padLeft(2, '0');
-    return '${date.year}-$month-$day';
+    return DateFormatUtils.format(
+      date,
+      pattern: 'yyyy-MM-dd',
+    );
   }
 }

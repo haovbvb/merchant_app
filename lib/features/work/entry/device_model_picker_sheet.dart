@@ -195,7 +195,7 @@ class _DeviceModelPickerSheetState extends State<DeviceModelPickerSheet>
 
   Widget _buildVehicleTab() {
     if (_loadingVehicle) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: const SizedBox.shrink());
     }
     if (_vehicleTypes.isEmpty) {
       return _buildEmptyState();
@@ -211,7 +211,7 @@ class _DeviceModelPickerSheetState extends State<DeviceModelPickerSheet>
 
   Widget _buildBatteryTab() {
     if (_loadingBattery) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: const SizedBox.shrink());
     }
     if (_batteryTypes.isEmpty) {
       return _buildEmptyState();
@@ -227,7 +227,7 @@ class _DeviceModelPickerSheetState extends State<DeviceModelPickerSheet>
 
   Widget _buildStationTab() {
     if (_loadingStation) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: const SizedBox.shrink());
     }
     if (_stationTypes.isEmpty) {
       return _buildEmptyState();

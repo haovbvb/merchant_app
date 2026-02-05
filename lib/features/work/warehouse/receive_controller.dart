@@ -161,8 +161,12 @@ class ReceiveDetailNotifier extends Notifier<ReceiveDetailState> {
     state = state.copyWith(loading: true, transferNo: transferNo);
 
     final response = await _api.get<DeviceTransportDetail>(
-      ApiPath.transportQueryReceiveDetail,
-      queryParameters: {'transferNo': transferNo},
+      ApiPath.transportQueryIssueDetail,
+      queryParameters: {
+        'transferNo': transferNo,
+        'pageNum': 1,
+        'pageSize': _pageSize,
+      },
       parser: (json) =>
           DeviceTransportDetail.fromJson(Map<String, dynamic>.from(json as Map)),
     );

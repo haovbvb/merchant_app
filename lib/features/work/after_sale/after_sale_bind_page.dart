@@ -206,10 +206,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
+                          child: const SizedBox.shrink(),
                         )
                       : Text(
                           l10n.afterSaleBindConfirm,

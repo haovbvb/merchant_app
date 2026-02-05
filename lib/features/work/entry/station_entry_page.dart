@@ -58,7 +58,7 @@ class _StationEntryPageState extends State<StationEntryPage> {
     return Scaffold(
       appBar: AppBar(title: Text(l10n.stationEntryTitle)),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: const SizedBox.shrink())
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [

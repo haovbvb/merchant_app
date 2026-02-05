@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/features/work/map/address_picker_page.dart';
 import 'package:merchant_app/features/work/map/address_result.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -505,8 +506,10 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
     );
     if (picked == null || !mounted) return;
     setState(() {
-      _birthdayController.text =
-          '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+      _birthdayController.text = DateFormatUtils.format(
+        picked,
+        pattern: 'dd/MM/yyyy',
+      );
     });
   }
 

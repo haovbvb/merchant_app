@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/app/ui.dart';
+import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/login/providers/auth_controller.dart';
 import 'package:merchant_app/features/me/message_controller.dart';
+import 'package:merchant_app/features/me/profile_controller.dart';
 import 'package:merchant_app/features/me/providers/language_notifier.dart';
+
 class _ProfileAction {
   const _ProfileAction({
     this.icon,
@@ -34,11 +38,14 @@ class ProfileTab extends ConsumerStatefulWidget {
 }
 
 class _ProfileTabState extends ConsumerState<ProfileTab> {
+  final ImagePicker _imagePicker = ImagePicker();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(messageListProvider.notifier).refresh();
+      ref.read(profileProvider.notifier).refresh();
     });
   }
 
@@ -46,11 +53,16 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
   Widget build(BuildContext context) {
     ref.watch(authNotifierProvider);
     final session = AuthSession.instance.current;
-    final rawName = session != null ? session.name.trim() : '';
-    final rawPhone = session != null ? session.phone.trim() : '';
+    final profileState = ref.watch(profileProvider);
+    final profile = profileState.info;
+    final rawName = profile?.displayName.trim() ??
+        (session != null ? session.name.trim() : '');
     final name = rawName.isNotEmpty ? rawName : context.l10n.tabMe;
-    final phone = rawPhone.isNotEmpty ? rawPhone : context.l10n.profileGreeting;
-    final avatarUrl = session?.avatar.trim();
+    final userId = _formatUserId(profile?.userId);
+    final subtitle = userId.isNotEmpty ? userId : '-';
+    final avatarUrl = (profile?.avatarUrl?.trim().isNotEmpty ?? false)
+        ? profile?.avatarUrl?.trim()
+        : session?.avatar.trim();
     final messageState = ref.watch(messageListProvider);
     final unreadCount = messageState.items
         .where((item) => item.isRead != 1)
@@ -105,8 +117,12 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
             children: [
               _ProfileHeader(
                 name: name,
-                subtitle: phone,
+                subtitle: subtitle,
                 avatarUrl: avatarUrl,
+                showAvatarHint: avatarUrl == null || avatarUrl.isEmpty,
+                isUpdating: profileState.updating,
+                onEditNickname: () => _editNickname(context, name),
+                onEditAvatar: () => _showAvatarSheet(context),
                 onLogout: () async {
                   await ref.read(authNotifierProvider.notifier).logout();
                 },
@@ -135,6 +151,171 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
     }
     return 'English';
   }
+
+  String _formatUserId(String? value) {
+    if (value == null || value.trim().isEmpty) return '';
+    final trimmed = value.trim();
+    final atIndex = trimmed.indexOf('@');
+    if (atIndex > 0) {
+      return trimmed.substring(0, atIndex);
+    }
+    return trimmed;
+  }
+
+  Future<void> _editNickname(BuildContext context, String currentName) async {
+    final l10n = context.l10n;
+    final controller = TextEditingController(text: currentName);
+    final result = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(l10n.profileEditNicknameTitle),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: l10n.profileEditNicknameHint,
+            ),
+            textInputAction: TextInputAction.done,
+            onSubmitted: (_) => Navigator.of(ctx).pop(controller.text.trim()),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+              child: Text(l10n.confirm),
+            ),
+          ],
+        );
+      },
+    );
+    final trimmed = result?.trim() ?? '';
+    if (trimmed.isEmpty) {
+      if (result != null) {
+        showToast(l10n.profileEditNicknameEmpty);
+      }
+      return;
+    }
+    await ref.read(profileProvider.notifier).changeNickName(trimmed);
+  }
+
+  Future<void> _showAvatarSheet(BuildContext context) async {
+    final l10n = context.l10n;
+    if (ref.read(profileProvider).updating) return;
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Title and options card
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Title
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        child: Text(
+                          l10n.profileAvatar,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF999999),
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                      const Divider(height: 1, color: Color(0xFFE5E5E5)),
+                      // Photograph option
+                      InkWell(
+                        onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Text(
+                            l10n.orderVoucherPickCamera,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF333333),
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const Divider(height: 1, color: Color(0xFFE5E5E5)),
+                      // Select from album option
+                      InkWell(
+                        onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          child: Text(
+                            l10n.orderVoucherPickGallery,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF333333),
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                // Cancel button
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: InkWell(
+                    onTap: () => Navigator.of(ctx).pop(),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      child: Text(
+                        l10n.cancel,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFF333333),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+    if (source == null) return;
+    final image = await _imagePicker.pickImage(
+      source: source,
+      imageQuality: 85,
+      maxWidth: 1024,
+      maxHeight: 1024,
+    );
+    if (image == null) return;
+    await ref.read(profileProvider.notifier).changeAvatar(image.path);
+  }
 }
 
 class _ProfileHeader extends StatelessWidget {
@@ -142,12 +323,20 @@ class _ProfileHeader extends StatelessWidget {
     required this.name,
     required this.subtitle,
     required this.onLogout,
+    required this.onEditNickname,
+    required this.onEditAvatar,
+    required this.showAvatarHint,
+    required this.isUpdating,
     this.avatarUrl,
   });
 
   final String name;
   final String subtitle;
   final Future<void> Function() onLogout;
+  final VoidCallback onEditNickname;
+  final VoidCallback onEditAvatar;
+  final bool showAvatarHint;
+  final bool isUpdating;
   final String? avatarUrl;
 
   @override
@@ -190,33 +379,43 @@ class _ProfileHeader extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _Avatar(avatarUrl: avatarUrl, displayName: name),
+                _Avatar(
+                  avatarUrl: avatarUrl,
+                  displayName: name,
+                  showHint: showAvatarHint,
+                  isUpdating: isUpdating,
+                  onTap: onEditAvatar,
+                ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              name,
-                              style: Theme.of(context).textTheme.titleLarge
-                                  ?.copyWith(
-                                    color: AppColors.black09Text,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 22,
-                                  ),
-                              overflow: TextOverflow.ellipsis,
+                      InkWell(
+                        onTap: onEditNickname,
+                        borderRadius: BorderRadius.circular(6),
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                name,
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(
+                                      color: AppColors.black09Text,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 22,
+                                    ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          Icon(
-                            Icons.edit_outlined,
-                            size: 18,
-                            color: AppColors.black04Text,
-                          ),
-                        ],
+                            const SizedBox(width: 8),
+                            Icon(
+                              Icons.edit_outlined,
+                              size: 18,
+                              color: AppColors.black04Text,
+                            ),
+                          ],
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -238,10 +437,19 @@ class _ProfileHeader extends StatelessWidget {
 }
 
 class _Avatar extends StatelessWidget {
-  const _Avatar({required this.avatarUrl, required this.displayName});
+  const _Avatar({
+    required this.avatarUrl,
+    required this.displayName,
+    required this.onTap,
+    required this.showHint,
+    required this.isUpdating,
+  });
 
   final String? avatarUrl;
   final String displayName;
+  final VoidCallback onTap;
+  final bool showHint;
+  final bool isUpdating;
 
   @override
   Widget build(BuildContext context) {
@@ -249,16 +457,59 @@ class _Avatar extends StatelessWidget {
     final initials = sanitized.isNotEmpty
         ? sanitized.substring(0, 1).toUpperCase()
         : '?';
-    if (avatarUrl != null && avatarUrl!.isNotEmpty) {
-      return CircleAvatar(
-        radius: 32,
-        backgroundImage: NetworkImage(avatarUrl!),
-        onBackgroundImageError: (_, __) {},
-      );
-    }
-    return CircleAvatar(
-      radius: 32,
-      child: Text(initials, style: Theme.of(context).textTheme.titleMedium),
+    final avatar = avatarUrl != null && avatarUrl!.isNotEmpty
+        ? CircleAvatar(
+            radius: 32,
+            backgroundImage: NetworkImage(avatarUrl!),
+            onBackgroundImageError: (_, __) {},
+          )
+        : CircleAvatar(
+            radius: 32,
+            child: Text(initials, style: Theme.of(context).textTheme.titleMedium),
+          );
+    return GestureDetector(
+      onTap: isUpdating ? null : onTap,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          avatar,
+          if (showHint)
+            Positioned(
+              right: 0,
+              bottom: 0,
+              child: Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                  color: AppColors.primaryColor,
+                  borderRadius: BorderRadius.circular(11),
+                  border: Border.all(color: Colors.white, width: 1.5),
+                ),
+                child: const Icon(
+                  Icons.add,
+                  size: 14,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          if (isUpdating)
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.3),
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: const SizedBox.shrink(),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -273,14 +524,7 @@ class _ProfileCard extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x11000000),
-            offset: Offset(0, 6),
-            blurRadius: 12,
-          ),
-        ],
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         children: [

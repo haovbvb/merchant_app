@@ -232,10 +232,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
+                          child: const SizedBox.shrink(),
                         )
                       : Text(
                           l10n.unbindDeviceConfirmButton,

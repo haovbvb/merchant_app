@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/maintenance.dart';
 import 'package:merchant_app/features/work/maintenance/maintenance_controller.dart';
@@ -613,12 +613,11 @@ class _VehicleInfoCard extends StatelessWidget {
 
   String _formatDate(String? dateStr) {
     if (dateStr == null || dateStr.isEmpty) return '-';
-    try {
-      final date = DateTime.parse(dateStr);
-      return DateFormat('dd MMM, yyyy').format(date);
-    } catch (_) {
-      return dateStr;
-    }
+    return DateFormatUtils.formatString(
+      dateStr,
+      pattern: 'dd MMM, yyyy',
+      fallback: dateStr,
+    );
   }
 }
 
@@ -915,10 +914,7 @@ class _MaintenanceCostSheetState extends ConsumerState<_MaintenanceCostSheet> {
                           ? const SizedBox(
                               width: 18,
                               height: 18,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white,
-                              ),
+                              child: const SizedBox.shrink(),
                             )
                           : Text(
                               widget.l10n.maintenanceSubmit,
@@ -1094,7 +1090,7 @@ class _VoucherGrid extends StatelessWidget {
                       child: SizedBox(
                         width: 24,
                         height: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: const SizedBox.shrink(),
                       ),
                     )
                   : const Icon(Icons.camera_alt, color: Colors.grey),

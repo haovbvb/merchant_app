@@ -95,7 +95,6 @@ class ApiPath {
   // 工作台
   static const String workbenchMonthlyIncome =
       '/admin/trade/staticMonthlyIncome';
-  static const String workbenchShopIndex = '/admin/shop/index';
 
   // 销售统计
   static const String saleSummaryLast12MonthOrderData =

@@ -9,7 +9,20 @@ import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DeviceSearchPage extends StatefulWidget {
-  const DeviceSearchPage({super.key});
+  const DeviceSearchPage({
+    super.key,
+    this.returnResult = false,
+    this.latitude,
+    this.longitude,
+    this.deviceType,
+    this.readOnly = false,
+  });
+
+  final bool returnResult;
+  final double? latitude;
+  final double? longitude;
+  final int? deviceType;
+  final bool readOnly;
 
   @override
   State<DeviceSearchPage> createState() => _DeviceSearchPageState();
@@ -39,6 +52,9 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final hasHistory = _history.isNotEmpty;
+    final hintText = widget.deviceType == 3
+        ? l10n.deviceSearchStationHint
+        : l10n.deviceSearchHint;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -67,7 +83,7 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
                   controller: _controller,
                   focusNode: _focusNode,
                   decoration: InputDecoration(
-                    hintText: l10n.deviceSearchHint,
+                    hintText: hintText,
                     hintStyle: const TextStyle(
                       color: Color(0xFF999999),
                       fontSize: 15,
@@ -114,7 +130,7 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
         ),
       ),
       body: _loadingHistory
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: const SizedBox.shrink())
           : hasHistory
           ? _buildHistoryView(l10n)
           : _DeviceSearchEmpty(text: l10n.deviceSearchEmpty),
@@ -161,12 +177,12 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
                 },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 10,
+                    horizontal: 8,
+                    vertical: 8,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: const Color(0xFFEEEEEE)),
                   ),
                   child: Text(
@@ -229,11 +245,24 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
       ).showSnackBar(SnackBar(content: Text(l10n.deviceSearchHint)));
       return;
     }
-    final sn = ScanUtils.getDeviceSn(input).trim();
+    final sn = widget.deviceType == null
+        ? ScanUtils.getDeviceSn(input).trim()
+        : ScanUtils.parseSnByDeviceType(input, widget.deviceType).trim();
     if (sn.isEmpty) return;
     if (!mounted) return;
+    if (widget.returnResult) {
+      await _addHistory(input);
+      if (!mounted) return;
+      Navigator.of(context).pop(sn);
+      return;
+    }
     final hasData = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => DeviceDetailPageNew(initialSn: sn)),
+      MaterialPageRoute(
+        builder: (_) => DeviceDetailPageNew(
+          initialSn: sn,
+          readOnly: widget.readOnly,
+        ),
+      ),
     );
     if (!mounted) return;
     if (hasData == true) {
@@ -243,7 +272,12 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
 
   Future<void> _scan() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
+      MaterialPageRoute(
+        builder: (_) => QrScanPage(
+          parseDeviceSn: true,
+          deviceType: widget.deviceType,
+        ),
+      ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _controller.text = result;

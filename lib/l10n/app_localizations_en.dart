@@ -9,6 +9,9 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get profileAvatar => 'Avatar';
+
+  @override
   String get appTitle => 'Merchant';
 
   @override
@@ -174,7 +177,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get workbenchCabinetUnshelve => 'Cabinet\nUnshelve';
 
   @override
+  String get workbenchStationRepairRegistration => 'Station\nRepair';
+
+  @override
+  String get workbenchStationQuery => 'Station\nQuery';
+
+  @override
   String get profileGreeting => 'Manage your personal settings here.';
+
+  @override
+  String get profileEditNicknameTitle => 'Edit Nickname';
+
+  @override
+  String get profileEditNicknameHint => 'Enter nickname';
+
+  @override
+  String get profileEditNicknameEmpty => 'Please enter a nickname';
 
   @override
   String get login => 'Sign In';
@@ -715,6 +733,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repairRecordDeviceSnHint => 'Enter device SN or scan  QR code';
+
+  @override
+  String get repairRecordStationSnLabel => 'Station SN';
+
+  @override
+  String get repairRecordStationSnHint => 'Enter station SN or scan QR code';
 
   @override
   String get repairRecordFetchDeviceInfo => 'Fetch device info';
@@ -1470,6 +1494,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceSearchHint => 'Enter device SN or keyword';
 
   @override
+  String get deviceSearchStationHint => 'Enter station SN or scan QR code';
+
+  @override
   String get deviceSearchEmpty => 'No results';
 
   @override
@@ -1564,6 +1591,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get deviceDetailFixRecordsEmpty => 'No fix records';
+
+  @override
+  String get deviceDetailSale => 'Sale';
+
+  @override
+  String get deviceDetailLease => 'Lease';
 
   @override
   String get deviceDetailFixResultLabel => 'Fix Result';
@@ -3225,10 +3258,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetAuthCancelConfirm => 'Are you sure you want to cancel this authorization?';
 
   @override
-  String get cabinetAuthCancelSuccess => 'Canceled';
+  String get cabinetAuthCancelSuccess => 'Authorization cancelled';
 
   @override
-  String get cabinetAuthCancelFailed => 'Cancel failed';
+  String get cabinetAuthCancelFailed => 'Failed to cancel authorization';
 
   @override
   String get cabinetAuthAllPort => 'All port';
@@ -3809,13 +3842,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceDetailPortFilterAll => 'All';
 
   @override
-  String get deviceDetailPortFilterAvailable => 'Available';
+  String get deviceDetailPortFilterAvailable => 'Vacant';
 
   @override
   String get deviceDetailPortFilterDisabled => 'Disabled';
 
   @override
-  String get deviceDetailPortFilterInUse => 'In Use';
+  String get deviceDetailPortFilterInUse => 'Occupied';
 
   @override
   String get deviceDetailPortReplaceable => 'Replaceable';
@@ -3824,7 +3857,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceDetailPortDisabled => 'Disabled';
 
   @override
-  String get deviceDetailPortAvailable => 'Available';
+  String get deviceDetailPortAvailable => 'Empty';
 
   @override
   String get deviceDetailPortSetup => 'Set up';

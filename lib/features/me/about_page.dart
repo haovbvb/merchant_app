@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class AboutPage extends StatefulWidget {
@@ -115,7 +115,10 @@ class _AboutPageState extends State<AboutPage> {
                       future: PackageInfo.fromPlatform(),
                       builder: (context, snapshot) {
                         final version = snapshot.data?.version ?? '-';
-                        final date = DateFormat('yyyy-MM-dd').format(DateTime.now());
+                        final date = DateFormatUtils.format(
+                          DateTime.now(),
+                          pattern: 'yyyy-MM-dd',
+                        );
                         return Column(
                           children: [
                             const SizedBox(height: 20),

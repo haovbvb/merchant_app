@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:merchant_app/app/styles/colors.dart';
-import 'package:intl/intl.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/data/models/installment_payment_response.dart';
 
 class InstallmentOrderSheet extends StatefulWidget {
@@ -44,9 +44,10 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
   }
 
   String _formatDate(int? timestamp) {
-    if (timestamp == null || timestamp == 0) return '-';
-    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    return DateFormat('MMM dd, yyyy').format(date);
+    return DateFormatUtils.formatTimestamp(
+      timestamp,
+      pattern: 'MMM dd, yyyy',
+    );
   }
 
   @override

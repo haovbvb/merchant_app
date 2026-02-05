@@ -287,10 +287,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
+                    child: const SizedBox.shrink(),
                   )
                 : Text(
                     l10n.merchantReplaceSubmit,

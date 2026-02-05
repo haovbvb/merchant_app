@@ -90,7 +90,7 @@ class _BootstrapPageState extends ConsumerState<BootstrapPage> {
     return Scaffold(
       body: Center(
         child: _checking
-            ? const CircularProgressIndicator.adaptive()
+            ? const SizedBox.shrink()
             : const SizedBox.shrink(),
       ),
     );

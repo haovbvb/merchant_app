@@ -13,10 +13,12 @@ import 'package:merchant_app/app/ui.dart';
 import 'package:merchant_app/core/utils/location_permission.dart';
 import 'package:merchant_app/data/models/near_by_vehicle.dart';
 import 'package:merchant_app/features/home/widgets/vehicle_map.dart';
+import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/device/device_detail_page_new.dart';
 import 'package:merchant_app/features/work/device/device_search_page.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeTab extends ConsumerStatefulWidget {
   const HomeTab({super.key});
@@ -43,6 +45,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   double? _latitude;
   double? _longitude;
   int? _maintainFlag;
+  String? _vehicleSnFilter;
   NearByVehicle? _selectedVehicle;
   gmaps.BitmapDescriptor? _markerIcon;
   gmaps.BitmapDescriptor? _maintenanceMarkerIcon;
@@ -53,6 +56,8 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   gmaps.BitmapDescriptor? _locationMarkerIcon;
   bool _appleIconLoaded = false;
   bool _hasLocationPermission = false;
+  double _refreshTurns = 0;
+  double _locateTurns = 0;
 
   @override
   void initState() {
@@ -142,8 +147,6 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   }
 
   Future<void> _loadAppleMarkerIcon() async {
-    const targetWidth = 158;
-    const targetHeight = 150;
     // 加载正常车辆标记图标（按像素缩放，确保 iOS 生效）
     final icon = await _loadAppleBitmapDescriptor(
       'assets/android/mipmap-xxhdpi/3.0x/icon_marker_vehicle.png',
@@ -272,6 +275,8 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
         'count': _vehicleCount,
         'radius': _vehicleRadius,
         if (_maintainFlag != null) 'maintainFlag': _maintainFlag,
+        if (_vehicleSnFilter != null && _vehicleSnFilter!.isNotEmpty)
+          'vehicleSn': _vehicleSnFilter,
       },
       parser: (json) => (json as List<dynamic>?)
               ?.map(
@@ -389,9 +394,22 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   }
 
   Future<void> _openSearch() async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const DeviceSearchPage()),
+    final lat = _latitude ?? _fallbackLatitude;
+    final lng = _longitude ?? _fallbackLongitude;
+    final sn = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => DeviceSearchPage(
+          returnResult: true,
+          latitude: lat,
+          longitude: lng,
+        ),
+      ),
     );
+    if (!mounted) return;
+    if (sn != null && sn.trim().isNotEmpty) {
+      setState(() => _vehicleSnFilter = sn.trim());
+      await _fetchVehicles();
+    }
   }
 
   void _selectVehicle(NearByVehicle? vehicle) {
@@ -425,7 +443,12 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   Future<void> _openDetail(String? sn) async {
     if (sn == null || sn.trim().isEmpty) return;
     await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => DeviceDetailPageNew(initialSn: sn)),
+      MaterialPageRoute(
+        builder: (_) => DeviceDetailPageNew(
+          initialSn: sn,
+          readOnly: true,
+        ),
+      ),
     );
   }
 
@@ -593,6 +616,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
     final hasLocation = _latitude != null && _longitude != null;
     final centerLat = hasLocation ? _latitude! : _fallbackLatitude;
     final centerLng = hasLocation ? _longitude! : _fallbackLongitude;
+    final areaCode = AuthSession.instance.current?.areaCode;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -614,16 +638,24 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
                       _maybeCenterMap();
                     },
                   )
-                : const Center(child: CircularProgressIndicator()),
+                : const Center(child: const SizedBox.shrink()),
           ),
           _HomeOverlays(
             title: l10n.homeTitle,
             searchHint: l10n.homeSearchHint,
             onSearch: _openSearch,
             onFilter: _showFilterSheet,
-            onLocate: _centerMap,
-            onRefresh: _fetchVehicles,
+            onLocate: () {
+              setState(() => _locateTurns += 1);
+              _centerMap();
+            },
+            onRefresh: () {
+              setState(() => _refreshTurns += 1);
+              _fetchVehicles();
+            },
             isFilterActive: _maintainFlag != null,
+            refreshTurns: _refreshTurns,
+            locateTurns: _locateTurns,
           ),
           if (_vehicles.isNotEmpty && _selectedVehicle == null)
             _VehicleDraggableSheet(
@@ -639,6 +671,9 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
               vehicle: _selectedVehicle!,
               address: _addressFor(_selectedVehicle!),
               distance: _distanceLabel(_selectedVehicle!),
+              originLat: _latitude,
+              originLng: _longitude,
+              areaCode: areaCode,
               onClose: () => _selectVehicle(null),
               onViewMore: () async {
                 final sn = _selectedVehicle?.sn;
@@ -661,6 +696,8 @@ class _HomeOverlays extends StatelessWidget {
     required this.onLocate,
     required this.onRefresh,
     this.isFilterActive = false,
+    required this.refreshTurns,
+    required this.locateTurns,
   });
 
   final String title;
@@ -670,6 +707,8 @@ class _HomeOverlays extends StatelessWidget {
   final VoidCallback onLocate;
   final VoidCallback onRefresh;
   final bool isFilterActive;
+  final double refreshTurns;
+  final double locateTurns;
 
   @override
   Widget build(BuildContext context) {
@@ -744,19 +783,23 @@ class _HomeOverlays extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 _CircleIconButton(
-                  iconWidget: Image.asset(
-                    'assets/android/mipmap-xxhdpi/icon_refresh.png',
-                    // width: 22,
-                    // height: 22,
+                  iconWidget: AnimatedRotation(
+                    turns: refreshTurns,
+                    duration: const Duration(milliseconds: 800),
+                    child: Image.asset(
+                      'assets/android/mipmap-xxhdpi/icon_refresh.png',
+                    ),
                   ),
                   onPressed: onRefresh,
                 ),
                 const SizedBox(height: 10),
                 _CircleIconButton(
-                  iconWidget: Image.asset(
-                    'assets/android/mipmap-xxhdpi/icon_location1.png',
-                    // width: 22,
-                    // height: 22,
+                  iconWidget: AnimatedRotation(
+                    turns: locateTurns,
+                    duration: const Duration(milliseconds: 800),
+                    child: Image.asset(
+                      'assets/android/mipmap-xxhdpi/icon_location1.png',
+                    ),
                   ),
                   onPressed: onLocate,
                 ),
@@ -824,7 +867,7 @@ class _VehicleDraggableSheet extends StatelessWidget {
               const SizedBox(height: 8),
               Expanded(
                 child: loading
-                    ? const Center(child: CircularProgressIndicator())
+                    ? const Center(child: const SizedBox.shrink())
                     : vehicles.isEmpty
                         ? Center(
                             child: Text(
@@ -1016,15 +1059,11 @@ class _VehicleImage extends StatelessWidget {
 class _CircleIconButton extends StatelessWidget {
   const _CircleIconButton({
     required this.onPressed,
-    this.icon,
-    this.iconWidget,
-    this.iconColor,
+    required this.iconWidget,
     this.showShadow = true,
   });
 
-  final IconData? icon;
-  final Widget? iconWidget;
-  final Color? iconColor;
+  final Widget iconWidget;
   final VoidCallback onPressed;
   final bool showShadow;
 
@@ -1045,8 +1084,7 @@ class _CircleIconButton extends StatelessWidget {
             : null,
       ),
       child: IconButton(
-        icon: iconWidget ?? Icon(icon),
-        color: iconColor ?? (iconWidget == null ? AppColors.black07Text : null),
+        icon: iconWidget,
         onPressed: onPressed,
       ),
     );
@@ -1140,6 +1178,9 @@ class _VehicleDetailSheet extends StatefulWidget {
     required this.distance,
     required this.onClose,
     required this.onViewMore,
+    this.originLat,
+    this.originLng,
+    this.areaCode,
   });
 
   final NearByVehicle vehicle;
@@ -1147,6 +1188,9 @@ class _VehicleDetailSheet extends StatefulWidget {
   final String distance;
   final VoidCallback onClose;
   final VoidCallback onViewMore;
+  final double? originLat;
+  final double? originLng;
+  final String? areaCode;
 
   @override
   State<_VehicleDetailSheet> createState() => _VehicleDetailSheetState();
@@ -1205,6 +1249,38 @@ class _VehicleDetailSheetState extends State<_VehicleDetailSheet>
   Future<void> _handleClose() async {
     await _controller.reverse();
     widget.onClose();
+  }
+
+  String _formatPhone(String? phone) {
+    final value = (phone ?? '').trim();
+    if (value.isEmpty) return '-';
+    final code = (widget.areaCode ?? '').trim();
+    if (code.isEmpty) return value;
+    if (value.startsWith(code)) return value;
+    return '$code $value';
+  }
+
+  Future<void> _openNavigation() async {
+    final lat = widget.vehicle.latitude;
+    final lng = widget.vehicle.longitude;
+    if (lat == null || lng == null) return;
+    final originLat = widget.originLat;
+    final originLng = widget.originLng;
+    Uri uri;
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      final params = originLat != null && originLng != null
+          ? 'saddr=$originLat,$originLng&daddr=$lat,$lng'
+          : 'daddr=$lat,$lng';
+      uri = Uri.parse('http://maps.apple.com/?$params');
+    } else {
+      final params = originLat != null && originLng != null
+          ? 'origin=$originLat,$originLng&destination=$lat,$lng&travelmode=driving'
+          : 'destination=$lat,$lng&travelmode=driving';
+      uri = Uri.parse('https://www.google.com/maps/dir/?api=1&$params');
+    }
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   @override
@@ -1318,7 +1394,7 @@ class _VehicleDetailSheetState extends State<_VehicleDetailSheet>
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      _phone ?? '-',
+                      _formatPhone(_phone),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: _phone != null && _phone!.isNotEmpty ? Colors.blue : AppColors.black06Text,
                         fontSize: 14,
@@ -1348,22 +1424,25 @@ class _VehicleDetailSheetState extends State<_VehicleDetailSheet>
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Column(
-                      children: [
-                        Icon(
-                          Icons.navigation,
-                          size: 20,
-                          color: AppColors.primaryColor,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          widget.distance,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.black06Text,
-                            fontSize: 12,
+                    InkWell(
+                      onTap: _openNavigation,
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.navigation,
+                            size: 20,
+                            color: AppColors.primaryColor,
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 2),
+                          Text(
+                            widget.distance,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: AppColors.black06Text,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -1396,7 +1475,9 @@ class _VehicleDetailSheetState extends State<_VehicleDetailSheet>
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'V1490',
+                              widget.vehicle.carNumber?.isNotEmpty == true
+                                  ? widget.vehicle.carNumber!
+                                  : '-',
                               style: theme.textTheme.titleLarge?.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,

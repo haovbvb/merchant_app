@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/deposit_refund_info_bean.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -185,7 +186,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(20),
-                child: CircularProgressIndicator(),
+                child: const SizedBox.shrink(),
               ),
             )
           else if (info != null)
@@ -584,10 +585,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
+                    child: const SizedBox.shrink(),
                   )
                 : Text(
                     l10n.depositRefundSubmit,
@@ -605,10 +603,10 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
   // === 辅助方法 ===
 
   String _formatUnbindTime(int? timestamp) {
-    if (timestamp == null) return '-';
-    final dt = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    return '${dt.year}.${dt.month.toString().padLeft(2, '0')}.${dt.day.toString().padLeft(2, '0')} '
-        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:${dt.second.toString().padLeft(2, '0')}';
+    return DateFormatUtils.formatTimestamp(
+      timestamp,
+      pattern: 'yyyy.MM.dd HH:mm:ss',
+    );
   }
 
   List<String> _splitUrls(Deposit? deposit) {

@@ -17,6 +17,7 @@ class BindDevice {
   final int? status;
   final int? soc;
   final int? onlineFlag;
+  final bool? needMaintenance;
 
   const BindDevice({
     this.bindDate,
@@ -34,6 +35,7 @@ class BindDevice {
     this.status,
     this.soc,
     this.onlineFlag,
+    this.needMaintenance,
   });
 
   factory BindDevice.fromJson(Map<String, dynamic> json) {
@@ -53,6 +55,7 @@ class BindDevice {
       status: (json['status'] as num?)?.toInt(),
       soc: (json['soc'] as num?)?.toInt(),
       onlineFlag: (json['onlineFlag'] as num?)?.toInt(),
+      needMaintenance: json['needMaintenance'] == true,
     );
   }
 
@@ -72,5 +75,6 @@ class BindDevice {
         'status': status,
         'soc': soc,
         'onlineFlag': onlineFlag,
+        'needMaintenance': needMaintenance,
       };
 }

@@ -405,6 +405,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userBasicRemark => 'Remark';
 
   @override
+  String get userBindSale => 'Sale';
+
+  @override
+  String get userBindRental => 'Rental';
+
+  @override
+  String get userBindTimeSuffix => 'bind';
+
+  @override
   String get userTypeNormal => 'Normal';
 
   @override
@@ -423,6 +432,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userPaymentTime => 'Payment Time';
 
   @override
+  String get userPaymentEmpty => 'No payment records';
+
+  @override
+  String get userPaymentOrderNo => 'Order No:';
+
+  @override
+  String get userPaymentPeriod => 'Period:';
+
+  @override
   String get userSwapRecord => 'Swap Record';
 
   @override
@@ -433,6 +451,48 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get userSwapNewBattery => 'New Battery';
+
+  @override
+  String get userSwapEmpty => 'No swap records';
+
+  @override
+  String get userSwapManual => 'Manual swap';
+
+  @override
+  String get userSwapRemote => 'Remote swap';
+
+  @override
+  String get userSwapBluetooth => 'Bluetooth swap';
+
+  @override
+  String get userSwapScan => 'Scan swap';
+
+  @override
+  String get userSwapStatusSuccess => 'Success';
+
+  @override
+  String get userSwapStatusFail => 'Fail';
+
+  @override
+  String get userSwapStatusPartSuccess => 'Partially successful';
+
+  @override
+  String get userSwapStatusSystemReject => 'System reject';
+
+  @override
+  String get userSwapStationSn => 'Station SN';
+
+  @override
+  String get userSwapOperator => 'Operator';
+
+  @override
+  String get userSwapInBattery => 'In battery';
+
+  @override
+  String get userSwapOutBattery => 'Out battery';
+
+  @override
+  String get userSwapError => 'Error';
 
   @override
   String get userDetailCall => 'Call';

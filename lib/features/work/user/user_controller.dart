@@ -142,8 +142,10 @@ class UserDetailState {
   final int total;
   final List<UserPaymentRecord> payments;
   final int paymentsTotal;
+  final int paymentsPage;
   final List<PowerChangeItem> swaps;
   final int swapsTotal;
+  final int swapsPage;
 
   const UserDetailState({
     this.loading = false,
@@ -155,9 +157,14 @@ class UserDetailState {
     this.total = 0,
     this.payments = const [],
     this.paymentsTotal = 0,
+    this.paymentsPage = 1,
     this.swaps = const [],
     this.swapsTotal = 0,
+    this.swapsPage = 1,
   });
+
+  bool get paymentsHasMore => payments.length < paymentsTotal;
+  bool get swapsHasMore => swaps.length < swapsTotal;
 
   UserDetailState copyWith({
     bool? loading,
@@ -169,8 +176,10 @@ class UserDetailState {
     int? total,
     List<UserPaymentRecord>? payments,
     int? paymentsTotal,
+    int? paymentsPage,
     List<PowerChangeItem>? swaps,
     int? swapsTotal,
+    int? swapsPage,
   }) {
     return UserDetailState(
       loading: loading ?? this.loading,
@@ -182,8 +191,10 @@ class UserDetailState {
       total: total ?? this.total,
       payments: payments ?? this.payments,
       paymentsTotal: paymentsTotal ?? this.paymentsTotal,
+      paymentsPage: paymentsPage ?? this.paymentsPage,
       swaps: swaps ?? this.swaps,
       swapsTotal: swapsTotal ?? this.swapsTotal,
+      swapsPage: swapsPage ?? this.swapsPage,
     );
   }
 }
@@ -201,7 +212,16 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
 
   Future<void> loadDetail(String cardNum) async {
     if (cardNum.trim().isEmpty) return;
-    state = state.copyWith(loading: true, cardNum: cardNum);
+    state = state.copyWith(
+      loading: true,
+      cardNum: cardNum,
+      payments: const [],
+      paymentsTotal: 0,
+      paymentsPage: 1,
+      swaps: const [],
+      swapsTotal: 0,
+      swapsPage: 1,
+    );
 
     final detailResponse = await _api.get<UserDetail>(
       ApiPath.userGetDetail,
@@ -243,10 +263,12 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
       showHud: false,
     );
 
+    final list = response.result?.list ?? const [];
     state = state.copyWith(
       loadingPayments: false,
-      payments: response.result?.list ?? const [],
-      paymentsTotal: response.result?.total ?? 0,
+      paymentsPage: page,
+      payments: page == 1 ? list : [...state.payments, ...list],
+      paymentsTotal: response.result?.total ?? state.paymentsTotal,
     );
   }
 
@@ -264,10 +286,12 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
       showHud: false,
     );
 
+    final list = response.result?.list ?? const [];
     state = state.copyWith(
       loadingSwaps: false,
-      swaps: response.result?.list ?? const [],
-      swapsTotal: response.result?.total ?? 0,
+      swapsPage: page,
+      swaps: page == 1 ? list : [...state.swaps, ...list],
+      swapsTotal: response.result?.total ?? state.swapsTotal,
     );
   }
 

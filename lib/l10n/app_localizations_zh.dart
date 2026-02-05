@@ -405,6 +405,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get userBasicRemark => '备注';
 
   @override
+  String get userBindSale => '销售';
+
+  @override
+  String get userBindRental => '租赁';
+
+  @override
+  String get userBindTimeSuffix => '绑定';
+
+  @override
   String get userTypeNormal => '普通';
 
   @override
@@ -423,6 +432,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get userPaymentTime => '付款时间';
 
   @override
+  String get userPaymentEmpty => '暂无付款记录';
+
+  @override
+  String get userPaymentOrderNo => '订单号:';
+
+  @override
+  String get userPaymentPeriod => '期数:';
+
+  @override
   String get userSwapRecord => '换电记录';
 
   @override
@@ -433,6 +451,48 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get userSwapNewBattery => '新电池';
+
+  @override
+  String get userSwapEmpty => '暂无换电记录';
+
+  @override
+  String get userSwapManual => '人工换电';
+
+  @override
+  String get userSwapRemote => '远程换电';
+
+  @override
+  String get userSwapBluetooth => '蓝牙换电';
+
+  @override
+  String get userSwapScan => '扫码换电';
+
+  @override
+  String get userSwapStatusSuccess => '成功';
+
+  @override
+  String get userSwapStatusFail => '失败';
+
+  @override
+  String get userSwapStatusPartSuccess => '部分成功';
+
+  @override
+  String get userSwapStatusSystemReject => '系统拒绝';
+
+  @override
+  String get userSwapStationSn => '电柜SN';
+
+  @override
+  String get userSwapOperator => '操作人';
+
+  @override
+  String get userSwapInBattery => '放入电池';
+
+  @override
+  String get userSwapOutBattery => '取出电池';
+
+  @override
+  String get userSwapError => '异常原因';
 
   @override
   String get userDetailCall => '拨打电话';

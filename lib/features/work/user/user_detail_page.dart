@@ -9,10 +9,13 @@ import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/data/models/bind_device.dart';
+import 'package:merchant_app/data/models/power_change.dart';
 import 'package:merchant_app/data/models/user_detail.dart';
 import 'package:merchant_app/data/models/user_order_response.dart';
+import 'package:merchant_app/data/models/user_payment_record.dart';
 import 'package:merchant_app/features/work/user/user_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class UserDetailPage extends ConsumerStatefulWidget {
@@ -33,7 +36,10 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(userDetailProvider.notifier).loadDetail(widget.cardNum);
+      final notifier = ref.read(userDetailProvider.notifier);
+      notifier.loadDetail(widget.cardNum);
+      notifier.loadPayments(cardNum: widget.cardNum, page: 1);
+      notifier.loadSwaps(cardNum: widget.cardNum, page: 1);
     });
   }
 
@@ -68,7 +74,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage>
         centerTitle: true,
       ),
       body: state.loading
-          ? const Center(child: const SizedBox.shrink())
+          ? const Center(child: SizedBox.shrink())
           : Column(
               children: [
                 // User header
@@ -228,15 +234,25 @@ class _BasicInfoTab extends StatelessWidget {
               _DeviceRow(
                 label: l10n.userBasicVehicle,
                 devices: detail?.vehicleList ?? const [],
-                onTap: () => _showDeviceSheet(context, l10n, l10n.userBasicVehicle,
-                    detail?.vehicleList ?? const []),
+                onTap: () => _showDeviceSheet(
+                  context,
+                  l10n,
+                  l10n.userBasicVehicle,
+                  detail?.vehicleList ?? const [],
+                  deviceType: 2,
+                ),
               ),
               Divider(height: 1, indent: 16, color: AppColors.borderColor),
               _DeviceRow(
                 label: l10n.userBasicBattery,
                 devices: detail?.batteryList ?? const [],
-                onTap: () => _showDeviceSheet(context, l10n, l10n.userBasicBattery,
-                    detail?.batteryList ?? const []),
+                onTap: () => _showDeviceSheet(
+                  context,
+                  l10n,
+                  l10n.userBasicBattery,
+                  detail?.batteryList ?? const [],
+                  deviceType: 1,
+                ),
               ),
             ],
           ),
@@ -339,15 +355,25 @@ class _BasicInfoTab extends StatelessWidget {
     return imgList.split(',').where((s) => s.trim().isNotEmpty).toList();
   }
 
-  void _showDeviceSheet(BuildContext context, AppLocalizations l10n,
-      String title, List<BindDevice> devices) {
+  void _showDeviceSheet(
+    BuildContext context,
+    AppLocalizations l10n,
+    String title,
+    List<BindDevice> devices, {
+    required int deviceType,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => _DeviceSheet(title: title, devices: devices, l10n: l10n),
+      builder: (_) => _DeviceSheet(
+        title: title,
+        devices: devices,
+        l10n: l10n,
+        deviceType: deviceType,
+      ),
     );
   }
 }
@@ -402,120 +428,150 @@ class _DeviceRow extends StatelessWidget {
   }
 }
 
-class _DeviceSheet extends StatelessWidget {
+class _DeviceSheet extends StatefulWidget {
   const _DeviceSheet({
     required this.title,
     required this.devices,
     required this.l10n,
+    required this.deviceType,
   });
 
   final String title;
   final List<BindDevice> devices;
   final AppLocalizations l10n;
+  final int deviceType;
+
+  @override
+  State<_DeviceSheet> createState() => _DeviceSheetState();
+}
+
+class _DeviceSheetState extends State<_DeviceSheet>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  late List<BindDevice> _saleDevices;
+  late List<BindDevice> _rentalDevices;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _splitDevices();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  void _splitDevices() {
+    _saleDevices = [];
+    _rentalDevices = [];
+    for (final device in widget.devices) {
+      if (_isRentalDevice(device)) {
+        _rentalDevices.add(device);
+      } else {
+        _saleDevices.add(device);
+      }
+    }
+  }
+
+  bool _isRentalDevice(BindDevice device) {
+    if (device.bindSource != null) {
+      return device.bindSource == 2;
+    }
+    if (device.rentOrderStatus != null) {
+      return device.rentOrderStatus != 0;
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
+    final isBattery = widget.deviceType == 1;
+    final titleStyle = const TextStyle(
+      fontSize: 18,
+      fontWeight: FontWeight.w600,
+      color: Colors.black,
+    );
+    final tabTextStyle = const TextStyle(
+      fontSize: 15,
+      fontWeight: FontWeight.w500,
+    );
     return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.6,
+      height: MediaQuery.of(context).size.height * 0.75,
+      color: AppColors.bgColor,
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).padding.bottom,
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+          Container(
+            color: Colors.white,
+            child: Column(
               children: [
-                const SizedBox(width: 40),
-                Expanded(
-                  child: Text(
-                    title,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                const SizedBox(height: 12),
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0E0E0),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
+                const SizedBox(height: 12),
+                Text(widget.title, style: titleStyle),
+                const SizedBox(height: 12),
+                TabBar(
+                  controller: _tabController,
+                  labelColor: Colors.black,
+                  unselectedLabelColor: const Color(0xFF999999),
+                  labelStyle: tabTextStyle,
+                  unselectedLabelStyle: tabTextStyle,
+                  indicatorColor: AppColors.primaryColor,
+                  indicatorWeight: 3,
+                  tabs: [
+                    Tab(
+                      text:
+                          '${widget.l10n.userBindSale} ${_saleDevices.length}',
+                    ),
+                    Tab(
+                      text:
+                          '${widget.l10n.userBindRental} ${_rentalDevices.length}',
+                    ),
+                  ],
                 ),
+                Divider(height: 1, color: AppColors.borderColor),
               ],
             ),
           ),
-          Divider(height: 1, color: AppColors.borderColor),
-          Flexible(
-            child: devices.isEmpty
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(32),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.inbox_outlined,
-                              size: 48, color: Colors.grey[400]),
-                          const SizedBox(height: 16),
-                          Text(
-                            l10n.userDetailBindEmpty,
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                : ListView.separated(
-                    shrinkWrap: true,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: devices.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      final device = devices[index];
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).pop();
-                          _navigateToDeviceDetail(context, device);
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF8F8F8),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      device.deviceSn ?? '-',
-                                      style: const TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      device.modelName ?? device.model ?? '-',
-                                      style: const TextStyle(
-                                        fontSize: 13,
-                                        color: Color(0xFF999999),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const Icon(
-                                Icons.chevron_right,
-                                color: Color(0xFF999999),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
+          Expanded(
+            child: Container(
+              color: AppColors.bgColor,
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _DeviceListView(
+                    devices: _saleDevices,
+                    l10n: widget.l10n,
+                    isBattery: isBattery,
+                    onTap: (device) {
+                      Navigator.of(context).pop();
+                      _navigateToDeviceDetail(context, device);
                     },
                   ),
+                  _DeviceListView(
+                    devices: _rentalDevices,
+                    l10n: widget.l10n,
+                    isBattery: isBattery,
+                    onTap: (device) {
+                      Navigator.of(context).pop();
+                      _navigateToDeviceDetail(context, device);
+                    },
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -529,6 +585,404 @@ class _DeviceSheet extends StatelessWidget {
     AppRouter.router.push(
       '${AppRouter.workModulePath}/device_detail?recordNo=${device.deviceSn}&type=$typeParam',
       extra: 'Device Detail',
+    );
+  }
+}
+
+class _DeviceListView extends StatelessWidget {
+  const _DeviceListView({
+    required this.devices,
+    required this.l10n,
+    required this.isBattery,
+    required this.onTap,
+  });
+
+  final List<BindDevice> devices;
+  final AppLocalizations l10n;
+  final bool isBattery;
+  final ValueChanged<BindDevice> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    if (devices.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/android/mipmap-xxhdpi/empty_user_binddevice.png',
+              width: 120,
+              height: 120,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.link_off,
+                size: 64,
+                color: Colors.grey[400],
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              l10n.userDetailBindEmpty,
+              style: TextStyle(
+                color: Colors.grey[600],
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      itemCount: devices.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      itemBuilder: (context, index) {
+        final device = devices[index];
+        return _BoundDeviceCard(
+          device: device,
+          l10n: l10n,
+          isBattery: isBattery,
+          onTap: () => onTap(device),
+        );
+      },
+    );
+  }
+}
+
+class _BoundDeviceCard extends StatelessWidget {
+  const _BoundDeviceCard({
+    required this.device,
+    required this.l10n,
+    required this.isBattery,
+    required this.onTap,
+  });
+
+  final BindDevice device;
+  final AppLocalizations l10n;
+  final bool isBattery;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final bindTimeText = _bindTimeText(l10n, device.bindDate);
+    final showMaintenance =
+        device.needMaintenance == true || (device.status == 1);
+    final isOnline = device.onlineFlag == 1;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0D000000),
+              blurRadius: 8,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _DeviceThumb(url: device.img),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        device.deviceSn ?? '-',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black09Text,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          if (!isBattery && showMaintenance)
+                            _TagChip(
+                              text: l10n.homeFilterNeedMaintenance,
+                              borderColor: const Color(0xFFF56C6C),
+                              textColor: const Color(0xFFF56C6C),
+                            ),
+                          if (isBattery)
+                            _TagChip(
+                              text: isOnline
+                                  ? l10n.deviceDetailOnline
+                                  : l10n.deviceDetailOffline,
+                              borderColor: isOnline
+                                  ? const Color(0xFF67C23A)
+                                  : const Color(0xFFF56C6C),
+                              textColor: isOnline
+                                  ? const Color(0xFF67C23A)
+                                  : const Color(0xFFF56C6C),
+                            ),
+                          if (bindTimeText != '-')
+                            _TagChip(
+                              text: bindTimeText,
+                              borderColor: const Color(0xFFDDDDDD),
+                              textColor: const Color(0xFF666666),
+                              backgroundColor: Colors.white,
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            if (isBattery)
+              _BatteryInfoGrid(
+                l10n: l10n,
+                soc: device.soc,
+                specification: device.modelName,
+                model: device.model,
+              )
+            else
+              _VehicleInfoGrid(
+                l10n: l10n,
+                model: device.model,
+                plate: device.carNumber,
+                specification: device.modelName,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DeviceThumb extends StatelessWidget {
+  const _DeviceThumb({required this.url});
+
+  final String? url;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(8),
+      child: url == null || url!.isEmpty
+          ? Container(
+              width: 56,
+              height: 56,
+              color: const Color(0xFFF2F3F5),
+              child: const Icon(
+                Icons.image_outlined,
+                size: 28,
+                color: Color(0xFFB0B0B0),
+              ),
+            )
+          : Image.network(
+              url!,
+              width: 56,
+              height: 56,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                width: 56,
+                height: 56,
+                color: const Color(0xFFF2F3F5),
+                child: const Icon(
+                  Icons.broken_image_outlined,
+                  size: 28,
+                  color: Color(0xFFB0B0B0),
+                ),
+              ),
+            ),
+    );
+  }
+}
+
+class _TagChip extends StatelessWidget {
+  const _TagChip({
+    required this.text,
+    required this.borderColor,
+    required this.textColor,
+    this.backgroundColor = Colors.white,
+  });
+
+  final String text;
+  final Color borderColor;
+  final Color textColor;
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: borderColor),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 12,
+          color: textColor,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+}
+
+class _VehicleInfoGrid extends StatelessWidget {
+  const _VehicleInfoGrid({
+    required this.l10n,
+    required this.model,
+    required this.plate,
+    required this.specification,
+  });
+
+  final AppLocalizations l10n;
+  final String? model;
+  final String? plate;
+  final String? specification;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _InfoGridBox(
+          children: [
+            _InfoCell(
+              label: l10n.orderLabelModel,
+              value: model ?? '-',
+            ),
+            _InfoDivider(),
+            _InfoCell(
+              label: l10n.repairRecordDevicePlateNumber,
+              value: plate ?? '-',
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        _InfoGridBox(
+          children: [
+            _InfoCell(
+              label: l10n.repairRecordDeviceSpecLabel,
+              value: specification ?? '-',
+              alignStart: true,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _BatteryInfoGrid extends StatelessWidget {
+  const _BatteryInfoGrid({
+    required this.l10n,
+    required this.soc,
+    required this.specification,
+    required this.model,
+  });
+
+  final AppLocalizations l10n;
+  final int? soc;
+  final String? specification;
+  final String? model;
+
+  @override
+  Widget build(BuildContext context) {
+    final socText = soc == null ? '-' : '${soc!}%';
+    return _InfoGridBox(
+      children: [
+        _InfoCell(label: l10n.deviceDetailSoc, value: socText),
+        _InfoDivider(),
+        _InfoCell(
+          label: l10n.repairRecordDeviceSpecLabel,
+          value: specification ?? '-',
+        ),
+        _InfoDivider(),
+        _InfoCell(label: l10n.orderLabelModel, value: model ?? '-'),
+      ],
+    );
+  }
+}
+
+class _InfoGridBox extends StatelessWidget {
+  const _InfoGridBox({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF6F7F9),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: children,
+      ),
+    );
+  }
+}
+
+class _InfoCell extends StatelessWidget {
+  const _InfoCell({
+    required this.label,
+    required this.value,
+    this.alignStart = false,
+  });
+
+  final String label;
+  final String value;
+  final bool alignStart;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment:
+            alignStart ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF9B9B9B),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.black09Text,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoDivider extends StatelessWidget {
+  const _InfoDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 1,
+      height: 36,
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      color: const Color(0xFFE4E6EB),
     );
   }
 }
@@ -625,55 +1079,81 @@ class _OrderRecordsTab extends StatefulWidget {
   State<_OrderRecordsTab> createState() => _OrderRecordsTabState();
 }
 
-class _OrderRecordsTabState extends State<_OrderRecordsTab>
-    with SingleTickerProviderStateMixin {
-  late TabController _subTabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _subTabController = TabController(length: 3, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _subTabController.dispose();
-    super.dispose();
-  }
+class _OrderRecordsTabState extends State<_OrderRecordsTab> {
+  int _selectedIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     final saleOrders = widget.orders.where((o) => o.orderType == 1).toList();
     final rentOrders = widget.orders.where((o) => o.orderType == 2).toList();
     final swapOrders = widget.orders.where((o) => o.orderType == 3).toList();
+    final tabs = [
+      widget.l10n.userOrderTabSale,
+      widget.l10n.userOrderTabRent,
+      widget.l10n.userOrderTabSwap,
+    ];
+
+    List<OrderItem> current;
+    int orderType;
+    switch (_selectedIndex) {
+      case 1:
+        current = rentOrders;
+        orderType = 2;
+        break;
+      case 2:
+        current = swapOrders;
+        orderType = 3;
+        break;
+      default:
+        current = saleOrders;
+        orderType = 1;
+    }
 
     return Column(
       children: [
         Container(
           color: Colors.white,
-          child: TabBar(
-            controller: _subTabController,
-            labelColor: AppColors.primaryColor,
-            unselectedLabelColor: const Color(0xFF666666),
-            labelStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-            unselectedLabelStyle: const TextStyle(fontSize: 13),
-            indicatorColor: AppColors.primaryColor,
-            indicatorSize: TabBarIndicatorSize.label,
-            tabs: [
-              Tab(text: widget.l10n.userOrderTabSale),
-              Tab(text: widget.l10n.userOrderTabRent),
-              Tab(text: widget.l10n.userOrderTabSwap),
-            ],
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          child: Row(
+            children: List.generate(tabs.length, (index) {
+              final isSelected = _selectedIndex == index;
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(right: index < tabs.length - 1 ? 10 : 0),
+                  child: GestureDetector(
+                    onTap: () => setState(() => _selectedIndex = index),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected ? Colors.white : const Color(0xFFF5F6F8),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isSelected ? AppColors.primaryColor : Colors.transparent,
+                        ),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        tabs[index],
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: isSelected
+                              ? AppColors.primaryColor
+                              : const Color(0xFF666666),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }),
           ),
         ),
         Expanded(
-          child: TabBarView(
-            controller: _subTabController,
-            children: [
-              _OrderList(orders: saleOrders, l10n: widget.l10n, orderType: 1),
-              _OrderList(orders: rentOrders, l10n: widget.l10n, orderType: 2),
-              _OrderList(orders: swapOrders, l10n: widget.l10n, orderType: 3),
-            ],
+          child: _OrderList(
+            orders: current,
+            l10n: widget.l10n,
+            orderType: orderType,
           ),
         ),
       ],
@@ -725,21 +1205,26 @@ class _OrderList extends StatelessWidget {
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final order = orders[index];
-        return _OrderCard(order: order, l10n: l10n);
+        return _OrderCard(order: order, l10n: l10n, orderType: orderType);
       },
     );
   }
 }
 
 class _OrderCard extends StatelessWidget {
-  const _OrderCard({required this.order, required this.l10n});
+  const _OrderCard({
+    required this.order,
+    required this.l10n,
+    required this.orderType,
+  });
 
   final OrderItem order;
   final AppLocalizations l10n;
+  final int orderType;
 
   @override
   Widget build(BuildContext context) {
-    switch (order.orderType) {
+    switch (orderType) {
       case 1:
         return _SaleOrderCard(order: order, l10n: l10n);
       case 2:
@@ -761,6 +1246,26 @@ class _SaleOrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final sale = order.saleOrder;
+    final orderNo = order.orderNo.isNotEmpty ? order.orderNo : '-';
+    final timeText =
+        _formatOrderTime(order.createTime ?? sale?.createTime ?? 0);
+    final payTypeLabel = _payTypeLabel(
+      l10n,
+      sale?.payWay ?? order.payWay,
+      sale?.payType,
+    );
+    final statusChip = sale?.status != null
+        ? _statusChip(context, l10n, sale?.status)
+        : null;
+    final voucherAction = _buildVoucherAction(
+      context,
+      l10n,
+      order: order,
+      status: sale?.status,
+      payType: sale?.payType,
+      payWay: sale?.payWay ?? order.payWay,
+      attachment: _resolveAttachment(sale?.attachment, order.attachment),
+    );
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -768,65 +1273,75 @@ class _SaleOrderCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    order.orderNo,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.black06Text,
-                    ),
-                  ),
-                ),
-                _statusChip(context, l10n, sale?.status),
-              ],
-            ),
-          ),
+          _OrderHeaderRow(orderNo: orderNo, timeText: timeText),
           Divider(height: 1, color: AppColors.borderColor),
-          // Content
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _OrderImage(url: sale?.deviceImg),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _orderInfoRow(l10n.orderLabelOrderTime, _formatDate(sale?.createTime ?? order.createTime)),
-                      _orderInfoRow(l10n.orderLabelDeviceSn, sale?.deviceSn ?? '-'),
-                      _orderInfoRow(l10n.orderLabelModel, sale?.deviceModel ?? '-'),
-                      _orderInfoRow(l10n.orderLabelAmount, _formatAmount(order.orderAmount)),
-                      _orderInfoRow(l10n.orderLabelPayType, _payTypeLabel(l10n, order.payWay, sale?.payType)),
-                      if (sale?.payType == 2) ...[
-                        _orderInfoRow(l10n.orderLabelTerm, sale?.period?.toString() ?? '-'),
-                        _orderInfoRow(l10n.orderLabelRate, _formatRate(sale?.rate)),
-                        _orderInfoRow(l10n.orderLabelMonthly, _formatAmount(sale?.perAmount)),
-                      ],
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _OrderImage(url: sale?.deviceImg, size: 50),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            sale?.deviceSn ?? '-',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.black09Text,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              if (statusChip != null) statusChip,
+                              if (payTypeLabel != '-') _OrderTag(text: payTypeLabel),
+                              if ((sale?.deviceModel ?? '').isNotEmpty)
+                                _OrderTag(text: sale?.deviceModel ?? '-'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _OrderInfoPanel(
+                  children: [
+                    _InfoLine(
+                      label: l10n.sellBindPlanPrice,
+                      value: _formatAmount(order.orderAmount),
+                    ),
+                    if (sale?.payType == 2) ...[
+                      _InfoLine(
+                        label: l10n.orderLabelTerm,
+                        value: sale?.period?.toString() ?? '-',
+                      ),
+                      _InfoLine(
+                        label: l10n.orderLabelRate,
+                        value: _formatRate(sale?.rate),
+                      ),
+                      const _InfoDashedDivider(),
+                      _InfoLine(
+                        label: l10n.orderLabelMonthly,
+                        value: _formatAmount(sale?.perAmount),
+                        boldValue: true,
+                      ),
                     ],
-                  ),
+                  ],
                 ),
               ],
             ),
           ),
-          // Voucher action
-          if (_buildVoucherAction(
-                context,
-                l10n,
-                order: order,
-                status: sale?.status,
-                payType: sale?.payType,
-                payWay: order.payWay,
-                attachment: sale?.attachment ?? order.attachment,
-              )
-              case final Widget action)
+          if (voucherAction case final Widget action)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: action,
@@ -846,6 +1361,26 @@ class _RentOrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rent = order.rentOrder;
+    final orderNo = order.orderNo.isNotEmpty ? order.orderNo : '-';
+    final timeText =
+        _formatOrderTime(order.createTime ?? rent?.createTime ?? 0);
+    final payTypeLabel = _payTypeLabel(
+      l10n,
+      rent?.payWay ?? order.payWay,
+      rent?.payType,
+    );
+    final statusChip = rent?.status != null
+        ? _statusChip(context, l10n, rent?.status)
+        : null;
+    final voucherAction = _buildVoucherAction(
+      context,
+      l10n,
+      order: order,
+      status: rent?.status,
+      payType: rent?.payType,
+      payWay: rent?.payWay ?? order.payWay,
+      attachment: _resolveAttachment(rent?.attachment, order.attachment),
+    );
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -853,65 +1388,75 @@ class _RentOrderCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    order.orderNo,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.black06Text,
-                    ),
-                  ),
-                ),
-                _statusChip(context, l10n, rent?.status),
-              ],
-            ),
-          ),
+          _OrderHeaderRow(orderNo: orderNo, timeText: timeText),
           Divider(height: 1, color: AppColors.borderColor),
-          // Content
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Row(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _OrderImage(url: rent?.deviceImg),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _orderInfoRow(l10n.orderLabelOrderTime, _formatDate(rent?.createTime ?? order.createTime)),
-                      _orderInfoRow(l10n.orderLabelPackageName, rent?.infoName ?? '-'),
-                      _orderInfoRow(l10n.orderLabelDeviceSn, rent?.deviceSn ?? '-'),
-                      _orderInfoRow(l10n.orderLabelModel, rent?.deviceModel ?? '-'),
-                      _orderInfoRow(l10n.orderLabelAmount, _formatAmount(rent?.serviceAmount)),
-                      _orderInfoRow(l10n.orderLabelDeposit, _formatAmount(rent?.depositAmount)),
-                      _orderInfoRow(l10n.orderLabelServiceDays, _formatUnit(rent?.duration, l10n.orderUnitDays)),
-                      _orderInfoRow(l10n.orderLabelRemainDays, _formatUnit(rent?.remainDuration, l10n.orderUnitDays)),
-                      _orderInfoRow(l10n.orderLabelExpireDate, _formatDate(rent?.expireDate)),
-                      _orderInfoRow(l10n.orderLabelPayType, _payTypeLabel(l10n, order.payWay, rent?.payType)),
-                    ],
-                  ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _OrderImage(url: rent?.deviceImg, size: 50),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            rent?.deviceSn ?? '-',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.black09Text,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              if (statusChip != null) statusChip,
+                              if (payTypeLabel != '-') _OrderTag(text: payTypeLabel),
+                              if ((rent?.deviceModel ?? '').isNotEmpty)
+                                _OrderTag(text: rent?.deviceModel ?? '-'),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _OrderPackageHeader(
+                  title: rent?.infoName ?? '-',
+                  amount: _formatAmount(rent?.serviceAmount ?? order.orderAmount),
+                ),
+                _OrderInfoPanel(
+                  children: [
+                    _InfoLine(
+                      label: l10n.orderLabelDeposit,
+                      value: _formatAmount(rent?.depositAmount),
+                    ),
+                    _InfoLine(
+                      label: l10n.orderLabelServiceDays,
+                      value: _formatUnit(rent?.duration, l10n.orderUnitDays),
+                    ),
+                    _InfoLine(
+                      label: l10n.orderLabelRemainDays,
+                      value: _formatUnit(rent?.remainDuration, l10n.orderUnitDays),
+                    ),
+                    _InfoLine(
+                      label: l10n.orderLabelExpireDate,
+                      value: _formatDate(rent?.expireDate),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
-          // Voucher action
-          if (_buildVoucherAction(
-                context,
-                l10n,
-                order: order,
-                status: rent?.status,
-                payType: rent?.payType,
-                payWay: order.payWay,
-                attachment: rent?.attachment ?? order.attachment,
-              )
-              case final Widget action)
+          if (voucherAction case final Widget action)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: action,
@@ -931,6 +1476,26 @@ class _SwapOrderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final swap = order.otherOrder;
+    final orderNo = order.orderNo.isNotEmpty ? order.orderNo : '-';
+    final timeText =
+        _formatOrderTime(order.createTime ?? swap?.createTime ?? 0);
+    final payTypeLabel = _payTypeLabel(
+      l10n,
+      swap?.payWay ?? order.payWay,
+      swap?.payType,
+    );
+    final statusChip = swap?.status != null
+        ? _statusChip(context, l10n, swap?.status)
+        : null;
+    final voucherAction = _buildVoucherAction(
+      context,
+      l10n,
+      order: order,
+      status: swap?.status,
+      payType: swap?.payType,
+      payWay: swap?.payWay ?? order.payWay,
+      attachment: _resolveAttachment(swap?.attachment, order.attachment),
+    );
     final batteryInfo = swap == null
         ? '-'
         : '${swap.batteryType ?? '-'} • ${swap.batteryNum ?? '-'}';
@@ -941,57 +1506,100 @@ class _SwapOrderCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    order.orderNo,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.black06Text,
-                    ),
-                  ),
-                ),
-                _statusChip(context, l10n, swap?.status),
-              ],
-            ),
-          ),
+          _OrderHeaderRow(orderNo: orderNo, timeText: timeText),
           Divider(height: 1, color: AppColors.borderColor),
-          // Content
           Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _orderInfoRow(l10n.orderLabelOrderTime, _formatDate(swap?.createTime ?? order.createTime)),
-                _orderInfoRow(l10n.orderLabelPackageName, swap?.infoName ?? '-'),
-                _orderInfoRow(l10n.orderLabelVehicle, swap?.carType ?? '-'),
-                _orderInfoRow(l10n.orderLabelBattery, batteryInfo),
-                _orderInfoRow(l10n.orderLabelAmount, _formatAmount(order.orderAmount)),
-                _orderInfoRow(l10n.orderLabelServiceDays, _formatUnit(swap?.duration, l10n.orderUnitDays)),
-                _orderInfoRow(l10n.orderLabelSwapTimes, _formatUnit(swap?.times, l10n.orderUnitTimes)),
-                _orderInfoRow(l10n.orderLabelRemainDays, _formatUnit(swap?.remainDuration, l10n.orderUnitDays)),
-                _orderInfoRow(l10n.orderLabelRemainTimes, _formatUnit(swap?.remainTime, l10n.orderUnitTimes)),
-                _orderInfoRow(l10n.orderLabelExpireDate, _formatDate(swap?.expireDate)),
-                _orderInfoRow(l10n.orderLabelPayType, _payTypeLabel(l10n, order.payWay, swap?.payType)),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _OrderImage(
+                      url: null,
+                      size: 50,
+                      placeholder: 'assets/android/mipmap-xxhdpi/icon_swap_bind.webp',
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  swap?.infoName ?? '-',
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.black09Text,
+                                  ),
+                                ),
+                              ),
+                              Text(
+                                _formatAmount(order.orderAmount),
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.black09Text,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              if (statusChip != null) statusChip,
+                              if (payTypeLabel != '-') _OrderTag(text: payTypeLabel),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _OrderInfoPanel(
+                  children: [
+                    _InfoLine(
+                      label: l10n.orderLabelVehicle,
+                      value: swap?.carType ?? '-',
+                    ),
+                    _InfoLine(
+                      label: l10n.orderLabelBattery,
+                      value: batteryInfo,
+                    ),
+                    _InfoLine(
+                      label: l10n.orderLabelServiceDays,
+                      value: _formatUnit(swap?.duration, l10n.orderUnitDays),
+                    ),
+                    _InfoLine(
+                      label: l10n.orderLabelSwapTimes,
+                      value: _formatUnit(swap?.times, l10n.orderUnitTimes),
+                    ),
+                    const _InfoDashedDivider(),
+                    _InfoLine(
+                      label: l10n.orderLabelRemainDays,
+                      value: _formatUnit(swap?.remainDuration, l10n.orderUnitDays),
+                    ),
+                    _InfoLine(
+                      label: l10n.orderLabelRemainTimes,
+                      value: _formatUnit(swap?.remainTime, l10n.orderUnitTimes),
+                    ),
+                    _InfoLine(
+                      label: l10n.orderLabelExpireDate,
+                      value: _formatDate(swap?.expireDate),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-          // Voucher action
-          if (_buildVoucherAction(
-                context,
-                l10n,
-                order: order,
-                status: swap?.status,
-                payType: swap?.payType,
-                payWay: order.payWay,
-                attachment: swap?.attachment ?? order.attachment,
-              )
-              case final Widget action)
+          if (voucherAction case final Widget action)
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
               child: action,
@@ -1006,26 +1614,79 @@ class _SwapOrderCard extends StatelessWidget {
 // Payment Records Tab
 // =============================================================================
 
-class _PaymentRecordsTab extends StatelessWidget {
+class _PaymentRecordsTab extends ConsumerStatefulWidget {
   const _PaymentRecordsTab({required this.l10n});
 
   final AppLocalizations l10n;
 
   @override
+  ConsumerState<_PaymentRecordsTab> createState() => _PaymentRecordsTabState();
+}
+
+class _PaymentRecordsTabState extends ConsumerState<_PaymentRecordsTab> {
+  final RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = ref.read(userDetailProvider);
+      if (state.cardNum.isNotEmpty && state.payments.isEmpty) {
+        ref.read(userDetailProvider.notifier).loadPayments(page: 1);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // TODO: Implement payment records API
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.payment_outlined, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text(
-            l10n.userDetailOrderEmpty,
-            style: TextStyle(color: Colors.grey[600], fontSize: 14),
-          ),
-        ],
-      ),
+    final state = ref.watch(userDetailProvider);
+    final notifier = ref.read(userDetailProvider.notifier);
+    final items = state.payments;
+
+    return SmartRefresher(
+      controller: _refreshController,
+      enablePullDown: true,
+      enablePullUp: state.paymentsHasMore,
+      onRefresh: () async {
+        await notifier.loadPayments(page: 1);
+        _refreshController.refreshCompleted();
+        if (ref.read(userDetailProvider).paymentsHasMore) {
+          _refreshController.resetNoData();
+        } else {
+          _refreshController.loadNoData();
+        }
+      },
+      onLoading: () async {
+        await notifier.loadPayments(page: state.paymentsPage + 1);
+        if (ref.read(userDetailProvider).paymentsHasMore) {
+          _refreshController.loadComplete();
+        } else {
+          _refreshController.loadNoData();
+        }
+      },
+      child: items.isEmpty && !state.loadingPayments
+          ? _RecordsEmptyView(
+              imagePath: 'assets/android/mipmap-xxhdpi/icon_empty_payrecord.png',
+              text: widget.l10n.userPaymentEmpty,
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                return _PaymentRecordCard(
+                  record: items[index],
+                  l10n: widget.l10n,
+                );
+              },
+            ),
     );
   }
 }
@@ -1034,26 +1695,79 @@ class _PaymentRecordsTab extends StatelessWidget {
 // Swap Records Tab
 // =============================================================================
 
-class _SwapRecordsTab extends StatelessWidget {
+class _SwapRecordsTab extends ConsumerStatefulWidget {
   const _SwapRecordsTab({required this.l10n});
 
   final AppLocalizations l10n;
 
   @override
+  ConsumerState<_SwapRecordsTab> createState() => _SwapRecordsTabState();
+}
+
+class _SwapRecordsTabState extends ConsumerState<_SwapRecordsTab> {
+  final RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = ref.read(userDetailProvider);
+      if (state.cardNum.isNotEmpty && state.swaps.isEmpty) {
+        ref.read(userDetailProvider.notifier).loadSwaps(page: 1);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // TODO: Implement swap records API
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.swap_horiz_outlined, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
-          Text(
-            l10n.userDetailOrderEmpty,
-            style: TextStyle(color: Colors.grey[600], fontSize: 14),
-          ),
-        ],
-      ),
+    final state = ref.watch(userDetailProvider);
+    final notifier = ref.read(userDetailProvider.notifier);
+    final items = state.swaps;
+
+    return SmartRefresher(
+      controller: _refreshController,
+      enablePullDown: true,
+      enablePullUp: state.swapsHasMore,
+      onRefresh: () async {
+        await notifier.loadSwaps(page: 1);
+        _refreshController.refreshCompleted();
+        if (ref.read(userDetailProvider).swapsHasMore) {
+          _refreshController.resetNoData();
+        } else {
+          _refreshController.loadNoData();
+        }
+      },
+      onLoading: () async {
+        await notifier.loadSwaps(page: state.swapsPage + 1);
+        if (ref.read(userDetailProvider).swapsHasMore) {
+          _refreshController.loadComplete();
+        } else {
+          _refreshController.loadNoData();
+        }
+      },
+      child: items.isEmpty && !state.loadingSwaps
+          ? _RecordsEmptyView(
+              imagePath: 'assets/android/mipmap-xxhdpi/icon_empty_swaprecord.png',
+              text: widget.l10n.userSwapEmpty,
+            )
+          : ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                return _SwapRecordCard(
+                  record: items[index],
+                  l10n: widget.l10n,
+                );
+              },
+            ),
     );
   }
 }
@@ -1063,33 +1777,68 @@ class _SwapRecordsTab extends StatelessWidget {
 // =============================================================================
 
 class _OrderImage extends StatelessWidget {
-  const _OrderImage({required this.url});
+  const _OrderImage({
+    required this.url,
+    this.size = 60,
+    this.placeholder,
+  });
 
   final String? url;
+  final double size;
+  final String? placeholder;
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: url == null || url!.isEmpty
-          ? Container(
-              width: 60,
-              height: 60,
-              color: const Color(0xFFF5F5F5),
-              child: const Icon(Icons.image_outlined, size: 28, color: Color(0xFF999999)),
-            )
+          ? _OrderPlaceholder(size: size, asset: placeholder)
           : Image.network(
               url!,
-              width: 60,
-              height: 60,
+              width: size,
+              height: size,
               fit: BoxFit.cover,
               errorBuilder: (_, __, ___) => Container(
-                width: 60,
-                height: 60,
+                width: size,
+                height: size,
                 color: const Color(0xFFF5F5F5),
                 child: const Icon(Icons.broken_image_outlined, size: 28, color: Color(0xFF999999)),
               ),
             ),
+    );
+  }
+}
+
+class _OrderPlaceholder extends StatelessWidget {
+  const _OrderPlaceholder({required this.size, this.asset});
+
+  final double size;
+  final String? asset;
+
+  @override
+  Widget build(BuildContext context) {
+    if (asset != null && asset!.isNotEmpty) {
+      return Container(
+        width: size,
+        height: size,
+        color: const Color(0xFFF5F5F5),
+        padding: const EdgeInsets.all(6),
+        child: Image.asset(
+          asset!,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => const Icon(
+            Icons.image_outlined,
+            size: 28,
+            color: Color(0xFF999999),
+          ),
+        ),
+      );
+    }
+    return Container(
+      width: size,
+      height: size,
+      color: const Color(0xFFF5F5F5),
+      child: const Icon(Icons.image_outlined, size: 28, color: Color(0xFF999999)),
     );
   }
 }
@@ -1110,30 +1859,31 @@ class _VoucherButton extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          border: Border.all(color: AppColors.primaryColor),
-          borderRadius: BorderRadius.circular(20),
+          color: const Color(0xFFF5F6F8),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image.asset(
               iconPath,
-              width: 16,
-              height: 16,
+              width: 18,
+              height: 18,
               errorBuilder: (_, __, ___) => Icon(
                 Icons.upload_file,
-                size: 16,
-                color: AppColors.primaryColor,
+                size: 18,
+                color: AppColors.black06Text,
               ),
             ),
-            const SizedBox(width: 6),
+            const SizedBox(width: 8),
             Text(
               label,
               style: TextStyle(
-                fontSize: 13,
-                color: AppColors.primaryColor,
+                fontSize: 14,
+                color: AppColors.black06Text,
               ),
             ),
           ],
@@ -1141,6 +1891,429 @@ class _VoucherButton extends StatelessWidget {
       ),
     );
   }
+}
+
+class _OrderHeaderRow extends StatelessWidget {
+  const _OrderHeaderRow({
+    required this.orderNo,
+    required this.timeText,
+  });
+
+  final String orderNo;
+  final String timeText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+      child: Row(
+        children: [
+          Image.asset(
+            'assets/android/mipmap-xxhdpi/icon_userdetail_saleorder.png',
+            width: 18,
+            height: 18,
+            errorBuilder: (_, __, ___) => const Icon(
+              Icons.event_note_outlined,
+              size: 18,
+              color: Color(0xFF999999),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              orderNo,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.black09Text,
+              ),
+            ),
+          ),
+          Text(
+            timeText,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF999999),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OrderTag extends StatelessWidget {
+  const _OrderTag({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 24,
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: const Color(0xFFD0D4DA)),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 12,
+          color: Color(0xFF666666),
+        ),
+      ),
+    );
+  }
+}
+
+class _OrderPackageHeader extends StatelessWidget {
+  const _OrderPackageHeader({
+    required this.title,
+    required this.amount,
+  });
+
+  final String title;
+  final String amount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF3A4D9C), Color(0xFF2A3F83)],
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Text(
+            amount,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OrderInfoPanel extends StatelessWidget {
+  const _OrderInfoPanel({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF6F7F9),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Column(
+        children: children,
+      ),
+    );
+  }
+}
+
+class _InfoLine extends StatelessWidget {
+  const _InfoLine({
+    required this.label,
+    required this.value,
+    this.boldValue = false,
+  });
+
+  final String label;
+  final String value;
+  final bool boldValue;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13,
+                color: Color(0xFF8A8A8A),
+              ),
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 13,
+              color: AppColors.black09Text,
+              fontWeight: boldValue ? FontWeight.w600 : FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InfoDashedDivider extends StatelessWidget {
+  const _InfoDashedDivider();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
+      height: 1,
+      decoration: const BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: Color(0xFFE0E0E0),
+            width: 1,
+            style: BorderStyle.solid,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RecordsEmptyView extends StatelessWidget {
+  const _RecordsEmptyView({
+    required this.imagePath,
+    required this.text,
+  });
+
+  final String imagePath;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            imagePath,
+            width: 120,
+            height: 120,
+            errorBuilder: (_, __, ___) => Icon(
+              Icons.inbox_outlined,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            text,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PaymentRecordCard extends StatelessWidget {
+  const _PaymentRecordCard({
+    required this.record,
+    required this.l10n,
+  });
+
+  final UserPaymentRecord record;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final payWayLabel = _paymentWayLabel(l10n, record.payWay);
+    final payTypeLabel = _paymentTypeLabel(l10n, record.payType);
+    final title = [payWayLabel, payTypeLabel]
+        .where((item) => item.trim().isNotEmpty && item != '-')
+        .join(' ');
+    final amountText = _formatAmountOptional(record.amount);
+    final timeText = DateFormatUtils.formatString(record.payTime);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Image.asset(
+                _paymentIconPath(record.payWay),
+                width: 32,
+                height: 32,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.payment_outlined,
+                  size: 28,
+                  color: Color(0xFF999999),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title.isEmpty ? '-' : title,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.black09Text,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${l10n.userPaymentOrderNo} ${record.orderNo ?? '-'}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.black06Text,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Text(
+                amountText,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.black09Text,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _recordInfoRow(l10n.userPaymentTime, timeText),
+          if (record.payType == 2)
+            _recordInfoRow(
+              l10n.userPaymentPeriod,
+              record.period?.toString() ?? '-',
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SwapRecordCard extends StatelessWidget {
+  const _SwapRecordCard({
+    required this.record,
+    required this.l10n,
+  });
+
+  final PowerChangeItem record;
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final typeInfo = _swapTypeInfo(l10n, record);
+    final statusLabel = _swapStatusLabel(l10n, record);
+    final statusColor = _swapStatusColor(record.status);
+    final timeText = DateFormatUtils.formatString(record.createTime);
+    final operator = _joinNonEmpty([record.handlerName, record.handlerPhone]);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Image.asset(
+                typeInfo.iconPath,
+                width: 32,
+                height: 32,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.swap_horiz_outlined,
+                  size: 28,
+                  color: Color(0xFF999999),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  typeInfo.label,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black09Text,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  statusLabel,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: statusColor,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _recordInfoRow(l10n.userSwapTime, timeText),
+          if (record.stationSn?.isNotEmpty ?? false)
+            _recordInfoRow(l10n.userSwapStationSn, record.stationSn ?? '-'),
+          if (operator.isNotEmpty)
+            _recordInfoRow(l10n.userSwapOperator, operator),
+          if (record.outBattery?.isNotEmpty ?? false)
+            _recordInfoRow(l10n.userSwapOutBattery, record.outBattery ?? '-'),
+          if (record.inBattery?.isNotEmpty ?? false)
+            _recordInfoRow(l10n.userSwapInBattery, record.inBattery ?? '-'),
+          if (record.error?.isNotEmpty ?? false)
+            _recordInfoRow(l10n.userSwapError, record.error ?? '-'),
+        ],
+      ),
+    );
+  }
+}
+
+class _SwapTypeInfo {
+  const _SwapTypeInfo(this.label, this.iconPath);
+
+  final String label;
+  final String iconPath;
 }
 
 // =============================================================================
@@ -1171,6 +2344,38 @@ Widget _orderInfoRow(String label, String value) {
   );
 }
 
+Widget _recordInfoRow(String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 6),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 110,
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: AppColors.black09Text,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w400,
+              color: AppColors.black06Text,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 String _formatDate(int? timestamp) {
   return DateFormatUtils.formatTimestamp(
     timestamp,
@@ -1178,9 +2383,18 @@ String _formatDate(int? timestamp) {
   );
 }
 
+String _formatOrderTime(int? timestamp) {
+  return DateFormatUtils.formatTimestamp(timestamp);
+}
+
 String _formatAmount(double? amount) {
   final value = amount ?? 0;
   return NumberFormat.currency(symbol: '\$', decimalDigits: 2).format(value);
+}
+
+String _formatAmountOptional(double? amount) {
+  if (amount == null) return '-';
+  return _formatAmount(amount);
 }
 
 String _formatRate(double? rate) {
@@ -1208,6 +2422,144 @@ String _payTypeLabel(AppLocalizations l10n, int? payWay, int? payType) {
   return '$wayLabel $typeLabel'.trim();
 }
 
+String _resolveAttachment(String? primary, String? fallback) {
+  String normalize(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) return '';
+    if (text == 'null' || text == '[]') return '';
+    return text;
+  }
+
+  final first = normalize(primary);
+  if (first.isNotEmpty) return first;
+  return normalize(fallback);
+}
+
+List<String> _parseAttachmentUrls(String attachment) {
+  var text = attachment.trim();
+  if (text.isEmpty || text == 'null' || text == '[]') return const [];
+  if (text.startsWith('[') && text.endsWith(']')) {
+    text = text.substring(1, text.length - 1);
+  }
+  text = text.replaceAll('"', '');
+  return text
+      .split(RegExp(r'[,;|]'))
+      .map((item) => item.trim())
+      .where((item) => item.isNotEmpty)
+      .toList();
+}
+
+String _bindTimeText(AppLocalizations l10n, int? timestamp) {
+  final time = DateFormatUtils.formatTimestamp(timestamp);
+  if (time == '-') return '-';
+  return '$time ${l10n.userBindTimeSuffix}';
+}
+
+String _paymentWayLabel(AppLocalizations l10n, int? payWay) {
+  switch (payWay) {
+    case 1:
+      return l10n.orderPayCash;
+    case 2:
+      return l10n.orderPayOnline;
+    default:
+      return '-';
+  }
+}
+
+String _paymentTypeLabel(AppLocalizations l10n, int? payType) {
+  switch (payType) {
+    case 1:
+      return l10n.orderPayFull;
+    case 2:
+      return l10n.orderPayInstallment;
+    default:
+      return '-';
+  }
+}
+
+String _paymentIconPath(int? payWay) {
+  switch (payWay) {
+    case 1:
+      return 'assets/android/mipmap-xxhdpi/icon_payrecord_cash.png';
+    case 2:
+      return 'assets/android/mipmap-xxhdpi/icon_payrecord_online.png';
+    default:
+      return 'assets/android/mipmap-xxhdpi/icon_payrecord_cash.png';
+  }
+}
+
+_SwapTypeInfo _swapTypeInfo(AppLocalizations l10n, PowerChangeItem record) {
+  switch (record.type) {
+    case 1:
+      return _SwapTypeInfo(
+        l10n.userSwapManual,
+        'assets/android/mipmap-xxhdpi/icon_manual_change.webp',
+      );
+    case 2:
+      return _SwapTypeInfo(
+        l10n.userSwapRemote,
+        'assets/android/mipmap-xxhdpi/icon_remote_change.png',
+      );
+    case 3:
+      return _SwapTypeInfo(
+        l10n.userSwapBluetooth,
+        'assets/android/mipmap-xxhdpi/icon_bluetooth_change.png',
+      );
+    case 4:
+      return _SwapTypeInfo(
+        l10n.userSwapScan,
+        'assets/android/mipmap-xxhdpi/icon_scan_change.webp',
+      );
+    default:
+      return _SwapTypeInfo(
+        record.swapTypeName?.isNotEmpty == true
+            ? record.swapTypeName!
+            : '-',
+        'assets/android/mipmap-xxhdpi/icon_manual_change.webp',
+      );
+  }
+}
+
+String _swapStatusLabel(AppLocalizations l10n, PowerChangeItem record) {
+  if (record.showStatusName?.isNotEmpty == true) {
+    return record.showStatusName!;
+  }
+  switch (record.status) {
+    case 1:
+      return l10n.userSwapStatusSuccess;
+    case 2:
+      return l10n.userSwapStatusFail;
+    case 3:
+      return l10n.userSwapStatusPartSuccess;
+    case 4:
+      return l10n.userSwapStatusSystemReject;
+    default:
+      return '-';
+  }
+}
+
+Color _swapStatusColor(int? status) {
+  switch (status) {
+    case 1:
+      return const Color(0xFF19BE6B);
+    case 2:
+      return const Color(0xFFF56C6C);
+    case 3:
+      return const Color(0xFFE6A23C);
+    case 4:
+      return const Color(0xFF909399);
+    default:
+      return const Color(0xFF909399);
+  }
+}
+
+String _joinNonEmpty(List<String?> values) {
+  return values
+      .where((value) => value != null && value.trim().isNotEmpty)
+      .map((value) => value!.trim())
+      .join(' / ');
+}
+
 Widget? _buildVoucherAction(
   BuildContext context,
   AppLocalizations l10n, {
@@ -1218,6 +2570,13 @@ Widget? _buildVoucherAction(
   required String? attachment,
 }) {
   final hasAttachment = attachment != null && attachment.trim().isNotEmpty;
+  if (hasAttachment) {
+    return _VoucherButton(
+      iconPath: 'assets/android/mipmap-xxhdpi/icon_view_voucher.png',
+      label: l10n.orderVoucherView,
+      onPressed: () => _showVoucherDialog(context, l10n, attachment),
+    );
+  }
   if (status == 0 && payWay == 1) {
     return _VoucherButton(
       iconPath: 'assets/android/mipmap-xxhdpi/icon_upload_voucher.png',
@@ -1229,13 +2588,6 @@ Widget? _buildVoucherAction(
         payType: payType,
         existingAttachment: attachment,
       ),
-    );
-  }
-  if (hasAttachment) {
-    return _VoucherButton(
-      iconPath: 'assets/android/mipmap-xxhdpi/icon_view_voucher.png',
-      label: l10n.orderVoucherView,
-      onPressed: () => _showVoucherDialog(context, l10n, attachment),
     );
   }
   return null;
@@ -1404,11 +2756,7 @@ void _showVoucherDialog(
   AppLocalizations l10n,
   String attachment,
 ) {
-  final urls = attachment
-      .split(',')
-      .map((item) => item.trim())
-      .where((item) => item.isNotEmpty)
-      .toList();
+  final urls = _parseAttachmentUrls(attachment);
   if (urls.isEmpty) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(l10n.orderVoucherEmpty)),
@@ -1465,10 +2813,11 @@ Widget _statusChip(
   final label = _statusLabel(l10n, status);
   final colors = _statusColors(status);
   return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+    height: 24,
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     decoration: BoxDecoration(
-      color: colors.background,
-      borderRadius: BorderRadius.circular(10),
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(6),
       border: Border.all(color: colors.border),
     ),
     child: Text(

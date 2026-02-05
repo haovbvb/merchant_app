@@ -887,6 +887,24 @@ abstract class AppLocalizations {
   /// **'Remark'**
   String get userBasicRemark;
 
+  /// No description provided for @userBindSale.
+  ///
+  /// In en, this message translates to:
+  /// **'Sale'**
+  String get userBindSale;
+
+  /// No description provided for @userBindRental.
+  ///
+  /// In en, this message translates to:
+  /// **'Rental'**
+  String get userBindRental;
+
+  /// No description provided for @userBindTimeSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'bind'**
+  String get userBindTimeSuffix;
+
   /// No description provided for @userTypeNormal.
   ///
   /// In en, this message translates to:
@@ -923,6 +941,24 @@ abstract class AppLocalizations {
   /// **'Payment Time'**
   String get userPaymentTime;
 
+  /// No description provided for @userPaymentEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No payment records'**
+  String get userPaymentEmpty;
+
+  /// No description provided for @userPaymentOrderNo.
+  ///
+  /// In en, this message translates to:
+  /// **'Order No:'**
+  String get userPaymentOrderNo;
+
+  /// No description provided for @userPaymentPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Period:'**
+  String get userPaymentPeriod;
+
   /// No description provided for @userSwapRecord.
   ///
   /// In en, this message translates to:
@@ -946,6 +982,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'New Battery'**
   String get userSwapNewBattery;
+
+  /// No description provided for @userSwapEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No swap records'**
+  String get userSwapEmpty;
+
+  /// No description provided for @userSwapManual.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual swap'**
+  String get userSwapManual;
+
+  /// No description provided for @userSwapRemote.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote swap'**
+  String get userSwapRemote;
+
+  /// No description provided for @userSwapBluetooth.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth swap'**
+  String get userSwapBluetooth;
+
+  /// No description provided for @userSwapScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan swap'**
+  String get userSwapScan;
+
+  /// No description provided for @userSwapStatusSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Success'**
+  String get userSwapStatusSuccess;
+
+  /// No description provided for @userSwapStatusFail.
+  ///
+  /// In en, this message translates to:
+  /// **'Fail'**
+  String get userSwapStatusFail;
+
+  /// No description provided for @userSwapStatusPartSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Partially successful'**
+  String get userSwapStatusPartSuccess;
+
+  /// No description provided for @userSwapStatusSystemReject.
+  ///
+  /// In en, this message translates to:
+  /// **'System reject'**
+  String get userSwapStatusSystemReject;
+
+  /// No description provided for @userSwapStationSn.
+  ///
+  /// In en, this message translates to:
+  /// **'Station SN'**
+  String get userSwapStationSn;
+
+  /// No description provided for @userSwapOperator.
+  ///
+  /// In en, this message translates to:
+  /// **'Operator'**
+  String get userSwapOperator;
+
+  /// No description provided for @userSwapInBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'In battery'**
+  String get userSwapInBattery;
+
+  /// No description provided for @userSwapOutBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'Out battery'**
+  String get userSwapOutBattery;
+
+  /// No description provided for @userSwapError.
+  ///
+  /// In en, this message translates to:
+  /// **'Error'**
+  String get userSwapError;
 
   /// No description provided for @userDetailCall.
   ///

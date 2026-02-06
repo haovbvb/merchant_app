@@ -62,13 +62,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Image.asset(
-                        'assets/images/AppIcon_logo.png',
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => Icon(
-                          Icons.eco,
-                          color: AppColors.primaryColor,
-                          size: 48,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Image.asset(
+                          'assets/images/AppIcon_logo.png',
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => Icon(
+                            Icons.eco,
+                            color: AppColors.primaryColor,
+                            size: 48,
+                          ),
                         ),
                       ),
                     ),

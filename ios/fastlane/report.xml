@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="fastlane.lanes">
+    
+    
+    
+      
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000257">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="1: flutter build ipa --release" time="138.71484">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="2: flutter build apk --release" time="9.177462">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="3: curl -f -X POST https://www.pgyer.com/apiv2/app/upload -F _api_key\=630a6a4d973bda999b5ca54affaebc60 -F file\=@../../build/ios/ipa/user_app.ipa -F buildUpdateDescription\= -F buildInstallType\=1" time="15.5026">
+        
+      </testcase>
+    
+      
+      <testcase classname="fastlane.lanes" name="4: curl -f -X POST https://www.pgyer.com/apiv2/app/upload -F _api_key\=630a6a4d973bda999b5ca54affaebc60 -F file\=@../../build/app/outputs/flutter-apk/app-release.apk -F buildUpdateDescription\= -F buildInstallType\=1" time="28.25441">
+        
+      </testcase>
+    
+  </testsuite>
+</testsuites>

@@ -1,0 +1,109 @@
+default_platform(:ios)
+
+platform :ios do
+  def upload_to_pgyer(file_path:, api_key:, update_desc: "", install_type: "1", password: "", app_key: "")
+    upload_cmd = [
+      "curl", "-f", "-X", "POST", "https://www.pgyer.com/apiv2/app/upload",
+      "-F", "_api_key=#{api_key}",
+      "-F", "file=@#{file_path}",
+      "-F", "buildUpdateDescription=#{update_desc}",
+      "-F", "buildInstallType=#{install_type}",
+    ]
+
+    upload_cmd += ["-F", "buildPassword=#{password}"] unless password.to_s.empty?
+    upload_cmd += ["-F", "buildKey=#{app_key}"] unless app_key.to_s.empty?
+
+    sh(*upload_cmd)
+  end
+
+  desc "Build Flutter iOS IPA and upload to Pgyer"
+  lane :pgyer do
+    app_identifier = "com.okla.merchant"
+    team_id = "39634H5Y8U"
+    pgyer_api_key = "630a6a4d973bda999b5ca54affaebc60"
+    pgyer_app_key = ENV["PGYER_APP_KEY"]
+    update_desc = ENV["PGYER_UPDATE_DESCRIPTION"] || ""
+    install_type = ENV["PGYER_INSTALL_TYPE"] || "1"
+    password = ENV["PGYER_PASSWORD"] || ""
+    ipa_path = ENV["IPA_PATH"]
+
+    UI.user_error!("APP_IDENTIFIER is required") if app_identifier.to_s.strip.empty?
+    UI.user_error!("TEAM_ID is required") if team_id.to_s.strip.empty?
+    UI.user_error!("PGYER_API_KEY is required") if pgyer_api_key.to_s.strip.empty?
+
+    build_number = Time.now.strftime("%Y%m%d%H%M")
+    sh "flutter", "build", "ipa", "--release", "--build-number=#{build_number}"
+
+    if ipa_path.to_s.strip.empty?
+      ipa_candidates = Dir["../../build/ios/ipa/*.ipa"]
+      UI.user_error!("IPA not found in build/ios/ipa") if ipa_candidates.empty?
+      ipa_path = ipa_candidates.first
+    end
+    upload_to_pgyer(
+      file_path: ipa_path,
+      api_key: pgyer_api_key,
+      update_desc: update_desc,
+      install_type: install_type,
+      password: password,
+      app_key: pgyer_app_key,
+    )
+  end
+
+  desc "Build Flutter iOS + Android and upload both to Pgyer"
+  lane :pgyer_all do
+    app_identifier = "com.okla.merchant"
+    team_id = "39634H5Y8U"
+    pgyer_api_key = "630a6a4d973bda999b5ca54affaebc60"
+    pgyer_app_key = ENV["PGYER_APP_KEY"]
+    update_desc = ENV["PGYER_UPDATE_DESCRIPTION"] || ""
+    install_type = ENV["PGYER_INSTALL_TYPE"] || "1"
+    password = ENV["PGYER_PASSWORD"] || ""
+    ipa_path = ENV["IPA_PATH"]
+    android_artifact = ENV["ANDROID_ARTIFACT"] || "apk" # apk or aab
+    android_artifact_path = ENV["ANDROID_ARTIFACT_PATH"]
+
+    UI.user_error!("APP_IDENTIFIER is required") if app_identifier.to_s.strip.empty?
+    UI.user_error!("TEAM_ID is required") if team_id.to_s.strip.empty?
+    UI.user_error!("PGYER_API_KEY is required") if pgyer_api_key.to_s.strip.empty?
+
+    build_number = Time.now.strftime("%Y%m%d%H%M")
+    sh "flutter", "build", "ipa", "--release", "--build-number=#{build_number}"
+    sh "flutter", "build", android_artifact, "--release", "--build-number=#{build_number}"
+
+    if ipa_path.to_s.strip.empty?
+      ipa_candidates = Dir["../../build/ios/ipa/*.ipa"]
+      UI.user_error!("IPA not found in build/ios/ipa") if ipa_candidates.empty?
+      ipa_path = ipa_candidates.first
+    end
+
+    if android_artifact_path.to_s.strip.empty?
+      if android_artifact == "aab"
+        candidates = Dir["../../build/app/outputs/bundle/release/*.aab"]
+        UI.user_error!("AAB not found in build/app/outputs/bundle/release") if candidates.empty?
+        android_artifact_path = candidates.first
+      else
+        candidates = Dir["../../build/app/outputs/flutter-apk/*.apk"]
+        UI.user_error!("APK not found in build/app/outputs/flutter-apk") if candidates.empty?
+        android_artifact_path = candidates.first
+      end
+    end
+
+    upload_to_pgyer(
+      file_path: ipa_path,
+      api_key: pgyer_api_key,
+      update_desc: update_desc,
+      install_type: install_type,
+      password: password,
+      app_key: pgyer_app_key,
+    )
+
+    upload_to_pgyer(
+      file_path: android_artifact_path,
+      api_key: pgyer_api_key,
+      update_desc: update_desc,
+      install_type: install_type,
+      password: password,
+      app_key: pgyer_app_key,
+    )
+  end
+end

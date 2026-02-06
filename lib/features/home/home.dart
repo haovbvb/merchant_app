@@ -323,14 +323,16 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
 
   Future<void> _prefetchAddresses() async {
     for (final vehicle in _vehicles) {
+      final address = (vehicle.address ?? '').trim();
+      if (address.isNotEmpty) continue;
       final lat = vehicle.latitude;
       final lng = vehicle.longitude;
       if (lat == null || lng == null || lat == 0 || lng == 0) continue;
       final key = _addressKey(lat, lng);
       if (_addressCache.containsKey(key)) continue;
-      final address = await _resolveAddress(lat, lng);
+      final resolvedAddress = await _resolveAddress(lat, lng);
       if (!mounted) return;
-      setState(() => _addressCache[key] = address);
+      setState(() => _addressCache[key] = resolvedAddress);
     }
   }
 
@@ -376,6 +378,13 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
     final lng = vehicle.longitude;
     final centerLat = _latitude;
     final centerLng = _longitude;
+    final mile = vehicle.mile;
+    if (mile != null && mile > 0) {
+      if (mile < 1) {
+        return '${(mile * 1000).toStringAsFixed(0)}m';
+      }
+      return '${mile.toStringAsFixed(1)}km';
+    }
     if (lat == null || lng == null || centerLat == null || centerLng == null) {
       return '-';
     }
@@ -387,6 +396,8 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   }
 
   String _addressFor(NearByVehicle vehicle) {
+    final address = (vehicle.address ?? '').trim();
+    if (address.isNotEmpty) return address;
     final lat = vehicle.latitude;
     final lng = vehicle.longitude;
     if (lat == null || lng == null || lat == 0 || lng == 0) return '-';
@@ -638,7 +649,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
                       _maybeCenterMap();
                     },
                   )
-                : const Center(child: const SizedBox.shrink()),
+                : const Center(child: SizedBox.shrink()),
           ),
           _HomeOverlays(
             title: l10n.homeTitle,
@@ -654,6 +665,27 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
               _fetchVehicles();
             },
             isFilterActive: _maintainFlag != null,
+            vehicleSnFilter: _vehicleSnFilter,
+            maintenanceLabel: _maintainFlag == null
+                ? null
+                : _maintainFlag == 1
+                    ? l10n.homeFilterNeedMaintenance
+                    : l10n.homeFilterNormal,
+            onClearSnFilter: () async {
+              setState(() => _vehicleSnFilter = null);
+              await _fetchVehicles();
+            },
+            onClearMaintenance: () async {
+              setState(() => _maintainFlag = null);
+              await _fetchVehicles();
+            },
+            onClearAllFilters: () async {
+              setState(() {
+                _vehicleSnFilter = null;
+                _maintainFlag = null;
+              });
+              await _fetchVehicles();
+            },
             refreshTurns: _refreshTurns,
             locateTurns: _locateTurns,
           ),
@@ -696,6 +728,11 @@ class _HomeOverlays extends StatelessWidget {
     required this.onLocate,
     required this.onRefresh,
     this.isFilterActive = false,
+    this.vehicleSnFilter,
+    this.maintenanceLabel,
+    this.onClearSnFilter,
+    this.onClearMaintenance,
+    this.onClearAllFilters,
     required this.refreshTurns,
     required this.locateTurns,
   });
@@ -707,11 +744,20 @@ class _HomeOverlays extends StatelessWidget {
   final VoidCallback onLocate;
   final VoidCallback onRefresh;
   final bool isFilterActive;
+  final String? vehicleSnFilter;
+  final String? maintenanceLabel;
+  final VoidCallback? onClearSnFilter;
+  final VoidCallback? onClearMaintenance;
+  final VoidCallback? onClearAllFilters;
   final double refreshTurns;
   final double locateTurns;
 
   @override
   Widget build(BuildContext context) {
+    final hasSnFilter = (vehicleSnFilter ?? '').trim().isNotEmpty;
+    final hasMaintenance = (maintenanceLabel ?? '').trim().isNotEmpty;
+    final hasFilters = hasSnFilter || hasMaintenance;
+
     return Column(
       children: [
         // 白色导航条
@@ -723,53 +769,88 @@ class _HomeOverlays extends StatelessWidget {
             right: 16,
             bottom: 8,
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: InkWell(
-                  onTap: onSearch,
-                  borderRadius: BorderRadius.circular(8),
-                  child: Container(
-                    height: 36,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF2F4F7),
+              Row(
+                children: [
+                  Expanded(
+                    child: InkWell(
+                      onTap: onSearch,
                       borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    alignment: Alignment.centerLeft,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.search,
-                          color: AppColors.black04Text,
-                          size: 20,
+                      child: Container(
+                        height: 36,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF2F4F7),
+                          borderRadius: BorderRadius.circular(8),
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          searchHint,
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(
-                                color: AppColors.black05Text,
-                                fontSize: 14,
-                              ),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.search,
+                              color: AppColors.black04Text,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              searchHint,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(
+                                    color: AppColors.black05Text,
+                                    fontSize: 14,
+                                  ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
+                  const SizedBox(width: 12),
+                  _CircleIconButton(
+                    iconWidget: Image.asset(
+                      'assets/android/mipmap-xxhdpi/home_filter.png',
+                      color: isFilterActive ? AppColors.primaryColor : null,
+                    ),
+                    showShadow: false,
+                    onPressed: onFilter,
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              _CircleIconButton(
-                iconWidget: Image.asset(
-                  'assets/android/mipmap-xxhdpi/home_filter.png',
-
-                  color: isFilterActive ? AppColors.primaryColor : null,
+              if (hasFilters) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    if (hasSnFilter)
+                      _FilterChip(
+                        label: 'SN: ${vehicleSnFilter!}',
+                        onClear: onClearSnFilter,
+                      ),
+                    if (hasMaintenance)
+                      _FilterChip(
+                        label: maintenanceLabel!,
+                        onClear: onClearMaintenance,
+                      ),
+                    if (onClearAllFilters != null)
+                      GestureDetector(
+                        onTap: onClearAllFilters,
+                        child: Text(
+                          context.l10n.deviceSearchHistoryClear,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.primaryColor,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                  ],
                 ),
-                showShadow: false,
-                onPressed: onFilter,
-              ),
+              ],
             ],
           ),
         ),
@@ -867,7 +948,7 @@ class _VehicleDraggableSheet extends StatelessWidget {
               const SizedBox(height: 8),
               Expanded(
                 child: loading
-                    ? const Center(child: const SizedBox.shrink())
+                    ? const Center(child: SizedBox.shrink())
                     : vehicles.isEmpty
                         ? Center(
                             child: Text(
@@ -1171,6 +1252,51 @@ class _FilterMenuItem extends StatelessWidget {
   }
 }
 
+class _FilterChip extends StatelessWidget {
+  const _FilterChip({
+    required this.label,
+    this.onClear,
+  });
+
+  final String label;
+  final VoidCallback? onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F6F8),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: const Color(0xFFE0E0E0)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0xFF666666),
+            ),
+          ),
+          if (onClear != null) ...[
+            const SizedBox(width: 6),
+            GestureDetector(
+              onTap: onClear,
+              child: const Icon(
+                Icons.close,
+                size: 14,
+                color: Color(0xFF999999),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class _VehicleDetailSheet extends StatefulWidget {
   const _VehicleDetailSheet({
     required this.vehicle,
@@ -1280,6 +1406,13 @@ class _VehicleDetailSheetState extends State<_VehicleDetailSheet>
     }
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  Future<void> _callPhone(String phone) async {
+    final uri = Uri.parse('tel:$phone');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
     }
   }
 
@@ -1393,11 +1526,18 @@ class _VehicleDetailSheetState extends State<_VehicleDetailSheet>
                       ),
                     ),
                     const SizedBox(width: 6),
-                    Text(
-                      _formatPhone(_phone),
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: _phone != null && _phone!.isNotEmpty ? Colors.blue : AppColors.black06Text,
-                        fontSize: 14,
+                    GestureDetector(
+                      onTap: _phone != null && _phone!.isNotEmpty
+                          ? () => _callPhone(_phone!)
+                          : null,
+                      child: Text(
+                        _formatPhone(_phone),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: _phone != null && _phone!.isNotEmpty
+                              ? Colors.blue
+                              : AppColors.black06Text,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ],

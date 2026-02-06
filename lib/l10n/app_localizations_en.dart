@@ -312,7 +312,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userListEmpty => 'No users';
 
   @override
-  String get userSearchHint => 'Enter card number or keyword';
+  String get userSearchHint => 'Enter user ID / user name / phone';
+
+  @override
+  String get userSearchEmpty => 'No matching users';
 
   @override
   String get userSearchHistoryTitle => 'Search History';
@@ -871,6 +874,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get repairRecordEmpty => 'No repair records';
+
+  @override
+  String get repairRecordStatusFinish => 'Finish';
+
+  @override
+  String get repairRecordStatusLack => 'Lack';
+
+  @override
+  String get repairRecordStatusDiscard => 'Discard';
+
+  @override
+  String get repairRecordDetailTitle => 'Repair Record Detail';
+
+  @override
+  String get repairRecordOperator => 'Repair Operator';
+
+  @override
+  String get maintenanceViewDetail => 'View more detail';
 
   @override
   String get afterSaleBindTitle => 'After-sales Binding';
@@ -1807,6 +1828,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get shippingEntrySubtitle => 'Select the device model to be entered';
+
+  @override
+  String get shippingEntryEmpty => 'No device models';
 
   @override
   String get deviceTypeVehicle => 'Vehicle';

@@ -45,9 +45,9 @@ class _UserListPageState extends ConsumerState<UserListPage> {
     final tabs = [
       l10n.userFilterAll,
       l10n.userFilterNormal,
-      l10n.userFilterEnded,
       l10n.userFilterOverdue,
       l10n.userFilterDishonest,
+      l10n.userFilterEnded,
     ];
 
     return Scaffold(
@@ -80,10 +80,12 @@ class _UserListPageState extends ConsumerState<UserListPage> {
           // Filter tabs
           Container(
             color: AppColors.bgColor,
+            width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: List.generate(tabs.length, (index) {
                   final isSelected = _selectedTabIndex == index;
                   return Padding(
@@ -94,21 +96,22 @@ class _UserListPageState extends ConsumerState<UserListPage> {
                         notifier.refresh(status: _statusForTab(index));
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(
-                            color: isSelected ? AppColors.primaryColor : Colors.white,
-                            width: 1,
-                          ),
+                          borderRadius: BorderRadius.circular(6),
+                          border: isSelected
+                              ? Border.all(color: AppColors.primaryColor, width: 1)
+                              : null,
                         ),
                         child: Text(
                           tabs[index],
                           style: TextStyle(
-                            fontSize: 14,
-                            color: isSelected ? AppColors.primaryColor : const Color(0xFF666666),
-                            fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                            fontSize: 13,
+                            color: isSelected
+                                ? AppColors.primaryColor
+                                : const Color(0x99000000),
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ),
@@ -172,13 +175,13 @@ class _UserListPageState extends ConsumerState<UserListPage> {
   int? _statusForTab(int index) {
     switch (index) {
       case 1:
-        return 0; // Normal
+        return 1; // Normal
       case 2:
-        return 1; // Ended
-      case 3:
         return 2; // Overdue
-      case 4:
+      case 3:
         return 3; // Dishonest
+      case 4:
+        return 4; // Ended
       default:
         return null; // All
     }
@@ -207,34 +210,47 @@ class _UserCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final displayName = '${item.firstName} ${item.lastName}'.trim();
-    final statusColors = _getStatusColors(item.status);
-    final statusLabel = _getStatusLabel(l10n, item.status);
-    final tipInfo = _getTipInfo(l10n, item.status);
+    final statusColors = _getStatusColors(item.type);
+    final statusLabel = _getStatusLabel(l10n, item.type);
+    final tipInfo = _getTipInfo(l10n, item.type);
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
         ),
-        child: Column(
-          children: [
-            // Header: Avatar, Name, Status, ID
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
+          child: Column(
+            children: [
+              // Header: Avatar, Name, Status, ID
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Avatar
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: const Color(0xFFF5F5F5),
-                    backgroundImage: item.avatar.isNotEmpty
-                        ? NetworkImage(item.avatar)
-                        : null,
-                    child: item.avatar.isEmpty
-                        ? const Icon(Icons.person, color: Color(0xFF999999), size: 28)
-                        : null,
+                  Container(
+                    width: 54,
+                    height: 54,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                    child: CircleAvatar(
+                      radius: 27,
+                      backgroundColor: const Color(0xFFF5F5F5),
+                      backgroundImage: item.avatar.isNotEmpty
+                          ? NetworkImage(item.avatar)
+                          : null,
+                      child: item.avatar.isEmpty
+                          ? const Icon(
+                              Icons.person,
+                              color: Color(0xFF999999),
+                              size: 28,
+                            )
+                          : null,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   // Name and status
@@ -242,118 +258,111 @@ class _UserCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text(
+                          displayName.isNotEmpty ? displayName : item.username,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xE6000000),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 8),
                         Row(
                           children: [
-                            Flexible(
-                              child: Text(
-                                displayName.isNotEmpty ? displayName : item.username,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                            _StatusChip(
+                              text: statusLabel,
+                              textColor: statusColors.text,
+                              backgroundColor: statusColors.background,
+                              borderColor: statusColors.border,
                             ),
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: statusColors.background,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: statusColors.border, width: 1),
-                              ),
-                              child: Text(
-                                statusLabel,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: statusColors.text,
-                                ),
-                              ),
+                            const SizedBox(width: 5),
+                            _StatusChip(
+                              text: 'ID:${item.cardNum}',
+                              textColor: const Color(0x99000000),
+                              backgroundColor: Colors.transparent,
+                              borderColor: const Color(0x26000000),
                             ),
                           ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'ID:${item.cardNum}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF999999),
-                          ),
                         ),
                       ],
                     ),
                   ),
                 ],
               ),
-            ),
-            // Stats row
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8F8F8),
-                borderRadius: BorderRadius.circular(8),
+              const SizedBox(height: 16),
+              // Stats row
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF6F8FC),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Row(
+                  children: [
+                    _StatItem(
+                      label: l10n.userStatOrder,
+                      value: (item.order ?? 0).toString(),
+                    ),
+                    Container(
+                      width: 0.5,
+                      height: 24,
+                      color: const Color(0x12000000),
+                    ),
+                    _StatItem(
+                      label: l10n.userStatConsumption,
+                      value: _formatCurrency(item.orderAmount ?? 0),
+                    ),
+                    Container(
+                      width: 0.5,
+                      height: 24,
+                      color: const Color(0x12000000),
+                    ),
+                    _StatItem(
+                      label: l10n.userStatAssets,
+                      value: (item.asset ?? 0).toString(),
+                    ),
+                  ],
+                ),
               ),
-              child: Row(
-                children: [
-                  _StatItem(
-                    label: l10n.userStatOrder,
-                    value: (item.order ?? 0).toString(),
-                  ),
-                  Container(
-                    width: 1,
-                    height: 24,
-                    color: const Color(0xFFEEEEEE),
-                  ),
-                  _StatItem(
-                    label: l10n.userStatConsumption,
-                    value: _formatCurrency(item.orderAmount ?? 0),
-                  ),
-                  Container(
-                    width: 1,
-                    height: 24,
-                    color: const Color(0xFFEEEEEE),
-                  ),
-                  _StatItem(
-                    label: l10n.userStatAssets,
-                    value: (item.asset ?? 0).toString(),
-                  ),
-                ],
-              ),
-            ),
-            // Tip info
-            if (tipInfo != null)
-              Padding(
-                padding: const EdgeInsets.all(16),
+              const SizedBox(height: 5),
+              // Tip info
+              Container(
+                height: 44,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF6F8FC),
+                  borderRadius: BorderRadius.circular(6),
+                ),
                 child: Row(
                   children: [
                     Image.asset(
                       'assets/android/mipmap-xxhdpi/icon_order_notify.png',
+                      width: 16,
+                      height: 16,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        tipInfo,
+                        tipInfo ?? '-',
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF999999),
+                          color: Color(0x99000000),
                         ),
                       ),
                     ),
                   ],
                 ),
-              )
-            else
-              const SizedBox(height: 16),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
   String _formatCurrency(double amount) {
-    return NumberFormat.currency(symbol: '\$ ', decimalDigits: 2).format(amount);
+    return NumberFormat.currency(symbol: '\$', decimalDigits: 2).format(amount);
   }
 }
 
@@ -372,19 +381,52 @@ class _StatItem extends StatelessWidget {
             label,
             style: const TextStyle(
               fontSize: 12,
-              color: Color(0xFF999999),
+              color: Color(0x66000000),
             ),
           ),
           const SizedBox(height: 4),
           Text(
             value,
             style: const TextStyle(
-              fontSize: 16,
+              fontSize: 15,
               fontWeight: FontWeight.w600,
-              color: Colors.black,
+              color: Color(0xE6000000),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({
+    required this.text,
+    required this.textColor,
+    required this.backgroundColor,
+    required this.borderColor,
+  });
+
+  final String text;
+  final Color textColor;
+  final Color backgroundColor;
+  final Color borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: borderColor, width: 0.5),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          fontSize: 11,
+          color: textColor,
+        ),
       ),
     );
   }
@@ -400,49 +442,49 @@ class _StatusColors {
 
 _StatusColors _getStatusColors(int status) {
   switch (status) {
-    case 0: // Normal
+    case 1: // Normal
       return const _StatusColors(
-        text: Color(0xFF00B88A),
-        background: Color(0xFFE9F7F2),
-        border: Color(0xFF00B88A),
-      );
-    case 1: // Ended
-      return const _StatusColors(
-        text: Color(0xFF00B88A),
-        background: Colors.white,
-        border: Color(0xFF00B88A),
+        text: Color(0xFFF49300),
+        background: Colors.transparent,
+        border: Color(0xFFF49300),
       );
     case 2: // Overdue
       return const _StatusColors(
-        text: Color(0xFFF09A2B),
-        background: Color(0xFFFFF4E6),
-        border: Color(0xFFF09A2B),
+        text: Color(0xFFFA4332),
+        background: Color(0xFFFFF3F2),
+        border: Color(0xFFFFF3F2),
       );
     case 3: // Dishonest
       return const _StatusColors(
-        text: Color(0xFFE25C5C),
-        background: Color(0xFFFFF1F1),
-        border: Color(0xFFE25C5C),
+        text: Color(0xFFFA4332),
+        background: Color(0xFFFFF3F2),
+        border: Color(0xFFFFF3F2),
+      );
+    case 4: // Ended
+      return const _StatusColors(
+        text: AppColors.primaryColor,
+        background: Colors.transparent,
+        border: AppColors.primaryColor,
       );
     default:
       return const _StatusColors(
-        text: Color(0xFF7A7A7A),
-        background: Color(0xFFF2F2F2),
-        border: Color(0xFFBDBDBD),
+        text: Color(0x99000000),
+        background: Colors.transparent,
+        border: Color(0x26000000),
       );
   }
 }
 
 String _getStatusLabel(AppLocalizations l10n, int status) {
   switch (status) {
-    case 0:
-      return l10n.userFilterNormal;
     case 1:
-      return l10n.userFilterEnded;
+      return l10n.userFilterNormal;
     case 2:
       return l10n.userFilterOverdue;
     case 3:
       return l10n.userFilterDishonest;
+    case 4:
+      return l10n.userFilterEnded;
     default:
       return '-';
   }
@@ -450,16 +492,16 @@ String _getStatusLabel(AppLocalizations l10n, int status) {
 
 String? _getTipInfo(AppLocalizations l10n, int status) {
   switch (status) {
-    case 0:
-      return l10n.userTipNormal;
     case 1:
-      return l10n.userTipEnded;
+      return l10n.userTipNormal;
     case 2:
       return l10n.userTipOverdue;
     case 3:
       return l10n.userTipDishonest;
+    case 4:
+      return l10n.userTipEnded;
     default:
-      return null;
+      return '-';
   }
 }
 

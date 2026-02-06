@@ -32,7 +32,6 @@ export 'sale_data.dart';
 export 'sales_bar_data.dart';
 export 'sell_data_list_response.dart' hide OrderItem;
 export 'setting_info_bean.dart';
-export 'shop1_num.dart';
 export 'sn_bean.dart';
 export 'station_type.dart';
 export 'swap_bind_info.dart';

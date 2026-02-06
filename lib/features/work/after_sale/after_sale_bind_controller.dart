@@ -65,11 +65,24 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
   AfterSaleBindState build() => const AfterSaleBindState();
 
   void updateCardNum(String value) {
-    state = state.copyWith(cardNum: value);
+    if (value == state.cardNum) return;
+    state = state.copyWith(
+      cardNum: value,
+      userDetail: null,
+      orders: const [],
+      selectedOrder: null,
+      deviceInfo: null,
+      errorMessage: null,
+    );
   }
 
   void updateDeviceSn(String value) {
-    state = state.copyWith(deviceSn: value);
+    if (value == state.deviceSn) return;
+    state = state.copyWith(
+      deviceSn: value,
+      deviceInfo: null,
+      errorMessage: null,
+    );
   }
 
   void selectOrder(AfterSaleCanBindOrderBean? order) {

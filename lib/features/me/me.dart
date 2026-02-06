@@ -169,6 +169,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
       context: context,
       builder: (ctx) {
         return AlertDialog(
+          backgroundColor: Colors.white,
           title: Text(l10n.profileEditNicknameTitle),
           content: TextField(
             controller: controller,
@@ -180,8 +181,11 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
             onSubmitted: (_) => Navigator.of(ctx).pop(controller.text.trim()),
           ),
           actions: [
-            TextButton(
+            OutlinedButton(
               onPressed: () => Navigator.of(ctx).pop(),
+              style: OutlinedButton.styleFrom(
+                side: BorderSide(color: AppColors.borderColor),
+              ),
               child: Text(l10n.cancel),
             ),
             FilledButton(
@@ -504,7 +508,7 @@ class _Avatar extends StatelessWidget {
                 child: SizedBox(
                   width: 20,
                   height: 20,
-                  child: const SizedBox.shrink(),
+                  child: SizedBox.shrink(),
                 ),
               ),
             ),

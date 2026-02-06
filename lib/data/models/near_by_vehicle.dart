@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 @immutable
 class NearByVehicle {
+  final String? address;
   final String? carNumber;
   final String? cardNum;
   final String? img;
@@ -12,6 +13,7 @@ class NearByVehicle {
   final String? sn;
 
   const NearByVehicle({
+    this.address,
     this.carNumber,
     this.cardNum,
     this.img,
@@ -24,6 +26,7 @@ class NearByVehicle {
 
   factory NearByVehicle.fromJson(Map<String, dynamic> json) {
     return NearByVehicle(
+      address: json['address']?.toString(),
       carNumber: json['carNumber']?.toString(),
       cardNum: json['cardNum']?.toString(),
       img: json['img']?.toString(),
@@ -36,6 +39,7 @@ class NearByVehicle {
   }
 
   Map<String, dynamic> toJson() => {
+        'address': address,
         'carNumber': carNumber,
         'cardNum': cardNum,
         'img': img,

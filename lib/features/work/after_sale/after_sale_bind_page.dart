@@ -49,6 +49,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
       body: SafeArea(
         child: Column(
           children: [
+            if (state.loading) const LinearProgressIndicator(minHeight: 2),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -100,6 +101,8 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                             hint: l10n.afterSaleBindCardNumHint,
                             controller: _cardController,
                             onChanged: notifier.updateCardNum,
+                            onSubmitted: (_) =>
+                                ref.read(afterSaleBindProvider.notifier).fetchUserDetail(),
                             onScan: _scanCardNum,
                           ),
                           const Divider(height: 1, indent: 16, endIndent: 16),
@@ -107,6 +110,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                           if (state.userDetail != null)
                             _UserInfoCard(
                               avatar: state.userDetail?.avatar,
+                              cardNum: state.userDetail?.cardNum ?? '-',
                               name: _getUserName(state),
                               phone: state.userDetail?.phone ?? '-',
                             )
@@ -158,6 +162,8 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                             hint: l10n.afterSaleBindDeviceSnHint,
                             controller: _deviceController,
                             onChanged: notifier.updateDeviceSn,
+                            onSubmitted: (_) =>
+                                ref.read(afterSaleBindProvider.notifier).fetchDeviceInfo(),
                             onScan: _scanDeviceSn,
                           ),
                           const Divider(height: 1, indent: 16, endIndent: 16),
@@ -229,6 +235,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
     required String hint,
     required TextEditingController controller,
     required ValueChanged<String> onChanged,
+    ValueChanged<String>? onSubmitted,
     VoidCallback? onScan,
   }) {
     return Padding(
@@ -261,9 +268,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                     contentPadding: EdgeInsets.zero,
                   ),
                   onChanged: onChanged,
-                  onSubmitted: (_) {
-                    ref.read(afterSaleBindProvider.notifier).fetchUserDetail();
-                  },
+                  onSubmitted: onSubmitted,
                 ),
               ),
               if (onScan != null)
@@ -359,11 +364,13 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
 class _UserInfoCard extends StatelessWidget {
   const _UserInfoCard({
     required this.avatar,
+    required this.cardNum,
     required this.name,
     required this.phone,
   });
 
   final String? avatar;
+  final String cardNum;
   final String name;
   final String phone;
 
@@ -393,24 +400,54 @@ class _UserInfoCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
+                _InfoRow(
+                  label: context.l10n.afterSaleBindUserIdLabel,
+                  value: cardNum,
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  'Phone: $phone',
-                  style: const TextStyle(fontSize: 14, color: Colors.grey),
+                _InfoRow(
+                  label: context.l10n.afterSaleBindUserNameLabel,
+                  value: name,
+                ),
+                const SizedBox(height: 4),
+                _InfoRow(
+                  label: context.l10n.afterSaleBindUserPhoneLabel,
+                  value: phone,
                 ),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          '$label: ',
+          style: const TextStyle(fontSize: 13, color: Colors.grey),
+        ),
+        Flexible(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

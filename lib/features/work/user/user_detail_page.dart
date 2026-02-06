@@ -15,6 +15,8 @@ import 'package:merchant_app/data/models/user_order_response.dart';
 import 'package:merchant_app/data/models/user_payment_record.dart';
 import 'package:merchant_app/features/work/user/user_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
+import 'package:photo_view/photo_view.dart';
+import 'package:photo_view/photo_view_gallery.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -266,7 +268,7 @@ class _BasicInfoTab extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _InfoRow(label: l10n.userBasicRegisterTime, value: detail?.createTime ?? '-'),
+              _InfoRow(label: l10n.userBasicRegisterTime, value: DateFormatUtils.formatString(detail?.createTime)),
               Divider(height: 1, indent: 16, color: AppColors.borderColor),
               _InfoRow(label: l10n.userBasicUserType, value: _getUserType(l10n, detail?.type)),
               Divider(height: 1, indent: 16, color: AppColors.borderColor),
@@ -2199,6 +2201,14 @@ class _PaymentRecordCard extends StatelessWidget {
                         color: AppColors.black06Text,
                       ),
                     ),
+                    const SizedBox(height: 4),
+                    Text(
+                      timeText,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF999999),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -2212,8 +2222,7 @@ class _PaymentRecordCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          _recordInfoRow(l10n.userPaymentTime, timeText),
+          const SizedBox(height: 8),
           if (record.payType == 2)
             _recordInfoRow(
               l10n.userPaymentPeriod,
@@ -2253,14 +2262,23 @@ class _SwapRecordCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              Image.asset(
-                typeInfo.iconPath,
-                width: 32,
-                height: 32,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.swap_horiz_outlined,
-                  size: 28,
-                  color: Color(0xFF999999),
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF5F6F8),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                alignment: Alignment.center,
+                child: Image.asset(
+                  typeInfo.iconPath,
+                  width: 24,
+                  height: 24,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.swap_horiz_outlined,
+                    size: 24,
+                    color: Color(0xFF999999),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -2310,6 +2328,7 @@ class _SwapRecordCard extends StatelessWidget {
 }
 
 class _SwapTypeInfo {
+
   const _SwapTypeInfo(this.label, this.iconPath);
 
   final String label;
@@ -2319,30 +2338,6 @@ class _SwapTypeInfo {
 // =============================================================================
 // Helper Functions
 // =============================================================================
-
-Widget _orderInfoRow(String label, String value) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 6),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 90,
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.black09Text),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w400, color: AppColors.black06Text),
-          ),
-        ),
-      ],
-    ),
-  );
-}
 
 Widget _recordInfoRow(String label, String value) {
   return Padding(
@@ -2489,33 +2484,29 @@ String _paymentIconPath(int? payWay) {
 }
 
 _SwapTypeInfo _swapTypeInfo(AppLocalizations l10n, PowerChangeItem record) {
+  final title = record.swapTypeName?.isNotEmpty == true
+      ? record.swapTypeName!
+      : null;
   switch (record.type) {
-    case 1:
+    case 5:
       return _SwapTypeInfo(
-        l10n.userSwapManual,
+        title ?? l10n.userSwapManual,
         'assets/android/mipmap-xxhdpi/icon_manual_change.webp',
       );
-    case 2:
+    case 6:
       return _SwapTypeInfo(
-        l10n.userSwapRemote,
+        title ?? l10n.userSwapRemote,
         'assets/android/mipmap-xxhdpi/icon_remote_change.png',
       );
-    case 3:
+    case 7:
       return _SwapTypeInfo(
-        l10n.userSwapBluetooth,
+        title ?? l10n.userSwapBluetooth,
         'assets/android/mipmap-xxhdpi/icon_bluetooth_change.png',
-      );
-    case 4:
-      return _SwapTypeInfo(
-        l10n.userSwapScan,
-        'assets/android/mipmap-xxhdpi/icon_scan_change.webp',
       );
     default:
       return _SwapTypeInfo(
-        record.swapTypeName?.isNotEmpty == true
-            ? record.swapTypeName!
-            : '-',
-        'assets/android/mipmap-xxhdpi/icon_manual_change.webp',
+        title ?? l10n.userSwapScan,
+        'assets/android/mipmap-xxhdpi/icon_scan_change.webp',
       );
   }
 }
@@ -2547,7 +2538,7 @@ Color _swapStatusColor(int? status) {
     case 3:
       return const Color(0xFFE6A23C);
     case 4:
-      return const Color(0xFF909399);
+      return const Color(0xFFF56C6C);
     default:
       return const Color(0xFF909399);
   }
@@ -2763,43 +2754,54 @@ void _showVoucherDialog(
     );
     return;
   }
+  final controller = PageController();
   showDialog<void>(
     context: context,
+    barrierColor: Colors.black.withOpacity(0.9),
     builder: (context) => Dialog(
-      insetPadding: const EdgeInsets.all(16),
-      child: SizedBox(
-        height: 360,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                l10n.orderVoucherView,
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            ),
-            Divider(height: 1, color: AppColors.borderColor),
-            Expanded(
-              child: PageView.builder(
-                itemCount: urls.length,
-                itemBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Image.network(
-                    urls[index],
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => const Center(
-                      child: Icon(Icons.broken_image_outlined, size: 40),
-                    ),
+      insetPadding: EdgeInsets.zero,
+      backgroundColor: Colors.black,
+      child: Stack(
+        children: [
+          PhotoViewGallery.builder(
+            itemCount: urls.length,
+            pageController: controller,
+            backgroundDecoration: const BoxDecoration(color: Colors.black),
+            builder: (context, index) {
+              return PhotoViewGalleryPageOptions(
+                imageProvider: NetworkImage(urls[index]),
+                minScale: PhotoViewComputedScale.contained,
+                maxScale: PhotoViewComputedScale.covered * 2.5,
+                errorBuilder: (_, __, ___) => const Center(
+                  child: Icon(
+                    Icons.broken_image_outlined,
+                    size: 48,
+                    color: Colors.white70,
                   ),
+                ),
+              );
+            },
+          ),
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            right: 12,
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.4),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.close,
+                  size: 20,
+                  color: Colors.white,
                 ),
               ),
             ),
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.orderVoucherClose),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     ),
   );

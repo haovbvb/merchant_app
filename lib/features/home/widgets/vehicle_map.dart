@@ -65,21 +65,18 @@ class _AndroidVehicleMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: gmaps.GoogleMap(
-        initialCameraPosition: gmaps.CameraPosition(
-          target: position,
-          zoom: _defaultZoom,
-        ),
-        markers: markers,
-        myLocationEnabled: true,
-        myLocationButtonEnabled: false,
-        mapToolbarEnabled: false,
-        compassEnabled: false,
-        zoomControlsEnabled: false,
-        onMapCreated: onMapCreated,
+    return gmaps.GoogleMap(
+      initialCameraPosition: gmaps.CameraPosition(
+        target: position,
+        zoom: _defaultZoom,
       ),
+      markers: markers,
+      myLocationEnabled: true,
+      myLocationButtonEnabled: false,
+      mapToolbarEnabled: false,
+      compassEnabled: false,
+      zoomControlsEnabled: false,
+      onMapCreated: onMapCreated,
     );
   }
 }
@@ -98,20 +95,17 @@ class _IosVehicleMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: amaps.AppleMap(
-        initialCameraPosition: amaps.CameraPosition(
-          target: position,
-          zoom: _defaultZoom,
-        ),
-        annotations: annotations,
-        compassEnabled: false,
-        myLocationEnabled: true,
-        myLocationButtonEnabled: false,
-        mapType: amaps.MapType.standard,
-        onMapCreated: onMapCreated,
+    return amaps.AppleMap(
+      initialCameraPosition: amaps.CameraPosition(
+        target: position,
+        zoom: _defaultZoom,
       ),
+      annotations: annotations,
+      compassEnabled: false,
+      myLocationEnabled: true,
+      myLocationButtonEnabled: false,
+      mapType: amaps.MapType.standard,
+      onMapCreated: onMapCreated,
     );
   }
 }

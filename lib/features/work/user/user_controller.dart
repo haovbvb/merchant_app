@@ -85,7 +85,7 @@ class UserListNotifier extends Notifier<UserListState> {
         'pageNum': 1,
         'pageSize': _pageSize,
         if (nextKeyword.trim().isNotEmpty) 'keyword': nextKeyword.trim(),
-        if (nextStatus != null) 'status': nextStatus,
+        if (nextStatus != null) 'type': nextStatus,
       },
       parser: (json) =>
           _UserListResponse.fromJson(Map<String, dynamic>.from(json as Map)),
@@ -110,7 +110,7 @@ class UserListNotifier extends Notifier<UserListState> {
         'pageNum': nextPage,
         'pageSize': _pageSize,
         if (state.keyword.trim().isNotEmpty) 'keyword': state.keyword.trim(),
-        if (state.status != null) 'status': state.status,
+        if (state.status != null) 'type': state.status,
       },
       parser: (json) =>
           _UserListResponse.fromJson(Map<String, dynamic>.from(json as Map)),

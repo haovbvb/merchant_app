@@ -220,7 +220,7 @@ class _RepairRecordCreatePageState
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: const SizedBox.shrink(),
+                          child: SizedBox.shrink(),
                         )
                       : Text(
                           l10n.repairRecordSubmit,
@@ -365,7 +365,10 @@ class _RepairRecordCreatePageState
     if (!mounted) return;
     if (success) {
       showToast(l10n.repairRecordSubmitSuccess);
-      Navigator.of(context).pop(true);
+      // Align with Android: clear form and stay on the page for batch processing
+      notifier.resetForm();
+      _snController.clear();
+      _remarkController.clear();
     }
   }
 }

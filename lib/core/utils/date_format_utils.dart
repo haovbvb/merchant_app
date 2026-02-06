@@ -5,9 +5,9 @@ class DateFormatUtils {
   DateFormatUtils._();
 
   static const String defaultLocale = 'en';
-  static const String defaultPattern = 'yyyy/MM/dd HH:mm:ss';
-  static const String datePattern = 'yyyy/MM/dd';
-  static const String dateTimeNoSecondsPattern = 'yyyy/MM/dd HH:mm';
+  static const String defaultPattern = 'MMM dd, yyyy HH:mm:ss';
+  static const String datePattern = 'MMM dd, yyyy';
+  static const String dateTimeNoSecondsPattern = 'MMM dd, yyyy HH:mm';
 
   static String format(
     DateTime? date, {

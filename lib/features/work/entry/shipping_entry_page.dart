@@ -196,7 +196,7 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
 
   Widget _buildVehicleTab() {
     if (_loadingVehicle) {
-      return const Center(child: const SizedBox.shrink());
+      return _buildLoading();
     }
     if (_vehicleTypes.isEmpty) {
       return _buildEmptyState();
@@ -206,13 +206,14 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
       imageGetter: (type) => type.img,
       nameGetter: (type) => type.modelName ?? type.model ?? '-',
       specGetter: (type) => type.remark ?? '',
+      placeholderAsset: 'assets/android/mipmap-xxhdpi/icon_transport_vehicel.png',
       onSelected: (type) => _goToVehicleEntry(type),
     );
   }
 
   Widget _buildBatteryTab() {
     if (_loadingBattery) {
-      return const Center(child: const SizedBox.shrink());
+      return _buildLoading();
     }
     if (_batteryTypes.isEmpty) {
       return _buildEmptyState();
@@ -222,13 +223,14 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
       imageGetter: (type) => type.img,
       nameGetter: (type) => '${type.model ?? '-'} (${type.voltage ?? 0}V)',
       specGetter: (type) => type.remark ?? type.modelName ?? '',
+      placeholderAsset: 'assets/android/mipmap-xxhdpi/icon_transport_battery.webp',
       onSelected: (type) => _goToBatteryEntry(type),
     );
   }
 
   Widget _buildStationTab() {
     if (_loadingStation) {
-      return const Center(child: const SizedBox.shrink());
+      return _buildLoading();
     }
     if (_stationTypes.isEmpty) {
       return _buildEmptyState();
@@ -238,11 +240,13 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
       imageGetter: (type) => type.img,
       nameGetter: (type) => '${type.model ?? '-'} ${type.storeNum ?? 0}-Port',
       specGetter: (type) => type.dimension ?? '',
+      placeholderAsset: 'assets/android/mipmap-xxhdpi/icon_transport_station.png',
       onSelected: (type) => _goToStationEntry(type),
     );
   }
 
   Widget _buildEmptyState() {
+    final l10n = context.l10n;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -250,10 +254,19 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
           Icon(Icons.inbox_outlined, size: 64, color: Colors.grey.shade300),
           const SizedBox(height: 16),
           Text(
-            '暂无设备型号',
+            l10n.shippingEntryEmpty,
             style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLoading() {
+    return const Center(
+      child: SizedBox(
+        width: 120,
+        child: LinearProgressIndicator(minHeight: 3),
       ),
     );
   }
@@ -263,6 +276,7 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
     required String? Function(T) imageGetter,
     required String Function(T) nameGetter,
     required String Function(T) specGetter,
+    required String placeholderAsset,
     required void Function(T) onSelected,
   }) {
     return GridView.builder(
@@ -303,9 +317,10 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
                       ? Image.network(
                           imageUrl,
                           fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                          errorBuilder: (_, __, ___) =>
+                              _buildPlaceholder(placeholderAsset),
                         )
-                      : _buildPlaceholder(),
+                      : _buildPlaceholder(placeholderAsset),
                 ),
                 const SizedBox(height: 8),
 
@@ -342,14 +357,23 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
     );
   }
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(String assetPath) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Center(
-        child: Icon(Icons.ev_station, size: 40, color: AppColors.primaryColor),
+      child: Center(
+        child: Image.asset(
+          assetPath,
+          width: 40,
+          height: 40,
+          errorBuilder: (_, __, ___) => const Icon(
+            Icons.ev_station,
+            size: 40,
+            color: AppColors.primaryColor,
+          ),
+        ),
       ),
     );
   }
@@ -570,7 +594,7 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
 
   Widget _buildVehicleTab() {
     if (_loadingVehicle) {
-      return const Center(child: const SizedBox.shrink());
+      return _buildLoading();
     }
     if (_vehicleTypes.isEmpty) {
       return _buildEmptyState();
@@ -578,15 +602,16 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
     return _buildModelGrid<CarType>(
       types: _vehicleTypes,
       imageGetter: (type) => type.img,
-      nameGetter: (type) => type.model ?? '-',
+      nameGetter: (type) => type.modelName ?? type.model ?? '-',
       specGetter: (type) => type.remark ?? '',
+      placeholderAsset: 'assets/android/mipmap-xxhdpi/icon_transport_vehicel.png',
       onSelected: (type) => _goToVehicleEntry(type),
     );
   }
 
   Widget _buildBatteryTab() {
     if (_loadingBattery) {
-      return const Center(child: const SizedBox.shrink());
+      return _buildLoading();
     }
     if (_batteryTypes.isEmpty) {
       return _buildEmptyState();
@@ -594,15 +619,16 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
     return _buildModelGrid<BatteryType>(
       types: _batteryTypes,
       imageGetter: (type) => type.img,
-      nameGetter: (type) => type.model ?? '-',
-      specGetter: (type) => '${type.voltage ?? 0}V',
+      nameGetter: (type) => '${type.model ?? '-'} (${type.voltage ?? 0}V)',
+      specGetter: (type) => type.remark ?? type.modelName ?? '',
+      placeholderAsset: 'assets/android/mipmap-xxhdpi/icon_transport_battery.webp',
       onSelected: (type) => _goToBatteryEntry(type),
     );
   }
 
   Widget _buildStationTab() {
     if (_loadingStation) {
-      return const Center(child: const SizedBox.shrink());
+      return _buildLoading();
     }
     if (_stationTypes.isEmpty) {
       return _buildEmptyState();
@@ -610,13 +636,15 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
     return _buildModelGrid<StationType>(
       types: _stationTypes,
       imageGetter: (type) => type.img,
-      nameGetter: (type) => type.model ?? '-',
-      specGetter: (type) => '${type.storeNum ?? 0}-Port',
+      nameGetter: (type) => '${type.model ?? '-'} ${type.storeNum ?? 0}-Port',
+      specGetter: (type) => type.dimension ?? '',
+      placeholderAsset: 'assets/android/mipmap-xxhdpi/icon_transport_station.png',
       onSelected: (type) => _goToStationEntry(type),
     );
   }
 
   Widget _buildEmptyState() {
+    final l10n = context.l10n;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -624,10 +652,19 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
           Icon(Icons.inbox_outlined, size: 64, color: Colors.grey.shade300),
           const SizedBox(height: 16),
           Text(
-            '暂无设备型号',
+            l10n.shippingEntryEmpty,
             style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildLoading() {
+    return const Center(
+      child: SizedBox(
+        width: 120,
+        child: LinearProgressIndicator(minHeight: 3),
       ),
     );
   }
@@ -637,6 +674,7 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
     required String? Function(T) imageGetter,
     required String Function(T) nameGetter,
     required String Function(T) specGetter,
+    required String placeholderAsset,
     required void Function(T) onSelected,
   }) {
     return GridView.builder(
@@ -677,9 +715,10 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
                       ? Image.network(
                           imageUrl,
                           fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) => _buildPlaceholder(),
+                          errorBuilder: (_, __, ___) =>
+                              _buildPlaceholder(placeholderAsset),
                         )
-                      : _buildPlaceholder(),
+                      : _buildPlaceholder(placeholderAsset),
                 ),
                 const SizedBox(height: 8),
 
@@ -716,14 +755,23 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
     );
   }
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(String assetPath) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Center(
-        child: Icon(Icons.ev_station, size: 40, color: AppColors.primaryColor),
+      child: Center(
+        child: Image.asset(
+          assetPath,
+          width: 40,
+          height: 40,
+          errorBuilder: (_, __, ___) => const Icon(
+            Icons.ev_station,
+            size: 40,
+            color: AppColors.primaryColor,
+          ),
+        ),
       ),
     );
   }

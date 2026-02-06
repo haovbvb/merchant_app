@@ -704,8 +704,14 @@ abstract class AppLocalizations {
   /// No description provided for @userSearchHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter card number or keyword'**
+  /// **'Enter user ID / user name / phone'**
   String get userSearchHint;
+
+  /// No description provided for @userSearchEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching users'**
+  String get userSearchEmpty;
 
   /// No description provided for @userSearchHistoryTitle.
   ///
@@ -1822,6 +1828,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No repair records'**
   String get repairRecordEmpty;
+
+  /// No description provided for @repairRecordStatusFinish.
+  ///
+  /// In en, this message translates to:
+  /// **'Finish'**
+  String get repairRecordStatusFinish;
+
+  /// No description provided for @repairRecordStatusLack.
+  ///
+  /// In en, this message translates to:
+  /// **'Lack'**
+  String get repairRecordStatusLack;
+
+  /// No description provided for @repairRecordStatusDiscard.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get repairRecordStatusDiscard;
+
+  /// No description provided for @repairRecordDetailTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Repair Record Detail'**
+  String get repairRecordDetailTitle;
+
+  /// No description provided for @repairRecordOperator.
+  ///
+  /// In en, this message translates to:
+  /// **'Repair Operator'**
+  String get repairRecordOperator;
+
+  /// No description provided for @maintenanceViewDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'View more detail'**
+  String get maintenanceViewDetail;
 
   /// No description provided for @afterSaleBindTitle.
   ///
@@ -3694,6 +3736,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Select the device model to be entered'**
   String get shippingEntrySubtitle;
+
+  /// No description provided for @shippingEntryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No device models'**
+  String get shippingEntryEmpty;
 
   /// No description provided for @deviceTypeVehicle.
   ///
@@ -7880,7 +7928,7 @@ abstract class AppLocalizations {
   /// No description provided for @deviceDetailPortFilterAvailable.
   ///
   /// In en, this message translates to:
-  /// **'Available'**
+  /// **'Vacant'**
   String get deviceDetailPortFilterAvailable;
 
   /// No description provided for @deviceDetailPortFilterDisabled.
@@ -7892,7 +7940,7 @@ abstract class AppLocalizations {
   /// No description provided for @deviceDetailPortFilterInUse.
   ///
   /// In en, this message translates to:
-  /// **'In Use'**
+  /// **'Occupied'**
   String get deviceDetailPortFilterInUse;
 
   /// No description provided for @deviceDetailPortReplaceable.

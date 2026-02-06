@@ -114,7 +114,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get workbenchShippingEntry => '设备入库';
 
   @override
-  String get workbenchDeviceIssue => '设备异常';
+  String get workbenchDeviceIssue => '设备发出';
 
   @override
   String get workbenchDeviceReception => '设备接收';
@@ -312,7 +312,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get userListEmpty => '暂无用户';
 
   @override
-  String get userSearchHint => '输入卡号或关键字';
+  String get userSearchHint => '输入用户ID/姓名/手机号';
+
+  @override
+  String get userSearchEmpty => '暂无相关用户';
 
   @override
   String get userSearchHistoryTitle => '搜索历史';
@@ -871,6 +874,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get repairRecordEmpty => '暂无维修记录';
+
+  @override
+  String get repairRecordStatusFinish => '完成';
+
+  @override
+  String get repairRecordStatusLack => '缺失';
+
+  @override
+  String get repairRecordStatusDiscard => '报废';
+
+  @override
+  String get repairRecordDetailTitle => '维修记录详情';
+
+  @override
+  String get repairRecordOperator => '维修操作员';
+
+  @override
+  String get maintenanceViewDetail => '查看详情';
 
   @override
   String get afterSaleBindTitle => '售后绑定';
@@ -1807,6 +1828,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get shippingEntrySubtitle => '选择要录入的设备型号';
+
+  @override
+  String get shippingEntryEmpty => '暂无设备型号';
 
   @override
   String get deviceTypeVehicle => '车辆';

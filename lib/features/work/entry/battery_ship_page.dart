@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/features/work/entry/ship_success_page.dart';
-import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/warehouse/transport_create_page.dart';
 
 class BatteryShipPage extends StatefulWidget {
@@ -21,23 +19,26 @@ class BatteryShipPage extends StatefulWidget {
 }
 
 class _BatteryShipPageState extends State<BatteryShipPage> {
-  final TextEditingController _snController = TextEditingController();
-  late final List<String> _sns;
   int _deviceType = 0;
+  bool _opening = false;
+  late final List<String> _initialSns;
 
   @override
   void initState() {
     super.initState();
     _deviceType = widget.deviceType ?? 0;
-    _sns = widget.initialSns
-        .where((sn) => sn.trim().isNotEmpty)
+    _initialSns = widget.initialSns
+        .map((sn) => sn.trim())
+        .where((sn) => sn.isNotEmpty)
         .toSet()
         .toList();
+    if (_deviceType != 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _openTransport());
+    }
   }
 
   @override
   void dispose() {
-    _snController.dispose();
     super.dispose();
   }
 
@@ -45,121 +46,54 @@ class _BatteryShipPageState extends State<BatteryShipPage> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
+    if (widget.deviceType != null) {
+      return const Scaffold(body: SizedBox.shrink());
+    }
+
     return Scaffold(
       appBar: AppBar(title: Text(l10n.batteryShipTitle)),
-      body: ListView(
+      body: Padding(
         padding: const EdgeInsets.all(16),
-        children: [
-          Text(
-            l10n.shipDeviceTypeLabel,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: [
-              _TypeChip(
-                label: l10n.warehouseDeviceTypeBattery,
-                selected: _deviceType == 1,
-                onTap: widget.deviceType == null
-                    ? () => setState(() => _deviceType = 1)
-                    : null,
-              ),
-              _TypeChip(
-                label: l10n.warehouseDeviceTypeVehicle,
-                selected: _deviceType == 2,
-                onTap: widget.deviceType == null
-                    ? () => setState(() => _deviceType = 2)
-                    : null,
-              ),
-              _TypeChip(
-                label: l10n.warehouseDeviceTypeStation,
-                selected: _deviceType == 3,
-                onTap: widget.deviceType == null
-                    ? () => setState(() => _deviceType = 3)
-                    : null,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _snController,
-                  decoration: InputDecoration(
-                    labelText: l10n.entrySnLabel,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              ElevatedButton(
-                onPressed: _addSn,
-                child: Text(l10n.entryManualAdd),
-              ),
-              const SizedBox(width: 8),
-              IconButton(
-                icon: AppIcons.scanIcon(),
-                onPressed: _scanAndAdd,
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.entryDeviceListTitle,
-            style: const TextStyle(fontWeight: FontWeight.w600),
-          ),
-          const SizedBox(height: 8),
-          if (_sns.isEmpty)
-            _EmptyCard(text: l10n.entryListEmpty)
-          else
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.shipDeviceTypeLabel,
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
             Wrap(
               spacing: 8,
-              runSpacing: 8,
-              children: _sns
-                  .map(
-                    (sn) => Chip(
-                      label: Text(sn),
-                      onDeleted: () => setState(() => _sns.remove(sn)),
-                    ),
-                  )
-                  .toList(),
+              children: [
+                _TypeChip(
+                  label: l10n.warehouseDeviceTypeBattery,
+                  selected: _deviceType == 1,
+                  onTap: () => setState(() => _deviceType = 1),
+                ),
+                _TypeChip(
+                  label: l10n.warehouseDeviceTypeVehicle,
+                  selected: _deviceType == 2,
+                  onTap: () => setState(() => _deviceType = 2),
+                ),
+                _TypeChip(
+                  label: l10n.warehouseDeviceTypeStation,
+                  selected: _deviceType == 3,
+                  onTap: () => setState(() => _deviceType = 3),
+                ),
+              ],
             ),
-          const SizedBox(height: 24),
-          FilledButton(
-            onPressed: _goToTransfer,
-            child: Text(l10n.shipNextAction),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _addSn() {
-    final value = _snController.text.trim();
-    if (value.isEmpty) return;
-    if (!_sns.contains(value)) {
-      setState(() => _sns.add(value));
-    }
-    _snController.clear();
-  }
-
-  Future<void> _scanAndAdd() async {
-    final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(
-        builder: (_) => const QrScanPage(
-          parseDeviceSn: true,
-          deviceType: 1,
+            const Spacer(),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: _opening ? null : _goToTransfer,
+                child: Text(l10n.shipNextAction),
+              ),
+            ),
+          ],
         ),
       ),
     );
-    if (!mounted || result == null || result.isEmpty) return;
-    if (!_sns.contains(result)) {
-      setState(() => _sns.add(result));
-    }
   }
 
   Future<void> _goToTransfer() async {
@@ -168,26 +102,42 @@ class _BatteryShipPageState extends State<BatteryShipPage> {
       showToast(l10n.shipDeviceTypeRequired);
       return;
     }
-    if (_sns.isEmpty) {
-      showToast(l10n.entryListEmpty);
-      return;
-    }
+    await _openTransport();
+  }
+
+  Future<void> _openTransport() async {
+    if (_opening) return;
+    _opening = true;
     final created = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => TransportCreatePage(
           deviceType: _deviceType,
-          initialSns: _sns,
+          initialSns: _initialSns,
         ),
       ),
     );
-    if (!mounted || created != true) return;
-    final done = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => ShipSuccessPage(deviceType: _deviceType),
-      ),
-    );
-    if (!mounted || done != true) return;
-    Navigator.of(context).pop();
+    if (!mounted) return;
+    if (created == true && _initialSns.isNotEmpty) {
+      final done = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => ShipSuccessPage(deviceType: _deviceType),
+        ),
+      );
+      if (!mounted) return;
+      if (done == true) {
+        Navigator.of(context).pop(true);
+      }
+      return;
+    }
+    if (created == true) {
+      Navigator.of(context).pop(true);
+      return;
+    }
+    if (widget.deviceType != null) {
+      Navigator.of(context).pop();
+      return;
+    }
+    setState(() => _opening = false);
   }
 }
 
@@ -208,22 +158,6 @@ class _TypeChip extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: onTap == null ? null : (_) => onTap!(),
-    );
-  }
-}
-
-class _EmptyCard extends StatelessWidget {
-  const _EmptyCard({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Text(text),
-      ),
     );
   }
 }

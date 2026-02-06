@@ -56,6 +56,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
       body: SafeArea(
         child: Column(
           children: [
+            if (state.loading) const LinearProgressIndicator(minHeight: 2),
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
@@ -110,6 +111,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                               notifier.updateCardNum(v);
                               _debounceCheck();
                             },
+                            onSubmitted: (_) => notifier.checkUnfinishedOrder(),
                             onScan: _scanCardNum,
                           ),
                           const Divider(height: 1, indent: 16, endIndent: 16),
@@ -121,6 +123,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                               notifier.updateDeviceSn(v);
                               _debounceCheck();
                             },
+                            onSubmitted: (_) => notifier.checkUnfinishedOrder(),
                             onScan: _scanDeviceSn,
                           ),
                         ],
@@ -255,6 +258,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
     required String hint,
     required TextEditingController controller,
     required ValueChanged<String> onChanged,
+    ValueChanged<String>? onSubmitted,
     VoidCallback? onScan,
   }) {
     return Padding(
@@ -287,6 +291,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                     contentPadding: EdgeInsets.zero,
                   ),
                   onChanged: onChanged,
+                  onSubmitted: onSubmitted,
                 ),
               ),
               if (onScan != null)

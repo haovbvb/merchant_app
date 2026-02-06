@@ -157,6 +157,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
                                 contentPadding: EdgeInsets.zero,
                               ),
                               maxLines: 4,
+                              maxLength: 200,
                               onChanged: notifier.updateNote,
                             ),
                           ],
@@ -847,15 +848,15 @@ class _MaintenanceCostSheetState extends ConsumerState<_MaintenanceCostSheet> {
                       ),
                       const SizedBox(height: 12),
                       _PaymentOption(
-                        label: widget.l10n.maintenancePayCash,
-                        selected: isCash,
-                        onTap: () => notifier.updatePaySource(1),
-                      ),
-                      const Divider(height: 1),
-                      _PaymentOption(
                         label: widget.l10n.maintenancePayOnline,
                         selected: !isCash,
                         onTap: () => notifier.updatePaySource(2),
+                      ),
+                      const Divider(height: 1),
+                      _PaymentOption(
+                        label: widget.l10n.maintenancePayCash,
+                        selected: isCash,
+                        onTap: () => notifier.updatePaySource(1),
                       ),
                     ],
                   ),
@@ -914,7 +915,7 @@ class _MaintenanceCostSheetState extends ConsumerState<_MaintenanceCostSheet> {
                           ? const SizedBox(
                               width: 18,
                               height: 18,
-                              child: const SizedBox.shrink(),
+                              child: SizedBox.shrink(),
                             )
                           : Text(
                               widget.l10n.maintenanceSubmit,
@@ -1090,7 +1091,7 @@ class _VoucherGrid extends StatelessWidget {
                       child: SizedBox(
                         width: 24,
                         height: 24,
-                        child: const SizedBox.shrink(),
+                        child: SizedBox.shrink(),
                       ),
                     )
                   : const Icon(Icons.camera_alt, color: Colors.grey),

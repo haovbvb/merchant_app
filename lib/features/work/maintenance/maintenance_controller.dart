@@ -142,20 +142,20 @@ class MaintenanceBookNotifier extends Notifier<MaintenanceBookState> {
     final appointment = state.appointment;
     if (appointment == null) return false;
     final cardNum = appointment.cardNum ?? '';
-    final deviceSn = appointment.sn ?? '';
-    if (cardNum.isEmpty || deviceSn.isEmpty) return false;
+    final vehicleSn = appointment.sn ?? '';
+    if (cardNum.isEmpty || vehicleSn.isEmpty) return false;
     state = state.copyWith(submitting: true);
 
-    final imgList = state.voucherImages.join(',');
+    final attachment = state.voucherImages.join(',');
     final response = await _api.post<Object>(
-      ApiPath.maintenanceAddRecord,
+      ApiPath.maintenanceGenRecord,
       data: {
         'cardNum': cardNum,
-        'deviceSn': deviceSn,
-        'imgList': imgList,
-        'maintenanceNote': state.note.trim(),
+        'vehicleSn': vehicleSn,
+        'attachment': attachment,
+        'remark': state.note.trim(),
         'paySource': state.paySource,
-        'payTotal': state.amount.trim().isEmpty ? '0' : state.amount.trim(),
+        'price': state.amount.trim().isEmpty ? '0' : state.amount.trim(),
       },
       parser: (json) => json ?? Object(),
     );
@@ -200,35 +200,6 @@ class MaintenanceBookNotifier extends Notifier<MaintenanceBookState> {
     return '${DateTime.now().millisecondsSinceEpoch}.$ext';
   }
 
-  /// 生成保养订单（直接创建，不需要预约）
-  /// 对应 Android 的 genMaintainRecord
-  Future<bool> genMaintainRecord({
-    required String cardNum,
-    required String vehicleSn,
-    required String price,
-    required int paySource,
-    String? attachment,
-    String? remark,
-  }) async {
-    if (cardNum.isEmpty || vehicleSn.isEmpty) return false;
-    state = state.copyWith(submitting: true);
-
-    final response = await _api.post<Object>(
-      ApiPath.maintenanceGenRecord,
-      data: {
-        'cardNum': cardNum,
-        'vehicleSn': vehicleSn,
-        'price': price,
-        'paySource': paySource,
-        'attachment': attachment ?? '',
-        'remark': remark ?? '',
-      },
-      parser: (json) => json ?? Object(),
-    );
-
-    state = state.copyWith(submitting: false);
-    return response.isSuccess;
-  }
 }
 
 class RepairRecordState {
@@ -405,6 +376,10 @@ class RepairRecordCreateNotifier extends Notifier<RepairRecordCreateState> {
 
   void selectResult(DeviceFixResult? result) {
     state = state.copyWith(selectedResult: result);
+  }
+
+  void resetForm() {
+    state = const RepairRecordCreateState();
   }
 
   Future<void> fetchDeviceInfo() async {

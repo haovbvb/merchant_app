@@ -31,8 +31,9 @@ platform :ios do
     UI.user_error!("TEAM_ID is required") if team_id.to_s.strip.empty?
     UI.user_error!("PGYER_API_KEY is required") if pgyer_api_key.to_s.strip.empty?
 
-    build_number = Time.now.strftime("%Y%m%d%H%M")
-    sh "flutter", "build", "ipa", "--release", "--build-number=#{build_number}"
+    now = Time.now
+    ios_build_number = now.strftime("%Y%m%d%H%M")
+    sh "flutter", "build", "ipa", "--release", "--build-number=#{ios_build_number}"
 
     if ipa_path.to_s.strip.empty?
       ipa_candidates = Dir["../../build/ios/ipa/*.ipa"]
@@ -66,9 +67,12 @@ platform :ios do
     UI.user_error!("TEAM_ID is required") if team_id.to_s.strip.empty?
     UI.user_error!("PGYER_API_KEY is required") if pgyer_api_key.to_s.strip.empty?
 
-    build_number = Time.now.strftime("%Y%m%d%H%M")
-    sh "flutter", "build", "ipa", "--release", "--build-number=#{build_number}"
-    sh "flutter", "build", android_artifact, "--release", "--build-number=#{build_number}"
+    now = Time.now
+    ios_build_number = now.strftime("%Y%m%d%H%M")  # e.g. 202602090928
+    # Android versionCode max 2100000000, use (year-2020) prefix to stay under limit
+    android_build_number = "#{now.year - 2020}#{now.strftime('%m%d%H%M')}"  # e.g. 602090928
+    sh "flutter", "build", "ipa", "--release", "--build-number=#{ios_build_number}"
+    sh "flutter", "build", android_artifact, "--release", "--build-number=#{android_build_number}"
 
     if ipa_path.to_s.strip.empty?
       ipa_candidates = Dir["../../build/ios/ipa/*.ipa"]

@@ -16,6 +16,22 @@ platform :ios do
     sh(*upload_cmd)
   end
 
+  def clean_build_cache
+    UI.message("🧹 Cleaning build caches to free disk space...")
+    project_root = File.expand_path("../..", __dir__)
+    # Flutter build outputs
+    FileUtils.rm_rf(File.join(project_root, "build"))
+    # iOS DerivedData & build
+    FileUtils.rm_rf(File.join(project_root, "ios", "build"))
+    # Xcode DerivedData (global)
+    derived_data = File.expand_path("~/Library/Developer/Xcode/DerivedData")
+    FileUtils.rm_rf(Dir.glob(File.join(derived_data, "*"))) if Dir.exist?(derived_data)
+    # Xcode Archives
+    archives = File.expand_path("~/Library/Developer/Xcode/Archives")
+    FileUtils.rm_rf(Dir.glob(File.join(archives, "*"))) if Dir.exist?(archives)
+    UI.success("✅ Build caches cleaned.")
+  end
+
   desc "Build Flutter iOS IPA and upload to Pgyer"
   lane :pgyer do
     app_identifier = "com.okla.merchant"
@@ -30,6 +46,8 @@ platform :ios do
     UI.user_error!("APP_IDENTIFIER is required") if app_identifier.to_s.strip.empty?
     UI.user_error!("TEAM_ID is required") if team_id.to_s.strip.empty?
     UI.user_error!("PGYER_API_KEY is required") if pgyer_api_key.to_s.strip.empty?
+
+    clean_build_cache
 
     now = Time.now
     ios_build_number = now.strftime("%Y%m%d%H%M")
@@ -66,6 +84,8 @@ platform :ios do
     UI.user_error!("APP_IDENTIFIER is required") if app_identifier.to_s.strip.empty?
     UI.user_error!("TEAM_ID is required") if team_id.to_s.strip.empty?
     UI.user_error!("PGYER_API_KEY is required") if pgyer_api_key.to_s.strip.empty?
+
+    clean_build_cache
 
     now = Time.now
     ios_build_number = now.strftime("%Y%m%d%H%M")  # e.g. 202602090928

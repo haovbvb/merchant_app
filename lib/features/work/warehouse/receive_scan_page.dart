@@ -86,7 +86,7 @@ class _ReceiveScanPageState extends ConsumerState<ReceiveScanPage>
       child: PopScope(
         canPop: true,
         onPopInvokedWithResult: (didPop, result) {
-          if (didPop && _hasReceived) {
+          if (didPop && _hasReceived && result != true) {
             Navigator.of(context).pop(true);
           }
         },
@@ -429,6 +429,13 @@ class _ReceiveScanPageState extends ConsumerState<ReceiveScanPage>
 
     if (result.success) {
       _hasReceived = true;
+      _controller?.stop();
+      Future.delayed(const Duration(milliseconds: 700), () {
+        if (mounted) {
+          Navigator.of(context).pop(true);
+        }
+      });
+      return;
     }
 
     // 3秒后隐藏结果并允许继续扫描

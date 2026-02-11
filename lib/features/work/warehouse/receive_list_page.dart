@@ -28,7 +28,10 @@ class _ReceiveListPageState extends ConsumerState<ReceiveListPage> {
     super.initState();
     _selectedTabIndex = widget.initialTabIndex;
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(receiveListProvider.notifier).refresh();
+      ref.read(receiveListProvider.notifier).refresh(
+            keyword: '',
+            resetStatus: true,
+          );
     });
   }
 
@@ -56,11 +59,18 @@ class _ReceiveListPageState extends ConsumerState<ReceiveListPage> {
             color: Colors.white,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
             child: GestureDetector(
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const ReceiveSearchPage(),
-                ),
-              ),
+              onTap: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => const ReceiveSearchPage(),
+                  ),
+                );
+                // 从搜索页返回时，清空关键字并刷新列表
+                ref.read(receiveListProvider.notifier).refresh(
+                      status: _mapStatus(_selectedTabIndex),
+                      keyword: '',
+                    );
+              },
               child: Container(
                 height: 36,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -132,7 +142,10 @@ class _ReceiveListPageState extends ConsumerState<ReceiveListPage> {
               enablePullDown: true,
               enablePullUp: state.hasMore,
               onRefresh: () async {
-                await notifier.refresh(status: state.status);
+                await notifier.refresh(
+                  status: state.status,
+                  resetStatus: state.status == null,
+                );
                 _refreshController.refreshCompleted();
                 if (!ref.read(receiveListProvider).hasMore) {
                   _refreshController.loadNoData();
@@ -196,7 +209,8 @@ class _ReceiveListPageState extends ConsumerState<ReceiveListPage> {
 
   void _onTabSelected(int index, ReceiveListNotifier notifier) {
     setState(() => _selectedTabIndex = index);
-    notifier.refresh(status: _mapStatus(index));
+    final status = _mapStatus(index);
+    notifier.refresh(status: status, resetStatus: status == null);
   }
 
   void _navigateToDetail(DeviceTransport item) async {
@@ -209,8 +223,10 @@ class _ReceiveListPageState extends ConsumerState<ReceiveListPage> {
       ),
     );
     if (result == true) {
+      final status = _mapStatus(_selectedTabIndex);
       ref.read(receiveListProvider.notifier).refresh(
-            status: _mapStatus(_selectedTabIndex),
+            status: status,
+            resetStatus: status == null,
           );
     }
   }
@@ -285,6 +301,8 @@ class _ReceiveCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final warehouseName = _formatWarehouseName(item.outWarehouseName, l10n);
+    final recallNum = item.deviceNum - item.inTransitNum - item.receivedNum;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -328,15 +346,20 @@ class _ReceiveCard extends StatelessWidget {
             // 仓库信息
             Row(
               children: [
-                const Icon(
-                  Icons.home_outlined,
-                  size: 16,
-                  color: Color(0xFF666666),
+                Image.asset(
+                  'assets/android/mipmap-xxhdpi/icon_device_issuse_state.png',
+                  width: 16,
+                  height: 16,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.home_outlined,
+                    size: 16,
+                    color: Color(0xFF666666),
+                  ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    item.inWarehouseName,
+                    warehouseName,
                     style: const TextStyle(
                       fontSize: 14,
                       color: AppColors.black06Text,
@@ -361,7 +384,7 @@ class _ReceiveCard extends StatelessWidget {
                 ),
                 _MetricItem(
                   label: l10n.deviceIssueWithdrawn,
-                  value: (item.deviceNum - item.receivedNum - item.inTransitNum).toString(),
+                  value: (recallNum >= 0 ? recallNum : 0).toString(),
                 ),
               ],
             ),
@@ -369,6 +392,14 @@ class _ReceiveCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatWarehouseName(String name, AppLocalizations l10n) {
+    if (name.trim().isEmpty) return '-';
+    if (name.toLowerCase().contains('platform')) {
+      return l10n.commonPlatform;
+    }
+    return name;
   }
 }
 

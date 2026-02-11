@@ -303,6 +303,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileAbout => 'About';
 
   @override
+  String get commonPlatform => 'Platform';
+
+  @override
   String get aboutVersionLabel => 'Version';
 
   @override

@@ -303,6 +303,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get profileAbout => '关于';
 
   @override
+  String get commonPlatform => '平台';
+
+  @override
   String get aboutVersionLabel => '版本';
 
   @override

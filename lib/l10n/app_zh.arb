@@ -138,6 +138,10 @@
   "@profileAbout": {
     "description": "个人中心中查看应用信息的菜单项"
   },
+  "commonPlatform": "平台",
+  "@commonPlatform": {
+    "description": "平台仓库显示文案"
+  },
   "aboutVersionLabel": "版本",
   "@aboutVersionLabel": {
     "description": "关于页面版本前缀"

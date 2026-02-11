@@ -27,11 +27,13 @@ class ReceiveListState {
 
   bool get hasMore => items.length < total;
 
+  static const int _sentinel = -999;
+
   ReceiveListState copyWith({
     bool? loading,
     bool? loadingMore,
     int? page,
-    int? status,
+    int? status = _sentinel,
     String? keyword,
     List<DeviceTransport>? items,
     int? total,
@@ -40,7 +42,7 @@ class ReceiveListState {
       loading: loading ?? this.loading,
       loadingMore: loadingMore ?? this.loadingMore,
       page: page ?? this.page,
-      status: status ?? this.status,
+      status: status == _sentinel ? this.status : status,
       keyword: keyword ?? this.keyword,
       items: items ?? this.items,
       total: total ?? this.total,
@@ -59,12 +61,15 @@ class ReceiveListNotifier extends Notifier<ReceiveListState> {
   @override
   ReceiveListState build() => const ReceiveListState();
 
-  Future<void> refresh({int? status, String? keyword}) async {
+  Future<void> refresh({int? status, bool resetStatus = false, String? keyword}) async {
+    final effectiveStatus = resetStatus ? null : (status ?? state.status);
+    final effectiveKeyword = keyword ?? state.keyword;
+
     state = state.copyWith(
       loading: true,
       page: 1,
-      status: status ?? state.status,
-      keyword: keyword ?? state.keyword,
+      status: effectiveStatus,
+      keyword: effectiveKeyword,
     );
 
     final response = await _api.get<DeviceTransportResp>(
@@ -72,9 +77,9 @@ class ReceiveListNotifier extends Notifier<ReceiveListState> {
       queryParameters: {
         'pageNum': 1,
         'pageSize': _pageSize,
-        if ((status ?? state.status) != null) 'status': status ?? state.status,
-        if ((keyword ?? state.keyword).trim().isNotEmpty)
-          'keyword': (keyword ?? state.keyword).trim(),
+        if (effectiveStatus != null) 'status': effectiveStatus,
+        if (effectiveKeyword.trim().isNotEmpty)
+          'keyword': effectiveKeyword.trim(),
       },
       parser: (json) =>
           DeviceTransportResp.fromJson(Map<String, dynamic>.from(json as Map)),
@@ -86,6 +91,11 @@ class ReceiveListNotifier extends Notifier<ReceiveListState> {
       items: result?.list ?? const [],
       total: result?.total ?? 0,
     );
+  }
+
+  /// 清空搜索关键字并恢复默认状态
+  void clearKeyword() {
+    state = state.copyWith(keyword: '');
   }
 
   Future<void> loadMore() async {

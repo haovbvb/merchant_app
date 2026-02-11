@@ -191,6 +191,10 @@ class _OrderHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final outWarehouseName = _formatWarehouseName(
+      detail?.outWarehouseName ?? '',
+      l10n,
+    );
     return Container(
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -271,7 +275,7 @@ class _OrderHeaderCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            detail?.outWarehouseName ?? '',
+                            outWarehouseName,
                             style: const TextStyle(
                               fontSize: 14,
                               color: AppColors.black06Text,
@@ -326,6 +330,14 @@ class _OrderHeaderCard extends StatelessWidget {
       ),
     );
   }
+
+  String _formatWarehouseName(String name, AppLocalizations l10n) {
+    if (name.trim().isEmpty) return '-';
+    if (name.toLowerCase().contains('platform')) {
+      return l10n.commonPlatform;
+    }
+    return name;
+  }
 }
 
 class _DeviceListSection extends StatelessWidget {
@@ -375,7 +387,7 @@ class _DeviceListSection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Text(
-              '${_getDeviceTypeName()} (${detail?.deviceNum ?? 0})',
+              '${_getDeviceTypeName()} (${detail?.detailPage?.total ?? detail?.deviceNum ?? 0})',
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,

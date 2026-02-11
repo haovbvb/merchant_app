@@ -115,7 +115,10 @@ class SellBindNotifier extends Notifier<SellBindState> {
   Future<void> queryDevice(String sn) async {
     if (sn.isEmpty) return;
     final plan = state.selectedPlan;
-    state = state.copyWith(loadingDevice: true);
+    state = state.copyWith(
+      loadingDevice: true,
+      deviceInfo: null,
+    );
     final params = <String, dynamic>{'sn': sn};
     if ((plan?.batteryType ?? '').isNotEmpty) {
       params['batteryType'] = plan?.batteryType;
@@ -123,13 +126,18 @@ class SellBindNotifier extends Notifier<SellBindState> {
     if ((plan?.carType ?? '').isNotEmpty) {
       params['carType'] = plan?.carType;
     }
-    final response = await _api.get<BatterOrVehicleInfo>(
-      ApiPath.querySaleDeviceInfo,
-      queryParameters: params,
-      parser: (json) =>
-          BatterOrVehicleInfo.fromJson(Map<String, dynamic>.from(json as Map)),
-    );
-    state = state.copyWith(loadingDevice: false, deviceInfo: response.result);
+    try {
+      final response = await _api.get<BatterOrVehicleInfo>(
+        ApiPath.querySaleDeviceInfo,
+        queryParameters: params,
+        parser: (json) => BatterOrVehicleInfo.fromJson(
+          Map<String, dynamic>.from(json as Map),
+        ),
+      );
+      state = state.copyWith(loadingDevice: false, deviceInfo: response.result);
+    } catch (_) {
+      state = state.copyWith(loadingDevice: false, deviceInfo: null);
+    }
   }
 
   Future<void> queryPlans(String keyword) async {
@@ -147,7 +155,14 @@ class SellBindNotifier extends Notifier<SellBindState> {
   }
 
   void selectPlan(ServicePlanBean plan) {
-    state = state.copyWith(selectedPlan: plan);
+    final isSamePlan = state.selectedPlan?.infoCode == plan.infoCode;
+    state = state.copyWith(
+      selectedPlan: plan,
+      deviceInfo: isSamePlan ? state.deviceInfo : null,
+      selectedPaymentPlan: null,
+      paymentPlans: const [],
+      loadingDevice: false,
+    );
     if (plan.packageAmount != null) {
       queryPaymentPlans(plan.packageAmount!);
     }

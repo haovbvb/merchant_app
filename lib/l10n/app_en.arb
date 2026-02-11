@@ -140,6 +140,10 @@
   "@profileAbout": {
     "description": "Menu label for viewing information about the application."
   },
+  "commonPlatform": "Platform",
+  "@commonPlatform": {
+    "description": "Label for platform warehouse."
+  },
   "aboutVersionLabel": "Version",
   "@aboutVersionLabel": {
     "description": "Label prefix for app version on About page."

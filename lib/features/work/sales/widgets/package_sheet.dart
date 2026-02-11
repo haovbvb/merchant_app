@@ -173,8 +173,15 @@ class _PackageItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final price = plan.packageAmount?.toStringAsFixed(2) ?? '0.00';
-    final modelType = plan.batteryType != null ? 'Battery' : 'Vehicle';
-    final model = plan.batteryType ?? plan.carType ?? '-';
+    final hasBatteryType = (plan.batteryType ?? '').isNotEmpty;
+    final hasCarType = (plan.carType ?? '').isNotEmpty;
+    final typeLabel = hasBatteryType
+        ? 'Battery'
+        : hasCarType
+        ? 'Vehicle'
+        : 'Device';
+    final typeValue = _valueOrDash(plan.batteryType ?? plan.carType);
+    final modelValue = _valueOrDash(plan.deviceModel);
 
     return GestureDetector(
       onTap: onTap,
@@ -213,23 +220,12 @@ class _PackageItem extends StatelessWidget {
                   const SizedBox(height: 8),
                   const Divider(height: 1),
                   const SizedBox(height: 8),
-                  Row(
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 6,
                     children: [
-                      Text(
-                        'Applicable Models:',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[500],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '$modelType · $model',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.black06Text,
-                        ),
-                      ),
+                      _buildInfoTag('$typeLabel · $typeValue'),
+                      _buildInfoTag('Model · $modelValue'),
                     ],
                   ),
                 ],
@@ -250,6 +246,28 @@ class _PackageItem extends StatelessWidget {
                 ),
               ),
           ],
+        ),
+      ),
+    );
+  }
+
+  String _valueOrDash(String? value) {
+    if (value == null || value.trim().isEmpty) return '-';
+    return value;
+  }
+
+  Widget _buildInfoTag(String text) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 12,
+          color: AppColors.black06Text,
         ),
       ),
     );

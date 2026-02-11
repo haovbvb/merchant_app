@@ -111,7 +111,10 @@ class _ReceiveSearchPageState extends ConsumerState<ReceiveSearchPage> {
                         _searchController.clear();
                         setState(() {
                           _hasSearched = false;
+                          _selectedTabIndex = 0;
                         });
+                        // 清空搜索关键字，避免列表页残留脏数据
+                        ref.read(receiveListProvider.notifier).clearKeyword();
                       },
                     )
                   : null,
@@ -218,43 +221,45 @@ class _ReceiveSearchPageState extends ConsumerState<ReceiveSearchPage> {
   ) {
     return Column(
       children: [
-        // 筛选标签
-        Container(
-          color: Colors.white,
-          height: 44,
-          child: ListView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            children: [
-              _FilterChip(
-                label: l10n.warehouseTabAll,
-                selected: _selectedTabIndex == 0,
-                onTap: () => _onTabSelected(0, notifier),
-              ),
-              _FilterChip(
-                label: l10n.deviceIssueStatusInTransit,
-                selected: _selectedTabIndex == 1,
-                onTap: () => _onTabSelected(1, notifier),
-              ),
-              _FilterChip(
-                label: l10n.deviceIssueStatusReceiveAll,
-                selected: _selectedTabIndex == 2,
-                onTap: () => _onTabSelected(2, notifier),
-              ),
-              _FilterChip(
-                label: l10n.deviceIssueStatusPartial,
-                selected: _selectedTabIndex == 3,
-                onTap: () => _onTabSelected(3, notifier),
-              ),
-              _FilterChip(
-                label: l10n.deviceIssueStatusWithdrawn,
-                selected: _selectedTabIndex == 4,
-                onTap: () => _onTabSelected(4, notifier),
-              ),
-            ],
+        // 筛选标签 - 仅在有搜索结果时展示
+        if (state.items.isNotEmpty || _selectedTabIndex != 0) ...[
+          Container(
+            color: Colors.white,
+            height: 44,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              children: [
+                _FilterChip(
+                  label: l10n.warehouseTabAll,
+                  selected: _selectedTabIndex == 0,
+                  onTap: () => _onTabSelected(0, notifier),
+                ),
+                _FilterChip(
+                  label: l10n.deviceIssueStatusInTransit,
+                  selected: _selectedTabIndex == 1,
+                  onTap: () => _onTabSelected(1, notifier),
+                ),
+                _FilterChip(
+                  label: l10n.deviceIssueStatusReceiveAll,
+                  selected: _selectedTabIndex == 2,
+                  onTap: () => _onTabSelected(2, notifier),
+                ),
+                _FilterChip(
+                  label: l10n.deviceIssueStatusPartial,
+                  selected: _selectedTabIndex == 3,
+                  onTap: () => _onTabSelected(3, notifier),
+                ),
+                _FilterChip(
+                  label: l10n.deviceIssueStatusWithdrawn,
+                  selected: _selectedTabIndex == 4,
+                  onTap: () => _onTabSelected(4, notifier),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
+          const SizedBox(height: 8),
+        ],
         // 列表
         Expanded(
           child: SmartRefresher(
@@ -262,8 +267,10 @@ class _ReceiveSearchPageState extends ConsumerState<ReceiveSearchPage> {
             enablePullDown: true,
             enablePullUp: state.hasMore,
             onRefresh: () async {
+              final status = _mapStatus(_selectedTabIndex);
               await notifier.refresh(
-                status: _mapStatus(_selectedTabIndex),
+                status: status,
+                resetStatus: status == null,
                 keyword: _searchController.text.trim(),
               );
               _refreshController.refreshCompleted();
@@ -279,9 +286,11 @@ class _ReceiveSearchPageState extends ConsumerState<ReceiveSearchPage> {
                 _refreshController.loadNoData();
               }
             },
-            child: state.items.isEmpty
-                ? _buildEmptyState(l10n)
-                : ListView.separated(
+            child: state.loading
+                ? const Center(child: CircularProgressIndicator())
+                : state.items.isEmpty
+                    ? _buildEmptyState(l10n)
+                    : ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemCount: state.items.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -329,13 +338,15 @@ class _ReceiveSearchPageState extends ConsumerState<ReceiveSearchPage> {
       _hasSearched = true;
       _selectedTabIndex = 0;
     });
-    notifier.refresh(keyword: keyword, status: null);
+    notifier.refresh(keyword: keyword, resetStatus: true);
   }
 
   void _onTabSelected(int index, ReceiveListNotifier notifier) {
     setState(() => _selectedTabIndex = index);
+    final status = _mapStatus(index);
     notifier.refresh(
-      status: _mapStatus(index),
+      status: status,
+      resetStatus: status == null,
       keyword: _searchController.text.trim(),
     );
   }
@@ -350,8 +361,10 @@ class _ReceiveSearchPageState extends ConsumerState<ReceiveSearchPage> {
       ),
     );
     if (result == true) {
+      final status = _mapStatus(_selectedTabIndex);
       ref.read(receiveListProvider.notifier).refresh(
-            status: _mapStatus(_selectedTabIndex),
+            status: status,
+            resetStatus: status == null,
             keyword: _searchController.text.trim(),
           );
     }
@@ -427,6 +440,8 @@ class _SearchResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final warehouseName = _formatWarehouseName(item.outWarehouseName, l10n);
+    final recallNum = item.deviceNum - item.inTransitNum - item.receivedNum;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -470,15 +485,20 @@ class _SearchResultCard extends StatelessWidget {
             // 仓库信息
             Row(
               children: [
-                const Icon(
-                  Icons.home_outlined,
-                  size: 16,
-                  color: Color(0xFF666666),
+                Image.asset(
+                  'assets/android/mipmap-xxhdpi/icon_device_issuse_state.png',
+                  width: 16,
+                  height: 16,
+                  errorBuilder: (_, __, ___) => const Icon(
+                    Icons.home_outlined,
+                    size: 16,
+                    color: Color(0xFF666666),
+                  ),
                 ),
-                const SizedBox(width: 4),
+                const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    item.inWarehouseName,
+                    warehouseName,
                     style: const TextStyle(
                       fontSize: 14,
                       color: AppColors.black06Text,
@@ -503,7 +523,7 @@ class _SearchResultCard extends StatelessWidget {
                 ),
                 _MetricItem(
                   label: l10n.deviceIssueWithdrawn,
-                  value: (item.deviceNum - item.receivedNum - item.inTransitNum).toString(),
+                  value: (recallNum >= 0 ? recallNum : 0).toString(),
                 ),
               ],
             ),
@@ -511,6 +531,14 @@ class _SearchResultCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatWarehouseName(String name, AppLocalizations l10n) {
+    if (name.trim().isEmpty) return '-';
+    if (name.toLowerCase().contains('platform')) {
+      return l10n.commonPlatform;
+    }
+    return name;
   }
 }
 

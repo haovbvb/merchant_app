@@ -683,6 +683,12 @@ abstract class AppLocalizations {
   /// **'About'**
   String get profileAbout;
 
+  /// No description provided for @commonPlatform.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform'**
+  String get commonPlatform;
+
   /// Label prefix for app version on About page.
   ///
   /// In en, this message translates to:

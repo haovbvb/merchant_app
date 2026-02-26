@@ -112,7 +112,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                               notifier.updateCardNum(v);
                               _debounceCheck();
                             },
-                            onSubmitted: (_) => notifier.checkUnfinishedOrder(),
+                            onSubmitted: (_) => _checkUnfinishedOrderWithFeedback(),
                             onScan: _scanCardNum,
                           ),
                           const Divider(height: 1, indent: 16, endIndent: 16),
@@ -124,7 +124,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                               notifier.updateDeviceSn(v);
                               _debounceCheck();
                             },
-                            onSubmitted: (_) => notifier.checkUnfinishedOrder(),
+                            onSubmitted: (_) => _checkUnfinishedOrderWithFeedback(),
                             onScan: _scanDeviceSn,
                           ),
                         ],
@@ -239,9 +239,14 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                   ),
                   child: state.submitting
                       ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: SizedBox.shrink(),
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
                         )
                       : Text(
                           l10n.unbindDeviceConfirmButton,
@@ -337,9 +342,19 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
 
   void _debounceCheck() {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 1200), () {
-      ref.read(unbindDeviceProvider.notifier).checkUnfinishedOrder();
+    _debounce = Timer(const Duration(milliseconds: 1200), () async {
+      await _checkUnfinishedOrderWithFeedback();
     });
+  }
+
+  Future<void> _checkUnfinishedOrderWithFeedback() async {
+    final notifier = ref.read(unbindDeviceProvider.notifier);
+    await notifier.checkUnfinishedOrder();
+    if (!mounted) return;
+    final error = ref.read(unbindDeviceProvider).errorMessage;
+    if (error != null && error.trim().isNotEmpty) {
+      _showSnack(context, error);
+    }
   }
 
   Future<void> _scanCardNum() async {
@@ -395,7 +410,14 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
     }
 
     final success = await notifier.unbindDevice();
-    if (!context.mounted || !success) return;
+    if (!context.mounted) return;
+    if (!success) {
+      final error = ref.read(unbindDeviceProvider).errorMessage;
+      if (error != null && error.trim().isNotEmpty) {
+        _showSnack(context, error);
+      }
+      return;
+    }
     notifier.clearForm();
     _cardController.clear();
     _deviceController.clear();

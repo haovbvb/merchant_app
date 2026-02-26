@@ -4,10 +4,11 @@ import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
-import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/data/models/after_sale_can_bind_order_bean.dart';
 import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
+import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/after_sale/after_sale_bind_controller.dart';
 import 'package:merchant_app/features/work/after_sale/after_sale_bind_success_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -31,12 +32,12 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
     super.initState();
     _cardFocusNode.addListener(() {
       if (!_cardFocusNode.hasFocus) {
-        ref.read(afterSaleBindProvider.notifier).fetchUserDetail();
+        _fetchUserDetailWithFeedback();
       }
     });
     _deviceFocusNode.addListener(() {
       if (!_deviceFocusNode.hasFocus) {
-        ref.read(afterSaleBindProvider.notifier).fetchDeviceInfo();
+        _fetchDeviceInfoWithFeedback();
       }
     });
   }
@@ -124,9 +125,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                             controller: _cardController,
                             focusNode: _cardFocusNode,
                             onChanged: notifier.updateCardNum,
-                            onSubmitted: (_) => ref
-                                .read(afterSaleBindProvider.notifier)
-                                .fetchUserDetail(),
+                            onSubmitted: (_) => _fetchUserDetailWithFeedback(),
                             onScan: _scanCardNum,
                           ),
                           const Divider(height: 1, indent: 16, endIndent: 16),
@@ -136,7 +135,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                               avatar: state.userDetail?.avatar,
                               cardNum: state.userDetail?.cardNum ?? '-',
                               name: _getUserName(state),
-                              phone: state.userDetail?.phone ?? '-',
+                              phone: _getUserPhone(state),
                             )
                           else
                             _EmptyInfoCard(
@@ -187,9 +186,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                             controller: _deviceController,
                             focusNode: _deviceFocusNode,
                             onChanged: notifier.updateDeviceSn,
-                            onSubmitted: (_) => ref
-                                .read(afterSaleBindProvider.notifier)
-                                .fetchDeviceInfo(),
+                            onSubmitted: (_) => _fetchDeviceInfoWithFeedback(),
                             onScan: _scanDeviceSn,
                           ),
                           const Divider(height: 1, indent: 16, endIndent: 16),
@@ -222,7 +219,8 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                       state.binding ||
                           state.cardNum.trim().isEmpty ||
                           state.deviceSn.trim().isEmpty ||
-                          state.selectedOrder == null
+                        state.selectedOrder == null ||
+                        state.deviceInfo == null
                       ? null
                       : () => _submit(context, l10n, notifier),
                   style: FilledButton.styleFrom(
@@ -238,7 +236,12 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: SizedBox.shrink(),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
                         )
                       : Text(
                           l10n.afterSaleBindConfirm,
@@ -314,11 +317,21 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
   String _getUserName(AfterSaleBindState state) {
     final detail = state.userDetail;
     if (detail == null) return '-';
-    final name = [
-      detail.firstName,
-      detail.lastName,
-    ].where((e) => e?.isNotEmpty == true);
+    if (detail.username?.isNotEmpty == true) {
+      return detail.username!;
+    }
+    final name = [detail.firstName, detail.lastName]
+        .where((e) => e?.isNotEmpty == true)
+        .toList();
     return name.isEmpty ? '-' : name.join(' ');
+  }
+
+  String _getUserPhone(AfterSaleBindState state) {
+    final detail = state.userDetail;
+    if (detail == null || (detail.phone?.isEmpty ?? true)) return '-';
+    final areaCode = AuthSession.instance.current?.areaCode ?? '';
+    if (areaCode.isEmpty) return detail.phone ?? '-';
+    return '$areaCode${detail.phone ?? ''}';
   }
 
   Future<void> _scanCardNum() async {
@@ -330,7 +343,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
     if (cardNum.isEmpty) return;
     _cardController.text = cardNum;
     ref.read(afterSaleBindProvider.notifier).updateCardNum(cardNum);
-    ref.read(afterSaleBindProvider.notifier).fetchUserDetail();
+    await _fetchUserDetailWithFeedback();
   }
 
   Future<void> _scanDeviceSn() async {
@@ -340,7 +353,27 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
     if (!mounted || result == null || result.isEmpty) return;
     _deviceController.text = result;
     ref.read(afterSaleBindProvider.notifier).updateDeviceSn(result);
-    ref.read(afterSaleBindProvider.notifier).fetchDeviceInfo();
+    await _fetchDeviceInfoWithFeedback();
+  }
+
+  Future<void> _fetchUserDetailWithFeedback() async {
+    final notifier = ref.read(afterSaleBindProvider.notifier);
+    final success = await notifier.fetchUserDetail();
+    if (!mounted || success) return;
+    final message = ref.read(afterSaleBindProvider).errorMessage;
+    if (message != null && message.isNotEmpty) {
+      showToast(message);
+    }
+  }
+
+  Future<void> _fetchDeviceInfoWithFeedback() async {
+    final notifier = ref.read(afterSaleBindProvider.notifier);
+    final success = await notifier.fetchDeviceInfo();
+    if (!mounted || success) return;
+    final message = ref.read(afterSaleBindProvider).errorMessage;
+    if (message != null && message.isNotEmpty) {
+      showToast(message);
+    }
   }
 
   void _syncControllers(AfterSaleBindState state) {
@@ -947,9 +980,9 @@ class _BatteryCard extends StatelessWidget {
                           children: [
                             _Tag(
                               text:
-                                  '${l10n.afterSaleBindBatteryLabel} · ${battery?.model ?? '-'}',
+                                  '${l10n.afterSaleBindBatteryLabel} · ${battery?.batModel ?? battery?.batteryType ?? '-'}',
                             ),
-                            _Tag(text: battery?.spec ?? '-'),
+                            _Tag(text: battery?.batSpec ?? '-'),
                           ],
                         ),
                       ],
@@ -1052,9 +1085,9 @@ class _VehicleCard extends StatelessWidget {
                           children: [
                             _Tag(
                               text:
-                                  '${l10n.afterSaleBindVehicleLabel} · ${vehicle?.model ?? '-'}',
+                                  '${l10n.afterSaleBindVehicleLabel} · ${vehicle?.carModel ?? vehicle?.carType ?? '-'}',
                             ),
-                            _Tag(text: vehicle?.spec ?? '-'),
+                            _Tag(text: vehicle?.carSpec ?? '-'),
                           ],
                         ),
                       ],

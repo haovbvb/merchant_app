@@ -16,6 +16,7 @@ class DeviceSearchPage extends StatefulWidget {
     this.longitude,
     this.deviceType,
     this.readOnly = false,
+    this.initialKeyword,
   });
 
   final bool returnResult;
@@ -23,6 +24,7 @@ class DeviceSearchPage extends StatefulWidget {
   final double? longitude;
   final int? deviceType;
   final bool readOnly;
+  final String? initialKeyword;
 
   @override
   State<DeviceSearchPage> createState() => _DeviceSearchPageState();
@@ -33,12 +35,23 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
   final FocusNode _focusNode = FocusNode();
   final List<String> _history = [];
   bool _loadingHistory = true;
+  bool _showHistory = true;
 
   @override
   void initState() {
     super.initState();
     _loadHistory();
-    _focusNode.requestFocus();
+    final initial = widget.initialKeyword?.trim() ?? '';
+    if (initial.isNotEmpty) {
+      _controller.text = initial;
+      _showHistory = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _submit(initial);
+      });
+    } else {
+      _focusNode.requestFocus();
+    }
   }
 
   @override
@@ -94,6 +107,11 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
                   ),
                   style: const TextStyle(fontSize: 15),
                   textInputAction: TextInputAction.search,
+                  onChanged: (value) {
+                    setState(() {
+                      _showHistory = value.trim().isEmpty;
+                    });
+                  },
                   onSubmitted: _submit,
                 ),
               ),
@@ -101,7 +119,9 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
                 GestureDetector(
                   onTap: () {
                     _controller.clear();
-                    setState(() {});
+                    setState(() {
+                      _showHistory = true;
+                    });
                   },
                   child: Container(
                     width: 20,
@@ -130,8 +150,8 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
         ),
       ),
       body: _loadingHistory
-          ? const Center(child: const SizedBox.shrink())
-          : hasHistory
+          ? const Center(child: SizedBox.shrink())
+          : (_showHistory && hasHistory)
           ? _buildHistoryView(l10n)
           : _DeviceSearchEmpty(text: l10n.deviceSearchEmpty),
     );
@@ -220,7 +240,10 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
   Future<void> _clearHistory() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(StorageKeys.deviceSearchHistory);
-    setState(() => _history.clear());
+    setState(() {
+      _history.clear();
+      _showHistory = true;
+    });
   }
 
   Future<void> _addHistory(String value) async {
@@ -229,8 +252,8 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
     setState(() {
       _history.remove(input);
       _history.insert(0, input);
-      if (_history.length > 10) {
-        _history.removeLast();
+      if (_history.length > 5) {
+        _history.removeRange(5, _history.length);
       }
     });
     await _saveHistory();
@@ -248,10 +271,17 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
     final sn = widget.deviceType == null
         ? ScanUtils.getDeviceSn(input).trim()
         : ScanUtils.parseSnByDeviceType(input, widget.deviceType).trim();
-    if (sn.isEmpty) return;
+    if (sn.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.deviceSearchEmpty)));
+      return;
+    }
+    _controller.text = sn;
+    setState(() => _showHistory = false);
     if (!mounted) return;
     if (widget.returnResult) {
-      await _addHistory(input);
+      await _addHistory(sn);
       if (!mounted) return;
       Navigator.of(context).pop(sn);
       return;
@@ -266,8 +296,10 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
     );
     if (!mounted) return;
     if (hasData == true) {
-      await _addHistory(input);
+      await _addHistory(sn);
+      return;
     }
+    setState(() => _showHistory = true);
   }
 
   Future<void> _scan() async {

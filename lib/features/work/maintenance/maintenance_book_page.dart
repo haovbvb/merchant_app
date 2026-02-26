@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/maintenance.dart';
+import 'package:merchant_app/features/work/device/device_search_page.dart';
 import 'package:merchant_app/features/work/maintenance/maintenance_controller.dart';
-import 'package:merchant_app/features/work/maintenance/maintenance_success_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -25,9 +24,26 @@ class MaintenanceBookPage extends ConsumerStatefulWidget {
 class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
   final TextEditingController _snController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
+  final FocusNode _snFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _snFocusNode.addListener(_onSnFocusChanged);
+  }
+
+  void _onSnFocusChanged() {
+    if (_snFocusNode.hasFocus) return;
+    final text = _snController.text.trim();
+    if (text.isEmpty) return;
+    ref.read(maintenanceBookProvider.notifier).fetchAppointment();
+  }
 
   @override
   void dispose() {
+    _snFocusNode
+      ..removeListener(_onSnFocusChanged)
+      ..dispose();
     _snController.dispose();
     _noteController.dispose();
     super.dispose();
@@ -105,6 +121,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
                             label: l10n.maintenanceSnLabel,
                             hint: l10n.maintenanceSnHint,
                             controller: _snController,
+                            focusNode: _snFocusNode,
                             onChanged: notifier.updateSn,
                             onScan: _scanSn,
                           ),
@@ -208,6 +225,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
     required String hint,
     required TextEditingController controller,
     required ValueChanged<String> onChanged,
+    FocusNode? focusNode,
     VoidCallback? onScan,
   }) {
     return Padding(
@@ -228,6 +246,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
               Expanded(
                 child: TextField(
                   controller: controller,
+                  focusNode: focusNode,
                   decoration: InputDecoration(
                     hintText: hint,
                     hintStyle: const TextStyle(
@@ -292,9 +311,13 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
 
   void _viewRecords(String sn) {
     if (sn.isEmpty) return;
-    AppRouter.router.push(
-      '${AppRouter.workModulePath}/device_detail?recordNo=$sn',
-      extra: 'Device Detail',
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => DeviceSearchPage(
+          readOnly: true,
+          initialKeyword: sn,
+        ),
+      ),
     );
   }
 
@@ -319,11 +342,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
       notifier.clearAll();
       _snController.clear();
       _noteController.clear();
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => const MaintenanceSuccessPage(),
-        ),
-      );
+      Navigator.of(context).pop(true);
     }
   }
 }

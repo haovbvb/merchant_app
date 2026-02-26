@@ -30,11 +30,13 @@ class RoadSideListState {
 
   bool get hasMore => items.length < total;
 
+  static const _unset = Object();
+
   RoadSideListState copyWith({
     bool? loading,
     bool? loadingMore,
     int? page,
-    int? status,
+    Object? status = _unset,
     List<RoadSideInfo>? items,
     int? total,
   }) {
@@ -42,7 +44,7 @@ class RoadSideListState {
       loading: loading ?? this.loading,
       loadingMore: loadingMore ?? this.loadingMore,
       page: page ?? this.page,
-      status: status ?? this.status,
+      status: status == _unset ? this.status : status as int?,
       items: items ?? this.items,
       total: total ?? this.total,
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/data/models/roadside_list.dart';
 import 'package:merchant_app/features/work/roadside/roadside_controller.dart';
 import 'package:merchant_app/features/work/roadside/roadside_detail_page.dart';
@@ -135,7 +136,7 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage> {
                 }
               },
               child: state.loading && state.items.isEmpty
-                  ? const Center(child: const SizedBox.shrink())
+                  ? const Center(child: SizedBox.shrink())
                   : state.items.isEmpty
                       ? _EmptyView(text: l10n.roadsideEmpty)
                       : ListView.separated(
@@ -195,7 +196,8 @@ class _RoadSideCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusColors = _statusColors(item.status ?? -1);
     final statusLabel = _statusLabel(l10n, item.status);
-    final showResult = item.status == 2 && item.result != null;
+    final showResult = (item.status == 1 || item.status == 2) && item.result != null;
+    final showCompleteTime = item.status == 2;
 
     return GestureDetector(
       onTap: onTap,
@@ -222,7 +224,7 @@ class _RoadSideCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(
-                    item.createTime ?? '-',
+                    _formatTime(item.createTime),
                     style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xFF999999),
@@ -289,34 +291,61 @@ class _RoadSideCard extends StatelessWidget {
             if (showResult) ...[
               const Divider(height: 1, color: Color(0xFFEEEEEE)),
               Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Column(
                   children: [
-                    Container(
-                      width: 4,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: AppColors.primaryColor,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
+                    Row(
+                      children: [
+                        Container(
+                          width: 4,
+                          height: 16,
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryColor,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.roadsideRescueResult,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF999999),
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          _resultLabel(l10n, item.result),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: AppColors.black06Text,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      l10n.roadsideRescueResult,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF999999),
+                    if (showCompleteTime) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          Text(
+                            l10n.roadsideProcessTime,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF999999),
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            _formatTime(item.processTime ?? item.completetime),
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.black06Text,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _resultLabel(l10n, item.result),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.black06Text,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -325,6 +354,11 @@ class _RoadSideCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatTime(String? raw) {
+    if (raw == null || raw.isEmpty) return '-';
+    return DateFormatUtils.formatString(raw, fallback: raw);
   }
 }
 

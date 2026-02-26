@@ -14,6 +14,7 @@ import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
 const _pageSize = 20;
+const _orderPageSize = 10;
 
 class UserListState {
   final bool loading;
@@ -140,6 +141,15 @@ class UserDetailState {
   final UserDetail? detail;
   final List<OrderItem> orders;
   final int total;
+  final List<OrderItem> saleOrders;
+  final int saleOrdersPage;
+  final bool saleOrdersHasMore;
+  final List<OrderItem> rentOrders;
+  final int rentOrdersPage;
+  final bool rentOrdersHasMore;
+  final List<OrderItem> swapOrders;
+  final int swapOrdersPage;
+  final bool swapOrdersHasMore;
   final List<UserPaymentRecord> payments;
   final int paymentsTotal;
   final int paymentsPage;
@@ -155,6 +165,15 @@ class UserDetailState {
     this.detail,
     this.orders = const [],
     this.total = 0,
+    this.saleOrders = const [],
+    this.saleOrdersPage = 1,
+    this.saleOrdersHasMore = true,
+    this.rentOrders = const [],
+    this.rentOrdersPage = 1,
+    this.rentOrdersHasMore = true,
+    this.swapOrders = const [],
+    this.swapOrdersPage = 1,
+    this.swapOrdersHasMore = true,
     this.payments = const [],
     this.paymentsTotal = 0,
     this.paymentsPage = 1,
@@ -174,6 +193,15 @@ class UserDetailState {
     UserDetail? detail,
     List<OrderItem>? orders,
     int? total,
+    List<OrderItem>? saleOrders,
+    int? saleOrdersPage,
+    bool? saleOrdersHasMore,
+    List<OrderItem>? rentOrders,
+    int? rentOrdersPage,
+    bool? rentOrdersHasMore,
+    List<OrderItem>? swapOrders,
+    int? swapOrdersPage,
+    bool? swapOrdersHasMore,
     List<UserPaymentRecord>? payments,
     int? paymentsTotal,
     int? paymentsPage,
@@ -189,6 +217,15 @@ class UserDetailState {
       detail: detail ?? this.detail,
       orders: orders ?? this.orders,
       total: total ?? this.total,
+      saleOrders: saleOrders ?? this.saleOrders,
+      saleOrdersPage: saleOrdersPage ?? this.saleOrdersPage,
+      saleOrdersHasMore: saleOrdersHasMore ?? this.saleOrdersHasMore,
+      rentOrders: rentOrders ?? this.rentOrders,
+      rentOrdersPage: rentOrdersPage ?? this.rentOrdersPage,
+      rentOrdersHasMore: rentOrdersHasMore ?? this.rentOrdersHasMore,
+      swapOrders: swapOrders ?? this.swapOrders,
+      swapOrdersPage: swapOrdersPage ?? this.swapOrdersPage,
+      swapOrdersHasMore: swapOrdersHasMore ?? this.swapOrdersHasMore,
       payments: payments ?? this.payments,
       paymentsTotal: paymentsTotal ?? this.paymentsTotal,
       paymentsPage: paymentsPage ?? this.paymentsPage,
@@ -215,6 +252,17 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
     state = state.copyWith(
       loading: true,
       cardNum: cardNum,
+      orders: const [],
+      total: 0,
+      saleOrders: const [],
+      saleOrdersPage: 1,
+      saleOrdersHasMore: true,
+      rentOrders: const [],
+      rentOrdersPage: 1,
+      rentOrdersHasMore: true,
+      swapOrders: const [],
+      swapOrdersPage: 1,
+      swapOrdersHasMore: true,
       payments: const [],
       paymentsTotal: 0,
       paymentsPage: 1,
@@ -229,22 +277,66 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
       parser: (json) => UserDetail.fromJson(Map<String, dynamic>.from(json)),
     );
 
-    final orderResponse = await _api.get<UserOrderResponse>(
-      ApiPath.userQueryOrderList,
-      queryParameters: {
-        'cardNum': cardNum,
-        'pageNum': 1,
-        'pageSize': _pageSize,
-      },
-      parser: (json) =>
-          UserOrderResponse.fromJson(Map<String, dynamic>.from(json as Map)),
-    );
-
     state = state.copyWith(
       loading: false,
       detail: detailResponse.result,
-      orders: orderResponse.result?.list ?? const [],
-      total: orderResponse.result?.total ?? 0,
+      orders: const [],
+      total: 0,
+    );
+
+    await loadOrders(orderType: 1, page: 1);
+  }
+
+  Future<void> loadOrders({required int orderType, int page = 1}) async {
+    final num = state.cardNum;
+    if (num.trim().isEmpty) return;
+
+    final response = await _api.get<UserOrderResponse>(
+      ApiPath.userQueryOrderList,
+      queryParameters: {
+        'cardNum': num,
+        'pageNum': page,
+        'pageSize': _orderPageSize,
+      },
+      parser: (json) =>
+          UserOrderResponse.fromJson(Map<String, dynamic>.from(json as Map)),
+      showHud: false,
+    );
+
+    final incoming = (response.result?.list ?? const <OrderItem>[])
+        .where((item) => item.orderType == orderType)
+        .toList();
+    final hasMore = incoming.isNotEmpty;
+
+    switch (orderType) {
+      case 1:
+        state = state.copyWith(
+          saleOrdersPage: page,
+          saleOrders: page == 1 ? incoming : [...state.saleOrders, ...incoming],
+          saleOrdersHasMore: hasMore,
+        );
+        break;
+      case 2:
+        state = state.copyWith(
+          rentOrdersPage: page,
+          rentOrders: page == 1 ? incoming : [...state.rentOrders, ...incoming],
+          rentOrdersHasMore: hasMore,
+        );
+        break;
+      case 3:
+        state = state.copyWith(
+          swapOrdersPage: page,
+          swapOrders: page == 1 ? incoming : [...state.swapOrders, ...incoming],
+          swapOrdersHasMore: hasMore,
+        );
+        break;
+      default:
+        break;
+    }
+
+    state = state.copyWith(
+      orders: [...state.saleOrders, ...state.rentOrders, ...state.swapOrders],
+      total: state.saleOrders.length + state.rentOrders.length + state.swapOrders.length,
     );
   }
 
@@ -346,13 +438,26 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
     required String attachment,
     int? newStatus,
   }) {
-    final nextOrders = state.orders.map((order) {
-      if (order.orderNo != orderNo || order.orderType != orderType) {
-        return order;
-      }
-      return _copyOrderWithAttachment(order, attachment, newStatus);
-    }).toList();
-    state = state.copyWith(orders: nextOrders);
+    List<OrderItem> patch(List<OrderItem> source) {
+      return source.map((order) {
+        if (order.orderNo != orderNo || order.orderType != orderType) {
+          return order;
+        }
+        return _copyOrderWithAttachment(order, attachment, newStatus);
+      }).toList();
+    }
+
+    final nextSale = patch(state.saleOrders);
+    final nextRent = patch(state.rentOrders);
+    final nextSwap = patch(state.swapOrders);
+    final nextOrders = patch(state.orders);
+
+    state = state.copyWith(
+      saleOrders: nextSale,
+      rentOrders: nextRent,
+      swapOrders: nextSwap,
+      orders: nextOrders,
+    );
   }
 
   OrderItem _copyOrderWithAttachment(

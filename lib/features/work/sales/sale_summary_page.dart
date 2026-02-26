@@ -10,6 +10,7 @@ import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/core/widgets/photo_gallery_viewer.dart';
 import 'package:merchant_app/data/models/sales_bar_data.dart';
 import 'package:merchant_app/data/models/sell_data_list_response.dart';
+import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/sales/sale_summary_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
@@ -23,18 +24,36 @@ class SaleSummaryPage extends ConsumerStatefulWidget {
 class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    Future.microtask(() => ref.read(saleSummaryProvider.notifier).refresh());
+    _scrollController.addListener(_onScroll);
+    Future.microtask(() async {
+      final isManager = AuthSession.instance.current?.managerFlag == true;
+      final notifier = ref.read(saleSummaryProvider.notifier);
+      if (!isManager) {
+        notifier.setShowSalesData(true);
+      }
+      await notifier.refresh();
+    });
   }
 
   @override
   void dispose() {
+    _scrollController.dispose();
     _tabController.dispose();
     super.dispose();
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    final threshold = _scrollController.position.maxScrollExtent - 120;
+    if (_scrollController.position.pixels >= threshold) {
+      ref.read(saleSummaryProvider.notifier).loadMore();
+    }
   }
 
   @override
@@ -57,12 +76,29 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: SingleChildScrollView(
+                controller: _scrollController,
                 child: Column(
                   children: [
                     const SizedBox(height: 16),
                     _buildSigningRateCard(context, l10n, state),
                     const SizedBox(height: 16),
                     _buildDataSection(context, l10n, state),
+                    if (state.loadingMore)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    if (!state.loadingList && !state.loadingMore && !state.hasMore)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: Text(
+                          'No more data',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF999999),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -104,11 +140,11 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                     size: 20,
                   ),
                 ),
-                const Expanded(
+                Expanded(
                   child: Text(
-                    'Sales Statistics',
+                    l10n.workbenchSalesStatistics,
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
@@ -429,6 +465,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
     SaleSummaryState state,
   ) {
     final notifier = ref.read(saleSummaryProvider.notifier);
+    final isManager = AuthSession.instance.current?.managerFlag == true;
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
@@ -441,7 +478,9 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
         children: [
           // Sales Data / After-Sales Data 选择器
           GestureDetector(
-            onTap: () => _showDataTypeSelector(context, l10n, state, notifier),
+            onTap: isManager
+                ? () => _showDataTypeSelector(context, l10n, state, notifier)
+                : null,
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -455,12 +494,14 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                     color: AppColors.black06Text,
                   ),
                 ),
-                const SizedBox(width: 4),
-                const Icon(
-                  Icons.keyboard_arrow_down,
-                  size: 20,
-                  color: AppColors.black06Text,
-                ),
+                if (isManager) ...[
+                  const SizedBox(width: 4),
+                  const Icon(
+                    Icons.keyboard_arrow_down,
+                    size: 20,
+                    color: AppColors.black06Text,
+                  ),
+                ],
               ],
             ),
           ),
@@ -470,14 +511,12 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
           const SizedBox(height: 16),
           // 订单列表
           if (state.loadingList)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(20),
-                child: SizedBox.shrink(),
-              ),
+            const Padding(
+              padding: EdgeInsets.all(20),
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
             )
           else
-            _buildOrderList(l10n, state.orders),
+            _buildOrderList(l10n, state.orders, state.showSalesData),
         ],
       ),
     );
@@ -492,17 +531,17 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
       children: [
         _buildFilterChip(l10n.saleSummaryPayWayAll, state.payWay == null, () {
           notifier.updatePayWay(null);
-          notifier.fetchList();
+          notifier.fetchList(reset: true);
         }),
         const SizedBox(width: 8),
         _buildFilterChip(l10n.saleSummaryPayWayCash, state.payWay == 1, () {
           notifier.updatePayWay(1);
-          notifier.fetchList();
+          notifier.fetchList(reset: true);
         }),
         const SizedBox(width: 8),
         _buildFilterChip(l10n.saleSummaryPayWayOnline, state.payWay == 2, () {
           notifier.updatePayWay(2);
-          notifier.fetchList();
+          notifier.fetchList(reset: true);
         }),
       ],
     );
@@ -532,7 +571,11 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
     );
   }
 
-  Widget _buildOrderList(AppLocalizations l10n, List<OrderItem> orders) {
+  Widget _buildOrderList(
+    AppLocalizations l10n,
+    List<OrderItem> orders,
+    bool isSalesData,
+  ) {
     if (orders.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 32),
@@ -546,15 +589,22 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
     }
 
     return Column(
-      children: orders.map((order) => _buildOrderItem(l10n, order)).toList(),
+      children: orders
+          .map((order) => _buildOrderItem(l10n, order, isSalesData))
+          .toList(),
     );
   }
 
-  Widget _buildOrderItem(AppLocalizations l10n, OrderItem order) {
-    // orderType: 1=Sale, 2=Lease, 3=Swap Battery, 4=Road rescue, 5=Schedule Maintenance
-    final orderTypeInfo = _getOrderTypeInfo(order.orderType ?? 0);
-    // payType: 1=Full cash, 2=Full online, 3=Cash installment, 4=Online installment
-    final payTypeText = _getPayTypeText(order.payType ?? 0);
+  Widget _buildOrderItem(
+    AppLocalizations l10n,
+    OrderItem order,
+    bool isSalesData,
+  ) {
+    final orderTypeInfo = _getOrderTypeInfo(
+      order.orderType ?? 0,
+      isAfterSalesData: !isSalesData,
+    );
+    final orderMeta = _buildOrderMetaText(l10n, order, isSalesData);
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -593,7 +643,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '$payTypeText | Order No:${order.orderNo ?? '-'}',
+                  orderMeta,
                   style: const TextStyle(
                     fontSize: 12,
                     color: Color(0xFF999999),
@@ -614,7 +664,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                   color: AppColors.black06Text,
                 ),
               ),
-              if ((order.attachment ?? '').isNotEmpty) ...[
+              if (!isSalesData && (order.attachment ?? '').isNotEmpty) ...[
                 const SizedBox(height: 4),
                 GestureDetector(
                   onTap: () => PhotoGalleryViewer.show(
@@ -647,7 +697,36 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
     );
   }
 
-  Map<String, dynamic> _getOrderTypeInfo(int orderType) {
+  Map<String, dynamic> _getOrderTypeInfo(
+    int orderType, {
+    required bool isAfterSalesData,
+  }) {
+    if (isAfterSalesData) {
+      switch (orderType) {
+        case 1:
+          return {
+            'name': 'Schedule Maintenance',
+            'icon': Icons.build,
+            'bgColor': const Color(0xFFFFF8E1),
+            'iconColor': const Color(0xFFFFC107),
+          };
+        case 2:
+          return {
+            'name': 'Road rescue',
+            'icon': Icons.local_shipping,
+            'bgColor': const Color(0xFFFFEBEE),
+            'iconColor': const Color(0xFFF44336),
+          };
+        default:
+          return {
+            'name': 'Order',
+            'icon': Icons.receipt,
+            'bgColor': const Color(0xFFF5F5F5),
+            'iconColor': const Color(0xFF999999),
+          };
+      }
+    }
+
     switch (orderType) {
       case 1:
         return {
@@ -694,19 +773,23 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
     }
   }
 
-  String _getPayTypeText(int payType) {
-    switch (payType) {
-      case 1:
-        return 'Full cash';
-      case 2:
-        return 'Full online';
-      case 3:
-        return 'Cash installment';
-      case 4:
-        return 'Online installment';
-      default:
-        return 'Cash';
+  String _buildOrderMetaText(
+    AppLocalizations l10n,
+    OrderItem order,
+    bool isSalesData,
+  ) {
+    final payWay = order.payWay;
+    final payWayText = payWay == 2
+        ? l10n.saleSummaryPayWayOnline
+        : l10n.saleSummaryPayWayCash;
+    final orderNoText = '${l10n.saleSummaryOrderNo}:${order.orderNo ?? '-'}';
+    if (!isSalesData) {
+      return '$payWayText | $orderNoText';
     }
+    final installmentText = (order.payType ?? 0) == 2
+        ? l10n.orderPayInstallment
+        : l10n.orderPayFull;
+    return '$payWayText $installmentText | $orderNoText';
   }
 
   void _showInfoDialog(String title, String content) {
@@ -814,6 +897,13 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
       ),
     );
     if (!mounted || range == null) return;
+    final days = range.end.difference(range.start).inDays + 1;
+    if (days > 30) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Date range cannot exceed 30 days')),
+      );
+      return;
+    }
     notifier.updateDateRange(range.start, range.end);
     await notifier.refresh();
   }

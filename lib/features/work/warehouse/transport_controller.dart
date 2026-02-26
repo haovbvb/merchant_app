@@ -350,7 +350,7 @@ class TransportCreateNotifier extends Notifier<TransportCreateState> {
     if (deviceSn.isEmpty || state.sns.contains(deviceSn)) return;
     final warehouseNo = state.myWarehouse?.warehouseNo ?? '';
     if (warehouseNo.isNotEmpty && state.deviceType != 0) {
-      await _api.get<Object>(
+      final response = await _api.get<Object>(
         ApiPath.transportCheckDeviceSn,
         queryParameters: {
           'deviceType': state.deviceType,
@@ -359,6 +359,9 @@ class TransportCreateNotifier extends Notifier<TransportCreateState> {
         },
         parser: (json) => json ?? Object(),
       );
+      if (!response.isSuccess) {
+        return;
+      }
     }
     state = state.copyWith(sns: [...state.sns, deviceSn]);
   }
@@ -380,7 +383,7 @@ class TransportCreateNotifier extends Notifier<TransportCreateState> {
       return false;
     }
     state = state.copyWith(submitting: true);
-    await _api.post<Object>(
+    final response = await _api.post<Object>(
       ApiPath.transportCreateIssue,
       data: {
         'inWarehouseNo': inWarehouseNo,
@@ -392,6 +395,6 @@ class TransportCreateNotifier extends Notifier<TransportCreateState> {
       parser: (json) => json ?? Object(),
     );
     state = state.copyWith(submitting: false);
-    return true;
+    return response.isSuccess;
   }
 }

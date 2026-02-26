@@ -25,12 +25,28 @@ class _RepairRecordCreatePageState
     extends ConsumerState<RepairRecordCreatePage> {
   final TextEditingController _snController = TextEditingController();
   final TextEditingController _remarkController = TextEditingController();
+  final FocusNode _snFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _snFocusNode.addListener(_handleSnFocusChange);
+  }
 
   @override
   void dispose() {
+    _snFocusNode.removeListener(_handleSnFocusChange);
+    _snFocusNode.dispose();
     _snController.dispose();
     _remarkController.dispose();
     super.dispose();
+  }
+
+  void _handleSnFocusChange() {
+    if (_snFocusNode.hasFocus) return;
+    final sn = _snController.text.trim();
+    if (sn.isEmpty) return;
+    ref.read(repairRecordCreateProvider.notifier).fetchDeviceInfo();
   }
 
   @override
@@ -107,7 +123,14 @@ class _RepairRecordCreatePageState
                                 ? l10n.repairRecordStationSnHint
                                 : l10n.repairRecordDeviceSnHint,
                             controller: _snController,
-                            onChanged: notifier.updateSn,
+                            focusNode: _snFocusNode,
+                            onChanged: (value) {
+                              notifier.updateSn(value);
+                              if (value.trim().isEmpty) {
+                                _remarkController.clear();
+                                notifier.resetForm();
+                              }
+                            },
                             onScan: _scanSn,
                           ),
                           const Divider(height: 1, indent: 16, endIndent: 16),
@@ -220,7 +243,12 @@ class _RepairRecordCreatePageState
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: SizedBox.shrink(),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
                         )
                       : Text(
                           l10n.repairRecordSubmit,
@@ -243,6 +271,7 @@ class _RepairRecordCreatePageState
     required String hint,
     required TextEditingController controller,
     required ValueChanged<String> onChanged,
+    FocusNode? focusNode,
     VoidCallback? onScan,
   }) {
     return Padding(
@@ -264,6 +293,7 @@ class _RepairRecordCreatePageState
               Expanded(
                 child: TextField(
                   controller: controller,
+                  focusNode: focusNode,
                   decoration: InputDecoration(
                     hintText: hint,
                     hintStyle: const TextStyle(
@@ -316,7 +346,10 @@ class _RepairRecordCreatePageState
     RepairRecordCreateNotifier notifier,
     AppLocalizations l10n,
   ) {
-    if (state.deviceFix == null || state.deviceFix!.itemList.isEmpty) return;
+    if (state.deviceFix == null || state.deviceFix!.itemList.isEmpty) {
+      showToast(l10n.deviceSearchEmpty);
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -339,7 +372,10 @@ class _RepairRecordCreatePageState
     RepairRecordCreateNotifier notifier,
     AppLocalizations l10n,
   ) {
-    if (state.deviceFix == null || state.deviceFix!.resultList.isEmpty) return;
+    if (state.deviceFix == null || state.deviceFix!.resultList.isEmpty) {
+      showToast(l10n.deviceSearchEmpty);
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

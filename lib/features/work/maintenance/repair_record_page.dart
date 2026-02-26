@@ -5,12 +5,13 @@ import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/data/models/vehicle_repair_list_resp.dart';
 import 'package:merchant_app/features/work/maintenance/maintenance_controller.dart';
-import 'package:merchant_app/features/work/maintenance/repair_record_create_page.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class RepairRecordPage extends ConsumerStatefulWidget {
-  const RepairRecordPage({super.key});
+  const RepairRecordPage({super.key, required this.initialSn});
+
+  final String initialSn;
 
   @override
   ConsumerState<RepairRecordPage> createState() => _RepairRecordPageState();
@@ -20,6 +21,18 @@ class _RepairRecordPageState extends ConsumerState<RepairRecordPage> {
   final TextEditingController _snController = TextEditingController();
   final RefreshController _refreshController =
       RefreshController(initialRefresh: false);
+
+  @override
+  void initState() {
+    super.initState();
+    final sn = widget.initialSn.trim();
+    _snController.text = sn;
+    if (sn.isEmpty) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(repairRecordProvider.notifier).refresh(sn);
+    });
+  }
 
   @override
   void dispose() {
@@ -33,61 +46,21 @@ class _RepairRecordPageState extends ConsumerState<RepairRecordPage> {
     final l10n = context.l10n;
     final state = ref.watch(repairRecordProvider);
     final notifier = ref.read(repairRecordProvider.notifier);
+    final sn = widget.initialSn.trim();
 
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.repairRecordTitle),
-        actions: [
-          IconButton(
-            tooltip: l10n.repairRecordAddTitle,
-            icon: const Icon(Icons.add),
-            onPressed: () async {
-              final result = await Navigator.of(context).push<bool>(
-                MaterialPageRoute(
-                  builder: (_) => const RepairRecordCreatePage(),
-                ),
-              );
-              if (result == true && mounted) {
-                notifier.refresh(_snController.text.trim());
-              }
-            },
-          ),
-        ],
       ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _snController,
-              decoration: InputDecoration(
-                hintText: l10n.repairRecordSnHint,
-                prefixIcon: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Image.asset(
-                    'assets/android/mipmap-xxhdpi/icon_search.webp',
-                    width: 20,
-                    height: 20,
-                  ),
-                ),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () => notifier.refresh(_snController.text.trim()),
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onSubmitted: (value) => notifier.refresh(value.trim()),
-            ),
-          ),
           Expanded(
             child: SmartRefresher(
               controller: _refreshController,
               enablePullDown: true,
               enablePullUp: state.hasMore,
               onRefresh: () async {
-                await notifier.refresh(_snController.text.trim());
+                await notifier.refresh(sn);
                 _refreshController.refreshCompleted();
                 if (!ref.read(repairRecordProvider).hasMore) {
                   _refreshController.loadNoData();
@@ -123,6 +96,7 @@ class _RepairRecordPageState extends ConsumerState<RepairRecordPage> {
       ),
     );
   }
+
   void _showDetailDialog(
     BuildContext context,
     VehicleRepair item,
@@ -134,7 +108,8 @@ class _RepairRecordPageState extends ConsumerState<RepairRecordPage> {
       backgroundColor: Colors.transparent,
       builder: (_) => _RepairRecordDetailSheet(item: item, l10n: l10n),
     );
-  }}
+  }
+}
 
 class _RepairRecordItem extends StatelessWidget {
   const _RepairRecordItem({

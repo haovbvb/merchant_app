@@ -11,6 +11,7 @@ class UnbindDeviceState {
   final String remark;
   final bool hasUnfinishedOrder;
   final String appointmentNo;
+  final String? errorMessage;
 
   const UnbindDeviceState({
     this.loading = false,
@@ -21,6 +22,7 @@ class UnbindDeviceState {
     this.remark = '',
     this.hasUnfinishedOrder = false,
     this.appointmentNo = '',
+    this.errorMessage,
   });
 
   UnbindDeviceState copyWith({
@@ -32,6 +34,7 @@ class UnbindDeviceState {
     String? remark,
     bool? hasUnfinishedOrder,
     String? appointmentNo,
+    String? errorMessage,
   }) {
     return UnbindDeviceState(
       loading: loading ?? this.loading,
@@ -42,6 +45,7 @@ class UnbindDeviceState {
       remark: remark ?? this.remark,
       hasUnfinishedOrder: hasUnfinishedOrder ?? this.hasUnfinishedOrder,
       appointmentNo: appointmentNo ?? this.appointmentNo,
+      errorMessage: errorMessage,
     );
   }
 }
@@ -85,10 +89,14 @@ class UnbindDeviceNotifier extends Notifier<UnbindDeviceState> {
 
   Future<void> checkUnfinishedOrder() async {
     if (state.cardNum.trim().isEmpty || state.deviceSn.trim().isEmpty) {
-      state = state.copyWith(hasUnfinishedOrder: false, appointmentNo: '');
+      state = state.copyWith(
+        hasUnfinishedOrder: false,
+        appointmentNo: '',
+        errorMessage: null,
+      );
       return;
     }
-    state = state.copyWith(loading: true);
+    state = state.copyWith(loading: true, errorMessage: null);
     final response = await _api.get<Object>(
       ApiPath.unbindCheckMaintainRecord,
       queryParameters: {
@@ -98,18 +106,30 @@ class UnbindDeviceNotifier extends Notifier<UnbindDeviceState> {
       parser: (json) => json ?? Object(),
       showHud: false,
     );
+
+    if (!response.isSuccess) {
+      state = state.copyWith(
+        loading: false,
+        hasUnfinishedOrder: false,
+        appointmentNo: '',
+        errorMessage: response.message,
+      );
+      return;
+    }
+
     final value = response.result?.toString() ?? '';
     final hasUnfinished = value.isNotEmpty && value != '{}' && value != 'null';
     state = state.copyWith(
       loading: false,
       hasUnfinishedOrder: hasUnfinished,
       appointmentNo: hasUnfinished ? value : '',
+      errorMessage: null,
     );
   }
 
   Future<bool> unbindDevice() async {
     if (state.submitting) return false;
-    state = state.copyWith(submitting: true);
+    state = state.copyWith(submitting: true, errorMessage: null);
     final response = await _api.post<Object>(
       ApiPath.unbindDevice,
       data: {
@@ -120,7 +140,10 @@ class UnbindDeviceNotifier extends Notifier<UnbindDeviceState> {
       },
       parser: (json) => json ?? Object(),
     );
-    state = state.copyWith(submitting: false);
+    state = state.copyWith(
+      submitting: false,
+      errorMessage: response.isSuccess ? null : response.message,
+    );
     return response.isSuccess;
   }
 

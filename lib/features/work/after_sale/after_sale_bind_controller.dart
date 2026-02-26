@@ -94,10 +94,10 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
     );
   }
 
-  Future<void> fetchUserDetail() async {
+  Future<bool> fetchUserDetail() async {
     final cardNum = state.cardNum.trim();
     if (cardNum.isEmpty) {
-      return;
+      return false;
     }
 
     state = state.copyWith(loading: true, errorMessage: null);
@@ -117,7 +117,7 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
         deviceSn: '',
         errorMessage: response.message,
       );
-      return;
+      return false;
     }
 
     state = state.copyWith(
@@ -127,10 +127,11 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
       errorMessage: null,
     );
 
-    await fetchOrders(cardNum);
+    final orderSuccess = await fetchOrders(cardNum);
+    return orderSuccess;
   }
 
-  Future<void> fetchOrders(String cardNum) async {
+  Future<bool> fetchOrders(String cardNum) async {
     final response = await _apiService.get<List<AfterSaleCanBindOrderBean>>(
       ApiPath.afterSaleQueryCanBindOrderList,
       queryParameters: {'cardNum': cardNum},
@@ -141,19 +142,32 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
           .toList(),
     );
 
+    if (!response.isSuccess) {
+      state = state.copyWith(
+        orders: const [],
+        selectedOrder: null,
+        deviceSn: '',
+        deviceInfo: null,
+        errorMessage: response.message,
+      );
+      return false;
+    }
+
     state = state.copyWith(
       orders: response.result ?? const [],
       selectedOrder: null,
       deviceSn: '',
       deviceInfo: null,
+      errorMessage: null,
     );
+    return true;
   }
 
-  Future<void> fetchDeviceInfo() async {
+  Future<bool> fetchDeviceInfo() async {
     final order = state.selectedOrder;
     final deviceSn = state.deviceSn.trim();
     if (order == null || deviceSn.isEmpty) {
-      return;
+      return false;
     }
 
     final model = order.deviceType == 1 ? order.batteryType : order.carType;
@@ -168,7 +182,19 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
           BatterOrVehicleInfo.fromJson(Map<String, dynamic>.from(json)),
     );
 
-    state = state.copyWith(deviceInfo: response.result);
+    if (!response.isSuccess || response.result == null) {
+      state = state.copyWith(
+        deviceInfo: null,
+        errorMessage: response.message,
+      );
+      return false;
+    }
+
+    state = state.copyWith(
+      deviceInfo: response.result,
+      errorMessage: null,
+    );
+    return true;
   }
 
   Future<bool> bindOrder() async {

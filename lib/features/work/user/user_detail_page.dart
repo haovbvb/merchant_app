@@ -77,6 +77,11 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage>
       ),
       body: state.loading
           ? const Center(child: SizedBox.shrink())
+          : state.detail == null
+          ? _RecordsEmptyView(
+            imagePath: 'assets/android/mipmap-xxhdpi/icon_empty_search.png',
+            text: l10n.userListEmpty,
+          )
           : Column(
               children: [
                 // User header
@@ -112,7 +117,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage>
                     controller: _tabController,
                     children: [
                       _BasicInfoTab(detail: state.detail, l10n: l10n),
-                      _OrderRecordsTab(orders: state.orders, l10n: l10n),
+                      _OrderRecordsTab(l10n: l10n),
                       _PaymentRecordsTab(l10n: l10n),
                       _SwapRecordsTab(l10n: l10n),
                     ],
@@ -169,7 +174,7 @@ class _UserHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'ID: ${detail?.cardNum ?? '-'}',
+                  'ID: ${(detail?.username?.isNotEmpty ?? false) ? detail!.username : '-'}',
                   style: const TextStyle(
                     fontSize: 13,
                     color: Color(0xFF999999),
@@ -341,14 +346,16 @@ class _BasicInfoTab extends StatelessWidget {
 
   String _getUserType(AppLocalizations l10n, int? type) {
     switch (type) {
-      case 0:
-        return l10n.userTypeNormal;
       case 1:
-        return l10n.userTypeSenior;
+        return l10n.userFilterNormal;
       case 2:
-        return l10n.userTypeVip;
+        return l10n.userFilterOverdue;
+      case 3:
+        return l10n.userFilterDishonest;
+      case 4:
+        return l10n.userFilterEnded;
       default:
-        return l10n.userTypeNormal;
+        return '-';
     }
   }
 
@@ -1071,24 +1078,56 @@ class _PhotoGrid extends StatelessWidget {
 // Order Records Tab
 // =============================================================================
 
-class _OrderRecordsTab extends StatefulWidget {
-  const _OrderRecordsTab({required this.orders, required this.l10n});
+class _OrderRecordsTab extends ConsumerStatefulWidget {
+  const _OrderRecordsTab({required this.l10n});
 
-  final List<OrderItem> orders;
   final AppLocalizations l10n;
 
   @override
-  State<_OrderRecordsTab> createState() => _OrderRecordsTabState();
+  ConsumerState<_OrderRecordsTab> createState() => _OrderRecordsTabState();
 }
 
-class _OrderRecordsTabState extends State<_OrderRecordsTab> {
+class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
   int _selectedIndex = 0;
+  final RefreshController _refreshController =
+      RefreshController(initialRefresh: false);
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final state = ref.read(userDetailProvider);
+      if (state.cardNum.trim().isEmpty) return;
+      if (state.saleOrders.isEmpty) {
+        await ref.read(userDetailProvider.notifier).loadOrders(
+          orderType: _currentOrderType,
+          page: 1,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
+  }
+
+  int get _currentOrderType {
+    switch (_selectedIndex) {
+      case 1:
+        return 2;
+      case 2:
+        return 3;
+      default:
+        return 1;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final saleOrders = widget.orders.where((o) => o.orderType == 1).toList();
-    final rentOrders = widget.orders.where((o) => o.orderType == 2).toList();
-    final swapOrders = widget.orders.where((o) => o.orderType == 3).toList();
+    final state = ref.watch(userDetailProvider);
+    final notifier = ref.read(userDetailProvider.notifier);
     final tabs = [
       widget.l10n.userOrderTabSale,
       widget.l10n.userOrderTabRent,
@@ -1096,19 +1135,23 @@ class _OrderRecordsTabState extends State<_OrderRecordsTab> {
     ];
 
     List<OrderItem> current;
-    int orderType;
+    int page;
+    bool hasMore;
     switch (_selectedIndex) {
       case 1:
-        current = rentOrders;
-        orderType = 2;
+        current = state.rentOrders;
+        page = state.rentOrdersPage;
+        hasMore = state.rentOrdersHasMore;
         break;
       case 2:
-        current = swapOrders;
-        orderType = 3;
+        current = state.swapOrders;
+        page = state.swapOrdersPage;
+        hasMore = state.swapOrdersHasMore;
         break;
       default:
-        current = saleOrders;
-        orderType = 1;
+        current = state.saleOrders;
+        page = state.saleOrdersPage;
+        hasMore = state.saleOrdersHasMore;
     }
 
     return Column(
@@ -1123,7 +1166,19 @@ class _OrderRecordsTabState extends State<_OrderRecordsTab> {
                 child: Padding(
                   padding: EdgeInsets.only(right: index < tabs.length - 1 ? 10 : 0),
                   child: GestureDetector(
-                    onTap: () => setState(() => _selectedIndex = index),
+                    onTap: () async {
+                      setState(() => _selectedIndex = index);
+                      _refreshController.resetNoData();
+                      final nextType = _currentOrderType;
+                      final hasData = nextType == 1
+                          ? state.saleOrders.isNotEmpty
+                          : nextType == 2
+                              ? state.rentOrders.isNotEmpty
+                              : state.swapOrders.isNotEmpty;
+                      if (!hasData) {
+                        await notifier.loadOrders(orderType: nextType, page: 1);
+                      }
+                    },
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
@@ -1152,10 +1207,47 @@ class _OrderRecordsTabState extends State<_OrderRecordsTab> {
           ),
         ),
         Expanded(
-          child: _OrderList(
-            orders: current,
-            l10n: widget.l10n,
-            orderType: orderType,
+          child: SmartRefresher(
+            controller: _refreshController,
+            enablePullDown: true,
+            enablePullUp: hasMore,
+            onRefresh: () async {
+              await notifier.loadOrders(orderType: _currentOrderType, page: 1);
+              _refreshController.refreshCompleted();
+              final refreshed = ref.read(userDetailProvider);
+              final refreshedHasMore = _currentOrderType == 1
+                  ? refreshed.saleOrdersHasMore
+                  : _currentOrderType == 2
+                      ? refreshed.rentOrdersHasMore
+                      : refreshed.swapOrdersHasMore;
+              if (refreshedHasMore) {
+                _refreshController.resetNoData();
+              } else {
+                _refreshController.loadNoData();
+              }
+            },
+            onLoading: () async {
+              await notifier.loadOrders(
+                orderType: _currentOrderType,
+                page: page + 1,
+              );
+              final refreshed = ref.read(userDetailProvider);
+              final refreshedHasMore = _currentOrderType == 1
+                  ? refreshed.saleOrdersHasMore
+                  : _currentOrderType == 2
+                      ? refreshed.rentOrdersHasMore
+                      : refreshed.swapOrdersHasMore;
+              if (refreshedHasMore) {
+                _refreshController.loadComplete();
+              } else {
+                _refreshController.loadNoData();
+              }
+            },
+            child: _OrderList(
+              orders: current,
+              l10n: widget.l10n,
+              orderType: _currentOrderType,
+            ),
           ),
         ),
       ],

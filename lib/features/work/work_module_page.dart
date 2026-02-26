@@ -102,7 +102,7 @@ class WorkModulePage extends StatelessWidget {
       case 'station_repair_record':
         return const RepairRecordCreatePage(isStation: true);
       case 'repair_record_list':
-        return const RepairRecordPage();
+        return RepairRecordPage(initialSn: recordNo ?? '');
       case 'road_assist':
         return const RoadSideListPage();
       case 'road_order_detail':

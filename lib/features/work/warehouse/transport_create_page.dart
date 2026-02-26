@@ -281,7 +281,10 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
                   width: 160,
                   height: 44,
                   child: FilledButton(
-                    onPressed: state.submitting || state.sns.isEmpty
+                    onPressed:
+                        state.submitting ||
+                            state.sns.isEmpty ||
+                            state.selectedInWarehouse == null
                         ? null
                         : () => _submit(context, notifier),
                     style: FilledButton.styleFrom(

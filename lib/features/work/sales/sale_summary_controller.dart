@@ -1,13 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/data/models/sales_bar_data.dart';
 import 'package:merchant_app/data/models/sell_data_list_response.dart';
-import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
 class SaleSummaryState {
   final bool loadingSummary;
   final bool loadingList;
+  final bool loadingMore;
   final bool loadingChart;
   final DateTime startDate;
   final DateTime endDate;
@@ -17,12 +18,15 @@ class SaleSummaryState {
   final SalesBarData? chartData;
   final List<OrderItem> orders;
   final int total;
+  final int pageNum;
+  final int pageSize;
 
   const SaleSummaryState({
     required this.startDate,
     required this.endDate,
     this.loadingSummary = false,
     this.loadingList = false,
+    this.loadingMore = false,
     this.loadingChart = false,
     this.payWay,
     this.showSalesData = true,
@@ -30,33 +34,45 @@ class SaleSummaryState {
     this.chartData,
     this.orders = const [],
     this.total = 0,
+    this.pageNum = 1,
+    this.pageSize = 10,
   });
+
+  bool get hasMore => orders.length < total;
+
+  static const Object _unset = Object();
 
   SaleSummaryState copyWith({
     bool? loadingSummary,
     bool? loadingList,
+    bool? loadingMore,
     bool? loadingChart,
     DateTime? startDate,
     DateTime? endDate,
-    int? payWay,
+    Object? payWay = _unset,
     bool? showSalesData,
     SaleSumPageData? summary,
     SalesBarData? chartData,
     List<OrderItem>? orders,
     int? total,
+    int? pageNum,
+    int? pageSize,
   }) {
     return SaleSummaryState(
       loadingSummary: loadingSummary ?? this.loadingSummary,
       loadingList: loadingList ?? this.loadingList,
+      loadingMore: loadingMore ?? this.loadingMore,
       loadingChart: loadingChart ?? this.loadingChart,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
-      payWay: payWay ?? this.payWay,
+      payWay: payWay == _unset ? this.payWay : payWay as int?,
       showSalesData: showSalesData ?? this.showSalesData,
       summary: summary ?? this.summary,
       chartData: chartData ?? this.chartData,
       orders: orders ?? this.orders,
       total: total ?? this.total,
+      pageNum: pageNum ?? this.pageNum,
+      pageSize: pageSize ?? this.pageSize,
     );
   }
 }
@@ -80,7 +96,7 @@ class SaleSummaryNotifier extends Notifier<SaleSummaryState> {
     await Future.wait([
       fetchSummary(),
       fetchChartData(),
-      fetchList(),
+      fetchList(reset: true),
     ]);
   }
 
@@ -95,8 +111,12 @@ class SaleSummaryNotifier extends Notifier<SaleSummaryState> {
   /// Toggle between Sales Data and After-Sales Data
   void setShowSalesData(bool showSalesData) {
     if (state.showSalesData != showSalesData) {
-      state = state.copyWith(showSalesData: showSalesData, orders: const []);
-      fetchList();
+      state = state.copyWith(
+        showSalesData: showSalesData,
+        orders: const [],
+        pageNum: 1,
+      );
+      fetchList(reset: true);
     }
   }
 
@@ -132,13 +152,21 @@ class SaleSummaryNotifier extends Notifier<SaleSummaryState> {
     );
   }
 
-  Future<void> fetchList({int pageNum = 1, int pageSize = 20}) async {
-    state = state.copyWith(loadingList: true);
+  Future<void> fetchList({bool reset = false}) async {
+    if (state.loadingList || state.loadingMore) return;
+    if (!reset && !state.hasMore) return;
+
+    final nextPage = reset ? 1 : state.pageNum + 1;
+    state = state.copyWith(
+      loadingList: reset,
+      loadingMore: !reset,
+    );
+
     final params = <String, dynamic>{
       'startDate': _formatDate(state.startDate),
       'endDate': _formatDate(state.endDate),
-      'pageNum': pageNum,
-      'pageSize': pageSize,
+      'pageNum': nextPage,
+      'pageSize': state.pageSize,
     };
     if (state.payWay != null) {
       params['payWay'] = state.payWay;
@@ -154,11 +182,22 @@ class SaleSummaryNotifier extends Notifier<SaleSummaryState> {
         Map<String, dynamic>.from(json as Map),
       ),
     );
+
+    final incoming = response.result?.list ?? const <OrderItem>[];
+    final merged = reset ? incoming : [...state.orders, ...incoming];
+    final total = response.result?.total ?? (reset ? incoming.length : state.total);
+
     state = state.copyWith(
       loadingList: false,
-      orders: response.result?.list ?? const [],
-      total: response.result?.total ?? 0,
+      loadingMore: false,
+      pageNum: nextPage,
+      orders: merged,
+      total: total,
     );
+  }
+
+  Future<void> loadMore() async {
+    await fetchList(reset: false);
   }
 
   String _formatDate(DateTime date) {

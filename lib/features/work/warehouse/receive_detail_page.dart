@@ -10,11 +10,7 @@ import 'package:merchant_app/features/work/warehouse/receive_scan_page.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
 class ReceiveDetailPage extends ConsumerStatefulWidget {
-  const ReceiveDetailPage({
-    super.key,
-    required this.transferNo,
-    this.status,
-  });
+  const ReceiveDetailPage({super.key, required this.transferNo, this.status});
 
   final String transferNo;
   final int? status;
@@ -42,8 +38,8 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
     final state = ref.watch(receiveDetailProvider);
     final detail = state.detail;
 
-    // 是否可以接收 (在途状态 status=0 或 部分接收 status=2)
-    final canReceive = widget.status == 0 || widget.status == 2;
+    // Android 接收详情页始终展示扫码入口；具体操作按钮仍按 item 状态控制
+    const canReceive = true;
 
     return PopScope(
       canPop: true,
@@ -62,7 +58,7 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
           ),
         ),
         body: state.loading
-            ? const Center(child: const SizedBox.shrink())
+            ? const Center(child: SizedBox.shrink())
             : SingleChildScrollView(
                 child: Column(
                   children: [
@@ -142,9 +138,10 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
   }
 
   Future<void> _handleReceive(BuildContext context, String deviceSn) async {
-    final result =
-        await ref.read(receiveDetailProvider.notifier).receiveDevice(deviceSn);
-    if (mounted) {
+    final result = await ref
+        .read(receiveDetailProvider.notifier)
+        .receiveDevice(deviceSn);
+    if (mounted && context.mounted) {
       _hasChanged = true;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -156,9 +153,10 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
   }
 
   Future<void> _handleWithdraw(BuildContext context, String deviceSn) async {
-    final success =
-        await ref.read(receiveDetailProvider.notifier).withdrawDevice(deviceSn);
-    if (mounted) {
+    final success = await ref
+        .read(receiveDetailProvider.notifier)
+        .withdrawDevice(deviceSn);
+    if (mounted && context.mounted) {
       _hasChanged = true;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -219,10 +217,7 @@ class _OrderHeaderCard extends StatelessWidget {
                 ),
                 Text(
                   _formatTimestamp(detail?.sendTime),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.white70,
-                  ),
+                  style: const TextStyle(fontSize: 13, color: Colors.white70),
                 ),
               ],
             ),
@@ -387,7 +382,7 @@ class _DeviceListSection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Text(
-              '${_getDeviceTypeName()} (${detail?.detailPage?.total ?? detail?.deviceNum ?? 0})',
+              '${_getDeviceTypeName()} (${detail?.detailPage?.total ?? 0})',
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
@@ -441,13 +436,15 @@ class _DeviceListSection extends StatelessWidget {
               ),
             ),
           // 设备列表
-          ...items.map((item) => _DeviceItem(
-                item: item,
-                l10n: l10n,
-                canOperate: canReceive,
-                onReceive: onReceive,
-                onWithdraw: onWithdraw,
-              )),
+          ...items.map(
+            (item) => _DeviceItem(
+              item: item,
+              l10n: l10n,
+              canOperate: canReceive,
+              onReceive: onReceive,
+              onWithdraw: onWithdraw,
+            ),
+          ),
           const SizedBox(height: 8),
         ],
       ),
@@ -468,10 +465,7 @@ class _StatItem extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Color(0xFF999999),
-            ),
+            style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
           ),
           const SizedBox(height: 4),
           Text(
@@ -520,13 +514,16 @@ class _DeviceItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final (statusText, statusColor) = _getStatusInfo();
     final isInTransit = item.status == 0;
+    final opTimeText = DateFormatUtils.formatString(
+      item.opTime,
+      pattern: DateFormatUtils.defaultPattern,
+      fallback: '',
+    );
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: AppColors.borderColor),
-        ),
+        border: Border(bottom: BorderSide(color: AppColors.borderColor)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -545,18 +542,16 @@ class _DeviceItem extends StatelessWidget {
                         color: Color(0xFF1A1A1A),
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      DateFormatUtils.formatString(
-                        item.opTime,
-                        pattern: DateFormatUtils.defaultPattern,
-                        fallback: item.opTime,
+                    if (opTimeText.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        opTimeText,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF999999),
+                        ),
                       ),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF999999),
-                      ),
-                    ),
+                    ],
                   ],
                 ),
               ),
@@ -568,10 +563,7 @@ class _DeviceItem extends StatelessWidget {
                 ),
                 child: Text(
                   statusText,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: statusColor,
-                  ),
+                  style: TextStyle(fontSize: 12, color: statusColor),
                 ),
               ),
             ],

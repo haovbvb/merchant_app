@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/payment_plan.dart';
+import 'package:merchant_app/data/models/shop_payment_method.dart';
 import 'package:merchant_app/features/work/sales/sell_bind_controller.dart';
 
 class PaymentResult {
@@ -22,15 +23,18 @@ class PaymentSheet extends ConsumerStatefulWidget {
     super.key,
     required this.notifier,
     required this.packageAmount,
+    required this.shopPaymentMethod,
   });
 
   final SellBindNotifier notifier;
   final double packageAmount;
+  final ShopPaymentMethod? shopPaymentMethod;
 
   static Future<PaymentResult?> show(
     BuildContext context,
     SellBindNotifier notifier,
     double packageAmount,
+    ShopPaymentMethod? shopPaymentMethod,
   ) {
     return showModalBottomSheet<PaymentResult>(
       context: context,
@@ -39,6 +43,7 @@ class PaymentSheet extends ConsumerStatefulWidget {
       builder: (_) => PaymentSheet(
         notifier: notifier,
         packageAmount: packageAmount,
+        shopPaymentMethod: shopPaymentMethod,
       ),
     );
   }
@@ -51,14 +56,30 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
   int _paySource = 2; // 1=Cash, 2=Online
   int _payType = 1; // 1=Full Payment, 2=Installment
   PaymentPlan? _selectedPlan;
+  late Set<int> _availablePaySources;
+  late Set<int> _onlinePayTypes;
+  late Set<int> _cashPayTypes;
 
   @override
   void initState() {
     super.initState();
     final state = ref.read(sellBindProvider);
+    _availablePaySources = _parseOptions(
+      widget.shopPaymentMethod?.salePayWay,
+      defaultValues: const {1, 2},
+    );
+    _onlinePayTypes = _parseOptions(
+      widget.shopPaymentMethod?.saleOnlineOption,
+      defaultValues: const {1, 2},
+    );
+    _cashPayTypes = _parseOptions(
+      widget.shopPaymentMethod?.saleCashOption,
+      defaultValues: const {1, 2},
+    );
     _paySource = state.paySource;
     _payType = state.payType;
     _selectedPlan = state.selectedPaymentPlan;
+    _normalizeSelection(state);
 
     // Load payment plans if selecting installment
     if (_payType == 2 && state.paymentPlans.isEmpty) {
@@ -66,10 +87,55 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
     }
   }
 
+  Set<int> _parseOptions(String? raw, {required Set<int> defaultValues}) {
+    if (raw == null || raw.trim().isEmpty) return defaultValues;
+    final values = raw
+        .split(RegExp(r'[^0-9]+'))
+        .where((item) => item.isNotEmpty)
+        .map(int.tryParse)
+        .whereType<int>()
+        .toSet();
+    return values.isEmpty ? defaultValues : values;
+  }
+
+  Set<int> _payTypesBySource(int source) {
+    return source == 1 ? _cashPayTypes : _onlinePayTypes;
+  }
+
+  int _pickPaySource(Set<int> sources) {
+    if (sources.contains(2)) return 2;
+    if (sources.contains(1)) return 1;
+    return 2;
+  }
+
+  int _pickPayType(Set<int> types) {
+    if (types.contains(1)) return 1;
+    if (types.contains(2)) return 2;
+    return 1;
+  }
+
+  void _normalizeSelection(SellBindState state) {
+    if (!_availablePaySources.contains(_paySource)) {
+      _paySource = _pickPaySource(_availablePaySources);
+    }
+    final payTypes = _payTypesBySource(_paySource);
+    if (!payTypes.contains(_payType)) {
+      _payType = _pickPayType(payTypes);
+    }
+    if (_payType != 2) {
+      _selectedPlan = null;
+      return;
+    }
+    if (_selectedPlan == null && state.selectedPaymentPlan != null) {
+      _selectedPlan = state.selectedPaymentPlan;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final state = ref.watch(sellBindProvider);
+    final activePayTypes = _payTypesBySource(_paySource);
 
     return Container(
       constraints: BoxConstraints(
@@ -115,50 +181,66 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                   _buildSectionCard(
                     title: l10n.sellBindPaymentMethods,
                     children: [
-                      _buildRadioOption(
-                        title: l10n.sellBindPayCash,
-                        isSelected: _paySource == 1,
-                        onTap: () => setState(() => _paySource = 1),
-                      ),
-                      const Divider(height: 1, color: Color(0xFFEEEEEE)),
-                      _buildRadioOption(
-                        title: l10n.sellBindPayOnline,
-                        isSelected: _paySource == 2,
-                        onTap: () => setState(() => _paySource = 2),
-                      ),
+                      if (_availablePaySources.contains(1))
+                        _buildRadioOption(
+                          title: l10n.sellBindPayCash,
+                          isSelected: _paySource == 1,
+                          onTap: () => setState(() {
+                            _paySource = 1;
+                            _normalizeSelection(state);
+                          }),
+                        ),
+                      if (_availablePaySources.contains(1) &&
+                          _availablePaySources.contains(2))
+                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                      if (_availablePaySources.contains(2))
+                        _buildRadioOption(
+                          title: l10n.sellBindPayOnline,
+                          isSelected: _paySource == 2,
+                          onTap: () => setState(() {
+                            _paySource = 2;
+                            _normalizeSelection(state);
+                          }),
+                        ),
                     ],
                   ),
                   const SizedBox(height: 16),
 
-                  // Payment Period (only for Online)
-                  if (_paySource == 2) ...[
+                  // Payment Period
+                  if (activePayTypes.contains(1) ||
+                      activePayTypes.contains(2)) ...[
                     _buildSectionCard(
                       title: l10n.sellBindPaymentPeriod,
                       children: [
-                        _buildRadioOption(
-                          title: l10n.sellBindPayFull,
-                          isSelected: _payType == 1,
-                          onTap: () => setState(() => _payType = 1),
-                        ),
-                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
-                        _buildRadioOption(
-                          title: l10n.sellBindPayInstallment,
-                          isSelected: _payType == 2,
-                          onTap: () {
-                            setState(() => _payType = 2);
-                            if (state.paymentPlans.isEmpty) {
-                              widget.notifier
-                                  .queryPaymentPlans(widget.packageAmount);
-                            }
-                          },
-                        ),
+                        if (activePayTypes.contains(1))
+                          _buildRadioOption(
+                            title: l10n.sellBindPayFull,
+                            isSelected: _payType == 1,
+                            onTap: () => setState(() => _payType = 1),
+                          ),
+                        if (activePayTypes.contains(1) &&
+                            activePayTypes.contains(2))
+                          const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                        if (activePayTypes.contains(2))
+                          _buildRadioOption(
+                            title: l10n.sellBindPayInstallment,
+                            isSelected: _payType == 2,
+                            onTap: () {
+                              setState(() => _payType = 2);
+                              if (state.paymentPlans.isEmpty) {
+                                widget.notifier.queryPaymentPlans(
+                                  widget.packageAmount,
+                                );
+                              }
+                            },
+                          ),
                       ],
                     ),
                     const SizedBox(height: 16),
                   ],
 
                   // Installment options
-                  if (_paySource == 2 && _payType == 2) ...[
+                  if (_payType == 2) ...[
                     _buildSectionCard(
                       children: [
                         _buildFinancialRow(
@@ -250,7 +332,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                   ],
 
                   // Total for Full Payment
-                  if (_paySource == 2 && _payType == 1) ...[
+                  if (_payType == 1) ...[
                     _buildSectionCard(
                       children: [
                         _buildFinancialRow(
@@ -306,10 +388,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
     );
   }
 
-  Widget _buildSectionCard({
-    String? title,
-    required List<Widget> children,
-  }) {
+  Widget _buildSectionCard({String? title, required List<Widget> children}) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF8F8F8),
@@ -323,10 +402,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               child: Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF999999),
-                ),
+                style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
               ),
             ),
           ...children,
@@ -377,20 +453,14 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
     );
   }
 
-  Widget _buildFinancialRow({
-    required String label,
-    required Widget trailing,
-  }) {
+  Widget _buildFinancialRow({required String label, required Widget trailing}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF666666),
-            ),
+            style: const TextStyle(fontSize: 14, color: Color(0xFF666666)),
           ),
           const Spacer(),
           trailing,
@@ -411,7 +481,6 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
   }
 
   bool _canProceed() {
-    if (_paySource == 1) return true; // Cash always ok
     if (_payType == 1) return true; // Full payment ok
     return _selectedPlan != null; // Installment needs plan selected
   }
@@ -419,8 +488,10 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
   void _proceed() {
     widget.notifier.updatePaySource(_paySource);
     widget.notifier.updatePayType(_payType);
-    if (_selectedPlan != null) {
+    if (_payType == 2 && _selectedPlan != null) {
       widget.notifier.selectPaymentPlan(_selectedPlan!);
+    } else {
+      widget.notifier.clearPaymentPlan();
     }
 
     Navigator.of(context).pop(
@@ -432,7 +503,10 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
     );
   }
 
-  Future<void> _showPeriodSheet(BuildContext context, SellBindState state) async {
+  Future<void> _showPeriodSheet(
+    BuildContext context,
+    SellBindState state,
+  ) async {
     final l10n = context.l10n;
     final selected = await showModalBottomSheet<PaymentPlan>(
       context: context,

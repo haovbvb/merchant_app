@@ -68,6 +68,7 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
     if (value == state.cardNum) return;
     state = state.copyWith(
       cardNum: value,
+      deviceSn: '',
       userDetail: null,
       orders: const [],
       selectedOrder: null,
@@ -88,6 +89,7 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
   void selectOrder(AfterSaleCanBindOrderBean? order) {
     state = state.copyWith(
       selectedOrder: order,
+      deviceSn: '',
       deviceInfo: null,
     );
   }
@@ -112,6 +114,7 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
         orders: const [],
         selectedOrder: null,
         deviceInfo: null,
+        deviceSn: '',
         errorMessage: response.message,
       );
       return;
@@ -120,6 +123,7 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
     state = state.copyWith(
       loading: false,
       userDetail: response.result,
+      deviceSn: '',
       errorMessage: null,
     );
 
@@ -140,6 +144,7 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
     state = state.copyWith(
       orders: response.result ?? const [],
       selectedOrder: null,
+      deviceSn: '',
       deviceInfo: null,
     );
   }
@@ -191,5 +196,9 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
       state = state.copyWith(errorMessage: response.message);
     }
     return response.isSuccess;
+  }
+
+  void reset() {
+    state = const AfterSaleBindState();
   }
 }

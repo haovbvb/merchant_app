@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/widgets/confirm_dialog.dart';
+import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/after_sale_can_bind_order_bean.dart';
 import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
 import 'package:merchant_app/features/work/after_sale/after_sale_bind_controller.dart';
@@ -21,11 +23,30 @@ class AfterSaleBindPage extends ConsumerStatefulWidget {
 class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
   final TextEditingController _cardController = TextEditingController();
   final TextEditingController _deviceController = TextEditingController();
+  final FocusNode _cardFocusNode = FocusNode();
+  final FocusNode _deviceFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _cardFocusNode.addListener(() {
+      if (!_cardFocusNode.hasFocus) {
+        ref.read(afterSaleBindProvider.notifier).fetchUserDetail();
+      }
+    });
+    _deviceFocusNode.addListener(() {
+      if (!_deviceFocusNode.hasFocus) {
+        ref.read(afterSaleBindProvider.notifier).fetchDeviceInfo();
+      }
+    });
+  }
 
   @override
   void dispose() {
     _cardController.dispose();
     _deviceController.dispose();
+    _cardFocusNode.dispose();
+    _deviceFocusNode.dispose();
     super.dispose();
   }
 
@@ -34,6 +55,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
     final state = ref.watch(afterSaleBindProvider);
     final notifier = ref.read(afterSaleBindProvider.notifier);
     final l10n = context.l10n;
+    _syncControllers(state);
 
     return Scaffold(
       backgroundColor: AppColors.bgColor,
@@ -100,9 +122,11 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                             label: l10n.afterSaleBindCardNumLabel,
                             hint: l10n.afterSaleBindCardNumHint,
                             controller: _cardController,
+                            focusNode: _cardFocusNode,
                             onChanged: notifier.updateCardNum,
-                            onSubmitted: (_) =>
-                                ref.read(afterSaleBindProvider.notifier).fetchUserDetail(),
+                            onSubmitted: (_) => ref
+                                .read(afterSaleBindProvider.notifier)
+                                .fetchUserDetail(),
                             onScan: _scanCardNum,
                           ),
                           const Divider(height: 1, indent: 16, endIndent: 16),
@@ -161,9 +185,11 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                             label: l10n.afterSaleBindDeviceSnLabel,
                             hint: l10n.afterSaleBindDeviceSnHint,
                             controller: _deviceController,
+                            focusNode: _deviceFocusNode,
                             onChanged: notifier.updateDeviceSn,
-                            onSubmitted: (_) =>
-                                ref.read(afterSaleBindProvider.notifier).fetchDeviceInfo(),
+                            onSubmitted: (_) => ref
+                                .read(afterSaleBindProvider.notifier)
+                                .fetchDeviceInfo(),
                             onScan: _scanDeviceSn,
                           ),
                           const Divider(height: 1, indent: 16, endIndent: 16),
@@ -201,8 +227,8 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                       : () => _submit(context, l10n, notifier),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
-                    disabledBackgroundColor: AppColors.primaryColor.withOpacity(
-                      0.5,
+                    disabledBackgroundColor: AppColors.primaryColor.withValues(
+                      alpha: 0.5,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -212,7 +238,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: const SizedBox.shrink(),
+                          child: SizedBox.shrink(),
                         )
                       : Text(
                           l10n.afterSaleBindConfirm,
@@ -235,6 +261,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
     required String hint,
     required TextEditingController controller,
     required ValueChanged<String> onChanged,
+    FocusNode? focusNode,
     ValueChanged<String>? onSubmitted,
     VoidCallback? onScan,
   }) {
@@ -257,6 +284,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
               Expanded(
                 child: TextField(
                   controller: controller,
+                  focusNode: focusNode,
                   decoration: InputDecoration(
                     hintText: hint,
                     hintStyle: const TextStyle(
@@ -294,23 +322,34 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
   }
 
   Future<void> _scanCardNum() async {
-    final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
-    );
-    if (!mounted || result == null || result.isEmpty) return;
-    _cardController.text = result;
-    ref.read(afterSaleBindProvider.notifier).updateCardNum(result);
-    ref.read(afterSaleBindProvider.notifier).fetchUserDetail();
-  }
-
-  Future<void> _scanDeviceSn() async {
     final result = await Navigator.of(
       context,
     ).push<String>(MaterialPageRoute(builder: (_) => const QrScanPage()));
     if (!mounted || result == null || result.isEmpty) return;
+    final cardNum = ScanUtils.getUserCarNum(result);
+    if (cardNum.isEmpty) return;
+    _cardController.text = cardNum;
+    ref.read(afterSaleBindProvider.notifier).updateCardNum(cardNum);
+    ref.read(afterSaleBindProvider.notifier).fetchUserDetail();
+  }
+
+  Future<void> _scanDeviceSn() async {
+    final result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
+    );
+    if (!mounted || result == null || result.isEmpty) return;
     _deviceController.text = result;
     ref.read(afterSaleBindProvider.notifier).updateDeviceSn(result);
     ref.read(afterSaleBindProvider.notifier).fetchDeviceInfo();
+  }
+
+  void _syncControllers(AfterSaleBindState state) {
+    if (_cardController.text != state.cardNum) {
+      _cardController.text = state.cardNum;
+    }
+    if (_deviceController.text != state.deviceSn) {
+      _deviceController.text = state.deviceSn;
+    }
   }
 
   void _showOrderSelector(
@@ -318,7 +357,10 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
     AfterSaleBindState state,
     AfterSaleBindNotifier notifier,
   ) {
-    if (state.orders.isEmpty) return;
+    if (state.orders.isEmpty) {
+      showToast(context.l10n.afterSaleBindNoOrders);
+      return;
+    }
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -328,6 +370,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
         selectedOrder: state.selectedOrder,
         onSelected: (order) {
           notifier.selectOrder(order);
+          _deviceController.clear();
           Navigator.of(context).pop();
         },
         l10n: context.l10n,
@@ -358,6 +401,10 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
     await Navigator.of(
       context,
     ).push(MaterialPageRoute(builder: (_) => const AfterSaleBindSuccessPage()));
+    if (!context.mounted) return;
+    ref.read(afterSaleBindProvider.notifier).reset();
+    _cardController.clear();
+    _deviceController.clear();
   }
 }
 

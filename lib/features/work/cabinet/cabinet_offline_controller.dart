@@ -12,10 +12,14 @@ class CabinetOfflineState {
   final String? secretKey;
   final bool layoutLoading;
   final LayoutCabinetInfo? layoutInfo;
+  final bool operating;
+
   /// 蓝牙连接状态
   final bool bleConnected;
+
   /// 仓位列表 (蓝牙获取)
   final List<CabinetCabin> cabins;
+
   /// 换电阈值
   final int swapThreshold;
 
@@ -25,6 +29,7 @@ class CabinetOfflineState {
     this.secretKey,
     this.layoutLoading = false,
     this.layoutInfo,
+    this.operating = false,
     this.bleConnected = false,
     this.cabins = const [],
     this.swapThreshold = 100,
@@ -36,6 +41,7 @@ class CabinetOfflineState {
     String? secretKey,
     bool? layoutLoading,
     LayoutCabinetInfo? layoutInfo,
+    bool? operating,
     bool? bleConnected,
     List<CabinetCabin>? cabins,
     int? swapThreshold,
@@ -46,6 +52,7 @@ class CabinetOfflineState {
       secretKey: secretKey ?? this.secretKey,
       layoutLoading: layoutLoading ?? this.layoutLoading,
       layoutInfo: layoutInfo ?? this.layoutInfo,
+      operating: operating ?? this.operating,
       bleConnected: bleConnected ?? this.bleConnected,
       cabins: cabins ?? this.cabins,
       swapThreshold: swapThreshold ?? this.swapThreshold,
@@ -55,8 +62,8 @@ class CabinetOfflineState {
 
 final cabinetOfflineProvider =
     NotifierProvider<CabinetOfflineNotifier, CabinetOfflineState>(
-  CabinetOfflineNotifier.new,
-);
+      CabinetOfflineNotifier.new,
+    );
 
 class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
   final ApiService _api = ApiService();
@@ -67,40 +74,63 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
   Future<void> load(String sn) async {
     if (sn.isEmpty) return;
     state = state.copyWith(loading: true);
-    final baseResponse = await _api.get<CabinetDetailBaseInfoBean>(
-      ApiPath.cabinetBaseInfo,
-      queryParameters: {'sn': sn},
-      parser: (json) => CabinetDetailBaseInfoBean.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
-    );
-    final secretResponse = await _api.get<String>(
-      ApiPath.cabinetSecretKey,
-      queryParameters: {'sn': sn},
-      parser: (json) => json?.toString() ?? '',
-    );
-    state = state.copyWith(
-      loading: false,
-      baseInfo: baseResponse.result,
-      secretKey: secretResponse.result,
-    );
+    try {
+      final baseResponse = await _api.get<CabinetDetailBaseInfoBean>(
+        ApiPath.cabinetBaseInfo,
+        queryParameters: {'sn': sn},
+        parser: (json) => CabinetDetailBaseInfoBean.fromJson(
+          Map<String, dynamic>.from(json as Map),
+        ),
+      );
+      final secretResponse = await _api.get<String>(
+        ApiPath.cabinetSecretKey,
+        queryParameters: {'sn': sn},
+        parser: (json) => json?.toString() ?? '',
+      );
+      final baseInfo = baseResponse.result;
+      final storeNum = baseInfo?.storeNum ?? 0;
+      final cabins = storeNum > 0
+          ? List.generate(
+              storeNum,
+              (i) => CabinetCabin(
+                portNo: i + 1,
+                slotName: '仓位 ${i + 1}',
+                status: 1,
+              ),
+            )
+          : const <CabinetCabin>[];
+      state = state.copyWith(
+        loading: false,
+        baseInfo: baseInfo,
+        secretKey: secretResponse.result,
+        swapThreshold: baseInfo?.swapThreshold ?? 100,
+        cabins: cabins,
+      );
+    } catch (_) {
+      state = state.copyWith(
+        loading: false,
+        baseInfo: null,
+        secretKey: null,
+        cabins: const [],
+      );
+    }
   }
 
   Future<void> loadLayout(String sn) async {
     if (sn.isEmpty) return;
     state = state.copyWith(layoutLoading: true);
-    final path = ApiPath.cabinetLayoutHistory.replaceAll('{sn}', sn);
-    final response = await _api.get<LayoutCabinetInfo>(
-      path,
-      queryParameters: {'sn': sn},
-      parser: (json) => LayoutCabinetInfo.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
-    );
-    state = state.copyWith(
-      layoutLoading: false,
-      layoutInfo: response.result,
-    );
+    try {
+      final path = ApiPath.cabinetLayoutHistory.replaceAll('{sn}', sn);
+      final response = await _api.get<LayoutCabinetInfo>(
+        path,
+        queryParameters: {'sn': sn},
+        parser: (json) =>
+            LayoutCabinetInfo.fromJson(Map<String, dynamic>.from(json as Map)),
+      );
+      state = state.copyWith(layoutLoading: false, layoutInfo: response.result);
+    } catch (_) {
+      state = state.copyWith(layoutLoading: false, layoutInfo: null);
+    }
   }
 
   /// 根据仓位数量初始化仓位列表
@@ -108,10 +138,7 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
     if (storeNum <= 0) return;
     final cabins = List.generate(
       storeNum,
-      (i) => CabinetCabin(
-        portNo: i + 1,
-        slotName: '仓位 ${i + 1}',
-      ),
+      (i) => CabinetCabin(portNo: i + 1, slotName: '仓位 ${i + 1}'),
     );
     state = state.copyWith(cabins: cabins);
   }
@@ -148,10 +175,7 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
     final threshold = state.swapThreshold;
     final cabins = state.cabins.map((c) {
       if (c.portNo == portNo) {
-        return c.copyWith(
-          batterySoc: soc,
-          swapFlag: soc >= threshold ? 1 : 0,
-        );
+        return c.copyWith(batterySoc: soc, swapFlag: soc >= threshold ? 1 : 0);
       }
       return c;
     }).toList();
@@ -175,6 +199,73 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
       return c.copyWith(swapFlag: c.batterySoc >= threshold ? 1 : 0);
     }).toList();
     state = state.copyWith(swapThreshold: threshold, cabins: cabins);
+  }
+
+  Future<bool> restartCabinet({required String pId}) async {
+    if (pId.isEmpty) return false;
+    state = state.copyWith(operating: true);
+    try {
+      final response = await _api.post<Object>(
+        ApiPath.cabinetRestart,
+        data: {'pID': pId, 'shutDown': 0, 'type': 3},
+        parser: (json) => json ?? Object(),
+      );
+      return response.isSuccess;
+    } catch (_) {
+      return false;
+    } finally {
+      state = state.copyWith(operating: false);
+    }
+  }
+
+  Future<bool> openBackDoor({required String sn}) async {
+    if (sn.isEmpty) return false;
+    state = state.copyWith(operating: true);
+    try {
+      final response = await _api.post<Object>(
+        ApiPath.cabinetOpenBackDoor,
+        data: {'sn': sn},
+        parser: (json) => json ?? Object(),
+      );
+      return response.isSuccess;
+    } catch (_) {
+      return false;
+    } finally {
+      state = state.copyWith(operating: false);
+    }
+  }
+
+  Future<bool> controlCabinPort({
+    required String sn,
+    required int port,
+    required int type,
+  }) async {
+    if (sn.isEmpty || port <= 0) return false;
+    state = state.copyWith(operating: true);
+    try {
+      final response = await _api.post<Object>(
+        ApiPath.cabinetCtrlPort,
+        data: {'sn': sn, 'port': port, 'type': type},
+        parser: (json) => json ?? Object(),
+      );
+      if (response.isSuccess) {
+        if (type == 2 || type == 3) {
+          final nextStatus = type == 3 ? 1 : 0;
+          final cabins = state.cabins.map((cabin) {
+            if (cabin.portNo == port) {
+              return cabin.copyWith(status: nextStatus);
+            }
+            return cabin;
+          }).toList();
+          state = state.copyWith(cabins: cabins);
+        }
+      }
+      return response.isSuccess;
+    } catch (_) {
+      return false;
+    } finally {
+      state = state.copyWith(operating: false);
+    }
   }
 }
 
@@ -210,8 +301,8 @@ class CabinetFaultState {
 
 final cabinetFaultProvider =
     NotifierProvider<CabinetFaultNotifier, CabinetFaultState>(
-  CabinetFaultNotifier.new,
-);
+      CabinetFaultNotifier.new,
+    );
 
 class CabinetFaultNotifier extends Notifier<CabinetFaultState> {
   final ApiService _api = ApiService();
@@ -230,14 +321,15 @@ class CabinetFaultNotifier extends Notifier<CabinetFaultState> {
         'sn': sn,
         'port': port,
       },
-      parser: (json) => CabinFaultBean.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
+      parser: (json) =>
+          CabinFaultBean.fromJson(Map<String, dynamic>.from(json as Map)),
     );
     final result = response.result;
     state = state.copyWith(
       loading: false,
-      items: page == 1 ? (result?.list ?? []) : [...state.items, ...?result?.list],
+      items: page == 1
+          ? (result?.list ?? [])
+          : [...state.items, ...?result?.list],
       total: result?.total ?? state.total,
     );
   }

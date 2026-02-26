@@ -7,14 +7,18 @@ import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
 import 'package:merchant_app/data/models/payment_plan.dart';
 import 'package:merchant_app/data/models/purchasing_user.dart';
 import 'package:merchant_app/data/models/service_plan.dart';
+import 'package:merchant_app/data/models/shop_payment_method.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
 class SellBindState {
+  static const Object _sentinel = Object();
+
   final bool loadingUser;
   final bool loadingDevice;
   final bool loadingPlans;
   final bool loadingPaymentPlans;
+  final bool loadingShopPayment;
   final bool submitting;
   final bool submitSuccess;
   final String? documentNo;
@@ -28,12 +32,14 @@ class SellBindState {
   final int payType;
   final String? cardImgUrl;
   final String? personImgUrl;
+  final ShopPaymentMethod? shopPaymentMethod;
 
   const SellBindState({
     this.loadingUser = false,
     this.loadingDevice = false,
     this.loadingPlans = false,
     this.loadingPaymentPlans = false,
+    this.loadingShopPayment = false,
     this.submitting = false,
     this.submitSuccess = false,
     this.documentNo,
@@ -47,6 +53,7 @@ class SellBindState {
     this.payType = 1,
     this.cardImgUrl,
     this.personImgUrl,
+    this.shopPaymentMethod,
   });
 
   SellBindState copyWith({
@@ -54,38 +61,56 @@ class SellBindState {
     bool? loadingDevice,
     bool? loadingPlans,
     bool? loadingPaymentPlans,
+    bool? loadingShopPayment,
     bool? submitting,
     bool? submitSuccess,
-    String? documentNo,
-    PurchasingUser? user,
-    BatterOrVehicleInfo? deviceInfo,
+    Object? documentNo = _sentinel,
+    Object? user = _sentinel,
+    Object? deviceInfo = _sentinel,
     List<ServicePlanBean>? plans,
-    ServicePlanBean? selectedPlan,
+    Object? selectedPlan = _sentinel,
     List<PaymentPlan>? paymentPlans,
-    PaymentPlan? selectedPaymentPlan,
+    Object? selectedPaymentPlan = _sentinel,
     int? paySource,
     int? payType,
-    String? cardImgUrl,
-    String? personImgUrl,
+    Object? cardImgUrl = _sentinel,
+    Object? personImgUrl = _sentinel,
+    Object? shopPaymentMethod = _sentinel,
   }) {
     return SellBindState(
       loadingUser: loadingUser ?? this.loadingUser,
       loadingDevice: loadingDevice ?? this.loadingDevice,
       loadingPlans: loadingPlans ?? this.loadingPlans,
       loadingPaymentPlans: loadingPaymentPlans ?? this.loadingPaymentPlans,
+      loadingShopPayment: loadingShopPayment ?? this.loadingShopPayment,
       submitting: submitting ?? this.submitting,
       submitSuccess: submitSuccess ?? this.submitSuccess,
-      documentNo: documentNo ?? this.documentNo,
-      user: user ?? this.user,
-      deviceInfo: deviceInfo ?? this.deviceInfo,
+      documentNo: documentNo == _sentinel
+          ? this.documentNo
+          : documentNo as String?,
+      user: user == _sentinel ? this.user : user as PurchasingUser?,
+      deviceInfo: deviceInfo == _sentinel
+          ? this.deviceInfo
+          : deviceInfo as BatterOrVehicleInfo?,
       plans: plans ?? this.plans,
-      selectedPlan: selectedPlan ?? this.selectedPlan,
+      selectedPlan: selectedPlan == _sentinel
+          ? this.selectedPlan
+          : selectedPlan as ServicePlanBean?,
       paymentPlans: paymentPlans ?? this.paymentPlans,
-      selectedPaymentPlan: selectedPaymentPlan ?? this.selectedPaymentPlan,
+      selectedPaymentPlan: selectedPaymentPlan == _sentinel
+          ? this.selectedPaymentPlan
+          : selectedPaymentPlan as PaymentPlan?,
       paySource: paySource ?? this.paySource,
       payType: payType ?? this.payType,
-      cardImgUrl: cardImgUrl ?? this.cardImgUrl,
-      personImgUrl: personImgUrl ?? this.personImgUrl,
+      cardImgUrl: cardImgUrl == _sentinel
+          ? this.cardImgUrl
+          : cardImgUrl as String?,
+      personImgUrl: personImgUrl == _sentinel
+          ? this.personImgUrl
+          : personImgUrl as String?,
+      shopPaymentMethod: shopPaymentMethod == _sentinel
+          ? this.shopPaymentMethod
+          : shopPaymentMethod as ShopPaymentMethod?,
     );
   }
 }
@@ -115,10 +140,7 @@ class SellBindNotifier extends Notifier<SellBindState> {
   Future<void> queryDevice(String sn) async {
     if (sn.isEmpty) return;
     final plan = state.selectedPlan;
-    state = state.copyWith(
-      loadingDevice: true,
-      deviceInfo: null,
-    );
+    state = state.copyWith(loadingDevice: true, deviceInfo: null);
     final params = <String, dynamic>{'sn': sn};
     if ((plan?.batteryType ?? '').isNotEmpty) {
       params['batteryType'] = plan?.batteryType;
@@ -155,10 +177,9 @@ class SellBindNotifier extends Notifier<SellBindState> {
   }
 
   void selectPlan(ServicePlanBean plan) {
-    final isSamePlan = state.selectedPlan?.infoCode == plan.infoCode;
     state = state.copyWith(
       selectedPlan: plan,
-      deviceInfo: isSamePlan ? state.deviceInfo : null,
+      deviceInfo: null,
       selectedPaymentPlan: null,
       paymentPlans: const [],
       loadingDevice: false,
@@ -199,6 +220,11 @@ class SellBindNotifier extends Notifier<SellBindState> {
 
   void updatePayType(int value) {
     state = state.copyWith(payType: value);
+  }
+
+  void clearDeviceInfo() {
+    if (state.deviceInfo == null && !state.loadingDevice) return;
+    state = state.copyWith(loadingDevice: false, deviceInfo: null);
   }
 
   Future<String?> uploadCardImage(String path) async {
@@ -256,7 +282,9 @@ class SellBindNotifier extends Notifier<SellBindState> {
         'idNumber': idNumber,
         'phone': phone,
         'payType': state.payType,
-        'planNo': state.selectedPaymentPlan?.planNo ?? '',
+        'planNo': state.payType == 2
+            ? (state.selectedPaymentPlan?.planNo ?? '')
+            : '',
         'personImg': personImgUrl ?? state.personImgUrl ?? '',
         'infoCode': plan.infoCode ?? '',
         'paySource': state.paySource,
@@ -275,6 +303,11 @@ class SellBindNotifier extends Notifier<SellBindState> {
 
   void reset() {
     state = const SellBindState();
+  }
+
+  void clearPaymentPlan() {
+    if (state.selectedPaymentPlan == null) return;
+    state = state.copyWith(selectedPaymentPlan: null);
   }
 
   Future<Uint8List?> _compressImage(String path) async {
@@ -296,13 +329,25 @@ class SellBindNotifier extends Notifier<SellBindState> {
   }
 
   /// 查询门店支付配置 - 对应 Android 的 getShopPaymentMethod
-  Future<Map<String, dynamic>?> queryShopPayConfig(String shopId) async {
-    if (shopId.isEmpty) return null;
-    final response = await _api.get<Map<String, dynamic>>(
-      ApiPath.queryShopPayConfig,
-      queryParameters: {'shopId': shopId},
-      parser: (json) => Map<String, dynamic>.from(json as Map),
-    );
-    return response.result;
+  Future<void> loadShopPayConfig(String shopId) async {
+    if (shopId.isEmpty) return;
+    state = state.copyWith(loadingShopPayment: true);
+    try {
+      final response = await _api.get<ShopPaymentMethod>(
+        ApiPath.queryShopPayConfig,
+        queryParameters: {'shopId': shopId},
+        parser: (json) =>
+            ShopPaymentMethod.fromJson(Map<String, dynamic>.from(json as Map)),
+      );
+      state = state.copyWith(
+        loadingShopPayment: false,
+        shopPaymentMethod: response.result,
+      );
+    } catch (_) {
+      state = state.copyWith(
+        loadingShopPayment: false,
+        shopPaymentMethod: null,
+      );
+    }
   }
 }

@@ -9,7 +9,13 @@ import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/bluetooth_permission.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/data/models/sn_bean.dart';
+import 'package:merchant_app/features/login/models/auth_session.dart';
+import 'package:merchant_app/features/work/bluetooth/ble_command.dart';
+import 'package:merchant_app/features/work/bluetooth/bluetooth_operate_controller.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
+import 'package:merchant_app/network/api_path.dart';
+import 'package:merchant_app/network/api_service.dart';
 
 /// 蓝牙授权入口页面 - Find Bluetooth key
 class BluetoothAuthPage extends ConsumerStatefulWidget {
@@ -93,9 +99,11 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
       if (!mounted) return;
       // 只显示名称以 HNTT 开头的设备（蓝牙钥匙）
       final filtered = results
-          .where((r) =>
-              r.device.platformName.isNotEmpty &&
-              r.device.platformName.startsWith('HNTT'))
+          .where(
+            (r) =>
+                r.device.platformName.isNotEmpty &&
+                r.device.platformName.startsWith('HNTT'),
+          )
           .toList();
       setState(() {
         _devices
@@ -202,7 +210,7 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
                           const SizedBox(
                             width: 16,
                             height: 16,
-                            child: const SizedBox.shrink(),
+                            child: SizedBox.shrink(),
                           ),
                       ],
                     ),
@@ -220,14 +228,13 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
                           )
                         : ListView.separated(
                             itemCount: _devices.length,
-                            separatorBuilder: (_, __) => const Divider(
-                              height: 1,
-                              indent: 56,
-                            ),
+                            separatorBuilder: (_, __) =>
+                                const Divider(height: 1, indent: 56),
                             itemBuilder: (context, index) {
                               final device = _devices[index].device;
                               final isConnecting =
-                                  _connectingDevice?.remoteId == device.remoteId;
+                                  _connectingDevice?.remoteId ==
+                                  device.remoteId;
 
                               return ListTile(
                                 leading: Image.asset(
@@ -240,7 +247,7 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
                                     ? const SizedBox(
                                         width: 20,
                                         height: 20,
-                                        child: const SizedBox.shrink(),
+                                        child: SizedBox.shrink(),
                                       )
                                     : null,
                                 onTap: isConnecting
@@ -262,26 +269,71 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
 }
 
 /// 蓝牙授权操作页面 - Authorization
-class _BluetoothAuthorizationPage extends StatefulWidget {
+class _BluetoothAuthorizationPage extends ConsumerStatefulWidget {
   const _BluetoothAuthorizationPage({required this.device});
 
   final BluetoothDevice device;
 
   @override
-  State<_BluetoothAuthorizationPage> createState() =>
+  ConsumerState<_BluetoothAuthorizationPage> createState() =>
       _BluetoothAuthorizationPageState();
 }
 
 class _BluetoothAuthorizationPageState
-    extends State<_BluetoothAuthorizationPage> {
+    extends ConsumerState<_BluetoothAuthorizationPage> {
+  static final Guid _serviceUuid = Guid(BleCommandBuilder.serviceId);
+  static final Guid _readUuid = Guid(BleCommandBuilder.readUuid);
+  static final Guid _writeUuid = Guid(BleCommandBuilder.writeUuid);
+
   final _snController = TextEditingController();
+  final ApiService _api = ApiService();
+  BluetoothCharacteristic? _writeChar;
+  StreamSubscription<List<int>>? _notifySub;
+  String _pendingSignal = '';
+  String _notifyBuffer = '';
+  Completer<String>? _pendingResponse;
+  String _lastKeyId = '';
   bool _authorizing = false;
   bool _clearing = false;
 
   @override
+  void initState() {
+    super.initState();
+    _prepareGatt();
+  }
+
+  @override
   void dispose() {
+    _notifySub?.cancel();
     _snController.dispose();
     super.dispose();
+  }
+
+  Future<void> _prepareGatt() async {
+    try {
+      final services = await widget.device.discoverServices();
+      final service = services.firstWhere(
+        (s) => s.uuid == _serviceUuid,
+        orElse: () => services.first,
+      );
+      final writeChar = service.characteristics.firstWhere(
+        (c) => c.uuid == _writeUuid,
+        orElse: () => service.characteristics.first,
+      );
+      final notifyChar = service.characteristics.firstWhere(
+        (c) => c.uuid == _readUuid,
+        orElse: () => service.characteristics.first,
+      );
+      await notifyChar.setNotifyValue(true);
+      _notifySub?.cancel();
+      _notifySub = notifyChar.onValueReceived.listen((data) {
+        _handleNotify(_bytesToHex(data));
+      });
+      _writeChar = writeChar;
+    } catch (_) {
+      if (!mounted) return;
+      showToast(context.l10n.bluetoothAuthFailed);
+    }
   }
 
   Future<void> _scanQRCode() async {
@@ -316,8 +368,53 @@ class _BluetoothAuthorizationPageState
     setState(() => _authorizing = true);
 
     try {
-      // TODO: 发送蓝牙授权命令
-      await Future<void>.delayed(const Duration(seconds: 1));
+      final sn = _snController.text.trim();
+      final lockInfo = await _queryLockInfo(sn);
+      if (lockInfo == null) {
+        throw Exception('lock info missing');
+      }
+      final phone = AuthSession.instance.current?.phone ?? '';
+      if (phone.isEmpty) {
+        throw Exception('phone missing');
+      }
+      final uid = await _queryUid(phone);
+      if (uid == null || uid.isEmpty) {
+        throw Exception('uid missing');
+      }
+      final keyId = await _readKeyId();
+      if (keyId == null || keyId.isEmpty) {
+        throw Exception('key id missing');
+      }
+      final days = 1;
+      final now = DateTime.now();
+      final authBegTime = now
+          .subtract(const Duration(hours: 1))
+          .millisecondsSinceEpoch;
+      final authEndTime = now.add(Duration(days: days)).millisecondsSinceEpoch;
+      final payload = BleCommandBuilder.buildAddAuthorizationData(
+        keyId: keyId,
+        lockId: lockInfo.lockDevId,
+        userNum: uid.padLeft(8, '0'),
+        days: days,
+      );
+      final ack = await _sendEncryptedCommand(signal: '000D', payload: payload);
+      if (ack == null || ack.length < 8 || ack.substring(0, 8) != keyId) {
+        throw Exception('authorize ack invalid');
+      }
+      final uploaded = await ref
+          .read(bluetoothOperateProvider.notifier)
+          .authAdd(
+            phone: phone,
+            keyId: keyId,
+            lockIcId: lockInfo.lockIcId,
+            lockDevId: lockInfo.lockDevId,
+            sn: sn,
+            authBegTime: authBegTime,
+            authEndTime: authEndTime,
+          );
+      if (!uploaded) {
+        throw Exception('upload failed');
+      }
       if (mounted) {
         showToast(l10n.bluetoothAuthSuccess);
       }
@@ -350,8 +447,15 @@ class _BluetoothAuthorizationPageState
     setState(() => _clearing = true);
 
     try {
-      // TODO: 发送清除授权命令
-      await Future<void>.delayed(const Duration(seconds: 1));
+      final keyId = await _readKeyId();
+      if (keyId == null || keyId.isEmpty) {
+        throw Exception('key id missing');
+      }
+      final payload = BleCommandBuilder.buildClearAuthorizationData(keyId);
+      final ack = await _sendEncryptedCommand(signal: '000c', payload: payload);
+      if (ack == null || ack.length < 8 || ack.substring(0, 8) != keyId) {
+        throw Exception('clear ack invalid');
+      }
       if (mounted) {
         showToast(l10n.bluetoothAuthClearSuccess);
       }
@@ -364,6 +468,123 @@ class _BluetoothAuthorizationPageState
         setState(() => _clearing = false);
       }
     }
+  }
+
+  Future<SNBean?> _queryLockInfo(String sn) async {
+    final response = await _api.get<SNBean>(
+      ApiPath.bluetoothGetLockIdBySn,
+      queryParameters: {'sn': sn},
+      parser: (json) => SNBean.fromJson(Map<String, dynamic>.from(json as Map)),
+      showHud: false,
+    );
+    if (!response.isSuccess) return null;
+    return response.result;
+  }
+
+  Future<String?> _queryUid(String phone) async {
+    final response = await _api.get<String>(
+      ApiPath.bluetoothGetUidByPhone,
+      queryParameters: {'phone': phone},
+      parser: (json) => json?.toString() ?? '',
+      showHud: false,
+    );
+    if (!response.isSuccess) return null;
+    return response.result;
+  }
+
+  Future<String?> _readKeyId() async {
+    if (_lastKeyId.length == 8) return _lastKeyId;
+    final response = await _sendEncryptedCommand(
+      signal: '0031',
+      payload: BleCommandBuilder.buildReadKeyIdData(),
+    );
+    if (response == null || response.length < 8) return null;
+    _lastKeyId = response.substring(0, 8);
+    return _lastKeyId;
+  }
+
+  Future<String?> _sendEncryptedCommand({
+    required String signal,
+    required String payload,
+  }) async {
+    final writeChar = _writeChar;
+    if (writeChar == null) {
+      await _prepareGatt();
+    }
+    final activeWrite = _writeChar;
+    if (activeWrite == null) return null;
+    final encrypted = await ref
+        .read(bluetoothOperateProvider.notifier)
+        .enOrDecrypt(payload: payload, isEncrypt: true);
+    if (encrypted == null || encrypted.isEmpty) return null;
+    final command = BleCommandBuilder.buildCommand(
+      signal: signal,
+      plainHex: payload,
+      encryptedHex: encrypted,
+    );
+    final bytes = _hexToBytes(command);
+    if (bytes == null) return null;
+    _pendingSignal = signal.toLowerCase();
+    _pendingResponse = Completer<String>();
+    await activeWrite.write(bytes, withoutResponse: false);
+    try {
+      return await _pendingResponse!.future.timeout(const Duration(seconds: 8));
+    } catch (_) {
+      return null;
+    } finally {
+      _pendingResponse = null;
+    }
+  }
+
+  void _handleNotify(String hex) {
+    _notifyBuffer += hex.toLowerCase();
+    final endFlag = BleCommandBuilder.commandEnd.toLowerCase();
+    while (_notifyBuffer.contains(endFlag)) {
+      final index = _notifyBuffer.indexOf(endFlag);
+      final raw = _notifyBuffer.substring(0, index + endFlag.length);
+      _notifyBuffer = _notifyBuffer.substring(index + endFlag.length);
+      final unescaped = BleCommandBuilder.unescapeResponse(raw);
+      final signal = BleCommandBuilder.extractSignal(unescaped).toLowerCase();
+      if (_pendingSignal.isNotEmpty && signal != _pendingSignal) {
+        continue;
+      }
+      final decryptStr = BleCommandBuilder.extractDecryptStr(unescaped);
+      ref
+          .read(bluetoothOperateProvider.notifier)
+          .enOrDecrypt(payload: decryptStr, isEncrypt: false)
+          .then((value) {
+            if (value == null || value.isEmpty) return;
+            final completer = _pendingResponse;
+            if (completer != null && !completer.isCompleted) {
+              completer.complete(value);
+            }
+          });
+    }
+  }
+
+  List<int>? _hexToBytes(String input) {
+    final clean = input
+        .replaceAll('0x', '')
+        .replaceAll('0X', '')
+        .replaceAll(RegExp(r'\s+'), '')
+        .toUpperCase();
+    if (clean.isEmpty || clean.length.isOdd) return null;
+    final bytes = <int>[];
+    for (var i = 0; i < clean.length; i += 2) {
+      final part = clean.substring(i, i + 2);
+      final value = int.tryParse(part, radix: 16);
+      if (value == null) return null;
+      bytes.add(value);
+    }
+    return bytes;
+  }
+
+  String _bytesToHex(List<int> bytes) {
+    final buffer = StringBuffer();
+    for (final b in bytes) {
+      buffer.write(b.toRadixString(16).padLeft(2, '0').toUpperCase());
+    }
+    return buffer.toString();
   }
 
   @override
@@ -437,7 +658,7 @@ class _BluetoothAuthorizationPageState
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: const SizedBox.shrink(),
+                            child: SizedBox.shrink(),
                           )
                         : Text(
                             l10n.bluetoothAuthOpenButton,
@@ -463,7 +684,7 @@ class _BluetoothAuthorizationPageState
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: const SizedBox.shrink(),
+                            child: SizedBox.shrink(),
                           )
                         : Text(
                             l10n.bluetoothAuthClearButton,
@@ -531,17 +752,14 @@ class _ConnectedDeviceCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   l10n.bluetoothAuthConnected,
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
                 ),
               ],
             ),
           ),
           Icon(
             Icons.bluetooth,
-            color: Colors.white.withOpacity(0.3),
+            color: Colors.white.withValues(alpha: 0.3),
             size: 48,
           ),
         ],

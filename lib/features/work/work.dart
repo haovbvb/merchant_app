@@ -213,7 +213,7 @@ const List<WorkModule> _operationsDealerModules = [
   WorkModule(
     key: 'cabinet_unshelve',
     titleKey: 'cabinetUnshelve',
-    iconPath: 'assets/android/mipmap-xxhdpi/icon_unshelve.png',
+    iconPath: 'assets/android/mipmap-xxhdpi/icon_retire_station.png',
   ),
   WorkModule(
     key: 'cabinet_operate',
@@ -254,8 +254,9 @@ class _WorkTabState extends ConsumerState<WorkTab> {
     final availableRoles = _resolveAvailableRoles();
     final activeRole = _resolveActiveRole(availableRoles);
     final warehouseRole = AuthSession.instance.current?.role ?? 0;
-    final serviceTypes =
-        _parseServiceTypes(AuthSession.instance.current?.serviceType);
+    final serviceTypes = _parseServiceTypes(
+      AuthSession.instance.current?.serviceType,
+    );
     final modules = _resolveModules(activeRole, warehouseRole, serviceTypes);
 
     _syncRoleIfNeeded(activeRole);
@@ -271,9 +272,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
           Expanded(
             child: Container(
               margin: const EdgeInsets.only(top: 0),
-              decoration: BoxDecoration(
-                color: AppColors.bgColor,
-              ),
+              decoration: BoxDecoration(color: AppColors.bgColor),
               child: _buildModuleSection(context, modules, activeRole),
             ),
           ),
@@ -296,10 +295,11 @@ class _WorkTabState extends ConsumerState<WorkTab> {
 
     return Container(
       decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF1B3D2F), Color(0xFF2D5A45)],
+        image: DecorationImage(
+          image: AssetImage(
+            'assets/android/mipmap-xxhdpi/icon_workbench_topbg.webp',
+          ),
+          fit: BoxFit.cover,
         ),
       ),
       child: SafeArea(
@@ -320,7 +320,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
                         Text(
                           roleName,
                           style: const TextStyle(
-                            fontSize: 18,
+                            fontSize: 19,
                             fontWeight: FontWeight.w600,
                             color: Colors.white,
                           ),
@@ -339,11 +339,11 @@ class _WorkTabState extends ConsumerState<WorkTab> {
                   const Spacer(),
                   GestureDetector(
                     onTap: _scanAndOpenDetail,
-                    child: Container(
-                      padding: const EdgeInsets.all(0),
+                    child: SizedBox(
+                      width: 36,
+                      height: 36,
                       child: Image.asset(
                         'assets/android/mipmap-xxhdpi/icon_scan.png',
-                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -372,21 +372,25 @@ class _WorkTabState extends ConsumerState<WorkTab> {
     final orderNum = saleData?.orderNum ?? 0;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
+      margin: const EdgeInsets.symmetric(horizontal: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        gradient: const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFFFF8F0), Colors.white],
+        ),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(
-                Icons.shopping_bag_outlined,
-                size: 18,
-                color: AppColors.black06Text,
+              Image.asset(
+                'assets/android/mipmap-xxhdpi/icon_thismonth_sale.png',
+                width: 16,
+                height: 16,
               ),
               const SizedBox(width: 8),
               Text(
@@ -400,13 +404,12 @@ class _WorkTabState extends ConsumerState<WorkTab> {
               const Spacer(),
               Text(
                 dateStr,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF999999),
-                ),
+                style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
               ),
             ],
           ),
+          const SizedBox(height: 10),
+          const Divider(height: 1, color: Color(0xFFEBEBEB)),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -426,8 +429,8 @@ class _WorkTabState extends ConsumerState<WorkTab> {
                     Text(
                       l10n.workbenchTransactionAmount,
                       style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF999999),
+                        fontSize: 14,
+                        color: Color(0xA6000000),
                       ),
                     ),
                   ],
@@ -449,8 +452,8 @@ class _WorkTabState extends ConsumerState<WorkTab> {
                     Text(
                       l10n.workbenchOrderQuantity,
                       style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF999999),
+                        fontSize: 14,
+                        color: Color(0xA6000000),
                       ),
                     ),
                   ],
@@ -465,10 +468,10 @@ class _WorkTabState extends ConsumerState<WorkTab> {
 
   Widget _buildModulesCard(BuildContext context, List<WorkModule> modules) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      padding: const EdgeInsets.fromLTRB(8, 12, 8, 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: GridView.builder(
         shrinkWrap: true,
@@ -497,18 +500,18 @@ class _WorkTabState extends ConsumerState<WorkTab> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           SizedBox(
-            width: 56,
-            height: 56,
+            width: 55,
+            height: 55,
             child: ClipRRect(
               child: Image.asset(
                 module.iconPath,
-                width: 56,
-                height: 56,
+                width: 55,
+                height: 55,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    width: 56,
-                    height: 56,
+                    width: 55,
+                    height: 55,
                     decoration: BoxDecoration(
                       color: AppColors.primaryColor,
                       borderRadius: BorderRadius.circular(12),
@@ -529,10 +532,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 13,
-              color: AppColors.black06Text,
-            ),
+            style: const TextStyle(fontSize: 13, color: Color(0x99000000)),
           ),
         ],
       ),
@@ -651,10 +651,12 @@ class _WorkTabState extends ConsumerState<WorkTab> {
   }
 
   Widget _buildRoleOption(
-      BuildContext context, WorkRole role, AppLocalizations l10n) {
+    BuildContext context,
+    WorkRole role,
+    AppLocalizations l10n,
+  ) {
     final isSelected = _currentRole == role;
     final iconPath = _getRoleIconPath(role);
-    final color = _getRoleColor(role);
     final displayName = _getRoleDisplayName(role, l10n);
 
     return GestureDetector(
@@ -668,27 +670,26 @@ class _WorkTabState extends ConsumerState<WorkTab> {
         }
       },
       child: Container(
-        width: 100,
+        width: 108,
+        height: 130,
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? color.withValues(alpha: 0.1) : AppColors.bgColor,
-          borderRadius: BorderRadius.circular(12),
-          border: isSelected ? Border.all(color: color, width: 1) : null,
+          color: isSelected ? const Color(0xFFEAF2FF) : const Color(0xFFF5F8FB),
+          borderRadius: BorderRadius.circular(16),
+          border: isSelected
+              ? Border.all(color: const Color(0xFFB8D3FF), width: 1)
+              : null,
         ),
         child: Column(
           children: [
-            Image.asset(
-              iconPath,
-              width: 32,
-              height: 32,
-            ),
-            const SizedBox(height: 8),
+            Image.asset(iconPath, width: 54, height: 54),
+            const SizedBox(height: 12),
             Text(
               displayName,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12,
-                color: isSelected ? color : const Color(0xFF666666),
+                fontSize: 14,
+                color: const Color(0xFF606166),
                 fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
               ),
             ),
@@ -701,22 +702,11 @@ class _WorkTabState extends ConsumerState<WorkTab> {
   String _getRoleIconPath(WorkRole role) {
     switch (role) {
       case WorkRole.sale:
-        return 'assets/images/icon_shopping_bag_outlined.png';
+        return 'assets/android/mipmap-xxhdpi/img_sales_summary.png';
       case WorkRole.operations:
         return 'assets/android/mipmap-xxhdpi/icon_onm.png';
       case WorkRole.warehouseKeeper:
         return 'assets/android/mipmap-xxhdpi/icon_warehouse.png';
-    }
-  }
-
-  Color _getRoleColor(WorkRole role) {
-    switch (role) {
-      case WorkRole.sale:
-        return const Color(0xFFFF9800);
-      case WorkRole.operations:
-        return const Color(0xFF2196F3);
-      case WorkRole.warehouseKeeper:
-        return AppColors.primaryColor;
     }
   }
 
@@ -738,10 +728,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
     if (!mounted || result == null || result.isEmpty) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => DeviceDetailPageNew(
-          initialSn: result,
-          readOnly: true,
-        ),
+        builder: (_) => DeviceDetailPageNew(initialSn: result, readOnly: true),
       ),
     );
   }
@@ -868,7 +855,8 @@ class _WorkTabState extends ConsumerState<WorkTab> {
           case 'merchant_replace':
             return !serviceTypes.contains(4);
           case 'sale_summary':
-            final hasSalesService = serviceTypes.contains(2) ||
+            final hasSalesService =
+                serviceTypes.contains(2) ||
                 serviceTypes.contains(3) ||
                 serviceTypes.contains(4);
             final hasOtherService =
@@ -922,10 +910,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
 
   String _formatSaleDate(BuildContext context, String? raw) {
     if (raw == null || raw.trim().isEmpty) {
-      return DateFormatUtils.format(
-        DateTime.now(),
-        pattern: 'MMM dd,yyyy',
-      );
+      return DateFormatUtils.format(DateTime.now(), pattern: 'MMM dd,yyyy');
     }
     final timestamp = double.tryParse(raw);
     if (timestamp != null) {
@@ -936,14 +921,8 @@ class _WorkTabState extends ConsumerState<WorkTab> {
     }
     final parsed = DateTime.tryParse(raw);
     if (parsed != null) {
-      return DateFormatUtils.format(
-        parsed,
-        pattern: 'MMM dd,yyyy',
-      );
+      return DateFormatUtils.format(parsed, pattern: 'MMM dd,yyyy');
     }
-    return DateFormatUtils.format(
-      DateTime.now(),
-      pattern: 'MMM dd,yyyy',
-    );
+    return DateFormatUtils.format(DateTime.now(), pattern: 'MMM dd,yyyy');
   }
 }

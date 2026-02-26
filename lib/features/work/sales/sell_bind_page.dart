@@ -9,6 +9,7 @@ import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
 import 'package:merchant_app/data/models/purchasing_user.dart';
 import 'package:merchant_app/data/models/service_plan.dart';
+import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/sell_bind_controller.dart';
 import 'package:merchant_app/features/work/sales/widgets/applicant_sheet.dart';
@@ -25,17 +26,29 @@ class SellBindPage extends ConsumerStatefulWidget {
 
 class _SellBindPageState extends ConsumerState<SellBindPage> {
   final _snController = TextEditingController();
+  final _snFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    ref.read(sellBindProvider.notifier).reset();
+    final notifier = ref.read(sellBindProvider.notifier);
+    notifier.reset();
+    final shopNo = AuthSession.instance.current?.shopNo ?? '';
+    if (shopNo.isNotEmpty) {
+      notifier.loadShopPayConfig(shopNo);
+    }
     _snController.clear();
+    _snFocusNode.addListener(() {
+      if (!_snFocusNode.hasFocus) {
+        _queryDeviceByInput();
+      }
+    });
   }
 
   @override
   void dispose() {
     ref.read(sellBindProvider.notifier).reset();
+    _snFocusNode.dispose();
     _snController.dispose();
     super.dispose();
   }
@@ -152,7 +165,9 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 8),
               decoration: BoxDecoration(
-                border: Border(bottom: BorderSide(color: AppColors.borderColor)),
+                border: Border(
+                  bottom: BorderSide(color: AppColors.borderColor),
+                ),
               ),
               child: Row(
                 children: [
@@ -203,6 +218,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
               Expanded(
                 child: TextField(
                   controller: _snController,
+                  focusNode: _snFocusNode,
                   decoration: InputDecoration(
                     hintText: l10n.sellBindDeviceSnHint,
                     hintStyle: const TextStyle(color: Color(0xFF999999)),
@@ -214,6 +230,17 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
                     fontSize: 16,
                     color: AppColors.black06Text,
                   ),
+                  onChanged: (value) {
+                    final sn = value.trim();
+                    final currentSn =
+                        state.deviceInfo?.batteryVo?.sn ??
+                        state.deviceInfo?.carVo?.sn ??
+                        '';
+                    if (sn.isEmpty ||
+                        (currentSn.isNotEmpty && sn != currentSn)) {
+                      notifier.clearDeviceInfo();
+                    }
+                  },
                   onSubmitted: (value) {
                     if (value.trim().isNotEmpty) {
                       notifier.queryDevice(value.trim());
@@ -272,9 +299,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
         width: double.infinity,
         height: 48,
         child: ElevatedButton(
-          onPressed: isEnabled
-              ? () => _handleSubmit(context, state, notifier)
-              : null,
+          onPressed: isEnabled ? () => _handleSubmit(state, notifier) : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryColor,
             disabledBackgroundColor: const Color(0xFFE8F5E9),
@@ -303,6 +328,16 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
     ref.read(sellBindProvider.notifier).queryDevice(result);
   }
 
+  void _queryDeviceByInput() {
+    final sn = _snController.text.trim();
+    final notifier = ref.read(sellBindProvider.notifier);
+    if (sn.isEmpty) {
+      notifier.clearDeviceInfo();
+      return;
+    }
+    notifier.queryDevice(sn);
+  }
+
   Future<void> _showPackageSheet(
     BuildContext context,
     SellBindNotifier notifier,
@@ -315,23 +350,24 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
   }
 
   Future<void> _handleSubmit(
-    BuildContext context,
     SellBindState state,
     SellBindNotifier notifier,
   ) async {
-    final l10n = context.l10n;
+    final pageContext = context;
+    final l10n = pageContext.l10n;
 
     // Step 1: Select Payment
     final paymentResult = await PaymentSheet.show(
-      context,
+      pageContext,
       notifier,
       state.selectedPlan!.packageAmount ?? 0,
+      state.shopPaymentMethod,
     );
-    if (paymentResult == null || !mounted) return;
+    if (paymentResult == null || !mounted || !pageContext.mounted) return;
 
     // Step 2: Select Applicant
-    final applicantResult = await ApplicantSheet.show(context, notifier);
-    if (applicantResult == null || !mounted) return;
+    final applicantResult = await ApplicantSheet.show(pageContext, notifier);
+    if (applicantResult == null || !mounted || !pageContext.mounted) return;
 
     final latestState = ref.read(sellBindProvider);
 
@@ -348,15 +384,13 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
         device.carVo?.carModel ??
         device.carVo?.model;
     final planModel = plan.batteryType ?? plan.carType;
-    if (deviceModel != null &&
-        planModel != null &&
-        deviceModel != planModel) {
-      _showModelMismatchDialog(context, l10n);
+    if (deviceModel != null && planModel != null && deviceModel != planModel) {
+      _showModelMismatchDialog(pageContext, l10n);
       return;
     }
 
     // Step 4: Confirm and Submit
-    await Navigator.of(context).push<bool>(
+    await Navigator.of(pageContext).push<bool>(
       MaterialPageRoute(
         builder: (_) => _SellBindConfirmPage(
           applicant: applicantResult,
@@ -394,8 +428,8 @@ class _PackageCard extends StatelessWidget {
         : hasCarType
         ? 'Vehicle'
         : 'Device';
-    final typeValue = _valueOrDash(plan.batteryType ?? plan.carType);
-    final modelValue = _valueOrDash(plan.deviceModel);
+    final typeValue = _valueOrDash(_resolveTypeValue(plan));
+    final modelValue = _valueOrDash(_resolveModelValue(plan));
 
     return Container(
       decoration: BoxDecoration(
@@ -442,8 +476,30 @@ class _PackageCard extends StatelessWidget {
   }
 
   String _valueOrDash(String? value) {
-    if (value == null || value.trim().isEmpty) return '-';
+    if (value == null || value.trim().isEmpty || value.trim() == '-') {
+      return '-';
+    }
     return value;
+  }
+
+  String? _resolveTypeValue(ServicePlanBean plan) {
+    final carType = plan.carType?.trim();
+    if (carType != null && carType.isNotEmpty && carType != '-') {
+      return carType;
+    }
+    final batteryType = plan.batteryType?.trim();
+    if (batteryType != null && batteryType.isNotEmpty && batteryType != '-') {
+      return batteryType;
+    }
+    return null;
+  }
+
+  String? _resolveModelValue(ServicePlanBean plan) {
+    final model = plan.deviceModel?.trim();
+    if (model != null && model.isNotEmpty && model != '-') {
+      return model;
+    }
+    return _resolveTypeValue(plan);
   }
 
   Widget _buildInfoTag(String text) {
@@ -486,7 +542,9 @@ class _BatteryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final model = _valueOrDash(battery.batModel ?? battery.model);
+    final model = _valueOrDash(
+      battery.batModel ?? battery.model ?? battery.batteryType,
+    );
     final spec = _valueOrDash(battery.batSpec ?? battery.spec);
     return Container(
       decoration: BoxDecoration(
@@ -571,7 +629,9 @@ class _BatteryCard extends StatelessWidget {
   }
 
   String _valueOrDash(String? value) {
-    if (value == null || value.trim().isEmpty) return '-';
+    if (value == null || value.trim().isEmpty || value.trim() == '-') {
+      return '-';
+    }
     return value;
   }
 
@@ -624,7 +684,7 @@ class _VehicleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final model = _valueOrDash(car.carModel ?? car.model);
+    final model = _valueOrDash(_resolveModelValue(car));
     final spec = _valueOrDash(car.carSpec ?? car.spec);
     return Container(
       decoration: BoxDecoration(
@@ -708,8 +768,22 @@ class _VehicleCard extends StatelessWidget {
   }
 
   String _valueOrDash(String? value) {
-    if (value == null || value.trim().isEmpty) return '-';
+    if (value == null || value.trim().isEmpty || value.trim() == '-') {
+      return '-';
+    }
     return value;
+  }
+
+  String? _resolveModelValue(CarVo car) {
+    final carModel = car.carModel?.trim();
+    if (carModel != null && carModel.isNotEmpty && carModel != '-') {
+      return carModel;
+    }
+    final carType = car.carType?.trim();
+    if (carType != null && carType.isNotEmpty && carType != '-') {
+      return carType;
+    }
+    return car.model;
   }
 
   Widget _buildTag(String text) {
@@ -830,8 +904,8 @@ class _SellBindConfirmPageState extends ConsumerState<_SellBindConfirmPage> {
                         widget.payment.paySource == 1
                             ? l10n.sellBindPayFull
                             : (widget.payment.payType == 1
-                                ? l10n.sellBindPayFull
-                                : l10n.sellBindPayInstallment),
+                                  ? l10n.sellBindPayFull
+                                  : l10n.sellBindPayInstallment),
                       ),
                       if (widget.payment.paymentPlan != null)
                         _buildInfoRow(
@@ -846,9 +920,7 @@ class _SellBindConfirmPageState extends ConsumerState<_SellBindConfirmPage> {
                     children: [
                       _buildInfoRow(
                         l10n.sellBindCardNum,
-                        _valueOrDash(
-                          user?.cardNum ?? widget.applicant.cardNum,
-                        ),
+                        _valueOrDash(user?.cardNum ?? widget.applicant.cardNum),
                       ),
                       _buildInfoRow(
                         l10n.sellBindAccount,
@@ -902,18 +974,18 @@ class _SellBindConfirmPageState extends ConsumerState<_SellBindConfirmPage> {
             child: SizedBox(
               width: double.infinity,
               height: 48,
-                child: ElevatedButton(
-                  onPressed: _submitting ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    disabledBackgroundColor: const Color(0xFFE8F5E9),
+              child: ElevatedButton(
+                onPressed: _submitting ? null : _submit,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primaryColor,
+                  disabledBackgroundColor: const Color(0xFFE8F5E9),
                   foregroundColor: Colors.white,
                   disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                   elevation: 0,
-                  ),
+                ),
                 child: Text(
                   l10n.sellBindSubmit,
                   style: const TextStyle(
@@ -968,10 +1040,7 @@ class _SellBindConfirmPageState extends ConsumerState<_SellBindConfirmPage> {
             flex: 4,
             child: Text(
               label,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF999999),
-              ),
+              style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
             ),
           ),
           const SizedBox(width: 8),
@@ -997,6 +1066,11 @@ class _SellBindConfirmPageState extends ConsumerState<_SellBindConfirmPage> {
   }
 
   Future<void> _submit() async {
+    final email = widget.applicant.email.trim();
+    if (email.isNotEmpty && !email.contains('@')) {
+      showToast(context.l10n.offlineRegisterEmailInvalid);
+      return;
+    }
     setState(() => _submitting = true);
     final notifier = ref.read(sellBindProvider.notifier);
     final ok = await notifier.submit(

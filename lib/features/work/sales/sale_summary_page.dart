@@ -7,6 +7,7 @@ import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/widgets/confirm_dialog.dart';
+import 'package:merchant_app/core/widgets/photo_gallery_viewer.dart';
 import 'package:merchant_app/data/models/sales_bar_data.dart';
 import 'package:merchant_app/data/models/sell_data_list_response.dart';
 import 'package:merchant_app/features/work/sales/sale_summary_controller.dart';
@@ -472,7 +473,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(20),
-                child: const SizedBox.shrink(),
+                child: SizedBox.shrink(),
               ),
             )
           else
@@ -616,9 +617,10 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
               if ((order.attachment ?? '').isNotEmpty) ...[
                 const SizedBox(height: 4),
                 GestureDetector(
-                  onTap: () {
-                    // TODO: View Voucher
-                  },
+                  onTap: () => PhotoGalleryViewer.show(
+                    context,
+                    _splitAttachmentUrls(order.attachment),
+                  ),
                   child: Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8,
@@ -817,10 +819,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
   }
 
   String _formatDate(DateTime date) {
-    return DateFormatUtils.format(
-      date,
-      pattern: 'MMM d',
-    );
+    return DateFormatUtils.format(date, pattern: 'MMM d');
   }
 
   String _formatAmount(double amount) {
@@ -830,6 +829,15 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
       return '${(amount / 1000).toStringAsFixed(1)}K';
     }
     return amount.toStringAsFixed(0);
+  }
+
+  List<String> _splitAttachmentUrls(String? raw) {
+    if (raw == null || raw.trim().isEmpty) return const [];
+    return raw
+        .split(',')
+        .map((item) => item.trim())
+        .where((item) => item.isNotEmpty)
+        .toList();
   }
 }
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -31,6 +33,7 @@ class PackageSheet extends ConsumerStatefulWidget {
 
 class _PackageSheetState extends ConsumerState<PackageSheet> {
   final _searchController = TextEditingController();
+  Timer? _searchDebounce;
   ServicePlanBean? _selected;
 
   @override
@@ -42,6 +45,7 @@ class _PackageSheetState extends ConsumerState<PackageSheet> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -94,11 +98,7 @@ class _PackageSheetState extends ConsumerState<PackageSheet> {
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Row(
                 children: [
-                  const Icon(
-                    Icons.search,
-                    color: Color(0xFF999999),
-                    size: 20,
-                  ),
+                  const Icon(Icons.search, color: Color(0xFF999999), size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: TextField(
@@ -115,6 +115,15 @@ class _PackageSheetState extends ConsumerState<PackageSheet> {
                       onSubmitted: (value) {
                         widget.notifier.queryPlans(value.trim());
                       },
+                      onChanged: (value) {
+                        _searchDebounce?.cancel();
+                        _searchDebounce = Timer(
+                          const Duration(milliseconds: 1000),
+                          () {
+                            widget.notifier.queryPlans(value.trim());
+                          },
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -126,32 +135,31 @@ class _PackageSheetState extends ConsumerState<PackageSheet> {
           // Package list
           Expanded(
             child: state.loadingPlans
-                ? const Center(child: const SizedBox.shrink())
+                ? const Center(child: SizedBox.shrink())
                 : plans.isEmpty
-                    ? Center(
-                        child: Text(
-                          l10n.sellBindPlanEmpty,
-                          style: const TextStyle(color: Color(0xFF999999)),
-                        ),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        itemCount: plans.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final plan = plans[index];
-                          final isSelected =
-                              _selected?.infoCode == plan.infoCode;
-                          return _PackageItem(
-                            plan: plan,
-                            isSelected: isSelected,
-                            onTap: () {
-                              setState(() => _selected = plan);
-                              Navigator.of(context).pop(plan);
-                            },
-                          );
+                ? Center(
+                    child: Text(
+                      l10n.sellBindPlanEmpty,
+                      style: const TextStyle(color: Color(0xFF999999)),
+                    ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: plans.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final plan = plans[index];
+                      final isSelected = _selected?.infoCode == plan.infoCode;
+                      return _PackageItem(
+                        plan: plan,
+                        isSelected: isSelected,
+                        onTap: () {
+                          setState(() => _selected = plan);
+                          Navigator.of(context).pop(plan);
                         },
-                      ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -180,8 +188,8 @@ class _PackageItem extends StatelessWidget {
         : hasCarType
         ? 'Vehicle'
         : 'Device';
-    final typeValue = _valueOrDash(plan.batteryType ?? plan.carType);
-    final modelValue = _valueOrDash(plan.deviceModel);
+    final typeValue = _valueOrDash(_resolveTypeValue(plan));
+    final modelValue = _valueOrDash(_resolveModelValue(plan));
 
     return GestureDetector(
       onTap: onTap,
@@ -190,7 +198,9 @@ class _PackageItem extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primaryColor : const Color(0xFFEEEEEE),
+            color: isSelected
+                ? AppColors.primaryColor
+                : const Color(0xFFEEEEEE),
           ),
         ),
         padding: const EdgeInsets.all(16),
@@ -239,11 +249,7 @@ class _PackageItem extends StatelessWidget {
                   color: AppColors.primaryColor,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 16,
-                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 16),
               ),
           ],
         ),
@@ -252,8 +258,30 @@ class _PackageItem extends StatelessWidget {
   }
 
   String _valueOrDash(String? value) {
-    if (value == null || value.trim().isEmpty) return '-';
+    if (value == null || value.trim().isEmpty || value.trim() == '-') {
+      return '-';
+    }
     return value;
+  }
+
+  String? _resolveTypeValue(ServicePlanBean plan) {
+    final carType = plan.carType?.trim();
+    if (carType != null && carType.isNotEmpty && carType != '-') {
+      return carType;
+    }
+    final batteryType = plan.batteryType?.trim();
+    if (batteryType != null && batteryType.isNotEmpty && batteryType != '-') {
+      return batteryType;
+    }
+    return null;
+  }
+
+  String? _resolveModelValue(ServicePlanBean plan) {
+    final model = plan.deviceModel?.trim();
+    if (model != null && model.isNotEmpty && model != '-') {
+      return model;
+    }
+    return _resolveTypeValue(plan);
   }
 
   Widget _buildInfoTag(String text) {
@@ -265,10 +293,7 @@ class _PackageItem extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 12,
-          color: AppColors.black06Text,
-        ),
+        style: const TextStyle(fontSize: 12, color: AppColors.black06Text),
       ),
     );
   }

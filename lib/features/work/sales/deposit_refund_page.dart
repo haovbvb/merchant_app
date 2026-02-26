@@ -4,7 +4,9 @@ import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
+import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/core/widgets/photo_gallery_viewer.dart';
 import 'package:merchant_app/data/models/deposit_refund_info_bean.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/deposit_refund_controller.dart';
@@ -93,9 +95,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
           Container(
             width: 64,
             height: 64,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-            ),
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(16),
               child: Image.asset(
@@ -139,10 +139,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
         children: [
           Text(
             l10n.depositRefundUserId,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF999999),
-            ),
+            style: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
           ),
           const SizedBox(height: 8),
           Row(
@@ -186,7 +183,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(20),
-                child: const SizedBox.shrink(),
+                child: SizedBox.shrink(),
               ),
             )
           else if (info != null)
@@ -202,10 +199,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
               child: Text(
                 l10n.depositRefundUserEmpty,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF999999),
-                ),
+                style: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
               ),
             ),
         ],
@@ -387,10 +381,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
         const SizedBox(height: 8),
         Text(
           '$unbindTimeStr unbinding',
-          style: const TextStyle(
-            fontSize: 12,
-            color: Color(0xFF999999),
-          ),
+          style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
         ),
         const Divider(height: 24, color: Color(0xFFEEEEEE)),
         // 退款金额
@@ -399,10 +390,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
           children: [
             Text(
               l10n.depositRefundAmount,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF666666),
-              ),
+              style: const TextStyle(fontSize: 14, color: Color(0xFF666666)),
             ),
             Text(
               '\$ ${deposit.depositAmount.toStringAsFixed(2)}',
@@ -539,10 +527,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
               isDense: true,
               contentPadding: EdgeInsets.zero,
             ),
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.black06Text,
-            ),
+            style: const TextStyle(fontSize: 14, color: AppColors.black06Text),
           ),
         ],
       ),
@@ -554,15 +539,15 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
     final state = ref.watch(depositRefundProvider);
     final notifier = ref.read(depositRefundProvider.notifier);
     final canSubmit =
-        state.selectedDeposit != null && state.info != null && !state.submitting;
+        state.selectedDeposit != null &&
+        state.info != null &&
+        !state.submitting;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(
-          top: BorderSide(color: AppColors.borderColor),
-        ),
+        border: Border(top: BorderSide(color: AppColors.borderColor)),
       ),
       child: SafeArea(
         top: false,
@@ -585,7 +570,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: const SizedBox.shrink(),
+                    child: SizedBox.shrink(),
                   )
                 : Text(
                     l10n.depositRefundSubmit,
@@ -628,8 +613,10 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
       MaterialPageRoute(builder: (_) => const QrScanPage()),
     );
     if (result != null && result.isNotEmpty) {
-      _userIdController.text = result;
-      notifier.queryUser(result);
+      final cardNum = ScanUtils.getUserCarNum(result);
+      if (cardNum.isEmpty) return;
+      _userIdController.text = cardNum;
+      notifier.queryUser(cardNum);
     }
   }
 
@@ -651,10 +638,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
   }
 
   void _viewVoucher(List<String> urls) {
-    if (urls.isNotEmpty) {
-      // TODO: 实现图片预览功能
-      showToast('View voucher: ${urls.length} images');
-    }
+    PhotoGalleryViewer.show(context, urls);
   }
 
   Future<void> _submit(DepositRefundNotifier notifier) async {
@@ -721,11 +705,7 @@ class _SuccessPage extends ConsumerWidget {
                   shape: BoxShape.circle,
                   color: AppColors.primaryColor,
                 ),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 36,
-                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 36),
               ),
               const SizedBox(height: 20),
               Text(

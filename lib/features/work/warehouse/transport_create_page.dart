@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/data/models/city.dart';
 import 'package:merchant_app/data/models/warehouse_info.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/warehouse/transport_controller.dart';
@@ -33,6 +34,7 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
       notifier.setInitialSns(widget.initialSns);
       notifier.loadMyWarehouse();
       notifier.loadInWarehouseList();
+      notifier.loadCities();
     });
   }
 
@@ -44,9 +46,7 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
 
     return Scaffold(
       backgroundColor: AppColors.bgColor,
-      appBar: AppBar(
-        title: Text(_getCreateTitle(l10n)),
-      ),
+      appBar: AppBar(title: Text(_getCreateTitle(l10n))),
       body: Column(
         children: [
           Expanded(
@@ -110,23 +110,26 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
                   // 接收仓库
                   _SectionCard(
                     child: _SelectRow(
-                      icon: 'assets/android/mipmap-xxhdpi/icon_receive_warehouse.png',
+                      icon:
+                          'assets/android/mipmap-xxhdpi/icon_receive_warehouse.png',
                       label: l10n.deviceReceiveWarehouse,
                       value: state.selectedInWarehouse != null
                           ? (state.selectedInWarehouse!.inWarehouseName ??
-                              state.selectedInWarehouse!.warehouseName ??
-                              '')
+                                state.selectedInWarehouse!.warehouseName ??
+                                '')
                           : l10n.deviceIssuePleaseSelectWarehouse,
                       valueColor: state.selectedInWarehouse != null
                           ? const Color(0xFF1A1A1A)
                           : const Color(0xFF999999),
-                      onTap: () => _showWarehousePicker(context, l10n, notifier),
+                      onTap: () =>
+                          _showWarehousePicker(context, l10n, notifier),
                     ),
                   ),
                   // 物流单号
                   _SectionCard(
                     child: _SelectRow(
-                      icon: 'assets/android/mipmap-xxhdpi/icon_edt_traknumber.png',
+                      icon:
+                          'assets/android/mipmap-xxhdpi/icon_edt_traknumber.png',
                       label: l10n.deviceIssueTrackingNumber,
                       value: state.trackingNumber.isNotEmpty
                           ? state.trackingNumber
@@ -162,7 +165,8 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
                                 ),
                                 label: l10n.deviceIssueEnterSn,
                                 outlined: true,
-                                onTap: () => _showSnInputDialog(context, l10n, notifier),
+                                onTap: () =>
+                                    _showSnInputDialog(context, l10n, notifier),
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -340,11 +344,8 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) => _WarehousePickerSheet(
-        l10n: l10n,
-        notifier: notifier,
-        ref: ref,
-      ),
+      builder: (_) =>
+          _WarehousePickerSheet(l10n: l10n, notifier: notifier, ref: ref),
     );
   }
 
@@ -426,10 +427,8 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
   ) async {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => QrScanPage(
-          parseDeviceSn: true,
-          deviceType: widget.deviceType,
-        ),
+        builder: (_) =>
+            QrScanPage(parseDeviceSn: true, deviceType: widget.deviceType),
       ),
     );
     if (result != null && result.isNotEmpty) {
@@ -442,7 +441,7 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
     TransportCreateNotifier notifier,
   ) async {
     final created = await notifier.createIssue();
-    if (!mounted) return;
+    if (!context.mounted) return;
     if (created) {
       Navigator.of(context).pop(true);
     }
@@ -492,29 +491,19 @@ class _SelectRow extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.black06Text,
-            ),
+            style: const TextStyle(fontSize: 14, color: AppColors.black06Text),
           ),
           const Spacer(),
           Flexible(
             child: Text(
               value,
-              style: TextStyle(
-                fontSize: 14,
-                color: valueColor,
-              ),
+              style: TextStyle(fontSize: 14, color: valueColor),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
           ),
           const SizedBox(width: 4),
-          const Icon(
-            Icons.chevron_right,
-            color: Color(0xFFCCCCCC),
-            size: 20,
-          ),
+          const Icon(Icons.chevron_right, color: Color(0xFFCCCCCC), size: 20),
         ],
       ),
     );
@@ -585,7 +574,8 @@ class _WarehousePickerSheet extends StatefulWidget {
 
 class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
   final TextEditingController _searchController = TextEditingController();
-  final String _selectedCity = '';
+  String _selectedCityCode = '';
+  String _selectedCityName = '';
 
   @override
   void dispose() {
@@ -598,6 +588,7 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
     final state = widget.ref.watch(transportCreateProvider);
     final warehouses = state.inWarehouses;
     final selectedWarehouse = state.selectedInWarehouse;
+    final cities = state.cities;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
@@ -640,7 +631,7 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
                 onChanged: (value) {
                   widget.notifier.loadInWarehouseList(
                     keyword: value,
-                    cityCode: _selectedCity,
+                    cityCode: _selectedCityCode,
                   );
                 },
                 decoration: InputDecoration(
@@ -668,15 +659,13 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: GestureDetector(
-              onTap: () {
-                // TODO: 显示城市选择器
-              },
+              onTap: () => _showCitySheet(cities),
               child: Row(
                 children: [
                   Text(
-                    _selectedCity.isEmpty
+                    _selectedCityName.isEmpty
                         ? widget.l10n.deviceIssueAllCity
-                        : _selectedCity,
+                        : _selectedCityName,
                     style: const TextStyle(
                       fontSize: 14,
                       color: AppColors.black06Text,
@@ -697,15 +686,12 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
           Expanded(
             child: ListView.separated(
               itemCount: warehouses.length,
-              separatorBuilder: (_, __) => const Divider(
-                height: 1,
-                indent: 16,
-                endIndent: 16,
-              ),
+              separatorBuilder: (_, __) =>
+                  const Divider(height: 1, indent: 16, endIndent: 16),
               itemBuilder: (context, index) {
                 final warehouse = warehouses[index];
-                final isSelected = selectedWarehouse?.inWarehouseNo ==
-                    warehouse.inWarehouseNo;
+                final isSelected =
+                    selectedWarehouse?.inWarehouseNo == warehouse.inWarehouseNo;
                 return ListTile(
                   title: Text(
                     warehouse.inWarehouseName ?? warehouse.warehouseName ?? '-',
@@ -737,6 +723,72 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
           ),
         ],
       ),
+    );
+  }
+
+  Future<void> _showCitySheet(List<City> cities) async {
+    final selected = await showModalBottomSheet<City?>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: Text(widget.l10n.deviceIssueAllCity),
+                trailing: _selectedCityCode.isEmpty
+                    ? Icon(
+                        Icons.check,
+                        color: Theme.of(context).colorScheme.primary,
+                      )
+                    : null,
+                onTap: () => Navigator.of(ctx).pop(null),
+              ),
+              const Divider(height: 1),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: cities.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1),
+                  itemBuilder: (_, index) {
+                    final city = cities[index];
+                    final selected = city.code == _selectedCityCode;
+                    return ListTile(
+                      title: Text(city.name),
+                      trailing: selected
+                          ? Icon(
+                              Icons.check,
+                              color: Theme.of(context).colorScheme.primary,
+                            )
+                          : null,
+                      onTap: () => Navigator.of(ctx).pop(city),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (!mounted) return;
+    setState(() {
+      if (selected == null) {
+        _selectedCityCode = '';
+        _selectedCityName = '';
+      } else {
+        _selectedCityCode = selected.code;
+        _selectedCityName = selected.name;
+      }
+    });
+    await widget.notifier.loadInWarehouseList(
+      keyword: _searchController.text.trim(),
+      cityCode: _selectedCityCode,
     );
   }
 }

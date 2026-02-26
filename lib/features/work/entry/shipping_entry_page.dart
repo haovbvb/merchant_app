@@ -45,7 +45,7 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
     _loadAllTypes();
   }
 
@@ -204,8 +204,8 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
     return _buildModelGrid<CarType>(
       types: _vehicleTypes,
       imageGetter: (type) => type.img,
-      nameGetter: (type) => type.modelName ?? type.model ?? '-',
-      specGetter: (type) => type.remark ?? '',
+      nameGetter: (type) => type.model ?? '-',
+      specGetter: (type) => type.modelName ?? '-',
       placeholderAsset: 'assets/android/mipmap-xxhdpi/icon_transport_vehicel.png',
       onSelected: (type) => _goToVehicleEntry(type),
     );
@@ -221,8 +221,8 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
     return _buildModelGrid<BatteryType>(
       types: _batteryTypes,
       imageGetter: (type) => type.img,
-      nameGetter: (type) => '${type.model ?? '-'} (${type.voltage ?? 0}V)',
-      specGetter: (type) => type.remark ?? type.modelName ?? '',
+      nameGetter: (type) => type.model ?? '-',
+      specGetter: (type) => type.modelName ?? '-',
       placeholderAsset: 'assets/android/mipmap-xxhdpi/icon_transport_battery.webp',
       onSelected: (type) => _goToBatteryEntry(type),
     );
@@ -238,8 +238,8 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
     return _buildModelGrid<StationType>(
       types: _stationTypes,
       imageGetter: (type) => type.img,
-      nameGetter: (type) => '${type.model ?? '-'} ${type.storeNum ?? 0}-Port',
-      specGetter: (type) => type.dimension ?? '',
+      nameGetter: (type) => type.model ?? '-',
+      specGetter: (type) => type.modelName ?? '-',
       placeholderAsset: 'assets/android/mipmap-xxhdpi/icon_transport_station.png',
       onSelected: (type) => _goToStationEntry(type),
     );
@@ -279,81 +279,71 @@ class _ShippingEntryPageState extends State<ShippingEntryPage>
     required String placeholderAsset,
     required void Function(T) onSelected,
   }) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 0.85,
+    return SizedBox(
+      height: 190,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        scrollDirection: Axis.horizontal,
+        itemCount: types.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          final type = types[index];
+          final imageUrl = imageGetter(type);
+
+          return GestureDetector(
+            onTap: () => onSelected(type),
+            child: Container(
+              width: 140,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFEEEEEE)),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 108,
+                    height: 103,
+                    child: imageUrl != null && imageUrl.isNotEmpty
+                        ? Image.network(
+                            imageUrl,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) =>
+                                _buildPlaceholder(placeholderAsset),
+                          )
+                        : _buildPlaceholder(placeholderAsset),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    nameGetter(type),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black06Text,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    specGetter(type),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF606166),
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
-      itemCount: types.length,
-      itemBuilder: (context, index) {
-        final type = types[index];
-        final imageUrl = imageGetter(type);
-
-        return GestureDetector(
-          onTap: () => onSelected(type),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFEEEEEE)),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x0A000000),
-                  blurRadius: 8,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // 型号图片
-                Expanded(
-                  child: imageUrl != null && imageUrl.isNotEmpty
-                      ? Image.network(
-                          imageUrl,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) =>
-                              _buildPlaceholder(placeholderAsset),
-                        )
-                      : _buildPlaceholder(placeholderAsset),
-                ),
-                const SizedBox(height: 8),
-
-                // 型号名称
-                Text(
-                  nameGetter(type),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black06Text,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-
-                // 规格
-                Text(
-                  specGetter(type),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF999999),
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 
@@ -428,8 +418,7 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
   @override
   void initState() {
     super.initState();
-    // 默认选中 Station (index 2) 以匹配截图
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 2);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
     _loadAllTypes();
   }
 
@@ -602,8 +591,8 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
     return _buildModelGrid<CarType>(
       types: _vehicleTypes,
       imageGetter: (type) => type.img,
-      nameGetter: (type) => type.modelName ?? type.model ?? '-',
-      specGetter: (type) => type.remark ?? '',
+      nameGetter: (type) => type.model ?? '-',
+      specGetter: (type) => type.modelName ?? '-',
       placeholderAsset: 'assets/android/mipmap-xxhdpi/icon_transport_vehicel.png',
       onSelected: (type) => _goToVehicleEntry(type),
     );
@@ -619,8 +608,8 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
     return _buildModelGrid<BatteryType>(
       types: _batteryTypes,
       imageGetter: (type) => type.img,
-      nameGetter: (type) => '${type.model ?? '-'} (${type.voltage ?? 0}V)',
-      specGetter: (type) => type.remark ?? type.modelName ?? '',
+      nameGetter: (type) => type.model ?? '-',
+      specGetter: (type) => type.modelName ?? '-',
       placeholderAsset: 'assets/android/mipmap-xxhdpi/icon_transport_battery.webp',
       onSelected: (type) => _goToBatteryEntry(type),
     );
@@ -636,8 +625,8 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
     return _buildModelGrid<StationType>(
       types: _stationTypes,
       imageGetter: (type) => type.img,
-      nameGetter: (type) => '${type.model ?? '-'} ${type.storeNum ?? 0}-Port',
-      specGetter: (type) => type.dimension ?? '',
+      nameGetter: (type) => type.model ?? '-',
+      specGetter: (type) => type.modelName ?? '-',
       placeholderAsset: 'assets/android/mipmap-xxhdpi/icon_transport_station.png',
       onSelected: (type) => _goToStationEntry(type),
     );
@@ -677,81 +666,71 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
     required String placeholderAsset,
     required void Function(T) onSelected,
   }) {
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
-        childAspectRatio: 0.85,
+    return SizedBox(
+      height: 190,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        scrollDirection: Axis.horizontal,
+        itemCount: types.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (context, index) {
+          final type = types[index];
+          final imageUrl = imageGetter(type);
+
+          return GestureDetector(
+            onTap: () => onSelected(type),
+            child: Container(
+              width: 140,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFEEEEEE)),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: 108,
+                    height: 103,
+                    child: imageUrl != null && imageUrl.isNotEmpty
+                        ? Image.network(
+                            imageUrl,
+                            fit: BoxFit.contain,
+                            errorBuilder: (_, __, ___) =>
+                                _buildPlaceholder(placeholderAsset),
+                          )
+                        : _buildPlaceholder(placeholderAsset),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    nameGetter(type),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black06Text,
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    specGetter(type),
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF606166),
+                    ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
-      itemCount: types.length,
-      itemBuilder: (context, index) {
-        final type = types[index];
-        final imageUrl = imageGetter(type);
-
-        return GestureDetector(
-          onTap: () => onSelected(type),
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFEEEEEE)),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x0A000000),
-                  blurRadius: 8,
-                  offset: Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                // 型号图片
-                Expanded(
-                  child: imageUrl != null && imageUrl.isNotEmpty
-                      ? Image.network(
-                          imageUrl,
-                          fit: BoxFit.contain,
-                          errorBuilder: (_, __, ___) =>
-                              _buildPlaceholder(placeholderAsset),
-                        )
-                      : _buildPlaceholder(placeholderAsset),
-                ),
-                const SizedBox(height: 8),
-
-                // 型号名称
-                Text(
-                  nameGetter(type),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black06Text,
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4),
-
-                // 规格
-                Text(
-                  specGetter(type),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF999999),
-                  ),
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 

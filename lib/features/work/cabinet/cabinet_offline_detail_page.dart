@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/cabinet_cabin.dart';
 import 'package:merchant_app/data/models/cabinet_detail_base_info_bean.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_offline_controller.dart';
@@ -38,6 +39,67 @@ class _CabinetOfflineDetailPageState
     notifier.loadLayout(sn);
   }
 
+  Future<void> _restartCabinet() async {
+    final l10n = context.l10n;
+    final info = ref.read(cabinetOfflineProvider).baseInfo;
+    final pId = info?.stationPid?.trim() ?? '';
+    if (pId.isEmpty) return;
+    final ok = await ref
+        .read(cabinetOfflineProvider.notifier)
+        .restartCabinet(pId: pId);
+    if (!mounted) return;
+    showToast(
+      ok ? l10n.deviceDetailToggleSuccess : l10n.deviceDetailToggleFailed,
+    );
+  }
+
+  Future<void> _openBackDoor() async {
+    final l10n = context.l10n;
+    final info = ref.read(cabinetOfflineProvider).baseInfo;
+    final sn = info?.stationSn?.trim() ?? '';
+    if (sn.isEmpty) return;
+    final ok = await ref
+        .read(cabinetOfflineProvider.notifier)
+        .openBackDoor(sn: sn);
+    if (!mounted) return;
+    showToast(
+      ok
+          ? l10n.cabinetOperateOpenDoorSuccess
+          : l10n.cabinetOperateOpenDoorFailed,
+    );
+  }
+
+  Future<void> _openCabinDoor(CabinetCabin cabin) async {
+    final l10n = context.l10n;
+    final info = ref.read(cabinetOfflineProvider).baseInfo;
+    final sn = info?.stationSn?.trim() ?? '';
+    if (sn.isEmpty) return;
+    final ok = await ref
+        .read(cabinetOfflineProvider.notifier)
+        .controlCabinPort(sn: sn, port: cabin.portNo, type: 1);
+    if (!mounted) return;
+    showToast(
+      ok
+          ? l10n.deviceDetailCabinOpenDoorSuccess
+          : l10n.deviceDetailCabinOpenDoorFailed,
+    );
+  }
+
+  Future<void> _toggleCabinEnable(CabinetCabin cabin) async {
+    final l10n = context.l10n;
+    final info = ref.read(cabinetOfflineProvider).baseInfo;
+    final sn = info?.stationSn?.trim() ?? '';
+    if (sn.isEmpty) return;
+    final type = cabin.isEnabled ? 2 : 3;
+    final ok = await ref
+        .read(cabinetOfflineProvider.notifier)
+        .controlCabinPort(sn: sn, port: cabin.portNo, type: type);
+    if (!mounted) return;
+    showToast(
+      ok ? l10n.deviceDetailToggleSuccess : l10n.deviceDetailToggleFailed,
+    );
+  }
+
   @override
   void dispose() {
     _snController.dispose();
@@ -50,6 +112,7 @@ class _CabinetOfflineDetailPageState
     final state = ref.watch(cabinetOfflineProvider);
     final notifier = ref.read(cabinetOfflineProvider.notifier);
     final info = state.baseInfo;
+    final canOperate = (info?.hasPermission ?? 0) == 1;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.cabinetOfflineDetailTitle)),
@@ -75,13 +138,7 @@ class _CabinetOfflineDetailPageState
                       notifier.load(sn);
                       notifier.loadLayout(sn);
                     },
-              child: state.loading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: const SizedBox.shrink(),
-                    )
-                  : Text(l10n.cabinetOfflineQueryAction),
+              child: Text(l10n.cabinetOfflineQueryAction),
             ),
             const SizedBox(height: 16),
             Expanded(
@@ -105,13 +162,18 @@ class _CabinetOfflineDetailPageState
                                 _DeviceInfoTab(
                                   info: info,
                                   secretKey: state.secretKey,
+                                  canOperate: canOperate,
+                                  operating: state.operating,
+                                  onRestart: _restartCabinet,
+                                  onOpenDoor: _openBackDoor,
                                 ),
                                 _WarehouseTab(
                                   state: state,
+                                  canOperate: canOperate,
+                                  onOpenDoor: _openCabinDoor,
+                                  onToggleEnable: _toggleCabinEnable,
                                 ),
-                                _RealtimeInfoTab(
-                                  info: info,
-                                ),
+                                _RealtimeInfoTab(info: info),
                               ],
                             ),
                           ),
@@ -127,10 +189,21 @@ class _CabinetOfflineDetailPageState
 }
 
 class _DeviceInfoTab extends StatelessWidget {
-  const _DeviceInfoTab({required this.info, this.secretKey});
+  const _DeviceInfoTab({
+    required this.info,
+    this.secretKey,
+    required this.canOperate,
+    required this.operating,
+    required this.onRestart,
+    required this.onOpenDoor,
+  });
 
   final CabinetDetailBaseInfoBean info;
   final String? secretKey;
+  final bool canOperate;
+  final bool operating;
+  final Future<void> Function() onRestart;
+  final Future<void> Function() onOpenDoor;
 
   @override
   Widget build(BuildContext context) {
@@ -141,22 +214,36 @@ class _DeviceInfoTab extends StatelessWidget {
         _InfoTile(label: l10n.cabinetOfflineName, value: info.stationName),
         _InfoTile(label: l10n.cabinetOfflineSnLabel, value: info.stationSn),
         _InfoTile(label: l10n.cabinetOfflinePidLabel, value: info.stationPid),
-        _InfoTile(label: l10n.cabinetOfflineAddressLabel, value: info.stationAddress),
-        _InfoTile(label: l10n.cabinetOfflineSlotModel, value: info.stationModelName),
+        _InfoTile(
+          label: l10n.cabinetOfflineAddressLabel,
+          value: info.stationAddress,
+        ),
+        _InfoTile(
+          label: l10n.cabinetOfflineSlotModel,
+          value: info.stationModelName,
+        ),
         _InfoTile(label: l10n.cabinetOfflineSecretKey, value: secretKey),
         _InfoTile(
           label: l10n.cabinetOfflineSwapThreshold,
           value: info.swapThreshold?.toString(),
         ),
         _InfoTile(label: l10n.cabinetOfflineApn, value: info.apn),
-        _InfoTile(label: l10n.cabinetOfflineVolume, value: info.volume?.toString()),
-        _InfoTile(label: l10n.cabinetOfflinePlatformUrl, value: info.platformUrl),
+        _InfoTile(
+          label: l10n.cabinetOfflineVolume,
+          value: info.volume?.toString(),
+        ),
+        _InfoTile(
+          label: l10n.cabinetOfflinePlatformUrl,
+          value: info.platformUrl,
+        ),
         const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () => _showRestartDialog(context),
+                onPressed: !canOperate || operating
+                    ? null
+                    : () => _showRestartDialog(context),
                 icon: const Icon(Icons.restart_alt),
                 label: Text(l10n.cabinetOfflineRestart),
               ),
@@ -164,7 +251,9 @@ class _DeviceInfoTab extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () => _showOpenDoorDialog(context),
+                onPressed: !canOperate || operating
+                    ? null
+                    : () => _showOpenDoorDialog(context),
                 icon: const Icon(Icons.door_front_door_outlined),
                 label: Text(l10n.cabinetOfflineOpenDoor),
               ),
@@ -176,12 +265,11 @@ class _DeviceInfoTab extends StatelessWidget {
           onPressed: info.stationSn == null
               ? null
               : () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => CabinetOfflineFaultPage(
-                        sn: info.stationSn ?? '',
-                      ),
-                    ),
+                  MaterialPageRoute(
+                    builder: (_) =>
+                        CabinetOfflineFaultPage(sn: info.stationSn ?? ''),
                   ),
+                ),
           child: Text(l10n.cabinetOfflineFaultEntry),
         ),
       ],
@@ -201,9 +289,9 @@ class _DeviceInfoTab extends StatelessWidget {
             child: Text(l10n.cancel),
           ),
           FilledButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(ctx).pop();
-              // TODO: 发送蓝牙重启命令
+              await onRestart();
             },
             child: Text(l10n.confirm),
           ),
@@ -225,9 +313,9 @@ class _DeviceInfoTab extends StatelessWidget {
             child: Text(l10n.cancel),
           ),
           FilledButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.of(ctx).pop();
-              // TODO: 发送蓝牙开门命令
+              await onOpenDoor();
             },
             child: Text(l10n.confirm),
           ),
@@ -252,7 +340,10 @@ class _RealtimeInfoTab extends StatelessWidget {
           label: l10n.cabinetOfflineStatusLabel,
           value: info.showOnlineStatus ?? info.online,
         ),
-        _InfoTile(label: l10n.cabinetOfflineLastHbLabel, value: info.lastHbTime),
+        _InfoTile(
+          label: l10n.cabinetOfflineLastHbLabel,
+          value: info.lastHbTime,
+        ),
         _InfoTile(label: l10n.cabinetOfflineLockDevId, value: info.lockDevId),
         _InfoTile(label: l10n.cabinetOfflineLockIcId, value: info.lockIcId),
         // 实时报警状态 (需要蓝牙连接获取)
@@ -274,22 +365,35 @@ class _RealtimeInfoTab extends StatelessWidget {
 }
 
 class _WarehouseTab extends StatelessWidget {
-  const _WarehouseTab({required this.state});
+  const _WarehouseTab({
+    required this.state,
+    required this.canOperate,
+    required this.onOpenDoor,
+    required this.onToggleEnable,
+  });
 
   final CabinetOfflineState state;
+  final bool canOperate;
+  final Future<void> Function(CabinetCabin cabin) onOpenDoor;
+  final Future<void> Function(CabinetCabin cabin) onToggleEnable;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    
+
     // 优先显示蓝牙获取的仓位数据
     if (state.cabins.isNotEmpty) {
-      return _CabinGridView(state: state);
+      return _CabinGridView(
+        state: state,
+        canOperate: canOperate,
+        onOpenDoor: onOpenDoor,
+        onToggleEnable: onToggleEnable,
+      );
     }
-    
+
     // 否则显示布局历史信息
     if (state.layoutLoading) {
-      return const Center(child: const SizedBox.shrink());
+      return const Center(child: SizedBox.shrink());
     }
     final items = state.layoutInfo?.list ?? const [];
     if (items.isEmpty) {
@@ -311,8 +415,14 @@ class _WarehouseTab extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _InfoTile(label: l10n.cabinetOfflineSnLabel, value: item.sn),
-                  _InfoTile(label: l10n.cabinetOfflinePidLabel, value: item.pid),
-                  _InfoTile(label: l10n.cabinetOfflineStatusLabel, value: item.status),
+                  _InfoTile(
+                    label: l10n.cabinetOfflinePidLabel,
+                    value: item.pid,
+                  ),
+                  _InfoTile(
+                    label: l10n.cabinetOfflineStatusLabel,
+                    value: item.status,
+                  ),
                   _InfoTile(
                     label: l10n.cabinetOfflineWarehouseCityCodeLabel,
                     value: item.cityCode?.toString(),
@@ -353,15 +463,23 @@ class _WarehouseTab extends StatelessWidget {
 
 /// 仓位网格视图 (对标 Android CabinetOfflineWarehouseFragment)
 class _CabinGridView extends StatelessWidget {
-  const _CabinGridView({required this.state});
+  const _CabinGridView({
+    required this.state,
+    required this.canOperate,
+    required this.onOpenDoor,
+    required this.onToggleEnable,
+  });
 
   final CabinetOfflineState state;
+  final bool canOperate;
+  final Future<void> Function(CabinetCabin cabin) onOpenDoor;
+  final Future<void> Function(CabinetCabin cabin) onToggleEnable;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final cabins = state.cabins;
-    
+
     if (cabins.isEmpty) {
       return Center(child: Text(l10n.cabinetOfflineCabinEmpty));
     }
@@ -407,10 +525,12 @@ class _CabinGridView extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.door_front_door),
               title: Text(l10n.cabinetOfflineCabinOpenDoor),
-              onTap: () {
-                Navigator.pop(ctx);
-                // TODO: 发送蓝牙开门命令
-              },
+              onTap: !canOperate || state.operating
+                  ? null
+                  : () async {
+                      Navigator.pop(ctx);
+                      await onOpenDoor(cabin);
+                    },
             ),
             ListTile(
               leading: const Icon(Icons.power_settings_new),
@@ -419,10 +539,12 @@ class _CabinGridView extends StatelessWidget {
                     ? l10n.cabinetOfflineCabinDisable
                     : l10n.cabinetOfflineCabinEnable,
               ),
-              onTap: () {
-                Navigator.pop(ctx);
-                // TODO: 发送蓝牙启用/禁用命令
-              },
+              onTap: !canOperate || state.operating
+                  ? null
+                  : () async {
+                      Navigator.pop(ctx);
+                      await onToggleEnable(cabin);
+                    },
             ),
             ListTile(
               leading: const Icon(Icons.warning_amber),
@@ -432,7 +554,7 @@ class _CabinGridView extends StatelessWidget {
                 Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => CabinetOfflineFaultPage(
-                      sn: '', // TODO: 传入设备SN
+                      sn: state.baseInfo?.stationSn ?? '',
                       port: cabin.portNo,
                     ),
                   ),
@@ -460,10 +582,7 @@ class _CabinGridView extends StatelessWidget {
 
 /// 仓位卡片
 class _CabinCard extends StatelessWidget {
-  const _CabinCard({
-    required this.cabin,
-    required this.onTap,
-  });
+  const _CabinCard({required this.cabin, required this.onTap});
 
   final CabinetCabin cabin;
   final VoidCallback onTap;
@@ -474,13 +593,13 @@ class _CabinCard extends StatelessWidget {
     final statusText = cabin.isEnabled && cabin.canSwap
         ? l10n.cabinetOfflineCabinCanUse
         : cabin.isEnabled
-            ? (cabin.hasBattery ? '' : l10n.cabinetOfflineCabinNoBattery)
-            : l10n.cabinetOfflineCabinNoUse;
+        ? (cabin.hasBattery ? '' : l10n.cabinetOfflineCabinNoBattery)
+        : l10n.cabinetOfflineCabinNoUse;
     final statusColor = cabin.canSwap
         ? Colors.green
         : cabin.isEnabled
-            ? Colors.orange
-            : Colors.grey;
+        ? Colors.orange
+        : Colors.grey;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -512,10 +631,7 @@ class _CabinCard extends StatelessWidget {
                     ),
                     child: Text(
                       statusText,
-                      style: TextStyle(
-                        fontSize: 11,
-                        color: statusColor,
-                      ),
+                      style: TextStyle(fontSize: 11, color: statusColor),
                     ),
                   ),
                 ],
@@ -538,10 +654,7 @@ class _CabinCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 'SN: ${cabin.batterySn.isNotEmpty ? cabin.batterySn : '-'}',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -579,11 +692,11 @@ class _BatteryIndicator extends StatelessWidget {
     final color = !isEnabled
         ? Colors.grey
         : canSwap
-            ? Colors.green
-            : soc > 20
-                ? Colors.orange
-                : Colors.red;
-    
+        ? Colors.green
+        : soc > 20
+        ? Colors.orange
+        : Colors.red;
+
     return Container(
       height: 24,
       decoration: BoxDecoration(

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/data/models/city.dart';
 import 'package:merchant_app/data/models/device_transport_resp.dart';
 import 'package:merchant_app/data/models/warehouse_info.dart';
 import 'package:merchant_app/network/api_path.dart';
@@ -56,8 +57,8 @@ class TransportListState {
 
 final transportListProvider =
     NotifierProvider<TransportListNotifier, TransportListState>(
-  TransportListNotifier.new,
-);
+      TransportListNotifier.new,
+    );
 
 class TransportListNotifier extends Notifier<TransportListState> {
   final ApiService _api = ApiService();
@@ -65,7 +66,11 @@ class TransportListNotifier extends Notifier<TransportListState> {
   @override
   TransportListState build() => const TransportListState();
 
-  Future<void> refresh({int? status, TransportMode? mode, String? keyword}) async {
+  Future<void> refresh({
+    int? status,
+    TransportMode? mode,
+    String? keyword,
+  }) async {
     state = state.copyWith(
       loading: true,
       page: 1,
@@ -160,8 +165,8 @@ class TransportDetailState {
 
 final transportDetailProvider =
     NotifierProvider<TransportDetailNotifier, TransportDetailState>(
-  TransportDetailNotifier.new,
-);
+      TransportDetailNotifier.new,
+    );
 
 class TransportDetailNotifier extends Notifier<TransportDetailState> {
   final ApiService _api = ApiService();
@@ -175,8 +180,9 @@ class TransportDetailNotifier extends Notifier<TransportDetailState> {
     final response = await _api.get<DeviceTransportDetail>(
       ApiPath.transportQueryIssueDetail,
       queryParameters: {'transferNo': transferNo},
-      parser: (json) =>
-          DeviceTransportDetail.fromJson(Map<String, dynamic>.from(json as Map)),
+      parser: (json) => DeviceTransportDetail.fromJson(
+        Map<String, dynamic>.from(json as Map),
+      ),
     );
 
     final detail = response.result;
@@ -191,10 +197,7 @@ class TransportDetailNotifier extends Notifier<TransportDetailState> {
     if (state.transferNo.isEmpty) return;
     await _api.post<Object>(
       ApiPath.transportReceive,
-      data: {
-        'deviceSn': deviceSn,
-        'transferNo': state.transferNo,
-      },
+      data: {'deviceSn': deviceSn, 'transferNo': state.transferNo},
       parser: (json) => json ?? Object(),
     );
     await loadDetail(state.transferNo);
@@ -204,10 +207,7 @@ class TransportDetailNotifier extends Notifier<TransportDetailState> {
     if (state.transferNo.isEmpty) return;
     await _api.post<Object>(
       ApiPath.transportWithdraw,
-      data: {
-        'deviceSn': deviceSn,
-        'transferNo': state.transferNo,
-      },
+      data: {'deviceSn': deviceSn, 'transferNo': state.transferNo},
       parser: (json) => json ?? Object(),
     );
     await loadDetail(state.transferNo);
@@ -217,10 +217,7 @@ class TransportDetailNotifier extends Notifier<TransportDetailState> {
     if (state.transferNo.isEmpty) return;
     await _api.post<Object>(
       ApiPath.transportEditTrackingNumber,
-      data: {
-        'trackingNo': state.transferNo,
-        'trackingNumber': trackingNumber,
-      },
+      data: {'trackingNo': state.transferNo, 'trackingNumber': trackingNumber},
       parser: (json) => json ?? Object(),
     );
     await loadDetail(state.transferNo);
@@ -234,6 +231,7 @@ class TransportCreateState {
   final WarehouseInfo? myWarehouse;
   final List<WarehouseInfo> inWarehouses;
   final WarehouseInfo? selectedInWarehouse;
+  final List<City> cities;
   final List<String> sns;
   final String trackingNumber;
 
@@ -244,6 +242,7 @@ class TransportCreateState {
     this.myWarehouse,
     this.inWarehouses = const [],
     this.selectedInWarehouse,
+    this.cities = const [],
     this.sns = const [],
     this.trackingNumber = '',
   });
@@ -255,6 +254,7 @@ class TransportCreateState {
     WarehouseInfo? myWarehouse,
     List<WarehouseInfo>? inWarehouses,
     WarehouseInfo? selectedInWarehouse,
+    List<City>? cities,
     List<String>? sns,
     String? trackingNumber,
   }) {
@@ -265,6 +265,7 @@ class TransportCreateState {
       myWarehouse: myWarehouse ?? this.myWarehouse,
       inWarehouses: inWarehouses ?? this.inWarehouses,
       selectedInWarehouse: selectedInWarehouse ?? this.selectedInWarehouse,
+      cities: cities ?? this.cities,
       sns: sns ?? this.sns,
       trackingNumber: trackingNumber ?? this.trackingNumber,
     );
@@ -273,8 +274,8 @@ class TransportCreateState {
 
 final transportCreateProvider =
     NotifierProvider<TransportCreateNotifier, TransportCreateState>(
-  TransportCreateNotifier.new,
-);
+      TransportCreateNotifier.new,
+    );
 
 class TransportCreateNotifier extends Notifier<TransportCreateState> {
   final ApiService _api = ApiService();
@@ -295,29 +296,50 @@ class TransportCreateNotifier extends Notifier<TransportCreateState> {
     state = state.copyWith(loading: true);
     final response = await _api.get<WarehouseInfo>(
       ApiPath.transportQueryMyWarehouseInfo,
-      parser: (json) => WarehouseInfo.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
+      parser: (json) =>
+          WarehouseInfo.fromJson(Map<String, dynamic>.from(json as Map)),
     );
     state = state.copyWith(loading: false, myWarehouse: response.result);
   }
 
-  Future<void> loadInWarehouseList({String keyword = '', String cityCode = ''}) async {
+  Future<void> loadInWarehouseList({
+    String keyword = '',
+    String cityCode = '',
+  }) async {
     state = state.copyWith(loading: true);
     final response = await _api.get<List<WarehouseInfo>>(
       ApiPath.transportQueryInWarehouseList,
-      queryParameters: {
-        'cityCode': cityCode,
-        'name': keyword,
-      },
-      parser: (json) => (json as List<dynamic>?)
-              ?.map((item) => WarehouseInfo.fromJson(
-                    Map<String, dynamic>.from(item as Map),
-                  ))
+      queryParameters: {'cityCode': cityCode, 'name': keyword},
+      parser: (json) =>
+          (json as List<dynamic>?)
+              ?.map(
+                (item) => WarehouseInfo.fromJson(
+                  Map<String, dynamic>.from(item as Map),
+                ),
+              )
               .toList() ??
           const <WarehouseInfo>[],
     );
-    state = state.copyWith(loading: false, inWarehouses: response.result ?? const []);
+    state = state.copyWith(
+      loading: false,
+      inWarehouses: response.result ?? const [],
+    );
+  }
+
+  Future<void> loadCities() async {
+    final response = await _api.get<List<City>>(
+      ApiPath.cityList,
+      parser: (json) =>
+          (json as List<dynamic>?)
+              ?.map(
+                (item) => City.fromJson(Map<String, dynamic>.from(item as Map)),
+              )
+              .toList() ??
+          const <City>[],
+      showHud: false,
+      notifyOnError: false,
+    );
+    state = state.copyWith(cities: response.result ?? const []);
   }
 
   void selectInWarehouse(WarehouseInfo warehouse) {

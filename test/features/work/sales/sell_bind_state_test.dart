@@ -3,6 +3,7 @@ import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
 import 'package:merchant_app/data/models/payment_plan.dart';
 import 'package:merchant_app/data/models/purchasing_user.dart';
 import 'package:merchant_app/data/models/service_plan.dart';
+import 'package:merchant_app/data/models/shop_payment_method.dart';
 import 'package:merchant_app/features/work/sales/sell_bind_controller.dart';
 
 void main() {
@@ -13,6 +14,7 @@ void main() {
       expect(state.loadingDevice, false);
       expect(state.loadingPlans, false);
       expect(state.loadingPaymentPlans, false);
+      expect(state.loadingShopPayment, false);
       expect(state.submitting, false);
       expect(state.submitSuccess, false);
       expect(state.documentNo, isNull);
@@ -26,6 +28,7 @@ void main() {
       expect(state.payType, 1);
       expect(state.cardImgUrl, isNull);
       expect(state.personImgUrl, isNull);
+      expect(state.shopPaymentMethod, isNull);
     });
 
     test('should create with provided values', () {
@@ -114,7 +117,10 @@ void main() {
 
     test('copyWith should update selectedPlan', () {
       const original = SellBindState();
-      final plan = ServicePlanBean.fromJson({'infoCode': '1', 'infoName': 'Selected Plan'});
+      final plan = ServicePlanBean.fromJson({
+        'infoCode': '1',
+        'infoName': 'Selected Plan',
+      });
       final updated = original.copyWith(selectedPlan: plan);
       expect(updated.selectedPlan?.infoName, 'Selected Plan');
     });
@@ -162,6 +168,51 @@ void main() {
       expect(copy.paySource, original.paySource);
       expect(copy.payType, original.payType);
       expect(copy.documentNo, original.documentNo);
+    });
+
+    test('copyWith should allow clearing nullable fields', () {
+      final plan = ServicePlanBean.fromJson({
+        'infoCode': '1',
+        'infoName': 'Plan 1',
+      });
+      final paymentPlan = PaymentPlan.fromJson({'planNo': 'P1'});
+      final state = SellBindState(
+        documentNo: 'DOC001',
+        user: PurchasingUser.fromJson({'username': 'user'}),
+        deviceInfo: BatterOrVehicleInfo.fromJson({
+          'batteryVo': {'sn': 'DEV001'},
+          'deviceType': 1,
+        }),
+        selectedPlan: plan,
+        selectedPaymentPlan: paymentPlan,
+        cardImgUrl: 'https://example.com/card.jpg',
+        personImgUrl: 'https://example.com/person.jpg',
+        shopPaymentMethod: ShopPaymentMethod.fromJson({
+          'salePayWay': '1,2',
+          'saleCashOption': '1',
+          'saleOnlineOption': '1,2',
+        }),
+      );
+
+      final cleared = state.copyWith(
+        documentNo: null,
+        user: null,
+        deviceInfo: null,
+        selectedPlan: null,
+        selectedPaymentPlan: null,
+        cardImgUrl: null,
+        personImgUrl: null,
+        shopPaymentMethod: null,
+      );
+
+      expect(cleared.documentNo, isNull);
+      expect(cleared.user, isNull);
+      expect(cleared.deviceInfo, isNull);
+      expect(cleared.selectedPlan, isNull);
+      expect(cleared.selectedPaymentPlan, isNull);
+      expect(cleared.cardImgUrl, isNull);
+      expect(cleared.personImgUrl, isNull);
+      expect(cleared.shopPaymentMethod, isNull);
     });
   });
 }

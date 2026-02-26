@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/features/work/after_sale/unbind_device_controller.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -219,13 +220,18 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                 width: double.infinity,
                 height: 50,
                 child: FilledButton(
-                  onPressed: state.submitting
+                  onPressed:
+                      state.submitting ||
+                          state.cardNum.trim().isEmpty ||
+                          state.deviceSn.trim().isEmpty ||
+                          state.checkRemark.trim().isEmpty ||
+                          state.remark.trim().isEmpty
                       ? null
                       : () => _submit(context, l10n, notifier),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
-                    disabledBackgroundColor: AppColors.primaryColor.withOpacity(
-                      0.5,
+                    disabledBackgroundColor: AppColors.primaryColor.withValues(
+                      alpha: 0.5,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -235,7 +241,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                       ? const SizedBox(
                           width: 18,
                           height: 18,
-                          child: const SizedBox.shrink(),
+                          child: SizedBox.shrink(),
                         )
                       : Text(
                           l10n.unbindDeviceConfirmButton,
@@ -331,24 +337,26 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
 
   void _debounceCheck() {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 400), () {
+    _debounce = Timer(const Duration(milliseconds: 1200), () {
       ref.read(unbindDeviceProvider.notifier).checkUnfinishedOrder();
     });
   }
 
   Future<void> _scanCardNum() async {
-    final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
-    );
+    final result = await Navigator.of(
+      context,
+    ).push<String>(MaterialPageRoute(builder: (_) => const QrScanPage()));
     if (!mounted || result == null || result.isEmpty) return;
-    ref.read(unbindDeviceProvider.notifier).updateCardNum(result);
+    final cardNum = ScanUtils.getUserCarNum(result);
+    if (cardNum.isEmpty) return;
+    ref.read(unbindDeviceProvider.notifier).updateCardNum(cardNum);
     _debounceCheck();
   }
 
   Future<void> _scanDeviceSn() async {
-    final result = await Navigator.of(
-      context,
-    ).push<String>(MaterialPageRoute(builder: (_) => const QrScanPage()));
+    final result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
+    );
     if (!mounted || result == null || result.isEmpty) return;
     ref.read(unbindDeviceProvider.notifier).updateDeviceSn(result);
     _debounceCheck();
@@ -422,7 +430,7 @@ class _ReasonChip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.primaryColor.withOpacity(0.1)
+              ? AppColors.primaryColor.withValues(alpha: 0.1)
               : Colors.white,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
@@ -453,9 +461,9 @@ class _WarningCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.4)),
+        border: Border.all(color: color.withValues(alpha: 0.4)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,

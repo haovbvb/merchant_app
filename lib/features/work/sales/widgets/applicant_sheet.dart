@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
+import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/features/work/map/address_picker_page.dart';
 import 'package:merchant_app/features/work/map/address_result.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -37,19 +38,28 @@ class ApplicantResult {
 }
 
 class ApplicantSheet extends ConsumerStatefulWidget {
-  const ApplicantSheet({super.key, required this.notifier});
+  const ApplicantSheet({
+    super.key,
+    required this.notifier,
+    required this.advancedMode,
+  });
 
   final SellBindNotifier notifier;
+  final bool advancedMode;
 
   static Future<ApplicantResult?> show(
     BuildContext context,
     SellBindNotifier notifier,
+    bool advancedMode,
   ) {
     return showModalBottomSheet<ApplicantResult>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => ApplicantSheet(notifier: notifier),
+      builder: (_) => ApplicantSheet(
+        notifier: notifier,
+        advancedMode: advancedMode,
+      ),
     );
   }
 
@@ -429,19 +439,10 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
       children: [
         Text(
           text,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF666666),
-          ),
+          style: const TextStyle(fontSize: 14, color: Color(0xFF666666)),
         ),
         if (isRequired)
-          const Text(
-            ' *',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.red,
-            ),
-          ),
+          const Text(' *', style: TextStyle(fontSize: 14, color: Colors.red)),
       ],
     );
   }
@@ -471,10 +472,8 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
                 child: Image.network(
                   imageUrl,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => const Icon(
-                    Icons.image,
-                    color: Color(0xFF999999),
-                  ),
+                  errorBuilder: (_, __, ___) =>
+                      const Icon(Icons.image, color: Color(0xFF999999)),
                 ),
               )
             : Icon(
@@ -487,12 +486,14 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
   }
 
   Future<void> _scanUserId() async {
-    final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
-    );
+    final result = await Navigator.of(
+      context,
+    ).push<String>(MaterialPageRoute(builder: (_) => const QrScanPage()));
     if (!mounted || result == null || result.isEmpty) return;
-    _userIdController.text = result;
-    widget.notifier.queryUser(result);
+    final cardNum = ScanUtils.getUserCarNum(result);
+    if (cardNum.isEmpty) return;
+    _userIdController.text = cardNum;
+    widget.notifier.queryUser(cardNum);
   }
 
   Future<void> _pickBirthday() async {

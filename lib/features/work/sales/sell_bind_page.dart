@@ -366,7 +366,11 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
     if (paymentResult == null || !mounted || !pageContext.mounted) return;
 
     // Step 2: Select Applicant
-    final applicantResult = await ApplicantSheet.show(pageContext, notifier);
+    final applicantResult = await ApplicantSheet.show(
+      pageContext,
+      notifier,
+      false,
+    );
     if (applicantResult == null || !mounted || !pageContext.mounted) return;
 
     final latestState = ref.read(sellBindProvider);

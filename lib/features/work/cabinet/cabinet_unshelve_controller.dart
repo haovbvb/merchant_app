@@ -4,6 +4,8 @@ import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
 class CabinetUnshelveState {
+  static const Object _unset = Object();
+
   final bool loadingCabinet;
   final bool submitting;
   final NewCabinetBean? cabinet;
@@ -17,12 +19,14 @@ class CabinetUnshelveState {
   CabinetUnshelveState copyWith({
     bool? loadingCabinet,
     bool? submitting,
-    NewCabinetBean? cabinet,
+    Object? cabinet = _unset,
   }) {
     return CabinetUnshelveState(
       loadingCabinet: loadingCabinet ?? this.loadingCabinet,
       submitting: submitting ?? this.submitting,
-      cabinet: cabinet ?? this.cabinet,
+      cabinet: identical(cabinet, _unset)
+          ? this.cabinet
+          : cabinet as NewCabinetBean?,
     );
   }
 }
@@ -66,5 +70,9 @@ class CabinetUnshelveNotifier extends Notifier<CabinetUnshelveState> {
     );
     state = state.copyWith(submitting: false);
     return response.isSuccess;
+  }
+
+  void clearState() {
+    state = const CabinetUnshelveState();
   }
 }

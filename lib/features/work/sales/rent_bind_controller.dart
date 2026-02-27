@@ -10,6 +10,8 @@ import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
 class RentBindState {
+  static const Object _sentinel = Object();
+
   final bool loadingUser;
   final bool loadingDevice;
   final bool submitting;
@@ -41,26 +43,26 @@ class RentBindState {
     bool? loadingDevice,
     bool? submitting,
     bool? submitSuccess,
-    String? documentNo,
-    PurchasingUser? user,
-    RentDeviceInfoBean? deviceInfo,
-    Pack? selectedPack,
+    Object? documentNo = _sentinel,
+    Object? user = _sentinel,
+    Object? deviceInfo = _sentinel,
+    Object? selectedPack = _sentinel,
     int? paySource,
-    String? cardImgUrl,
-    String? personImgUrl,
+    Object? cardImgUrl = _sentinel,
+    Object? personImgUrl = _sentinel,
   }) {
     return RentBindState(
       loadingUser: loadingUser ?? this.loadingUser,
       loadingDevice: loadingDevice ?? this.loadingDevice,
       submitting: submitting ?? this.submitting,
       submitSuccess: submitSuccess ?? this.submitSuccess,
-      documentNo: documentNo ?? this.documentNo,
-      user: user ?? this.user,
-      deviceInfo: deviceInfo ?? this.deviceInfo,
-      selectedPack: selectedPack ?? this.selectedPack,
+      documentNo: documentNo == _sentinel ? this.documentNo : documentNo as String?,
+      user: user == _sentinel ? this.user : user as PurchasingUser?,
+      deviceInfo: deviceInfo == _sentinel ? this.deviceInfo : deviceInfo as RentDeviceInfoBean?,
+      selectedPack: selectedPack == _sentinel ? this.selectedPack : selectedPack as Pack?,
       paySource: paySource ?? this.paySource,
-      cardImgUrl: cardImgUrl ?? this.cardImgUrl,
-      personImgUrl: personImgUrl ?? this.personImgUrl,
+      cardImgUrl: cardImgUrl == _sentinel ? this.cardImgUrl : cardImgUrl as String?,
+      personImgUrl: personImgUrl == _sentinel ? this.personImgUrl : personImgUrl as String?,
     );
   }
 }
@@ -90,19 +92,37 @@ class RentBindNotifier extends Notifier<RentBindState> {
     );
   }
 
-  Future<void> queryDevice(String sn) async {
-    if (sn.isEmpty) return;
-    state = state.copyWith(loadingDevice: true);
-    final response = await _api.get<RentDeviceInfoBean>(
-      ApiPath.queryRentDeviceInfo,
-      queryParameters: {'deviceSn': sn},
-      parser: (json) => RentDeviceInfoBean.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
-    );
+  Future<bool> queryDevice(String sn) async {
+    if (sn.isEmpty) return false;
+    state = state.copyWith(loadingDevice: true, selectedPack: null);
+    try {
+      final response = await _api.get<RentDeviceInfoBean>(
+        ApiPath.queryRentDeviceInfo,
+        queryParameters: {'deviceSn': sn},
+        parser: (json) => RentDeviceInfoBean.fromJson(
+          Map<String, dynamic>.from(json as Map),
+        ),
+      );
+      state = state.copyWith(
+        loadingDevice: false,
+        deviceInfo: response.result,
+        selectedPack: null,
+      );
+      return true;
+    } catch (_) {
+      state = state.copyWith(
+        loadingDevice: false,
+        deviceInfo: null,
+        selectedPack: null,
+      );
+      return false;
+    }
+  }
+
+  void clearDeviceAndPack() {
     state = state.copyWith(
       loadingDevice: false,
-      deviceInfo: response.result,
+      deviceInfo: null,
       selectedPack: null,
     );
   }

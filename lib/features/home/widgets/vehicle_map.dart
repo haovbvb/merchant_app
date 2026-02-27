@@ -10,19 +10,27 @@ class VehicleMap extends StatelessWidget {
     this.latitude = 22.543099,
     this.longitude = 114.057868,
     this.markers = const <gmaps.Marker>{},
+    this.polylines = const <gmaps.Polyline>{},
     this.annotations = const <amaps.Annotation>{},
     this.onGoogleMapCreated,
     this.onAppleMapCreated,
+    this.onMapTap,
+    this.onGoogleCameraMove,
+    this.onGoogleCameraIdle,
   });
 
   final double latitude;
   final double longitude;
   final Set<gmaps.Marker> markers;
+    final Set<gmaps.Polyline> polylines;
   final Set<amaps.Annotation> annotations;
   final void Function(gmaps.GoogleMapController controller)?
       onGoogleMapCreated;
   final void Function(amaps.AppleMapController controller)?
       onAppleMapCreated;
+    final VoidCallback? onMapTap;
+    final void Function(gmaps.CameraPosition position)? onGoogleCameraMove;
+    final VoidCallback? onGoogleCameraIdle;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +43,11 @@ class VehicleMap extends StatelessWidget {
       return _AndroidVehicleMap(
         position: gmaps.LatLng(latitude, longitude),
         markers: markers,
+        polylines: polylines,
         onMapCreated: onGoogleMapCreated,
+        onMapTap: onMapTap,
+        onCameraMove: onGoogleCameraMove,
+        onCameraIdle: onGoogleCameraIdle,
       );
     }
 
@@ -55,12 +67,20 @@ class _AndroidVehicleMap extends StatelessWidget {
   const _AndroidVehicleMap({
     required this.position,
     required this.markers,
+    required this.polylines,
     this.onMapCreated,
+    this.onMapTap,
+    this.onCameraMove,
+    this.onCameraIdle,
   });
 
   final gmaps.LatLng position;
   final Set<gmaps.Marker> markers;
+  final Set<gmaps.Polyline> polylines;
   final void Function(gmaps.GoogleMapController controller)? onMapCreated;
+  final VoidCallback? onMapTap;
+  final void Function(gmaps.CameraPosition position)? onCameraMove;
+  final VoidCallback? onCameraIdle;
   static const double _defaultZoom = 14;
 
   @override
@@ -71,12 +91,16 @@ class _AndroidVehicleMap extends StatelessWidget {
         zoom: _defaultZoom,
       ),
       markers: markers,
+      polylines: polylines,
       myLocationEnabled: true,
       myLocationButtonEnabled: false,
       mapToolbarEnabled: false,
       compassEnabled: false,
       zoomControlsEnabled: false,
       onMapCreated: onMapCreated,
+      onTap: (_) => onMapTap?.call(),
+      onCameraMove: onCameraMove,
+      onCameraIdle: onCameraIdle,
     );
   }
 }

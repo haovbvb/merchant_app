@@ -7,6 +7,7 @@ class StorageKeys {
   static const String deviceSearchHistory = 'device_search_history';
   static const String vehicleSearchHistory = 'vehicle_search_history';
   static const String userSearchHistory = 'user_search_history';
+  static const String inventorySearchHistory = 'inventory_search_history';
   static const String vcuSearchHistory = 'vcu_search_history';
   static const String vcuBleEnabled = 'vcu_ble_enabled';
 }

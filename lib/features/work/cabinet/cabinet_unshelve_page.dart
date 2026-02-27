@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
@@ -17,11 +17,35 @@ class CabinetUnshelvePage extends ConsumerStatefulWidget {
 
 class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
   final _snController = TextEditingController();
+  final _snFocusNode = FocusNode();
   final _reasonController = TextEditingController();
   String? _selectedReason;
+  String _lastQueriedSn = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _snFocusNode.addListener(_onSnFocusChanged);
+  }
+
+  void _onSnFocusChanged() {
+    if (!_snFocusNode.hasFocus) {
+      _handleSnBlur();
+    }
+  }
+
+  bool get _canSubmit {
+    final state = ref.read(cabinetUnshelveProvider);
+    return !state.submitting &&
+        state.cabinet != null &&
+        _snController.text.trim().isNotEmpty &&
+        _reasonController.text.trim().isNotEmpty;
+  }
 
   @override
   void dispose() {
+    _snFocusNode.removeListener(_onSnFocusChanged);
+    _snFocusNode.dispose();
     _snController.dispose();
     _reasonController.dispose();
     super.dispose();
@@ -103,6 +127,7 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
                             Expanded(
                               child: TextField(
                                 controller: _snController,
+                                focusNode: _snFocusNode,
                                 decoration: InputDecoration(
                                   hintText: l10n.cabinetUnshelveSnHint,
                                   hintStyle: const TextStyle(
@@ -114,6 +139,12 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
                                   contentPadding: EdgeInsets.zero,
                                 ),
                                 style: const TextStyle(fontSize: 15),
+                                onChanged: (value) {
+                                  if (value.trim().isEmpty) {
+                                    _lastQueriedSn = '';
+                                    _resetBySnCleared();
+                                  }
+                                },
                                 onSubmitted: (_) => notifier.queryCabinet(
                                   _snController.text.trim(),
                                 ),
@@ -165,6 +196,7 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
                         label: l10n.cabinetUnshelveReasonLabel,
                         child: TextField(
                           controller: _reasonController,
+                          onChanged: (_) => setState(() {}),
                           decoration: InputDecoration(
                             hintText: l10n.cabinetUnshelveReasonHint,
                             hintStyle: const TextStyle(
@@ -252,9 +284,7 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
               width: double.infinity,
               height: 48,
               child: FilledButton(
-                onPressed: state.submitting
-                    ? null
-                    : () => _showConfirmDialog(context),
+                onPressed: _canSubmit ? () => _showConfirmDialog(context) : null,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
                   disabledBackgroundColor: const Color(0xFFB8E6B8),
@@ -266,7 +296,7 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: const SizedBox.shrink(),
+                        child: SizedBox.shrink(),
                       )
                     : Text(
                         l10n.cabinetUnshelveSubmit,
@@ -291,7 +321,28 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
+    _lastQueriedSn = result;
     ref.read(cabinetUnshelveProvider.notifier).queryCabinet(result);
+  }
+
+  void _handleSnBlur() {
+    final sn = _snController.text.trim();
+    if (sn.isEmpty) {
+      _lastQueriedSn = '';
+      _resetBySnCleared();
+      return;
+    }
+    if (sn == _lastQueriedSn) return;
+    _lastQueriedSn = sn;
+    ref.read(cabinetUnshelveProvider.notifier).queryCabinet(sn);
+  }
+
+  void _resetBySnCleared() {
+    ref.read(cabinetUnshelveProvider.notifier).clearState();
+    _reasonController.clear();
+    setState(() {
+      _selectedReason = null;
+    });
   }
 
   Future<void> _showConfirmDialog(BuildContext context) async {

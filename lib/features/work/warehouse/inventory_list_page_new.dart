@@ -5,6 +5,7 @@ import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/warehouse/device_type_sheet.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_controller.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_detail_page_new.dart';
+import 'package:merchant_app/features/work/warehouse/inventory_search_page.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -72,39 +73,39 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
       ),
       body: Column(
         children: [
-          // 搜索框
+          // 搜索框（对齐安卓：进入独立搜索页）
           Container(
             color: Colors.white,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
-            child: Container(
-              height: 36,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF2F4F7),
-                borderRadius: BorderRadius.circular(8),
+            child: InkWell(
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const InventorySearchPage()),
               ),
-              child: TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: l10n.inventorySearchHint,
-                  hintStyle: const TextStyle(
-                    color: Color(0xFF999999),
-                    fontSize: 14,
-                  ),
-                  prefixIcon: const Icon(
-                    Icons.search,
-                    color: Color(0xFF999999),
-                    size: 20,
-                  ),
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 8),
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF2F4F7),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                onSubmitted: (value) {
-                  notifier.refresh(
-                    status: _mapStatus(_selectedTabIndex),
-                    keyword: value,
-                  );
-                },
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.search,
+                      color: Color(0xFF999999),
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      l10n.inventorySearchHint,
+                      style: const TextStyle(
+                        color: Color(0xFF999999),
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -200,22 +201,6 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
           Text(
             l10n.inventoryEmptyHint,
             style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
-          ),
-          const SizedBox(height: 24),
-          SizedBox(
-            width: 200,
-            height: 48,
-            child: FilledButton.icon(
-              onPressed: () => _showCreateSheet(context),
-              icon: const Icon(Icons.add),
-              label: Text(l10n.warehouseTransportCreateAction),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primaryColor,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(24),
-                ),
-              ),
-            ),
           ),
         ],
       ),

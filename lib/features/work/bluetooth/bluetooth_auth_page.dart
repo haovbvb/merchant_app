@@ -97,12 +97,13 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
     _scanSubscription?.cancel();
     _scanSubscription = FlutterBluePlus.scanResults.listen((results) {
       if (!mounted) return;
-      // 只显示名称以 HNTT 开头的设备（蓝牙钥匙）
+        // 对齐安卓：显示名称包含 HWK 或 HNT 的设备
       final filtered = results
           .where(
             (r) =>
                 r.device.platformName.isNotEmpty &&
-                r.device.platformName.startsWith('HNTT'),
+            (r.device.platformName.contains('HWK') ||
+              r.device.platformName.contains('HNT')),
           )
           .toList();
       setState(() {

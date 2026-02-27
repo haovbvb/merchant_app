@@ -4,9 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/app/ui.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
+import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/installment_payment_response.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -22,9 +23,25 @@ class InstallmentPayPage extends ConsumerStatefulWidget {
 
 class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
   final _userIdController = TextEditingController();
+  final _userIdFocusNode = FocusNode();
+  String _lastQueriedUserId = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _userIdFocusNode.addListener(_onUserIdFocusChanged);
+  }
+
+  void _onUserIdFocusChanged() {
+    if (!_userIdFocusNode.hasFocus) {
+      _handleUserIdBlur();
+    }
+  }
 
   @override
   void dispose() {
+    _userIdFocusNode.removeListener(_onUserIdFocusChanged);
+    _userIdFocusNode.dispose();
     _userIdController.dispose();
     super.dispose();
   }
@@ -143,6 +160,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
               Expanded(
                 child: TextField(
                   controller: _userIdController,
+                  focusNode: _userIdFocusNode,
                   decoration: InputDecoration(
                     hintText: l10n.installmentPayUserIdHint,
                     hintStyle: const TextStyle(
@@ -157,6 +175,12 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                     fontSize: 16,
                     color: AppColors.black06Text,
                   ),
+                  onChanged: (value) {
+                    if (value.trim().isEmpty) {
+                      _lastQueriedUserId = '';
+                      ref.read(installmentPayProvider.notifier).reset();
+                    }
+                  },
                   onSubmitted: (_) => _searchUser(notifier),
                 ),
               ),
@@ -179,7 +203,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(20),
-                child: const SizedBox.shrink(),
+                child: SizedBox.shrink(),
               ),
             )
           else if (info != null)
@@ -774,7 +798,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                 child: SizedBox(
                   width: 24,
                   height: 24,
-                  child: const SizedBox.shrink(),
+                  child: SizedBox.shrink(),
                 ),
               )
             : const Icon(
@@ -823,7 +847,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: const SizedBox.shrink(),
+                    child: SizedBox.shrink(),
                   )
                 : Text(
                     l10n.installmentPaySubmit,
@@ -841,10 +865,28 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
   // === 辅助方法 ===
 
   void _searchUser(InstallmentPayNotifier notifier) {
-    final userId = _userIdController.text.trim();
+    final userId = ScanUtils.getUserCarNum(_userIdController.text.trim());
     if (userId.isNotEmpty) {
+      _userIdController.text = userId;
+      _lastQueriedUserId = userId;
       notifier.queryUser(userId);
     }
+  }
+
+  void _handleUserIdBlur() {
+    final notifier = ref.read(installmentPayProvider.notifier);
+    final userId = ScanUtils.getUserCarNum(_userIdController.text.trim());
+    if (userId.isEmpty) {
+      _lastQueriedUserId = '';
+      notifier.reset();
+      return;
+    }
+    if (userId == _lastQueriedUserId) {
+      return;
+    }
+    _userIdController.text = userId;
+    _lastQueriedUserId = userId;
+    notifier.queryUser(userId);
   }
 
   Future<void> _scanUserId(InstallmentPayNotifier notifier) async {
@@ -853,8 +895,11 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
       MaterialPageRoute(builder: (_) => const QrScanPage()),
     );
     if (result != null && result.isNotEmpty) {
-      _userIdController.text = result;
-      notifier.queryUser(result);
+      final userId = ScanUtils.getUserCarNum(result);
+      if (userId.isEmpty) return;
+      _userIdController.text = userId;
+      _lastQueriedUserId = userId;
+      notifier.queryUser(userId);
     }
   }
 

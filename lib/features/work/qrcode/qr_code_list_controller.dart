@@ -4,6 +4,8 @@ import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
 class QrCodeListState {
+  static const Object _unset = Object();
+
   final bool loading;
   final int? deviceType;
   final List<String> items;
@@ -16,12 +18,14 @@ class QrCodeListState {
 
   QrCodeListState copyWith({
     bool? loading,
-    int? deviceType,
+    Object? deviceType = _unset,
     List<String>? items,
   }) {
     return QrCodeListState(
       loading: loading ?? this.loading,
-      deviceType: deviceType ?? this.deviceType,
+      deviceType: identical(deviceType, _unset)
+          ? this.deviceType
+          : deviceType as int?,
       items: items ?? this.items,
     );
   }
@@ -50,9 +54,20 @@ class QrCodeListNotifier extends Notifier<QrCodeListState> {
     state = state.copyWith(items: merged);
   }
 
-  void addItem(String sn) {
-    if (sn.trim().isEmpty || state.items.contains(sn)) return;
-    state = state.copyWith(items: [...state.items, sn]);
+  bool addItem(String sn) {
+    final value = sn.trim();
+    if (value.isEmpty) return false;
+    final updated = [...state.items];
+    final existIndex = updated.indexOf(value);
+    if (existIndex != -1) {
+      final exist = updated.removeAt(existIndex);
+      updated.insert(0, exist);
+      state = state.copyWith(items: updated);
+      return false;
+    }
+    updated.insert(0, value);
+    state = state.copyWith(items: updated);
+    return true;
   }
 
   Future<String?> resolveDeviceSn(String content) async {

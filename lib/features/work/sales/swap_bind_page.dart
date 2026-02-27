@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
 import 'package:merchant_app/data/models/pack.dart';
@@ -24,9 +25,25 @@ class SwapBindPage extends ConsumerStatefulWidget {
 
 class _SwapBindPageState extends ConsumerState<SwapBindPage> {
   final _userIdController = TextEditingController();
+  final _userIdFocusNode = FocusNode();
+  String _lastQueriedUserId = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _userIdFocusNode.addListener(_onUserIdFocusChanged);
+  }
+
+  void _onUserIdFocusChanged() {
+    if (!_userIdFocusNode.hasFocus) {
+      _handleUserIdBlur();
+    }
+  }
 
   @override
   void dispose() {
+    _userIdFocusNode.removeListener(_onUserIdFocusChanged);
+    _userIdFocusNode.dispose();
     _userIdController.dispose();
     super.dispose();
   }
@@ -165,6 +182,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
               Expanded(
                 child: TextField(
                   controller: _userIdController,
+                  focusNode: _userIdFocusNode,
                   decoration: InputDecoration(
                     hintText: l10n.swapBindUserIdHint,
                     hintStyle: const TextStyle(
@@ -179,6 +197,12 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                     fontSize: 16,
                     color: AppColors.black06Text,
                   ),
+                  onChanged: (value) {
+                    if (value.trim().isEmpty) {
+                      _lastQueriedUserId = '';
+                      ref.read(swapBindProvider.notifier).reset();
+                    }
+                  },
                   onSubmitted: (_) => _searchUser(notifier),
                 ),
               ),
@@ -201,7 +225,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
             const Center(
               child: Padding(
                 padding: EdgeInsets.all(20),
-                child: const SizedBox.shrink(),
+                child: SizedBox.shrink(),
               ),
             )
           else if (info != null)
@@ -840,7 +864,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: const SizedBox.shrink(),
+                    child: SizedBox.shrink(),
                   )
                 : Text(
                     l10n.swapBindSubmit,
@@ -858,10 +882,28 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
   // === 辅助方法 ===
 
   void _searchUser(SwapBindNotifier notifier) {
-    final userId = _userIdController.text.trim();
+    final userId = ScanUtils.getUserCarNum(_userIdController.text.trim());
     if (userId.isNotEmpty) {
+      _userIdController.text = userId;
+      _lastQueriedUserId = userId;
       notifier.queryUser(userId);
     }
+  }
+
+  void _handleUserIdBlur() {
+    final notifier = ref.read(swapBindProvider.notifier);
+    final userId = ScanUtils.getUserCarNum(_userIdController.text.trim());
+    if (userId.isEmpty) {
+      _lastQueriedUserId = '';
+      notifier.reset();
+      return;
+    }
+    if (userId == _lastQueriedUserId) {
+      return;
+    }
+    _userIdController.text = userId;
+    _lastQueriedUserId = userId;
+    notifier.queryUser(userId);
   }
 
   Future<void> _scanUserId(SwapBindNotifier notifier) async {
@@ -870,8 +912,11 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
       MaterialPageRoute(builder: (_) => const QrScanPage()),
     );
     if (result != null && result.isNotEmpty) {
-      _userIdController.text = result;
-      notifier.queryUser(result);
+      final userId = ScanUtils.getUserCarNum(result);
+      if (userId.isEmpty) return;
+      _userIdController.text = userId;
+      _lastQueriedUserId = userId;
+      notifier.queryUser(userId);
     }
   }
 

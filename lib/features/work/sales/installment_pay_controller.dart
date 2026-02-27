@@ -8,6 +8,8 @@ import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
 class InstallmentPayState {
+  static const Object _unset = Object();
+
   final bool loadingUser;
   final bool uploading;
   final bool submitting;
@@ -34,23 +36,29 @@ class InstallmentPayState {
     bool? loadingUser,
     bool? uploading,
     bool? submitting,
-    InstallmentPaymentResponse? info,
+    Object? info = _unset,
     List<PeriodOrder>? orders,
-    PeriodOrder? selectedOrder,
+    Object? selectedOrder = _unset,
     List<String>? attachments,
     bool? submitSuccess,
-    String? documentNo,
+    Object? documentNo = _unset,
   }) {
     return InstallmentPayState(
       loadingUser: loadingUser ?? this.loadingUser,
       uploading: uploading ?? this.uploading,
       submitting: submitting ?? this.submitting,
-      info: info ?? this.info,
+      info: identical(info, _unset)
+          ? this.info
+          : info as InstallmentPaymentResponse?,
       orders: orders ?? this.orders,
-      selectedOrder: selectedOrder ?? this.selectedOrder,
+      selectedOrder: identical(selectedOrder, _unset)
+          ? this.selectedOrder
+          : selectedOrder as PeriodOrder?,
       attachments: attachments ?? this.attachments,
       submitSuccess: submitSuccess ?? this.submitSuccess,
-      documentNo: documentNo ?? this.documentNo,
+      documentNo: identical(documentNo, _unset)
+          ? this.documentNo
+          : documentNo as String?,
     );
   }
 }

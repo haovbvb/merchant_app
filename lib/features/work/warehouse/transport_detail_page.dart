@@ -68,7 +68,7 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
         ],
       ),
       body: state.loading
-          ? const Center(child: const SizedBox.shrink())
+          ? const Center(child: SizedBox.shrink())
           : SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,17 +181,17 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
                             children: [
                               _StatItem(
                                 label: l10n.deviceIssueStatusInTransit,
-                                value: _countByStatus(state.items, 0).toString(),
+                                value: (detail?.inTransitNum ?? 0).toString(),
                                 color: const Color(0xFFED942F),
                               ),
                               _StatItem(
                                 label: l10n.deviceIssueReceived,
-                                value: _countByStatus(state.items, 1).toString(),
+                                value: (detail?.receivedNum ?? 0).toString(),
                                 color: AppColors.primaryColor,
                               ),
                               _StatItem(
                                 label: l10n.deviceIssueWithdrawn,
-                                value: _countByStatus(state.items, 3).toString(),
+                                value: (detail?.withdrawNum ?? 0).toString(),
                                 color: const Color(0xFFE25C5C),
                               ),
                             ],
@@ -284,10 +284,6 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
               ),
             ),
     );
-  }
-
-  int _countByStatus(List<DeviceTransportDetailPageData> items, int status) {
-    return items.where((item) => item.status == status).length;
   }
 
   Future<void> _showTrackingDialog(
@@ -390,7 +386,6 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
       case 1:
         return l10n.deviceIssueReceived;
       case 2:
-        return l10n.deviceIssueStatusPartial;
       case 3:
         return l10n.deviceIssueWithdrawn;
       default:
@@ -411,10 +406,6 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
           background: Color(0xFFEEF7E9),
         );
       case 2:
-        return const _StatusColors(
-          text: Color(0xFF2196F3),
-          background: Color(0xFFE3F2FD),
-        );
       case 3:
         return const _StatusColors(
           text: Color(0xFFE25C5C),

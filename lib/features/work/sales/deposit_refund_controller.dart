@@ -4,6 +4,8 @@ import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
 class DepositRefundState {
+  static const Object _unset = Object();
+
   final bool loading;
   final bool submitting;
   final bool submitSuccess;
@@ -24,16 +26,20 @@ class DepositRefundState {
     bool? loading,
     bool? submitting,
     bool? submitSuccess,
-    DepositRefundInfoBean? info,
-    Deposit? selectedDeposit,
+    Object? info = _unset,
+    Object? selectedDeposit = _unset,
     bool? voucherConfirmed,
   }) {
     return DepositRefundState(
       loading: loading ?? this.loading,
       submitting: submitting ?? this.submitting,
       submitSuccess: submitSuccess ?? this.submitSuccess,
-      info: info ?? this.info,
-      selectedDeposit: selectedDeposit ?? this.selectedDeposit,
+      info: identical(info, _unset)
+          ? this.info
+          : info as DepositRefundInfoBean?,
+      selectedDeposit: identical(selectedDeposit, _unset)
+          ? this.selectedDeposit
+          : selectedDeposit as Deposit?,
       voucherConfirmed: voucherConfirmed ?? this.voucherConfirmed,
     );
   }

@@ -8,6 +8,8 @@ import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
 class CabinetPutawayState {
+  static const Object _unset = Object();
+
   final bool loadingCabinet;
   final bool uploading;
   final bool submitting;
@@ -26,14 +28,16 @@ class CabinetPutawayState {
     bool? loadingCabinet,
     bool? uploading,
     bool? submitting,
-    NewCabinetBean? cabinet,
+    Object? cabinet = _unset,
     List<String>? images,
   }) {
     return CabinetPutawayState(
       loadingCabinet: loadingCabinet ?? this.loadingCabinet,
       uploading: uploading ?? this.uploading,
       submitting: submitting ?? this.submitting,
-      cabinet: cabinet ?? this.cabinet,
+      cabinet: identical(cabinet, _unset)
+          ? this.cabinet
+          : cabinet as NewCabinetBean?,
       images: images ?? this.images,
     );
   }
@@ -98,8 +102,13 @@ class CabinetPutawayNotifier extends Notifier<CabinetPutawayState> {
     state = state.copyWith(images: updated);
   }
 
+  void clearState() {
+    state = const CabinetPutawayState();
+  }
+
   Future<bool> submit({
     required String sn,
+    required String name,
     required double latitude,
     required double longitude,
     required int swapTime,
@@ -107,7 +116,9 @@ class CabinetPutawayNotifier extends Notifier<CabinetPutawayState> {
     required String address,
   }) async {
     final cabinet = state.cabinet;
-    if (cabinet == null || sn.isEmpty || address.isEmpty) return false;
+    if (cabinet == null || sn.isEmpty || name.isEmpty || address.isEmpty) {
+      return false;
+    }
     if (state.images.isEmpty) return false;
     state = state.copyWith(submitting: true);
     final response = await _api.post<Object>(
@@ -117,7 +128,7 @@ class CabinetPutawayNotifier extends Notifier<CabinetPutawayState> {
         'sn': sn,
         'latitude': latitude,
         'longitude': longitude,
-        'name': cabinet.stationName ?? '',
+        'name': name,
         'model': cabinet.stationModel ?? '',
         'label': 0,
         'imgList': state.images.join(','),

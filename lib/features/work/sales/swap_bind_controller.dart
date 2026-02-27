@@ -6,6 +6,8 @@ import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
 class SwapBindState {
+  static const Object _unset = Object();
+
   final bool loadingUser;
   final bool loadingPack;
   final bool submitting;
@@ -38,29 +40,37 @@ class SwapBindState {
     bool? loadingUser,
     bool? loadingPack,
     bool? submitting,
-    SwapBindInfo? info,
-    CarVo? selectedCar,
-    BatteryVo? selectedBattery,
+    Object? info = _unset,
+    Object? selectedCar = _unset,
+    Object? selectedBattery = _unset,
     List<BatteryVo>? selectedBatteries,
     List<Pack>? packs,
-    Pack? selectedPack,
+    Object? selectedPack = _unset,
     int? paySource,
     bool? submitSuccess,
-    String? documentNo,
+    Object? documentNo = _unset,
   }) {
     return SwapBindState(
       loadingUser: loadingUser ?? this.loadingUser,
       loadingPack: loadingPack ?? this.loadingPack,
       submitting: submitting ?? this.submitting,
-      info: info ?? this.info,
-      selectedCar: selectedCar ?? this.selectedCar,
-      selectedBattery: selectedBattery ?? this.selectedBattery,
+      info: identical(info, _unset) ? this.info : info as SwapBindInfo?,
+      selectedCar: identical(selectedCar, _unset)
+          ? this.selectedCar
+          : selectedCar as CarVo?,
+      selectedBattery: identical(selectedBattery, _unset)
+          ? this.selectedBattery
+          : selectedBattery as BatteryVo?,
       selectedBatteries: selectedBatteries ?? this.selectedBatteries,
       packs: packs ?? this.packs,
-      selectedPack: selectedPack ?? this.selectedPack,
+      selectedPack: identical(selectedPack, _unset)
+          ? this.selectedPack
+          : selectedPack as Pack?,
       paySource: paySource ?? this.paySource,
       submitSuccess: submitSuccess ?? this.submitSuccess,
-      documentNo: documentNo ?? this.documentNo,
+      documentNo: identical(documentNo, _unset)
+          ? this.documentNo
+          : documentNo as String?,
     );
   }
 }
@@ -88,6 +98,7 @@ class SwapBindNotifier extends Notifier<SwapBindState> {
       loadingUser: false,
       info: response.result,
       selectedCar: null,
+      selectedBattery: null,
       selectedBatteries: const [],
       packs: const [],
       selectedPack: null,

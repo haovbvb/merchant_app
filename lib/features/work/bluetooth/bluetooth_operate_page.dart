@@ -12,6 +12,7 @@ import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/data/models/sn_bean.dart';
 import 'package:merchant_app/features/work/bluetooth/ble_command.dart';
 import 'package:merchant_app/features/work/bluetooth/bluetooth_operate_controller.dart';
+import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
@@ -66,10 +67,14 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
   void initState() {
     super.initState();
     _scanSub = FlutterBluePlus.scanResults.listen((results) {
+      final filtered = results.where((r) {
+        final name = r.device.platformName;
+        return name.isNotEmpty && (name.contains('HWK') || name.contains('HNT'));
+      }).toList();
       setState(() {
         _scanResults
           ..clear()
-          ..addAll(results);
+          ..addAll(filtered);
       });
     });
     _isScanningSub = FlutterBluePlus.isScanning.listen((value) {
@@ -145,9 +150,13 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
           const SizedBox(height: 8),
           TextField(
             controller: _snController,
-            decoration: const InputDecoration(
+            decoration: InputDecoration(
               labelText: '柜机SN',
-              border: OutlineInputBorder(),
+              border: const OutlineInputBorder(),
+              suffixIcon: IconButton(
+                onPressed: _scanSn,
+                icon: const Icon(Icons.qr_code_scanner),
+              ),
             ),
           ),
           const SizedBox(height: 8),
@@ -358,10 +367,19 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
             ),
           ),
           const SizedBox(height: 12),
-          Text(l10n.bluetoothOperateTodoList),
         ],
       ),
     );
+  }
+
+  Future<void> _scanSn() async {
+    final result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
+    );
+    if (!mounted || result == null || result.isEmpty) return;
+    setState(() {
+      _snController.text = result;
+    });
   }
 
   Future<void> _startScan() async {
@@ -479,6 +497,11 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
       showToast('请补充钥匙ID/lockDevId/用户编号');
       return;
     }
+    final confirmed = await ConfirmDialog.show(
+      context: context,
+      message: '确认执行开柜授权？',
+    );
+    if (!confirmed) return;
     _setAuthTime(days);
     final payload = BleCommandBuilder.buildAddAuthorizationData(
       keyId: keyId,

@@ -4,7 +4,7 @@ import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/widgets/confirm_dialog.dart';
-import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
+import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -436,7 +436,7 @@ class _InventoryDetailPageNewState
         bgColor = const Color(0xFFE8F5E9);
         break;
       case 2: // Not in stock
-        label = l10n.inventoryStatusNotInStock;
+        label = l10n.warehouseInventoryScanStatusSurplus;
         textColor = const Color(0xFFF57C00);
         bgColor = const Color(0xFFFFF3E0);
         break;
@@ -520,39 +520,52 @@ class _InventoryDetailPageNewState
   Future<void> _scanDevice(BuildContext context) async {
     final state = ref.read(inventoryDetailProvider);
     final notifier = ref.read(inventoryDetailProvider.notifier);
+    final initialItems = state.items.map((e) => e.deviceSn).toList();
 
-    final result = await Navigator.of(context).push<String>(
+    final result = await Navigator.of(context).push<List<String>>(
       MaterialPageRoute(
-        builder: (_) => QrScanPage(
-          parseDeviceSn: true,
-          deviceType: state.detail?.deviceType ?? state.deviceType,
+        builder: (_) => QrBatchScanPage(
+          fixedDeviceType: state.detail?.deviceType ?? state.deviceType,
+          initialItems: initialItems,
+          title: context.l10n.inventoryScanToReceive,
         ),
       ),
     );
 
     if (result == null || result.isEmpty) return;
 
-    final code = await notifier.scanInventory(result);
+    var success = 0;
+    var repeat = 0;
+    var failed = 0;
+    for (final sn in result) {
+      if (sn.trim().isEmpty) continue;
+      final code = await notifier.scanInventory(sn);
+      if (code == 1) {
+        success++;
+      } else if (code == 2) {
+        repeat++;
+      } else {
+        failed++;
+      }
+    }
     if (!mounted) return;
 
-    _showScanResult(context, code);
+    _showBatchScanResult(context, success: success, repeat: repeat, failed: failed);
   }
 
-  void _showScanResult(BuildContext context, int? result) {
+  void _showBatchScanResult(
+    BuildContext context, {
+    required int success,
+    required int repeat,
+    required int failed,
+  }) {
     final l10n = context.l10n;
-    String message;
-
-    if (result == 1) {
-      message = l10n.warehouseInventoryScanSuccess;
-    } else if (result == 2) {
-      message = l10n.warehouseInventoryScanRepeat;
-    } else {
-      message = l10n.warehouseInventoryScanFailed;
-    }
-
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    final parts = <String>[];
+    if (success > 0) parts.add('${l10n.warehouseInventoryScanSuccess} $success');
+    if (repeat > 0) parts.add('${l10n.warehouseInventoryScanRepeat} $repeat');
+    if (failed > 0) parts.add('${l10n.warehouseInventoryScanFailed} $failed');
+    final message = parts.isEmpty ? l10n.warehouseInventoryScanFailed : parts.join('，');
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _showRevokeConfirm(

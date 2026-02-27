@@ -84,7 +84,7 @@ class _QrBatchScanPageState extends ConsumerState<QrBatchScanPage> {
           ],
         ),
         body: _checkingPermission
-            ? const Center(child: const SizedBox.shrink())
+            ? const Center(child: SizedBox.shrink())
             : hasPermission
                 ? Stack(
                     children: [
@@ -96,10 +96,9 @@ class _QrBatchScanPageState extends ConsumerState<QrBatchScanPage> {
                           final value = barcodes.first.rawValue;
                           if (value == null || value.trim().isEmpty) return;
                           if (_isDuplicate(value, l10n)) return;
-                          if (_isOverMaxSize(state, l10n)) return;
                           _lastText = value;
                           _lastTime = DateTime.now();
-                          await _resolveAndAdd(notifier, value);
+                          await _resolveAndAdd(notifier, value, l10n);
                         },
                       ),
                       Positioned(
@@ -183,10 +182,18 @@ class _QrBatchScanPageState extends ConsumerState<QrBatchScanPage> {
   Future<void> _resolveAndAdd(
     QrCodeListNotifier notifier,
     String value,
+    AppLocalizations l10n,
   ) async {
     final resolved = await notifier.resolveDeviceSn(value);
-    if (resolved != null) {
-      notifier.addItem(resolved);
+    if (resolved == null || resolved.trim().isEmpty) return;
+
+    final state = ref.read(qrCodeListProvider);
+    final existed = state.items.contains(resolved);
+    if (!existed && _isOverMaxSize(state, l10n)) return;
+
+    final added = notifier.addItem(resolved);
+    if (!added) {
+      _showSnack(l10n.warehouseInventoryScanRepeat);
     }
   }
 
@@ -223,8 +230,14 @@ class _QrBatchScanPageState extends ConsumerState<QrBatchScanPage> {
     );
     if (!mounted || result == null || result.isEmpty) return;
     final state = ref.read(qrCodeListProvider);
-    if (_isOverMaxSize(state, l10n)) return;
-    await _resolveAndAdd(notifier, result);
+    final resolved = await notifier.resolveDeviceSn(result);
+    if (resolved == null || resolved.trim().isEmpty) return;
+    final existed = state.items.contains(resolved);
+    if (!existed && _isOverMaxSize(state, l10n)) return;
+    final added = notifier.addItem(resolved);
+    if (!added) {
+      _showSnack(l10n.warehouseInventoryScanRepeat);
+    }
   }
 
   void _showSnack(String message) {

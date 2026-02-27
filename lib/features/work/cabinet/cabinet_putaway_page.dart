@@ -1,9 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
@@ -21,16 +22,56 @@ class CabinetPutawayPage extends ConsumerStatefulWidget {
 
 class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
   final _snController = TextEditingController();
+  final _snFocusNode = FocusNode();
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
-  final _swapTimeController = TextEditingController(text: '0');
+  final _swapTimeController = TextEditingController();
 
   double? _latitude;
   double? _longitude;
   final List<String> _localImages = [];
+  String _lastQueriedSn = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _snFocusNode.addListener(_onSnFocusChanged);
+    _nameController.addListener(_onFormChanged);
+    _addressController.addListener(_onFormChanged);
+    _swapTimeController.addListener(_onFormChanged);
+  }
+
+  void _onFormChanged() {
+    if (mounted) setState(() {});
+  }
+
+  void _onSnFocusChanged() {
+    if (!_snFocusNode.hasFocus) {
+      _handleSnBlur();
+    }
+  }
+
+  bool get _canSubmit {
+    final state = ref.read(cabinetPutawayProvider);
+    final swapTime = int.tryParse(_swapTimeController.text.trim()) ?? 0;
+    return !state.submitting &&
+        state.cabinet != null &&
+        _snController.text.trim().isNotEmpty &&
+        _nameController.text.trim().isNotEmpty &&
+        _addressController.text.trim().isNotEmpty &&
+        _latitude != null &&
+        _longitude != null &&
+        swapTime > 0 &&
+        state.images.isNotEmpty;
+  }
 
   @override
   void dispose() {
+    _snFocusNode.removeListener(_onSnFocusChanged);
+    _snFocusNode.dispose();
+    _nameController.removeListener(_onFormChanged);
+    _addressController.removeListener(_onFormChanged);
+    _swapTimeController.removeListener(_onFormChanged);
     _snController.dispose();
     _nameController.dispose();
     _addressController.dispose();
@@ -108,6 +149,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
                             Expanded(
                               child: TextField(
                                 controller: _snController,
+                                focusNode: _snFocusNode,
                                 decoration: InputDecoration(
                                   hintText: l10n.cabinetPutawaySnHint,
                                   hintStyle: const TextStyle(
@@ -119,6 +161,12 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
                                   contentPadding: EdgeInsets.zero,
                                 ),
                                 style: const TextStyle(fontSize: 15),
+                                onChanged: (value) {
+                                  if (value.trim().isEmpty) {
+                                    _lastQueriedSn = '';
+                                    _resetBySnCleared();
+                                  }
+                                },
                                 onSubmitted: (_) => notifier.queryCabinet(
                                   _snController.text.trim(),
                                 ),
@@ -237,10 +285,15 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
                         child: TextField(
                           controller: _swapTimeController,
                           keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            LengthLimitingTextInputFormatter(2),
+                          ],
                           decoration: const InputDecoration(
                             border: InputBorder.none,
                             isDense: true,
                             contentPadding: EdgeInsets.zero,
+                            counterText: '',
                           ),
                           style: const TextStyle(fontSize: 15),
                         ),
@@ -267,7 +320,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            '(${state.images.length + _localImages.length}/5)',
+                            '(${state.images.length + _localImages.length}/4)',
                             style: const TextStyle(
                               fontSize: 14,
                               color: Color(0xFF999999),
@@ -297,7 +350,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
                             ),
                           ),
                           // 添加按钮
-                          if (state.images.length + _localImages.length < 5)
+                          if (state.images.length + _localImages.length < 4)
                             GestureDetector(
                               onTap: state.uploading
                                   ? null
@@ -344,9 +397,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
               width: double.infinity,
               height: 48,
               child: FilledButton(
-                onPressed: state.submitting
-                    ? null
-                    : () => _submit(context, notifier),
+                onPressed: _canSubmit ? () => _submit(context, notifier) : null,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
                   disabledBackgroundColor: const Color(0xFFB8E6B8),
@@ -358,7 +409,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: const SizedBox.shrink(),
+                        child: SizedBox.shrink(),
                       )
                     : Text(
                         l10n.cabinetPutawaySubmit,
@@ -383,6 +434,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
+    _lastQueriedSn = result;
     ref.read(cabinetPutawayProvider.notifier).queryCabinet(result);
   }
 
@@ -416,7 +468,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
   ) async {
     final l10n = context.l10n;
     final picker = ImagePicker();
-    final remaining = 5 - currentCount;
+    final remaining = 4 - currentCount;
     if (remaining <= 0) {
       showToast(l10n.cabinetPutawayImageLimit);
       return;
@@ -432,8 +484,36 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
       if (url != null && url.isNotEmpty) {
         notifier.addImage(url);
         setState(() => _localImages.remove(item.path));
+      } else {
+        if (!mounted) return;
+        setState(() => _localImages.remove(item.path));
+        showToast(l10n.orderVoucherUploadFailed);
       }
     }
+  }
+
+  void _handleSnBlur() {
+    final sn = _snController.text.trim();
+    if (sn.isEmpty) {
+      _lastQueriedSn = '';
+      _resetBySnCleared();
+      return;
+    }
+    if (sn == _lastQueriedSn) return;
+    _lastQueriedSn = sn;
+    ref.read(cabinetPutawayProvider.notifier).queryCabinet(sn);
+  }
+
+  void _resetBySnCleared() {
+    ref.read(cabinetPutawayProvider.notifier).clearState();
+    _nameController.clear();
+    _addressController.clear();
+    _swapTimeController.clear();
+    setState(() {
+      _latitude = null;
+      _longitude = null;
+      _localImages.clear();
+    });
   }
 
   Future<void> _submit(
@@ -444,6 +524,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
     final swapTime = int.tryParse(_swapTimeController.text.trim()) ?? 0;
     final ok = await notifier.submit(
       sn: _snController.text.trim(),
+      name: _nameController.text.trim(),
       latitude: _latitude ?? 0,
       longitude: _longitude ?? 0,
       swapTime: swapTime,

@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:apple_maps_flutter/apple_maps_flutter.dart' as amaps;
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,6 +38,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   final ApiService _api = ApiService();
   final List<NearByVehicle> _vehicles = [];
   final Map<String, String> _addressCache = {};
+  Set<gmaps.Polyline> _routePolylines = const <gmaps.Polyline>{};
 
   gmaps.GoogleMapController? _googleController;
   amaps.AppleMapController? _appleController;
@@ -56,6 +59,10 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   gmaps.BitmapDescriptor? _locationMarkerIcon;
   bool _appleIconLoaded = false;
   bool _hasLocationPermission = false;
+  gmaps.LatLng? _cameraTarget;
+  DateTime? _lastCameraIdleFetchAt;
+  bool _suppressNextCameraIdle = false;
+  int _routeRequestSeq = 0;
   double _refreshTurns = 0;
   double _locateTurns = 0;
 
@@ -257,13 +264,28 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
       final centerLat = _latitude ?? _fallbackLatitude;
       final centerLng = _longitude ?? _fallbackLongitude;
       final mockList = _buildMockVehicles(centerLat, centerLng);
+      final selectedId =
+          _selectedVehicle == null ? null : _vehicleMarkerId(_selectedVehicle!);
+      NearByVehicle? selected;
+      if (selectedId != null) {
+        for (final item in mockList) {
+          if (_vehicleMarkerId(item) == selectedId) {
+            selected = item;
+            break;
+          }
+        }
+      }
       if (!mounted) return;
       setState(() {
         _loading = false;
         _vehicles
           ..clear()
           ..addAll(mockList);
+        _selectedVehicle = selected;
+        _routePolylines = _buildRoutePolylines(selected);
       });
+      final requestId = ++_routeRequestSeq;
+      unawaited(_refreshRoutePolylines(selected, requestId: requestId));
       return;
     }
 
@@ -288,12 +310,28 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
           const <NearByVehicle>[],
     );
     if (!mounted) return;
+    final nextVehicles = response.result ?? const <NearByVehicle>[];
+    final selectedId =
+        _selectedVehicle == null ? null : _vehicleMarkerId(_selectedVehicle!);
+    NearByVehicle? selected;
+    if (selectedId != null) {
+      for (final item in nextVehicles) {
+        if (_vehicleMarkerId(item) == selectedId) {
+          selected = item;
+          break;
+        }
+      }
+    }
     setState(() {
       _loading = false;
       _vehicles
         ..clear()
-        ..addAll(response.result ?? const []);
+        ..addAll(nextVehicles);
+      _selectedVehicle = selected;
+      _routePolylines = _buildRoutePolylines(selected);
     });
+    final requestId = ++_routeRequestSeq;
+    unawaited(_refreshRoutePolylines(selected, requestId: requestId));
     await _prefetchAddresses();
   }
 
@@ -426,16 +464,143 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   void _selectVehicle(NearByVehicle? vehicle) {
     setState(() {
       _selectedVehicle = vehicle;
+      _routePolylines = _buildRoutePolylines(vehicle);
     });
+    final requestId = ++_routeRequestSeq;
+    unawaited(_refreshRoutePolylines(vehicle, requestId: requestId));
     if (vehicle != null) {
-      _centerOnVehicle(vehicle);
+      unawaited(_centerOnVehicle(vehicle));
     }
+  }
+
+  Set<gmaps.Polyline> _buildRoutePolylines(NearByVehicle? vehicle) {
+    final fromLat = _latitude;
+    final fromLng = _longitude;
+    final toLat = vehicle?.latitude;
+    final toLng = vehicle?.longitude;
+    if (fromLat == null || fromLng == null || toLat == null || toLng == null) {
+      return const <gmaps.Polyline>{};
+    }
+    return <gmaps.Polyline>{
+      gmaps.Polyline(
+        polylineId: const gmaps.PolylineId('selected_route'),
+        points: <gmaps.LatLng>[
+          gmaps.LatLng(fromLat, fromLng),
+          gmaps.LatLng(toLat, toLng),
+        ],
+        color: AppColors.primaryColor,
+        width: 5,
+      ),
+    };
+  }
+
+  Future<void> _refreshRoutePolylines(
+    NearByVehicle? vehicle, {
+    required int requestId,
+  }) async {
+    if (!mounted || requestId != _routeRequestSeq) return;
+    if (vehicle == null || kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+      return;
+    }
+
+    const directionApiKey = String.fromEnvironment(
+      'DIRECTION_API_KEY',
+      defaultValue: '',
+    );
+    if (directionApiKey.isEmpty) return;
+
+    final fromLat = _latitude;
+    final fromLng = _longitude;
+    final toLat = vehicle.latitude;
+    final toLng = vehicle.longitude;
+    if (fromLat == null || fromLng == null || toLat == null || toLng == null) {
+      return;
+    }
+
+    try {
+      final dio = Dio(
+        BaseOptions(
+          baseUrl: 'https://maps.googleapis.com',
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+        ),
+      );
+      final response = await dio.get<Map<String, dynamic>>(
+        '/maps/api/directions/json',
+        queryParameters: {
+          'origin': '$fromLat,$fromLng',
+          'destination': '$toLat,$toLng',
+          'avoid': 'highways',
+          'mode': 'WALKING',
+          'key': directionApiKey,
+        },
+      );
+      final data = response.data;
+      if (data == null) return;
+      final routes = data['routes'] as List<dynamic>?;
+      if (routes == null || routes.isEmpty) return;
+      final firstRoute = Map<String, dynamic>.from(routes.first as Map);
+      final overview = firstRoute['overview_polyline'];
+      if (overview is! Map) return;
+      final encoded = (overview['points'] ?? '').toString();
+      if (encoded.isEmpty) return;
+      final points = _decodePolyline(encoded);
+      if (points.length < 2) return;
+      if (!mounted || requestId != _routeRequestSeq) return;
+
+      setState(() {
+        _routePolylines = <gmaps.Polyline>{
+          gmaps.Polyline(
+            polylineId: const gmaps.PolylineId('selected_route'),
+            points: points,
+            color: AppColors.primaryColor,
+            width: 5,
+          ),
+        };
+      });
+    } catch (_) {
+      // 使用直线回退
+    }
+  }
+
+  List<gmaps.LatLng> _decodePolyline(String encoded) {
+    final points = <gmaps.LatLng>[];
+    var index = 0;
+    var lat = 0;
+    var lng = 0;
+
+    while (index < encoded.length) {
+      var shift = 0;
+      var result = 0;
+      int byte;
+      do {
+        byte = encoded.codeUnitAt(index++) - 63;
+        result |= (byte & 0x1f) << shift;
+        shift += 5;
+      } while (byte >= 0x20 && index < encoded.length + 1);
+      final dLat = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      lat += dLat;
+
+      shift = 0;
+      result = 0;
+      do {
+        byte = encoded.codeUnitAt(index++) - 63;
+        result |= (byte & 0x1f) << shift;
+        shift += 5;
+      } while (byte >= 0x20 && index < encoded.length + 1);
+      final dLng = (result & 1) != 0 ? ~(result >> 1) : (result >> 1);
+      lng += dLng;
+
+      points.add(gmaps.LatLng(lat / 1e5, lng / 1e5));
+    }
+    return points;
   }
 
   Future<void> _centerOnVehicle(NearByVehicle vehicle) async {
     final lat = vehicle.latitude;
     final lng = vehicle.longitude;
     if (lat == null || lng == null || kIsWeb) return;
+    _suppressNextCameraIdle = true;
     if (defaultTargetPlatform == TargetPlatform.android) {
       final controller = _googleController;
       if (controller == null) return;
@@ -467,6 +632,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
     final lat = _latitude ?? _fallbackLatitude;
     final lng = _longitude ?? _fallbackLongitude;
     if (kIsWeb) return;
+    _suppressNextCameraIdle = true;
     if (defaultTargetPlatform == TargetPlatform.android) {
       final controller = _googleController;
       if (controller == null) return;
@@ -489,6 +655,44 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
     if (_latitude == null || _longitude == null) return;
     _pendingCenterOnLocation = false;
     _centerMap();
+  }
+
+  Future<void> _onGoogleCameraIdle() async {
+    if (_suppressNextCameraIdle) {
+      _suppressNextCameraIdle = false;
+      return;
+    }
+    if (_selectedVehicle != null) return;
+    final target = _cameraTarget;
+    if (target == null) return;
+
+    final now = DateTime.now();
+    if (_lastCameraIdleFetchAt != null &&
+        now.difference(_lastCameraIdleFetchAt!) <
+            const Duration(milliseconds: 700)) {
+      return;
+    }
+    _lastCameraIdleFetchAt = now;
+
+    final oldLat = _latitude;
+    final oldLng = _longitude;
+    if (oldLat != null && oldLng != null) {
+      final moved = Geolocator.distanceBetween(
+        oldLat,
+        oldLng,
+        target.latitude,
+        target.longitude,
+      );
+      if (moved < 50) {
+        return;
+      }
+    }
+
+    setState(() {
+      _latitude = target.latitude;
+      _longitude = target.longitude;
+    });
+    await _fetchVehicles();
   }
 
   Future<void> _showFilterSheet() async {
@@ -639,7 +843,13 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
                     latitude: centerLat,
                     longitude: centerLng,
                     markers: _buildGoogleMarkers(),
+                    polylines: _routePolylines,
                     annotations: _buildAppleAnnotations(),
+                    onMapTap: () => _selectVehicle(null),
+                    onGoogleCameraMove: (position) {
+                      _cameraTarget = position.target;
+                    },
+                    onGoogleCameraIdle: _onGoogleCameraIdle,
                     onGoogleMapCreated: (controller) {
                       _googleController = controller;
                       _maybeCenterMap();

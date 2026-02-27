@@ -57,7 +57,6 @@ class CabinetAuthorizationNotifier extends Notifier<CabinetAuthorizationState> {
   CabinetAuthorizationState build() => const CabinetAuthorizationState();
 
   Future<void> queryCabinets(String sn, {int page = 1, int size = 20}) async {
-    if (sn.isEmpty) return;
     state = state.copyWith(loadingCabinet: true);
     final response = await _api.get<CabinetAuthorizationList>(
       ApiPath.stationQueryListBySn,

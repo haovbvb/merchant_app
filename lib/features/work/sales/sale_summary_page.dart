@@ -905,7 +905,8 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
       return;
     }
     notifier.updateDateRange(range.start, range.end);
-    await notifier.refresh();
+    await notifier.fetchSummary();
+    await notifier.fetchList(reset: true);
   }
 
   String _formatDate(DateTime date) {

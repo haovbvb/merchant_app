@@ -23,8 +23,8 @@ class _CabinetAuthorizationPageState
     extends ConsumerState<CabinetAuthorizationPage> {
   CabinetAuthorization? _selectedStation;
   UserAuthorizationBean? _selectedPerson;
-  final DateTime _beginTime = DateTime.now();
-  final DateTime _endTime = DateTime.now().add(const Duration(hours: 24));
+  DateTime _beginTime = DateTime.now();
+  DateTime _endTime = DateTime.now().add(const Duration(hours: 24));
 
   String _formatDateTime(DateTime dt) {
     return DateFormatUtils.format(
@@ -38,7 +38,13 @@ class _CabinetAuthorizationPageState
       MaterialPageRoute(builder: (_) => const _SelectStationPage()),
     );
     if (result != null) {
-      setState(() => _selectedStation = result);
+      setState(() {
+        final changed = _selectedStation?.stationSn != result.stationSn;
+        _selectedStation = result;
+        if (changed) {
+          _selectedPerson = null;
+        }
+      });
     }
   }
 
@@ -72,6 +78,51 @@ class _CabinetAuthorizationPageState
     );
     if (!mounted) return;
     showToast(ok ? l10n.cabinetAuthSuccess : l10n.cabinetAuthFailed);
+    if (ok) {
+      setState(() {
+        _selectedStation = null;
+        _selectedPerson = null;
+        _beginTime = DateTime.now();
+        _endTime = _beginTime.add(const Duration(hours: 24));
+      });
+    }
+  }
+
+  Future<void> _pickDateTime({required bool isBegin}) async {
+    final initial = isBegin ? _beginTime : _endTime;
+    final date = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime.now().subtract(const Duration(days: 3650)),
+      lastDate: DateTime.now().add(const Duration(days: 3650)),
+    );
+    if (date == null || !mounted) return;
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(initial),
+    );
+    if (time == null || !mounted) return;
+    final picked = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
+    setState(() {
+      if (isBegin) {
+        _beginTime = picked;
+        if (_endTime.isBefore(_beginTime)) {
+          _endTime = _beginTime.add(const Duration(hours: 1));
+        }
+      } else {
+        if (picked.isBefore(_beginTime)) {
+          showToast('结束时间不能早于开始时间');
+          return;
+        }
+        _endTime = picked;
+      }
+    });
   }
 
   Future<void> _viewRecords() async {
@@ -135,21 +186,57 @@ class _CabinetAuthorizationPageState
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
-                        _formatDateTime(_beginTime),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
+                      child: InkWell(
+                        onTap: () => _pickDateTime(isBegin: true),
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _formatDateTime(_beginTime),
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              const Icon(
+                                Icons.schedule,
+                                size: 16,
+                                color: Colors.black45,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                     const Text(' — ', style: TextStyle(color: Colors.black54)),
                     Expanded(
-                      child: Text(
-                        _formatDateTime(_endTime),
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
+                      child: InkWell(
+                        onTap: () => _pickDateTime(isBegin: false),
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 6),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  _formatDateTime(_endTime),
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              const Icon(
+                                Icons.schedule,
+                                size: 16,
+                                color: Colors.black45,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -180,7 +267,7 @@ class _CabinetAuthorizationPageState
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: const SizedBox.shrink(),
+                            child: SizedBox.shrink(),
                           )
                         : Text(
                             l10n.cabinetAuthConfirmButton,
@@ -859,7 +946,10 @@ class _AuthorizedRecordPageState extends ConsumerState<_AuthorizedRecordPage> {
   Future<void> _cancelAuthorization(Map<String, dynamic> record) async {
     final l10n = context.l10n;
     final sn = record['stationSn']?.toString() ?? record['sn']?.toString() ?? '';
-    final permissionId = (record['id'] as num?)?.toInt() ?? 0;
+    final permissionId =
+      (record['permissionId'] as num?)?.toInt() ??
+      (record['id'] as num?)?.toInt() ??
+      0;
     
     if (sn.isEmpty || permissionId <= 0) return;
 

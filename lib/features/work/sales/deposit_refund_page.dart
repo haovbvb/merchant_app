@@ -22,9 +22,25 @@ class DepositRefundPage extends ConsumerStatefulWidget {
 class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
   final _userIdController = TextEditingController();
   final _remarkController = TextEditingController();
+  final _userIdFocusNode = FocusNode();
+  String _lastQueriedUserId = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _userIdFocusNode.addListener(_onUserIdFocusChanged);
+  }
+
+  void _onUserIdFocusChanged() {
+    if (!_userIdFocusNode.hasFocus) {
+      _handleUserIdBlur();
+    }
+  }
 
   @override
   void dispose() {
+    _userIdFocusNode.removeListener(_onUserIdFocusChanged);
+    _userIdFocusNode.dispose();
     _userIdController.dispose();
     _remarkController.dispose();
     super.dispose();
@@ -147,6 +163,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
               Expanded(
                 child: TextField(
                   controller: _userIdController,
+                  focusNode: _userIdFocusNode,
                   decoration: InputDecoration(
                     hintText: l10n.depositRefundUserIdHint,
                     hintStyle: const TextStyle(
@@ -161,6 +178,13 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
                     fontSize: 16,
                     color: AppColors.black06Text,
                   ),
+                  onChanged: (value) {
+                    if (value.trim().isEmpty) {
+                      _lastQueriedUserId = '';
+                      _remarkController.clear();
+                      ref.read(depositRefundProvider.notifier).reset();
+                    }
+                  },
                   onSubmitted: (_) => _searchUser(notifier),
                 ),
               ),
@@ -601,10 +625,29 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
   }
 
   void _searchUser(DepositRefundNotifier notifier) {
-    final userId = _userIdController.text.trim();
+    final userId = ScanUtils.getUserCarNum(_userIdController.text.trim());
     if (userId.isNotEmpty) {
+      _userIdController.text = userId;
+      _lastQueriedUserId = userId;
       notifier.queryUser(userId);
     }
+  }
+
+  void _handleUserIdBlur() {
+    final notifier = ref.read(depositRefundProvider.notifier);
+    final userId = ScanUtils.getUserCarNum(_userIdController.text.trim());
+    if (userId.isEmpty) {
+      _lastQueriedUserId = '';
+      _remarkController.clear();
+      notifier.reset();
+      return;
+    }
+    if (userId == _lastQueriedUserId) {
+      return;
+    }
+    _userIdController.text = userId;
+    _lastQueriedUserId = userId;
+    notifier.queryUser(userId);
   }
 
   Future<void> _scanUserId(DepositRefundNotifier notifier) async {
@@ -616,6 +659,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
       final cardNum = ScanUtils.getUserCarNum(result);
       if (cardNum.isEmpty) return;
       _userIdController.text = cardNum;
+      _lastQueriedUserId = cardNum;
       notifier.queryUser(cardNum);
     }
   }
@@ -643,6 +687,32 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
 
   Future<void> _submit(DepositRefundNotifier notifier) async {
     final l10n = context.l10n;
+    final state = ref.read(depositRefundProvider);
+    if (!state.voucherConfirmed) {
+      final confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text(l10n.depositRefundTitle),
+            content: const Text('Voucher is not confirmed yet. Continue?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text(l10n.cancel),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: Text(l10n.confirm),
+              ),
+            ],
+          );
+        },
+      );
+      if (confirm != true) {
+        return;
+      }
+    }
+
     final success = await notifier.submit(
       cardNum: _userIdController.text.trim(),
       remark: _remarkController.text.trim(),

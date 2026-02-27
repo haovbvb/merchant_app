@@ -199,6 +199,27 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
     SellBindState state,
     SellBindNotifier notifier,
   ) {
+    if (state.selectedPlan == null) {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.sellBindDeviceSn,
+              style: const TextStyle(fontSize: 14, color: AppColors.black06Text),
+            ),
+            const SizedBox(height: 16),
+            _buildEmptyCard(l10n.sellBindChoosePackage),
+          ],
+        ),
+      );
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -243,7 +264,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
                   },
                   onSubmitted: (value) {
                     if (value.trim().isNotEmpty) {
-                      notifier.queryDevice(value.trim());
+                      _queryDevice(value.trim(), notifier);
                     }
                   },
                 ),
@@ -325,7 +346,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
-    ref.read(sellBindProvider.notifier).queryDevice(result);
+    await _queryDevice(result, ref.read(sellBindProvider.notifier));
   }
 
   void _queryDeviceByInput() {
@@ -335,7 +356,13 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
       notifier.clearDeviceInfo();
       return;
     }
-    notifier.queryDevice(sn);
+    _queryDevice(sn, notifier);
+  }
+
+  Future<void> _queryDevice(String sn, SellBindNotifier notifier) async {
+    final ok = await notifier.queryDevice(sn);
+    if (!mounted || ok) return;
+    showToast(context.l10n.sellBindNoDeviceInfo);
   }
 
   Future<void> _showPackageSheet(
@@ -990,13 +1017,24 @@ class _SellBindConfirmPageState extends ConsumerState<_SellBindConfirmPage> {
                   ),
                   elevation: 0,
                 ),
-                child: Text(
-                  l10n.sellBindSubmit,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                child: _submitting
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      )
+                    : Text(
+                        l10n.sellBindSubmit,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
               ),
             ),
           ),

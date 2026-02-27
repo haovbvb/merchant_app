@@ -21,9 +21,30 @@ class RentBindPage extends ConsumerStatefulWidget {
 
 class _RentBindPageState extends ConsumerState<RentBindPage> {
   final _snController = TextEditingController();
+  final _snFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _snFocusNode.addListener(_onSnFocusChanged);
+  }
+
+  void _onSnFocusChanged() {
+    if (_snFocusNode.hasFocus) return;
+    final sn = _snController.text.trim();
+    final notifier = ref.read(rentBindProvider.notifier);
+    if (sn.isEmpty) {
+      notifier.clearDeviceAndPack();
+      return;
+    }
+    _queryDevice(sn, notifier);
+  }
 
   @override
   void dispose() {
+    _snFocusNode
+      ..removeListener(_onSnFocusChanged)
+      ..dispose();
     _snController.dispose();
     super.dispose();
   }
@@ -139,6 +160,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
               Expanded(
                 child: TextField(
                   controller: _snController,
+                  focusNode: _snFocusNode,
                   decoration: InputDecoration(
                     hintText: l10n.rentBindDeviceSnHint,
                     hintStyle: const TextStyle(
@@ -151,7 +173,12 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
                   ),
                   onSubmitted: (value) {
                     if (value.trim().isNotEmpty) {
-                      notifier.queryDevice(value.trim());
+                      _queryDevice(value.trim(), notifier);
+                    }
+                  },
+                  onChanged: (value) {
+                    if (value.trim().isEmpty) {
+                      notifier.clearDeviceAndPack();
                     }
                   },
                 ),
@@ -509,7 +536,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
               ? const SizedBox(
                   width: 20,
                   height: 20,
-                  child: const SizedBox.shrink(),
+                  child: SizedBox.shrink(),
                 )
               : Text(
                   l10n.rentBindSubmit,
@@ -531,7 +558,13 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
-    ref.read(rentBindProvider.notifier).queryDevice(result);
+    await _queryDevice(result, ref.read(rentBindProvider.notifier));
+  }
+
+  Future<void> _queryDevice(String sn, RentBindNotifier notifier) async {
+    final ok = await notifier.queryDevice(sn);
+    if (!mounted || ok) return;
+    showToast(context.l10n.rentBindNoDeviceInfo);
   }
 
   Future<void> _selectPackage(

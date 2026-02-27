@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
@@ -31,6 +32,15 @@ class _OfflineUserRegisterPageState
   final _referrerController = TextEditingController();
 
   bool _obscurePassword = true;
+
+  bool get _canSubmit {
+    return _phoneController.text.trim().isNotEmpty &&
+        _codeController.text.trim().isNotEmpty &&
+        _passwordController.text.trim().isNotEmpty &&
+        _firstNameController.text.trim().isNotEmpty &&
+        _lastNameController.text.trim().isNotEmpty &&
+        _usernameController.text.trim().isNotEmpty;
+  }
 
   @override
   void initState() {
@@ -101,6 +111,8 @@ class _OfflineUserRegisterPageState
                         controller: _firstNameController,
                         hintText: l10n.offlineRegisterFirstNameHint,
                         isRequired: true,
+                        maxLength: 50,
+                        onChanged: (_) => setState(() {}),
                       ),
                       _buildDivider(),
                       _buildInputField(
@@ -108,6 +120,8 @@ class _OfflineUserRegisterPageState
                         controller: _lastNameController,
                         hintText: l10n.offlineRegisterLastNameHint,
                         isRequired: true,
+                        maxLength: 50,
+                        onChanged: (_) => setState(() {}),
                       ),
                       _buildDivider(),
                       _buildInputField(
@@ -115,6 +129,13 @@ class _OfflineUserRegisterPageState
                         controller: _usernameController,
                         hintText: l10n.offlineRegisterUsernameHint,
                         isRequired: true,
+                        maxLength: 50,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.deny(
+                            RegExp(r'[\u4e00-\u9fff]'),
+                          ),
+                        ],
+                        onChanged: (_) => setState(() {}),
                       ),
                     ],
                   ),
@@ -130,6 +151,7 @@ class _OfflineUserRegisterPageState
                         controller: _emailController,
                         hintText: l10n.offlineRegisterEmailHint,
                         keyboardType: TextInputType.emailAddress,
+                        maxLength: 50,
                       ),
                       _buildDivider(),
                       _buildReferrerField(l10n),
@@ -199,7 +221,7 @@ class _OfflineUserRegisterPageState
   ) {
     final selected = state.selectedArea;
     final areaCode = selected?.areaCode ?? '+880';
-    final countryShort = _getCountryShort(selected?.country);
+    final countryShort = (selected?.countrySimpleName ?? '').toUpperCase();
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -239,17 +261,21 @@ class _OfflineUserRegisterPageState
                 child: TextField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
+                  maxLength: 20,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   decoration: InputDecoration(
                     hintText: l10n.offlineRegisterPhoneHint,
                     hintStyle: const TextStyle(color: Color(0xFF999999)),
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
+                    counterText: '',
                   ),
                   style: const TextStyle(
                     fontSize: 16,
                     color: AppColors.black06Text,
                   ),
+                  onChanged: (_) => setState(() {}),
                 ),
               ),
             ],
@@ -277,17 +303,21 @@ class _OfflineUserRegisterPageState
                 child: TextField(
                   controller: _codeController,
                   keyboardType: TextInputType.number,
+                  maxLength: 6,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   decoration: InputDecoration(
                     hintText: l10n.offlineRegisterCodeHint,
                     hintStyle: const TextStyle(color: Color(0xFF999999)),
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
+                    counterText: '',
                   ),
                   style: const TextStyle(
                     fontSize: 16,
                     color: AppColors.black06Text,
                   ),
+                  onChanged: (_) => setState(() {}),
                 ),
               ),
               if (state.countdown > 0)
@@ -343,17 +373,24 @@ class _OfflineUserRegisterPageState
                 child: TextField(
                   controller: _passwordController,
                   obscureText: _obscurePassword,
+                  maxLength: 16,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.deny(RegExp(r'\s')),
+                    FilteringTextInputFormatter.deny(RegExp(r'[\u4e00-\u9fff]')),
+                  ],
                   decoration: InputDecoration(
                     hintText: l10n.offlineRegisterPasswordHint,
                     hintStyle: const TextStyle(color: Color(0xFF999999)),
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
+                    counterText: '',
                   ),
                   style: const TextStyle(
                     fontSize: 16,
                     color: AppColors.black06Text,
                   ),
+                  onChanged: (_) => setState(() {}),
                 ),
               ),
               GestureDetector(
@@ -379,6 +416,9 @@ class _OfflineUserRegisterPageState
     String? hintText,
     bool isRequired = false,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    int? maxLength,
+    ValueChanged<String>? onChanged,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -390,17 +430,21 @@ class _OfflineUserRegisterPageState
           TextField(
             controller: controller,
             keyboardType: keyboardType,
+            inputFormatters: inputFormatters,
+            maxLength: maxLength,
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: const TextStyle(color: Color(0xFF999999)),
               border: InputBorder.none,
               isDense: true,
               contentPadding: EdgeInsets.zero,
+              counterText: '',
             ),
             style: const TextStyle(
               fontSize: 16,
               color: AppColors.black06Text,
             ),
+            onChanged: onChanged,
           ),
         ],
       ),
@@ -458,12 +502,17 @@ class _OfflineUserRegisterPageState
               Expanded(
                 child: TextField(
                   controller: _referrerController,
+                  maxLength: 20,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.deny(RegExp(r'[\u4e00-\u9fff]')),
+                  ],
                   decoration: InputDecoration(
                     hintText: l10n.offlineRegisterReferrerHint,
                     hintStyle: const TextStyle(color: Color(0xFF999999)),
                     border: InputBorder.none,
                     isDense: true,
                     contentPadding: EdgeInsets.zero,
+                    counterText: '',
                   ),
                   style: const TextStyle(
                     fontSize: 16,
@@ -519,8 +568,9 @@ class _OfflineUserRegisterPageState
         width: double.infinity,
         height: 48,
         child: ElevatedButton(
-          onPressed:
-              state.registering ? null : () => _submit(context, notifier),
+          onPressed: (!state.registering && _canSubmit)
+              ? () => _submit(context, notifier)
+              : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryColor,
             disabledBackgroundColor: const Color(0xFFE8F5E9),
@@ -534,7 +584,7 @@ class _OfflineUserRegisterPageState
               ? const SizedBox(
                   width: 20,
                   height: 20,
-                  child: const SizedBox.shrink(),
+                  child: SizedBox.shrink(),
                 )
               : Text(
                   l10n.offlineRegisterSubmit,
@@ -546,16 +596,6 @@ class _OfflineUserRegisterPageState
         ),
       ),
     );
-  }
-
-  String _getCountryShort(String? country) {
-    if (country == null) return 'BD';
-    if (country.toLowerCase().contains('bangladesh')) return 'BD';
-    if (country.toLowerCase().contains('china')) return 'CN';
-    if (country.toLowerCase().contains('angola')) return 'AO';
-    if (country.toLowerCase().contains('south africa')) return 'ZA';
-    if (country.toLowerCase().contains('thailand')) return 'TH';
-    return country.substring(0, 2).toUpperCase();
   }
 
   Future<void> _sendSms(

@@ -21,6 +21,7 @@ class CabinetOfflineDetailPage extends ConsumerStatefulWidget {
 class _CabinetOfflineDetailPageState
     extends ConsumerState<CabinetOfflineDetailPage> {
   final TextEditingController _snController = TextEditingController();
+  bool _noPermissionHandled = false;
 
   @override
   void initState() {
@@ -113,6 +114,15 @@ class _CabinetOfflineDetailPageState
     final notifier = ref.read(cabinetOfflineProvider.notifier);
     final info = state.baseInfo;
     final canOperate = (info?.hasPermission ?? 0) == 1;
+
+    if (info != null && !canOperate && !_noPermissionHandled) {
+      _noPermissionHandled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        showToast('无操作权限');
+        Navigator.of(context).maybePop();
+      });
+    }
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.cabinetOfflineDetailTitle)),

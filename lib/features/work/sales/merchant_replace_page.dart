@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/ui.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
-import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/merchant_replace_controller.dart';
@@ -60,6 +59,13 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
         ),
       ),
     );
+  }
+
+  bool get _canSubmit {
+    return _userIdController.text.trim().isNotEmpty &&
+        _boundBatterySnController.text.trim().isNotEmpty &&
+        _newBatterySnController.text.trim().isNotEmpty &&
+        _reasonController.text.trim().isNotEmpty;
   }
 
   Widget _buildHeader(BuildContext context) {
@@ -132,7 +138,11 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
             label: l10n.merchantReplaceUserId,
             hint: l10n.merchantReplaceUserIdHint,
             controller: _userIdController,
-            onScan: () => _scanTo(_userIdController),
+            onScan: () => _scanTo(
+              _userIdController,
+              parser: ScanUtils.getUserCarNum,
+            ),
+            onChanged: (_) => setState(() {}),
           ),
           const Divider(height: 24, color: Color(0xFFEEEEEE)),
           // Bound Battery SN
@@ -140,7 +150,11 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
             label: l10n.merchantReplaceBoundBatterySn,
             hint: l10n.merchantReplaceBatterySnHint,
             controller: _boundBatterySnController,
-            onScan: () => _scanTo(_boundBatterySnController),
+            onScan: () => _scanTo(
+              _boundBatterySnController,
+              parser: ScanUtils.getDeviceSn,
+            ),
+            onChanged: (_) => setState(() {}),
           ),
           const Divider(height: 24, color: Color(0xFFEEEEEE)),
           // New Battery
@@ -148,7 +162,11 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
             label: l10n.merchantReplaceNewBattery,
             hint: l10n.merchantReplaceBatterySnHint,
             controller: _newBatterySnController,
-            onScan: () => _scanTo(_newBatterySnController),
+            onScan: () => _scanTo(
+              _newBatterySnController,
+              parser: ScanUtils.getDeviceSn,
+            ),
+            onChanged: (_) => setState(() {}),
           ),
         ],
       ),
@@ -160,6 +178,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
     required String hint,
     required TextEditingController controller,
     required VoidCallback onScan,
+    ValueChanged<String>? onChanged,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,6 +197,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
             Expanded(
               child: TextField(
                 controller: controller,
+                onChanged: onChanged,
                 decoration: InputDecoration(
                   hintText: hint,
                   hintStyle: const TextStyle(
@@ -231,6 +251,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
           const SizedBox(height: 8),
           TextField(
             controller: _reasonController,
+            onChanged: (_) => setState(() {}),
             maxLines: 3,
             decoration: InputDecoration(
               hintText: l10n.merchantReplaceReasonsHint,
@@ -273,7 +294,9 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
           width: double.infinity,
           height: 48,
           child: ElevatedButton(
-            onPressed: state.submitting ? null : () => _submit(context, notifier),
+            onPressed: state.submitting || !_canSubmit
+                ? null
+                : () => _submit(context, notifier),
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primaryColor,
               disabledBackgroundColor: const Color(0xFFB8E6B8),
@@ -287,7 +310,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
                 ? const SizedBox(
                     width: 20,
                     height: 20,
-                    child: const SizedBox.shrink(),
+                    child: SizedBox.shrink(),
                   )
                 : Text(
                     l10n.merchantReplaceSubmit,
@@ -302,12 +325,18 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
     );
   }
 
-  Future<void> _scanTo(TextEditingController controller) async {
+  Future<void> _scanTo(
+    TextEditingController controller, {
+    required String Function(String) parser,
+  }) async {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(builder: (_) => const QrScanPage()),
     );
     if (!mounted || result == null || result.isEmpty) return;
-    controller.text = result;
+    final parsed = parser(result).trim();
+    if (parsed.isEmpty) return;
+    controller.text = parsed;
+    setState(() {});
   }
 
   Future<void> _submit(

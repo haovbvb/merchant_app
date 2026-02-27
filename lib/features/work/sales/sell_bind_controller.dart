@@ -137,8 +137,8 @@ class SellBindNotifier extends Notifier<SellBindState> {
     state = state.copyWith(loadingUser: false, user: response.result);
   }
 
-  Future<void> queryDevice(String sn) async {
-    if (sn.isEmpty) return;
+  Future<bool> queryDevice(String sn) async {
+    if (sn.isEmpty) return false;
     final plan = state.selectedPlan;
     state = state.copyWith(loadingDevice: true, deviceInfo: null);
     final params = <String, dynamic>{'sn': sn};
@@ -157,8 +157,10 @@ class SellBindNotifier extends Notifier<SellBindState> {
         ),
       );
       state = state.copyWith(loadingDevice: false, deviceInfo: response.result);
+      return true;
     } catch (_) {
       state = state.copyWith(loadingDevice: false, deviceInfo: null);
+      return false;
     }
   }
 

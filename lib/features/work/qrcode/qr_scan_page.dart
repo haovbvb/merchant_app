@@ -12,7 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 class QrScanPage extends StatefulWidget {
   const QrScanPage({
     super.key,
-    this.allowManualInput = true,
+    this.allowManualInput = false,
     this.parseDeviceSn = false,
     this.deviceType,
   });
@@ -81,7 +81,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
         resizeToAvoidBottomInset: true,
         body: _checkingPermission
             ? const Center(
-                child: const SizedBox.shrink(),
+                child: SizedBox.shrink(),
               )
             : hasPermission
             ? _buildScannerView(context)

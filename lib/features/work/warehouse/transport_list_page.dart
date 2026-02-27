@@ -216,7 +216,7 @@ class _TransportListPageState extends ConsumerState<TransportListPage> {
                 fontSize: 14,
               ),
             ),
-            if (widget.mode == TransportMode.issue) ...[
+            if (widget.mode == TransportMode.issue && _selectedTabIndex == 0) ...[
               const SizedBox(height: 24),
               SizedBox(
                 width: 200,
@@ -411,7 +411,7 @@ class _TransportCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      item.outWarehouseName,
+                        item.inWarehouseName,
                       style: const TextStyle(
                         fontSize: 14,
                         color: AppColors.black06Text,

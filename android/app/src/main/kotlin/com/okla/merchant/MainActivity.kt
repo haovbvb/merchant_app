@@ -1,5 +1,3 @@
-package com.okla.merchant
+package com.okla.ops
 
-import io.flutter.embedding.android.FlutterActivity
-
-class MainActivity : FlutterActivity()
+// migrated to com/okla/ops/MainActivity.kt

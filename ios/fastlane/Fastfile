@@ -1,6 +1,60 @@
 default_platform(:ios)
 
+require "json"
+require "time"
+
 platform :ios do
+  def detect_profile_name(app_identifier:, export_method: "ad-hoc")
+    profile_dir = File.expand_path("~/Library/MobileDevice/Provisioning Profiles")
+    return nil unless Dir.exist?(profile_dir)
+
+    candidates = []
+    Dir.glob(File.join(profile_dir, "*.mobileprovision")).each do |path|
+      begin
+        tmp_plist = File.expand_path("./tmp_profile_#{Process.pid}.plist", __dir__)
+        File.write(tmp_plist, sh("security", "cms", "-D", "-i", path, log: false))
+        json = sh("plutil", "-convert", "json", "-o", "-", tmp_plist, log: false)
+        data = JSON.parse(json)
+        FileUtils.rm_f(tmp_plist)
+
+        entitlements = data["Entitlements"] || {}
+        app_id = entitlements["application-identifier"].to_s
+        next unless app_id.end_with?(app_identifier)
+
+        expiration = data["ExpirationDate"]
+        next if expiration && Time.parse(expiration.to_s) <= Time.now
+
+        all_devices = data["ProvisionsAllDevices"] == true
+        provisioned_devices = data["ProvisionedDevices"] || []
+        device_count = all_devices ? 999_999 : provisioned_devices.size
+
+        profile_name = data["Name"].to_s
+        next if profile_name.empty?
+
+        # ad-hoc 需要有设备列表且非企业包；development 允许开发证书 profile
+        if export_method == "ad-hoc"
+          next if all_devices
+          next if provisioned_devices.empty?
+        end
+
+        candidates << {
+          name: profile_name,
+          devices: device_count,
+          expiration: expiration.to_s,
+        }
+      rescue
+        FileUtils.rm_f(File.expand_path("./tmp_profile_#{Process.pid}.plist", __dir__))
+        next
+      end
+    end
+
+    return nil if candidates.empty?
+
+    picked = candidates.max_by { |item| [item[:devices], item[:expiration]] }
+    UI.message("🔎 Auto selected profile '#{picked[:name]}' (devices=#{picked[:devices]}, exp=#{picked[:expiration]})")
+    picked[:name]
+  end
+
   def upload_to_pgyer(file_path:, api_key:, update_desc: "", install_type: "1", password: "", app_key: "")
     upload_cmd = [
       "curl", "-f", "-X", "POST", "https://www.pgyer.com/apiv2/app/upload",
@@ -32,9 +86,73 @@ platform :ios do
     UI.success("✅ Build caches cleaned.")
   end
 
+  def generate_export_options_plist(app_identifier:, team_id:)
+    export_method = (ENV["IOS_EXPORT_METHOD"] || "ad-hoc").strip
+    signing_style = (ENV["IOS_SIGNING_STYLE"] || "automatic").strip
+    profile_name = (ENV["IOS_PROFILE_NAME"] || "").strip
+
+    if !profile_name.empty? && signing_style != "manual"
+      signing_style = "manual"
+    end
+
+    if signing_style == "manual" && profile_name.empty?
+      profile_name = detect_profile_name(
+        app_identifier: app_identifier,
+        export_method: export_method,
+      ).to_s.strip
+    end
+
+    if signing_style == "manual" && profile_name.empty?
+      UI.user_error!("IOS_PROFILE_NAME is required when IOS_SIGNING_STYLE=manual. You can set IOS_PROFILE_NAME explicitly, or install an AdHoc profile for #{app_identifier} first.")
+    end
+
+    if signing_style == "automatic" && export_method == "ad-hoc"
+      UI.important("⚠️ Using automatic signing with ad-hoc export may pick a profile with limited devices.")
+    end
+
+    export_plist_path = File.expand_path("./ExportOptions.generated.plist", __dir__)
+    provisioning_profiles_xml = if signing_style == "manual"
+                                  <<~XML
+                                    <key>provisioningProfiles</key>
+                                    <dict>
+                                      <key>#{app_identifier}</key>
+                                      <string>#{profile_name}</string>
+                                    </dict>
+                                  XML
+                                else
+                                  ""
+                                end
+
+    File.write(
+      export_plist_path,
+      <<~XML
+        <?xml version="1.0" encoding="UTF-8"?>
+        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        <plist version="1.0">
+        <dict>
+          <key>method</key>
+          <string>#{export_method}</string>
+          <key>signingStyle</key>
+          <string>#{signing_style}</string>
+          <key>teamID</key>
+          <string>#{team_id}</string>
+          #{provisioning_profiles_xml}
+          <key>compileBitcode</key>
+          <false/>
+          <key>stripSwiftSymbols</key>
+          <true/>
+        </dict>
+        </plist>
+      XML
+    )
+
+    UI.message("📦 iOS export_method=#{export_method}, signing_style=#{signing_style}, profile=#{profile_name.empty? ? 'AUTO' : profile_name}")
+    export_plist_path
+  end
+
   desc "Build Flutter iOS IPA and upload to Pgyer"
   lane :pgyer do
-    app_identifier = "com.okla.merchant"
+    app_identifier = "com.okla.ops"
     team_id = "39634H5Y8U"
     pgyer_api_key = "630a6a4d973bda999b5ca54affaebc60"
     pgyer_app_key = ENV["PGYER_APP_KEY"]
@@ -51,7 +169,11 @@ platform :ios do
 
     now = Time.now
     ios_build_number = now.strftime("%Y%m%d%H%M")
-    sh "flutter", "build", "ipa", "--release", "--build-number=#{ios_build_number}"
+    export_plist_path = generate_export_options_plist(
+      app_identifier: app_identifier,
+      team_id: team_id,
+    )
+    sh "flutter", "build", "ipa", "--release", "--build-number=#{ios_build_number}", "--export-options-plist=#{export_plist_path}"
 
     if ipa_path.to_s.strip.empty?
       ipa_candidates = Dir["../../build/ios/ipa/*.ipa"]
@@ -70,7 +192,7 @@ platform :ios do
 
   desc "Build Flutter iOS + Android and upload both to Pgyer"
   lane :pgyer_all do
-    app_identifier = "com.okla.merchant"
+    app_identifier = "com.okla.ops"
     team_id = "39634H5Y8U"
     pgyer_api_key = "630a6a4d973bda999b5ca54affaebc60"
     pgyer_app_key = ENV["PGYER_APP_KEY"]
@@ -91,7 +213,11 @@ platform :ios do
     ios_build_number = now.strftime("%Y%m%d%H%M")  # e.g. 202602090928
     # Android versionCode max 2100000000, use (year-2020) prefix to stay under limit
     android_build_number = "#{now.year - 2020}#{now.strftime('%m%d%H%M')}"  # e.g. 602090928
-    sh "flutter", "build", "ipa", "--release", "--build-number=#{ios_build_number}"
+    export_plist_path = generate_export_options_plist(
+      app_identifier: app_identifier,
+      team_id: team_id,
+    )
+    sh "flutter", "build", "ipa", "--release", "--build-number=#{ios_build_number}", "--export-options-plist=#{export_plist_path}"
     sh "flutter", "build", android_artifact, "--release", "--build-number=#{android_build_number}"
 
     if ipa_path.to_s.strip.empty?

@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -225,7 +226,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nameLabel => '用户名';
 
   @override
-  String get nameRequired => '请输入用户名';
+  String get nameRequired => '请输入账号';
 
   @override
   String get passwordLabel => '密码';
@@ -1356,13 +1357,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceIssueStatusInTransit => '运输中';
 
   @override
-  String get deviceIssueStatusReceiveAll => '全部接收';
+  String get deviceIssueStatusReceiveAll => '已接收';
 
   @override
   String get deviceIssueStatusPartial => '部分接收';
 
   @override
-  String get deviceIssueStatusWithdrawn => '全部撤回';
+  String get deviceIssueStatusWithdrawn => '已撤回';
 
   @override
   String get deviceIssueQuantity => '数量';

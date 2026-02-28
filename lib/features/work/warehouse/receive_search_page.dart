@@ -332,13 +332,17 @@ class _ReceiveSearchPageState extends ConsumerState<ReceiveSearchPage> {
     );
   }
 
-  void _performSearch(String keyword, ReceiveListNotifier notifier) {
-    _saveSearchHistory(keyword);
+  Future<void> _performSearch(String keyword, ReceiveListNotifier notifier) async {
     setState(() {
       _hasSearched = true;
       _selectedTabIndex = 0;
     });
-    notifier.refresh(keyword: keyword, resetStatus: true);
+    await notifier.refresh(keyword: keyword, resetStatus: true);
+    if (!mounted) return;
+    final currentState = ref.read(receiveListProvider);
+    if (currentState.items.isNotEmpty) {
+      await _saveSearchHistory(keyword);
+    }
   }
 
   void _onTabSelected(int index, ReceiveListNotifier notifier) {

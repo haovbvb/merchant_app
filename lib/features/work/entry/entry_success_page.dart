@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/app_router.dart';
+import 'package:merchant_app/app/root_tab_scaffold.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 
@@ -18,7 +21,7 @@ class EntrySuccessPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => _goToWorkbenchHome(context),
         ),
         title: Text(
           title,
@@ -66,10 +69,7 @@ class EntrySuccessPage extends StatelessWidget {
 
               // 返回工作台按钮
               OutlinedButton(
-                onPressed: () {
-                  // 返回到工作台
-                  Navigator.of(context).popUntil((route) => route.isFirst);
-                },
+                onPressed: () => _goToWorkbenchHome(context),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.primaryColor,
                   side: const BorderSide(color: AppColors.primaryColor),
@@ -88,5 +88,11 @@ class EntrySuccessPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _goToWorkbenchHome(BuildContext context) {
+    final container = ProviderScope.containerOf(context, listen: false);
+    container.read(bottomNavIndexProvider.notifier).setIndex(1);
+    AppRouter.goHome();
   }
 }

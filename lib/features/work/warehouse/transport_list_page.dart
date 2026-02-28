@@ -73,11 +73,18 @@ class _TransportListPageState extends ConsumerState<TransportListPage> {
             color: Colors.white,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
             child: GestureDetector(
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => TransportSearchPage(mode: widget.mode),
-                ),
-              ),
+              onTap: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => TransportSearchPage(mode: widget.mode),
+                  ),
+                );
+                await ref.read(transportListProvider.notifier).refresh(
+                      status: _mapStatus(_selectedTabIndex),
+                      mode: widget.mode,
+                      keyword: '',
+                    );
+              },
               child: Container(
                 height: 36,
                 padding: const EdgeInsets.symmetric(horizontal: 12),

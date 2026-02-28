@@ -25,6 +25,8 @@ class TransportCreatePage extends ConsumerStatefulWidget {
 }
 
 class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
+  final TextEditingController _trackingController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -39,10 +41,23 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
   }
 
   @override
+  void dispose() {
+    _trackingController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final state = ref.watch(transportCreateProvider);
     final notifier = ref.read(transportCreateProvider.notifier);
+
+    if (_trackingController.text != state.trackingNumber) {
+      _trackingController.value = TextEditingValue(
+        text: state.trackingNumber,
+        selection: TextSelection.collapsed(offset: state.trackingNumber.length),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.bgColor,
@@ -109,7 +124,7 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
                   ),
                   // 接收仓库
                   _SectionCard(
-                    child: _SelectRow(
+                    child: _SelectField(
                       icon:
                           'assets/android/mipmap-xxhdpi/icon_receive_warehouse.png',
                       label: l10n.deviceReceiveWarehouse,
@@ -127,17 +142,13 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
                   ),
                   // 物流单号
                   _SectionCard(
-                    child: _SelectRow(
+                    child: _InputField(
                       icon:
                           'assets/android/mipmap-xxhdpi/icon_edt_traknumber.png',
                       label: l10n.deviceIssueTrackingNumber,
-                      value: state.trackingNumber.isNotEmpty
-                          ? state.trackingNumber
-                          : l10n.deviceIssuePleaseEnterTracking,
-                      valueColor: state.trackingNumber.isNotEmpty
-                          ? const Color(0xFF1A1A1A)
-                          : const Color(0xFF999999),
-                      onTap: () => _showTrackingDialog(context, l10n, notifier),
+                      hintText: l10n.deviceIssuePleaseEnterTracking,
+                      controller: _trackingController,
+                      onChanged: notifier.setTrackingNumber,
                     ),
                   ),
                   // 选择设备
@@ -352,43 +363,6 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
     );
   }
 
-  Future<void> _showTrackingDialog(
-    BuildContext context,
-    AppLocalizations l10n,
-    TransportCreateNotifier notifier,
-  ) async {
-    final controller = TextEditingController(
-      text: ref.read(transportCreateProvider).trackingNumber,
-    );
-    final result = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.deviceIssueTrackingNumber),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: l10n.deviceIssueEnterTracking,
-            border: const OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
-    );
-    if (result != null) {
-      notifier.setTrackingNumber(result);
-    }
-  }
-
   Future<void> _showSnInputDialog(
     BuildContext context,
     AppLocalizations l10n,
@@ -468,8 +442,8 @@ class _SectionCard extends StatelessWidget {
   }
 }
 
-class _SelectRow extends StatelessWidget {
-  const _SelectRow({
+class _SelectField extends StatelessWidget {
+  const _SelectField({
     required this.icon,
     required this.label,
     required this.value,
@@ -488,27 +462,91 @@ class _SelectRow extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(icon, width: 20, height: 20),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: const TextStyle(fontSize: 14, color: AppColors.black06Text),
+          Row(
+            children: [
+              Image.asset(icon, width: 20, height: 20),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: AppColors.black06Text,
+                ),
+              ),
+            ],
           ),
-          const Spacer(),
-          Flexible(
-            child: Text(
-              value,
-              style: TextStyle(fontSize: 14, color: valueColor),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  value,
+                  style: TextStyle(fontSize: 14, color: valueColor),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 4),
+              const Icon(
+                Icons.chevron_right,
+                color: Color(0xFFCCCCCC),
+                size: 20,
+              ),
+            ],
           ),
-          const SizedBox(width: 4),
-          const Icon(Icons.chevron_right, color: Color(0xFFCCCCCC), size: 20),
         ],
       ),
+    );
+  }
+}
+
+class _InputField extends StatelessWidget {
+  const _InputField({
+    required this.icon,
+    required this.label,
+    required this.hintText,
+    required this.controller,
+    required this.onChanged,
+  });
+
+  final String icon;
+  final String label;
+  final String hintText;
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Image.asset(icon, width: 20, height: 20),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: const TextStyle(fontSize: 14, color: AppColors.black06Text),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          controller: controller,
+          onChanged: onChanged,
+          decoration: InputDecoration(
+            hintText: hintText,
+            hintStyle: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
+            border: InputBorder.none,
+            isDense: true,
+            contentPadding: EdgeInsets.zero,
+          ),
+          style: const TextStyle(fontSize: 14, color: Color(0xFF1A1A1A)),
+        ),
+      ],
     );
   }
 }

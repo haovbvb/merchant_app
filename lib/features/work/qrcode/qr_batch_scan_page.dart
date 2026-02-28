@@ -14,12 +14,14 @@ class QrBatchScanPage extends ConsumerStatefulWidget {
     this.fixedDeviceType,
     this.title,
     this.maxSize,
+    this.returnResolved = true,
   });
 
   final List<String> initialItems;
   final int? fixedDeviceType;
   final String? title;
   final int? maxSize;
+  final bool returnResolved;
 
   @override
   ConsumerState<QrBatchScanPage> createState() => _QrBatchScanPageState();
@@ -27,6 +29,7 @@ class QrBatchScanPage extends ConsumerStatefulWidget {
 
 class _QrBatchScanPageState extends ConsumerState<QrBatchScanPage> {
   final MobileScannerController _controller = MobileScannerController();
+  final Map<String, String> _resolvedToRaw = {};
   String? _lastText;
   DateTime? _lastTime;
   bool _sameToastShown = false;
@@ -45,6 +48,9 @@ class _QrBatchScanPageState extends ConsumerState<QrBatchScanPage> {
       }
       if (widget.initialItems.isNotEmpty) {
         notifier.setInitialItems(widget.initialItems);
+        for (final item in widget.initialItems) {
+          _resolvedToRaw[item] = item;
+        }
       }
     });
   }
@@ -64,7 +70,7 @@ class _QrBatchScanPageState extends ConsumerState<QrBatchScanPage> {
 
     return WillPopScope(
       onWillPop: () async {
-        Navigator.of(context).pop(state.items);
+        _popWithResult(state.items);
         return false;
       },
       child: Scaffold(
@@ -78,7 +84,7 @@ class _QrBatchScanPageState extends ConsumerState<QrBatchScanPage> {
                 tooltip: l10n.scanFlashOn,
               ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(state.items),
+              onPressed: () => _popWithResult(state.items),
               child: Text(l10n.qrcodeListConfirm),
             ),
           ],
@@ -192,6 +198,7 @@ class _QrBatchScanPageState extends ConsumerState<QrBatchScanPage> {
     if (!existed && _isOverMaxSize(state, l10n)) return;
 
     final added = notifier.addItem(resolved);
+    _resolvedToRaw[resolved] = value;
     if (!added) {
       _showSnack(l10n.warehouseInventoryScanRepeat);
     }
@@ -235,9 +242,21 @@ class _QrBatchScanPageState extends ConsumerState<QrBatchScanPage> {
     final existed = state.items.contains(resolved);
     if (!existed && _isOverMaxSize(state, l10n)) return;
     final added = notifier.addItem(resolved);
+    _resolvedToRaw[resolved] = result;
     if (!added) {
       _showSnack(l10n.warehouseInventoryScanRepeat);
     }
+  }
+
+  void _popWithResult(List<String> resolvedItems) {
+    if (widget.returnResolved) {
+      Navigator.of(context).pop(resolvedItems);
+      return;
+    }
+    final rawItems = resolvedItems
+        .map((sn) => _resolvedToRaw[sn] ?? sn)
+        .toList(growable: false);
+    Navigator.of(context).pop(rawItems);
   }
 
   void _showSnack(String message) {

@@ -32,11 +32,13 @@ class TransportListState {
 
   bool get hasMore => items.length < total;
 
+  static const int _sentinel = -999;
+
   TransportListState copyWith({
     bool? loading,
     bool? loadingMore,
     int? page,
-    int? status,
+    int? status = _sentinel,
     TransportMode? mode,
     String? keyword,
     List<DeviceTransport>? items,
@@ -46,7 +48,7 @@ class TransportListState {
       loading: loading ?? this.loading,
       loadingMore: loadingMore ?? this.loadingMore,
       page: page ?? this.page,
-      status: status ?? this.status,
+      status: status == _sentinel ? this.status : status,
       mode: mode ?? this.mode,
       keyword: keyword ?? this.keyword,
       items: items ?? this.items,
@@ -71,22 +73,25 @@ class TransportListNotifier extends Notifier<TransportListState> {
     TransportMode? mode,
     String? keyword,
   }) async {
+    final effectiveStatus = status;
+    final effectiveMode = mode ?? state.mode;
+    final effectiveKeyword = keyword ?? state.keyword;
+
     state = state.copyWith(
       loading: true,
       page: 1,
-      status: status ?? state.status,
-      mode: mode ?? state.mode,
-      keyword: keyword ?? state.keyword,
+      status: effectiveStatus,
+      mode: effectiveMode,
+      keyword: effectiveKeyword,
     );
 
     final response = await _api.get<DeviceTransportResp>(
-      _endpointForMode(state.mode),
+      _endpointForMode(effectiveMode),
       queryParameters: {
         'pageNum': 1,
         'pageSize': _pageSize,
-        if ((status ?? state.status) != null) 'status': status ?? state.status,
-        if ((keyword ?? state.keyword).trim().isNotEmpty)
-          'keyword': (keyword ?? state.keyword).trim(),
+        if (effectiveStatus != null) 'status': effectiveStatus,
+        if (effectiveKeyword.trim().isNotEmpty) 'keyword': effectiveKeyword.trim(),
       },
       parser: (json) =>
           DeviceTransportResp.fromJson(Map<String, dynamic>.from(json as Map)),

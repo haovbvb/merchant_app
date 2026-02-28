@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/app_router.dart';
+import 'package:merchant_app/app/root_tab_scaffold.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/battery_type.dart';
 import 'package:merchant_app/features/work/entry/battery_ship_page.dart';
+import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
@@ -221,7 +226,11 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: _addManual,
-                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  icon: Image.asset(
+                    'assets/android/mipmap-xxhdpi/icon_enter_sn.png',
+                    width: 18,
+                    height: 18,
+                  ),
                   label: Text(l10n.entryManualEntryButton),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppColors.black06Text,
@@ -237,10 +246,14 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
               Expanded(
                 child: FilledButton.icon(
                   onPressed: _addByScan,
-                  icon: AppIcons.scanIcon(size: 18, color: Colors.white),
+                  icon: Image.asset(
+                    'assets/android/mipmap-xxhdpi/ic_scan_white.webp',
+                    width: 18,
+                    height: 18,
+                  ),
                   label: Text(l10n.entryScanEntryButton),
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.black06Text,
+                    backgroundColor: const Color(0xFF0F322C),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
@@ -285,7 +298,16 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.storage_outlined, size: 48, color: Colors.grey.shade400),
+            Image.asset(
+              'assets/android/mipmap-xxhdpi/icon_empty_battery.png',
+              width: 48,
+              height: 48,
+              errorBuilder: (_, __, ___) => Icon(
+                Icons.storage_outlined,
+                size: 48,
+                color: Colors.grey.shade400,
+              ),
+            ),
             const SizedBox(height: 16),
             Text(
               l10n.entryEmptyDeviceHint,
@@ -359,13 +381,42 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
   }
 
   Future<void> _addByScan() async {
-    final result = await Navigator.of(context).push<String>(
+    final result = await Navigator.of(context).push<List<String>>(
       MaterialPageRoute(
-        builder: (_) => const QrScanPage(parseDeviceSn: true, deviceType: 1),
+        builder: (_) => QrBatchScanPage(
+          initialItems: _items.map((item) => item.sn).toList(),
+          fixedDeviceType: 1,
+          returnResolved: false,
+        ),
       ),
     );
-    if (result == null || result.isEmpty) return;
-    setState(() => _items.add(_BatteryItem(sn: result)));
+    if (result == null) return;
+    setState(() {
+      final existingBySn = {
+        for (final item in _items) item.sn: item,
+      };
+      _items
+        ..clear()
+        ..addAll(result.map((raw) {
+          final parsed = ScanUtils.parseBatteryQr(raw, 0);
+          final sn = (parsed.sn ?? '').trim();
+          final imei = (parsed.imei ?? '').trim();
+          final iccid = (parsed.iccid ?? '').trim();
+          final existing = existingBySn[sn];
+          if (existing == null) {
+            return _BatteryItem(
+              sn: sn,
+              imei: imei,
+              iccid: iccid,
+            );
+          }
+          return _BatteryItem(
+            sn: existing.sn,
+            imei: imei.isNotEmpty ? imei : existing.imei,
+            iccid: iccid.isNotEmpty ? iccid : existing.iccid,
+          );
+        }));
+    });
   }
 
   Future<void> _addManual() async {
@@ -498,8 +549,8 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                     );
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFFCCEECC),
-                    foregroundColor: const Color(0xFF88CC88),
+                    backgroundColor: AppColors.primaryColor,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -623,7 +674,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
           ),
         );
       } else {
-        setState(() => _items.clear());
+        _goToWorkbenchHome();
       }
     } finally {
       if (mounted) {
@@ -789,6 +840,12 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
         );
       },
     );
+  }
+
+  void _goToWorkbenchHome() {
+    final container = ProviderScope.containerOf(context, listen: false);
+    container.read(bottomNavIndexProvider.notifier).setIndex(1);
+    AppRouter.goHome();
   }
 }
 

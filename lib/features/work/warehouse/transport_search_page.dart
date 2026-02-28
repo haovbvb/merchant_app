@@ -261,7 +261,7 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
 
   Widget _buildSearchResults(AppLocalizations l10n, TransportListState state) {
     if (state.loading) {
-      return const Center(child: const SizedBox.shrink());
+      return const Center(child: SizedBox.shrink());
     }
 
     if (state.items.isEmpty) {
@@ -320,7 +320,6 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
     final keyword = _controller.text.trim();
     if (keyword.isEmpty) return;
 
-    await _saveHistory(keyword);
     setState(() {
       _hasSearched = true;
     });
@@ -331,6 +330,11 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
           status: status,
           mode: widget.mode,
         );
+    if (!mounted) return;
+    final currentState = ref.read(transportListProvider);
+    if (currentState.items.isNotEmpty) {
+      await _saveHistory(keyword);
+    }
   }
 
   int? _mapStatus(int index) {

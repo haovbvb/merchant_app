@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/app_router.dart';
+import 'package:merchant_app/app/root_tab_scaffold.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/car_type.dart';
 import 'package:merchant_app/features/work/entry/battery_ship_page.dart';
+import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
@@ -138,7 +142,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      type.modelName ?? type.model ?? '-',
+                      _buildVehicleTypeTitle(type),
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -158,30 +162,60 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _buildMetaItem('发动机型号', type.engineModel),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildMetaItem('生产日期', type.engineDate),
+              ),
+            ],
+          ),
           const SizedBox(height: 16),
 
           // Manual Entry 和 Scan Entry 按钮
           Row(
             children: [
               Expanded(
-                child: _buildActionButton(
-                  icon: const Icon(
-                    Icons.edit_outlined,
-                    size: 18,
-                    color: AppColors.primaryColor,
+                child: OutlinedButton.icon(
+                  onPressed: _addManual,
+                  icon: Image.asset(
+                    'assets/android/mipmap-xxhdpi/icon_enter_sn.png',
+                    width: 18,
+                    height: 18,
                   ),
-                  label: l10n.entryManualEntryButton,
-                  isPrimary: false,
-                  onTap: _addManual,
+                  label: Text(l10n.entryManualEntryButton),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.black06Text,
+                    side: const BorderSide(color: Color(0xFFDDDDDD)),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: _buildActionButton(
-                  icon: AppIcons.scanIcon(size: 18, color: Colors.white),
-                  label: l10n.entryScanEntryButton,
-                  isPrimary: true,
-                  onTap: _addByScan,
+                child: FilledButton.icon(
+                  onPressed: _addByScan,
+                  icon: Image.asset(
+                    'assets/android/mipmap-xxhdpi/ic_scan_white.webp',
+                    width: 18,
+                    height: 18,
+                  ),
+                  label: Text(l10n.entryScanEntryButton),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F322C),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -204,41 +238,41 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
     );
   }
 
-  Widget _buildActionButton({
-    required Widget icon,
-    required String label,
-    required bool isPrimary,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isPrimary ? AppColors.primaryColor : Colors.white,
-          borderRadius: BorderRadius.circular(8),
-          border: isPrimary
-              ? null
-              : Border.all(color: AppColors.primaryColor, width: 1),
+  Widget _buildMetaItem(String label, String? value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: Color(0xFF999999),
+          ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            icon,
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: isPrimary ? Colors.white : AppColors.primaryColor,
-              ),
-            ),
-          ],
+        const SizedBox(height: 2),
+        Text(
+          (value == null || value.trim().isEmpty) ? '-' : value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: AppColors.black06Text,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
-      ),
+      ],
     );
+  }
+
+  String _buildVehicleTypeTitle(CarType type) {
+    final model = type.model?.trim() ?? '';
+    final modelName = type.modelName?.trim() ?? '';
+    if (model.isNotEmpty && modelName.isNotEmpty) {
+      return '$model ($modelName)';
+    }
+    if (model.isNotEmpty) return model;
+    if (modelName.isNotEmpty) return modelName;
+    return '-';
   }
 
   Widget _buildEmptyState(dynamic l10n) {
@@ -246,10 +280,15 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.electric_moped_outlined,
-            size: 64,
-            color: Colors.grey.shade300,
+          Image.asset(
+            'assets/android/mipmap-xxhdpi/icon_empty_battery.png',
+            width: 64,
+            height: 64,
+            errorBuilder: (_, __, ___) => Icon(
+              Icons.electric_moped_outlined,
+              size: 64,
+              color: Colors.grey.shade300,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
@@ -313,16 +352,25 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
   }
 
   Future<void> _addByScan() async {
-    final result = await Navigator.of(context).push<String>(
+    final result = await Navigator.of(context).push<List<String>>(
       MaterialPageRoute(
-        builder: (_) => const QrScanPage(
-          parseDeviceSn: true,
-          deviceType: 2, // 2 for vehicle
+        builder: (_) => QrBatchScanPage(
+          initialItems: _items.map((item) => item.sn).toList(),
+          fixedDeviceType: 2,
         ),
       ),
     );
-    if (result == null || result.isEmpty) return;
-    setState(() => _items.add(_VehicleItem(sn: result)));
+    if (result == null) return;
+    setState(() {
+      final existingBySn = {
+        for (final item in _items) item.sn: item,
+      };
+      _items
+        ..clear()
+        ..addAll(
+          result.map((sn) => existingBySn[sn] ?? _VehicleItem(sn: sn)),
+        );
+    });
   }
 
   Future<void> _addManual() async {
@@ -445,8 +493,8 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                     );
                   },
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFFCCEECC),
-                    foregroundColor: const Color(0xFF88CC88),
+                    backgroundColor: AppColors.primaryColor,
+                    foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -570,7 +618,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
           ),
         );
       } else {
-        setState(() => _items.clear());
+        _goToWorkbenchHome();
       }
     } finally {
       if (mounted) {
@@ -736,6 +784,12 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
         );
       },
     );
+  }
+
+  void _goToWorkbenchHome() {
+    final container = ProviderScope.containerOf(context, listen: false);
+    container.read(bottomNavIndexProvider.notifier).setIndex(1);
+    AppRouter.goHome();
   }
 }
 

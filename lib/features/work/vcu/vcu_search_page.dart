@@ -71,7 +71,7 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
             const SizedBox(height: 24),
             Expanded(
               child: _loadingHistory
-                  ? const Center(child: const SizedBox.shrink())
+                  ? const Center(child: SizedBox.shrink())
                   : hasHistory
                   ? _VcuSearchHistory(
                       title: l10n.deviceSearchHistoryTitle,
@@ -143,7 +143,6 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
     }
     final sn = ScanUtils.getDeviceSn(input).trim();
     if (sn.isEmpty) return;
-    await _addHistory(input);
     final result = await notifier.searchDeviceBySn(sn);
     if (!mounted) return;
     final deviceInfo = result?.deviceInfo;
@@ -153,6 +152,7 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
       showToast(l10n.deviceSearchEmpty);
       return;
     }
+    await _addHistory(input);
     final vin = deviceInfo.vin ?? deviceInfo.deviceId ?? sn;
     final ctrlId = deviceInfo.ctrlId ?? '';
     final deviceSn = deviceInfo.sn ?? deviceInfo.deviceId ?? sn;

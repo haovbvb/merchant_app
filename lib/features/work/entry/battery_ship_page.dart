@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
-import 'package:merchant_app/features/work/entry/ship_success_page.dart';
+import 'package:merchant_app/features/work/warehouse/transport_controller.dart';
 import 'package:merchant_app/features/work/warehouse/transport_create_page.dart';
+import 'package:merchant_app/features/work/warehouse/transport_list_page.dart';
 
 class BatteryShipPage extends StatefulWidget {
   const BatteryShipPage({
@@ -108,6 +109,7 @@ class _BatteryShipPageState extends State<BatteryShipPage> {
   Future<void> _openTransport() async {
     if (_opening) return;
     _opening = true;
+    final l10n = context.l10n;
     final created = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
         builder: (_) => TransportCreatePage(
@@ -117,20 +119,17 @@ class _BatteryShipPageState extends State<BatteryShipPage> {
       ),
     );
     if (!mounted) return;
-    if (created == true && _initialSns.isNotEmpty) {
-      final done = await Navigator.of(context).push<bool>(
-        MaterialPageRoute(
-          builder: (_) => ShipSuccessPage(deviceType: _deviceType),
-        ),
-      );
-      if (!mounted) return;
-      if (done == true) {
-        Navigator.of(context).pop(true);
-      }
-      return;
-    }
     if (created == true) {
-      Navigator.of(context).pop(true);
+      showToast(l10n.entrySubmitSuccess);
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (_) => const TransportListPage(
+            initialTabIndex: 0,
+            mode: TransportMode.issue,
+          ),
+        ),
+        (route) => route.isFirst,
+      );
       return;
     }
     if (widget.deviceType != null) {

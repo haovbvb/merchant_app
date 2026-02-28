@@ -23,17 +23,30 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   bool _isSubmitting = false;
   bool _agreedToTerms = false;
 
+  bool get _hasCredentialsInput =>
+      _nameController.text.trim().isNotEmpty &&
+      _passwordController.text.trim().isNotEmpty;
+
   @override
   void initState() {
     super.initState();
+    _nameController.addListener(_onInputChanged);
+    _passwordController.addListener(_onInputChanged);
     _loadSavedCredentials();
   }
 
   @override
   void dispose() {
+    _nameController.removeListener(_onInputChanged);
+    _passwordController.removeListener(_onInputChanged);
     _nameController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _onInputChanged() {
+    if (!mounted) return;
+    setState(() {});
   }
 
   @override
@@ -100,6 +113,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   _LoginButton(
                     isSubmitting: _isSubmitting,
                     agreedToTerms: _agreedToTerms,
+                    hasCredentialsInput: _hasCredentialsInput,
                     onPressed: _onSubmit,
                   ),
                   const SizedBox(height: 20),
@@ -156,6 +170,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     }
     if (password.isNotEmpty) {
       _passwordController.text = password;
+    }
+    if (mounted) {
+      setState(() {});
     }
   }
 
@@ -271,17 +288,19 @@ class _LoginButton extends StatelessWidget {
   const _LoginButton({
     required this.isSubmitting,
     required this.agreedToTerms,
+    required this.hasCredentialsInput,
     required this.onPressed,
   });
 
   final bool isSubmitting;
   final bool agreedToTerms;
+  final bool hasCredentialsInput;
   final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final isActive = agreedToTerms && !isSubmitting;
+    final isActive = agreedToTerms && hasCredentialsInput && !isSubmitting;
     return SizedBox(
       height: 52,
       child: ElevatedButton(

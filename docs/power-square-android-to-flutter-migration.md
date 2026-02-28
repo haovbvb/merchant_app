@@ -444,9 +444,9 @@
 | 工作台   | WorkbenchFragmentNew          | WorkbenchPage            | 网络/权限      | P0     |
 | 二维码   | QRCodeActivity                | QrScanPage               | 相机/扫码      | P0     |
 | 设备详情 | DeviceDetailActivity          | DeviceDetailPage         | 网络/蓝牙      | P0     |
-| 入库     | BatteryEntryActivity          | BatteryEntryPage         | 网络/扫码      | P1     |
-| 入库     | VehicleEntryActivity          | VehicleEntryPage         | 网络/扫码      | P1     |
-| 入库     | StationEntryActivity          | StationEntryPage         | 网络/扫码      | P1     |
+| 入库     | BatteryEntryActivity          | BatteryEntryPageNew      | 网络/扫码      | P1     |
+| 入库     | VehicleEntryActivity          | VehicleEntryPageNew      | 网络/扫码      | P1     |
+| 入库     | StationEntryActivity          | StationEntryPageNew      | 网络/扫码      | P1     |
 | 出货     | BatteryShipActivity           | BatteryShipPage          | 网络/扫码      | P1     |
 | 仓库     | DeviceInventoryActivity       | InventoryListPage        | 网络           | P1     |
 | 仓库     | DeviceInventoryDetailActivity | InventoryDetailPage      | 网络/扫码      | P1     |
@@ -1010,9 +1010,9 @@
 
 ### 入库/登记
 
-- BatteryEntryPage：`GET admin/battery/getModelList`、`POST admin/battery/register`
-- VehicleEntryPage：`GET admin/vehicle/getModelList`、`POST admin/vehicle/register`
-- StationEntryPage：`GET admin/station/getModelList`、`POST admin/station/register`
+- BatteryEntryPageNew：`GET admin/battery/getModelList`、`POST admin/battery/register`
+- VehicleEntryPageNew：`GET admin/vehicle/getModelList`、`POST admin/vehicle/register`
+- StationEntryPageNew：`GET admin/station/getModelList`、`POST admin/station/register`
 
 ### 仓库/调拨
 

@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter/services.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/camera_permission.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
@@ -15,11 +15,14 @@ class QrScanPage extends StatefulWidget {
     this.allowManualInput = false,
     this.parseDeviceSn = false,
     this.deviceType,
+    this.returnRaw = false,
   });
 
   final bool allowManualInput;
   final bool parseDeviceSn;
   final int? deviceType;
+  /// When true, return the raw QR / manual-input value without parsing.
+  final bool returnRaw;
 
   @override
   State<QrScanPage> createState() => _QrScanPageState();
@@ -28,7 +31,9 @@ class QrScanPage extends StatefulWidget {
 class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
   MobileScannerController? _controller;
   final TextEditingController _inputController = TextEditingController();
+  final TextEditingController _vinController = TextEditingController();
   final FocusNode _inputFocusNode = FocusNode();
+  final FocusNode _vinFocusNode = FocusNode();
 
   bool _handled = false;
   bool _checkingPermission = true;
@@ -48,11 +53,12 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
       duration: const Duration(seconds: 2),
     )..repeat();
     _inputFocusNode.addListener(_onFocusChange);
+    _vinFocusNode.addListener(_onFocusChange);
   }
 
   void _onFocusChange() {
     setState(() {
-      _isInputMode = _inputFocusNode.hasFocus;
+      _isInputMode = _inputFocusNode.hasFocus || _vinFocusNode.hasFocus;
     });
   }
 
@@ -64,8 +70,11 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
   void dispose() {
     _controller?.dispose();
     _inputController.dispose();
+    _vinController.dispose();
     _inputFocusNode.removeListener(_onFocusChange);
+    _vinFocusNode.removeListener(_onFocusChange);
     _inputFocusNode.dispose();
+    _vinFocusNode.dispose();
     _scanLineController.dispose();
     super.dispose();
   }
@@ -227,74 +236,40 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
   }
 
   Widget _buildInputArea(dynamic l10n) {
-    return Row(
+    final isVehicle = widget.deviceType == 2;
+    final alwaysShowConfirm = widget.deviceType == 1 || widget.deviceType == 2 || widget.deviceType == 3;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        Expanded(
-          child: Container(
-            height: 52,
-            decoration: BoxDecoration(
-              color: const Color(0xCC3C3C3C),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                const SizedBox(width: 16),
-                const Icon(
-                  Icons.edit_outlined,
-                  color: Colors.white70,
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _inputController,
-                    focusNode: _inputFocusNode,
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    decoration: InputDecoration(
-                      hintText: l10n.scanManualInput,
-                      hintStyle: const TextStyle(
-                        color: Colors.white60,
-                        fontSize: 16,
-                      ),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                      isDense: true,
-                    ),
-                    onSubmitted: (_) => _confirmManualInput(),
-                  ),
-                ),
-                if (_inputController.text.isNotEmpty)
-                  GestureDetector(
-                    onTap: () {
-                      _inputController.clear();
-                      setState(() {});
-                    },
-                    child: const Padding(
-                      padding: EdgeInsets.all(8),
-                      child: Icon(
-                        Icons.cancel,
-                        color: Colors.white54,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                const SizedBox(width: 8),
-              ],
-            ),
-          ),
+        _buildManualInputBox(
+          controller: _inputController,
+          focusNode: _inputFocusNode,
+          hintText: l10n.deviceReceiveManualInput,
+          onSubmitted: (_) => _confirmManualInput(),
         ),
-        if (_isInputMode || _inputController.text.isNotEmpty) ...[
-          const SizedBox(width: 12),
-          GestureDetector(
-            onTap: _confirmManualInput,
-            child: Container(
-              height: 52,
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                color: AppColors.primaryColor,
-                borderRadius: BorderRadius.circular(12),
+        if (isVehicle) ...[
+          const SizedBox(height: 12),
+          _buildManualInputBox(
+            controller: _vinController,
+            focusNode: _vinFocusNode,
+            hintText: l10n.scanManualVehicleVin,
+            onSubmitted: (_) => _confirmManualInput(),
+          ),
+        ],
+        if (alwaysShowConfirm || _isInputMode || _inputController.text.isNotEmpty) ...[
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: FilledButton(
+              onPressed: _confirmManualInput,
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primaryColor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
-              alignment: Alignment.center,
               child: Text(
                 l10n.scanConfirm,
                 style: const TextStyle(
@@ -307,6 +282,67 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
           ),
         ],
       ],
+    );
+  }
+
+  Widget _buildManualInputBox({
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required String hintText,
+    required ValueChanged<String> onSubmitted,
+  }) {
+    return Container(
+      height: 52,
+      decoration: BoxDecoration(
+        color: const Color(0xCC3C3C3C),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 16),
+          const Icon(
+            Icons.edit_outlined,
+            color: Colors.white70,
+            size: 20,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              focusNode: focusNode,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+              decoration: InputDecoration(
+                hintText: hintText,
+                hintStyle: const TextStyle(
+                  color: Colors.white60,
+                  fontSize: 16,
+                ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+                isDense: true,
+              ),
+              onChanged: (_) => setState(() {}),
+              onSubmitted: onSubmitted,
+            ),
+          ),
+          if (controller.text.isNotEmpty)
+            GestureDetector(
+              onTap: () {
+                controller.clear();
+                setState(() {});
+              },
+              child: const Padding(
+                padding: EdgeInsets.all(8),
+                child: Icon(
+                  Icons.cancel,
+                  color: Colors.white54,
+                  size: 20,
+                ),
+              ),
+            ),
+          const SizedBox(width: 8),
+        ],
+      ),
     );
   }
 
@@ -413,6 +449,11 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
     if (barcodes.isEmpty) return;
     final value = barcodes.first.rawValue;
     if (value == null || value.isEmpty) return;
+    if (widget.returnRaw) {
+      _handled = true;
+      Navigator.of(context).pop(value.trim());
+      return;
+    }
     final parsed = _parseResult(value);
     if (parsed.isEmpty) return;
     _handled = true;
@@ -429,7 +470,38 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
   void _confirmManualInput() {
     final text = _inputController.text.trim();
     if (text.isEmpty) return;
-    final parsed = _parseResult(text);
+
+    final isVehicle = widget.deviceType == 2;
+    if (isVehicle) {
+      final vin = _vinController.text.trim();
+      if (vin.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(context.l10n.entryVinRequired)),
+        );
+        return;
+      }
+    }
+
+    if (widget.returnRaw) {
+      final raw = isVehicle
+          ? _buildVehicleManualRaw(text, _vinController.text.trim())
+          : text;
+      setState(() {
+        _successMessage = context.l10n.scanSuccessEntry;
+      });
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          Navigator.of(context).pop(raw);
+        }
+      });
+      return;
+    }
+
+    final parsed = _parseResult(
+      isVehicle
+          ? _buildVehicleManualRaw(text, _vinController.text.trim())
+          : text,
+    );
     if (parsed.isEmpty) return;
 
     // 显示成功提示
@@ -453,6 +525,15 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
       return ScanUtils.parseSnByDeviceType(value, widget.deviceType).trim();
     }
     return ScanUtils.getDeviceSn(value).trim();
+  }
+
+  String _buildVehicleManualRaw(String sn, String vin) {
+    final snText = sn.trim();
+    final vinText = vin.trim();
+    if (snText.isEmpty) {
+      return 'VIN:$vinText';
+    }
+    return 'SN:$snText,VIN:$vinText';
   }
 }
 

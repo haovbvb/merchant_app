@@ -46,12 +46,20 @@ class RentPaymentSheet extends ConsumerStatefulWidget {
 
 class _RentPaymentSheetState extends ConsumerState<RentPaymentSheet> {
   int _paySource = 2; // 1=Cash, 2=Online
+  late Set<int> _availablePaySources;
 
   @override
   void initState() {
     super.initState();
     final state = ref.read(rentBindProvider);
+    _availablePaySources = _parseOptions(
+      state.shopPaymentMethod?.otherPayWay,
+      defaultValues: const {1, 2},
+    );
     _paySource = state.paySource;
+    if (!_availablePaySources.contains(_paySource)) {
+      _paySource = _availablePaySources.contains(2) ? 2 : 1;
+    }
   }
 
   @override
@@ -99,17 +107,21 @@ class _RentPaymentSheetState extends ConsumerState<RentPaymentSheet> {
                 _buildSectionCard(
                   title: l10n.rentBindPaymentMethods,
                   children: [
-                    _buildRadioOption(
-                      title: l10n.rentBindPayCash,
-                      isSelected: _paySource == 1,
-                      onTap: () => setState(() => _paySource = 1),
-                    ),
-                    const Divider(height: 1, color: Color(0xFFEEEEEE)),
-                    _buildRadioOption(
-                      title: l10n.rentBindPayOnline,
-                      isSelected: _paySource == 2,
-                      onTap: () => setState(() => _paySource = 2),
-                    ),
+                    if (_availablePaySources.contains(1))
+                      _buildRadioOption(
+                        title: l10n.rentBindPayCash,
+                        isSelected: _paySource == 1,
+                        onTap: () => setState(() => _paySource = 1),
+                      ),
+                    if (_availablePaySources.contains(1) &&
+                        _availablePaySources.contains(2))
+                      const Divider(height: 1, color: Color(0xFFEEEEEE)),
+                    if (_availablePaySources.contains(2))
+                      _buildRadioOption(
+                        title: l10n.rentBindPayOnline,
+                        isSelected: _paySource == 2,
+                        onTap: () => setState(() => _paySource = 2),
+                      ),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -187,10 +199,7 @@ class _RentPaymentSheetState extends ConsumerState<RentPaymentSheet> {
     );
   }
 
-  Widget _buildSectionCard({
-    String? title,
-    required List<Widget> children,
-  }) {
+  Widget _buildSectionCard({String? title, required List<Widget> children}) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF8F8F8),
@@ -204,10 +213,7 @@ class _RentPaymentSheetState extends ConsumerState<RentPaymentSheet> {
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
               child: Text(
                 title,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF999999),
-                ),
+                style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
               ),
             ),
           ...children,
@@ -291,9 +297,18 @@ class _RentPaymentSheetState extends ConsumerState<RentPaymentSheet> {
 
   void _confirm() {
     widget.notifier.updatePaySource(_paySource);
-    Navigator.of(context).pop(
-      RentPaymentResult(paySource: _paySource),
-    );
+    Navigator.of(context).pop(RentPaymentResult(paySource: _paySource));
+  }
+
+  Set<int> _parseOptions(String? raw, {required Set<int> defaultValues}) {
+    if (raw == null || raw.trim().isEmpty) return defaultValues;
+    final values = raw
+        .split(RegExp(r'[^0-9]+'))
+        .where((item) => item.isNotEmpty)
+        .map(int.tryParse)
+        .whereType<int>()
+        .toSet();
+    return values.isEmpty ? defaultValues : values;
   }
 }
 

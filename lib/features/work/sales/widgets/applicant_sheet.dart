@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
@@ -56,10 +57,8 @@ class ApplicantSheet extends ConsumerStatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => ApplicantSheet(
-        notifier: notifier,
-        advancedMode: advancedMode,
-      ),
+      builder: (_) =>
+          ApplicantSheet(notifier: notifier, advancedMode: advancedMode),
     );
   }
 
@@ -80,6 +79,7 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
 
   String? _cardImgUrl;
   String? _personImgUrl;
+  final List<String> _cardImgUrls = [];
 
   @override
   void dispose() {
@@ -105,6 +105,7 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
       final user = next.user;
       if (user != null && prev?.user != next.user) {
         setState(() {
+          _userIdController.text = user.cardNum ?? _userIdController.text;
           _accountController.text = user.username ?? '';
           _firstNameController.text = user.firstName ?? '';
           _lastNameController.text = user.lastName ?? '';
@@ -113,6 +114,17 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
           _birthdayController.text = user.birthday ?? '';
           _emailController.text = user.email ?? '';
           _addressController.text = user.address ?? '';
+          _cardImgUrls
+            ..clear()
+            ..addAll(
+              (user.cardImg ?? '')
+                  .split(',')
+                  .map((item) => item.trim())
+                  .where((item) => item.isNotEmpty)
+                  .take(4),
+            );
+          _cardImgUrl = _cardImgUrls.isEmpty ? null : _cardImgUrls.join(',');
+          _personImgUrl = user.personImg;
         });
       }
     });
@@ -204,6 +216,7 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
                     label: l10n.sellBindAccount,
                     controller: _accountController,
                     isRequired: true,
+                    readOnly: true,
                   ),
                   _buildDivider(),
                   _buildInputField(
@@ -225,51 +238,43 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
                     controller: _phoneController,
                     isRequired: true,
                     keyboardType: TextInputType.phone,
-                  ),
-                  _buildDivider(),
-                  _buildInputField(
-                    label: l10n.sellBindNid,
-                    controller: _nidController,
-                    isRequired: true,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
                   const SizedBox(height: 16),
 
-                  // NID Photo upload
-                  _buildLabel(l10n.sellBindUploadNidPhoto, isRequired: true),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.sellBindNidPhotoHint,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF999999),
+                  if (widget.advancedMode) ...[
+                    _buildInputField(
+                      label: l10n.sellBindNid,
+                      controller: _nidController,
+                      isRequired: true,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _buildImageUpload(
-                        imageUrl: _cardImgUrl,
-                        onTap: () => _pickImage(true),
-                      ),
-                      const SizedBox(width: 12),
-                      _buildImageUpload(
-                        imageUrl: null,
-                        onTap: () => _pickImage(true),
-                        showCamera: true,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  // Personal Photo upload
-                  _buildLabel(l10n.sellBindPersonalPhoto, isRequired: true),
-                  const SizedBox(height: 8),
-                  _buildImageUpload(
-                    imageUrl: _personImgUrl,
-                    onTap: () => _pickImage(false),
-                    showCamera: _personImgUrl == null,
-                  ),
-                  const SizedBox(height: 16),
+                    _buildLabel(l10n.sellBindUploadNidPhoto, isRequired: true),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.sellBindNidPhotoHint,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF999999),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildCardImageRow(),
+                    const SizedBox(height: 16),
+
+                    _buildLabel(l10n.sellBindPersonalPhoto, isRequired: true),
+                    const SizedBox(height: 8),
+                    _buildImageUpload(
+                      imageUrl: _personImgUrl,
+                      onTap: () =>
+                          _pickImage(false, source: ImageSource.gallery),
+                      showCamera: _personImgUrl == null,
+                      onCameraTap: () =>
+                          _pickImage(false, source: ImageSource.camera),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
 
                   // Birthday & Email
                   _buildInputField(
@@ -285,20 +290,22 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
                     hintText: l10n.sellBindEmailHint,
                     keyboardType: TextInputType.emailAddress,
                   ),
-                  _buildDivider(),
-                  _buildInputField(
-                    label: l10n.sellBindAddress,
-                    controller: _addressController,
-                    isRequired: true,
-                    hintText: l10n.sellBindAddressHint,
-                    suffixIcon: GestureDetector(
-                      onTap: _pickAddress,
-                      child: const Icon(
-                        Icons.location_on_outlined,
-                        color: Color(0xFF999999),
+                  if (widget.advancedMode) ...[
+                    _buildDivider(),
+                    _buildInputField(
+                      label: l10n.sellBindAddress,
+                      controller: _addressController,
+                      isRequired: true,
+                      hintText: l10n.sellBindAddressHint,
+                      suffixIcon: GestureDetector(
+                        onTap: _pickAddress,
+                        child: const Icon(
+                          Icons.location_on_outlined,
+                          color: Color(0xFF999999),
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                   const SizedBox(height: 24),
                 ],
               ),
@@ -394,6 +401,7 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
     bool isRequired = false,
     String? hintText,
     TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
     bool readOnly = false,
     VoidCallback? onTap,
     Widget? suffixIcon,
@@ -411,6 +419,7 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
                 child: TextField(
                   controller: controller,
                   keyboardType: keyboardType,
+                  inputFormatters: inputFormatters,
                   readOnly: readOnly,
                   onTap: onTap,
                   decoration: InputDecoration(
@@ -455,9 +464,12 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
     String? imageUrl,
     required VoidCallback onTap,
     bool showCamera = false,
+    VoidCallback? onCameraTap,
   }) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: imageUrl == null && showCamera && onCameraTap != null
+          ? onCameraTap
+          : onTap,
       child: Container(
         width: 80,
         height: 80,
@@ -485,10 +497,42 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
     );
   }
 
+  Widget _buildCardImageRow() {
+    final children = <Widget>[];
+    final showList = _cardImgUrls.take(4).toList();
+    for (final imageUrl in showList) {
+      children.add(_buildImageUpload(imageUrl: imageUrl, onTap: () {}));
+      if (children.length < 4) {
+        children.add(const SizedBox(width: 12));
+      }
+    }
+
+    if (showList.length < 4) {
+      if (children.isNotEmpty) {
+        children.add(const SizedBox(width: 12));
+      }
+      children.add(
+        _buildImageUpload(
+          imageUrl: null,
+          onTap: () => _pickImage(true, source: ImageSource.gallery),
+          showCamera: true,
+          onCameraTap: () => _pickImage(true, source: ImageSource.camera),
+        ),
+      );
+    }
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(children: children),
+    );
+  }
+
   Future<void> _scanUserId() async {
-    final result = await Navigator.of(
-      context,
-    ).push<String>(MaterialPageRoute(builder: (_) => const QrScanPage()));
+    final result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => const QrScanPage(allowManualInput: true),
+      ),
+    );
     if (!mounted || result == null || result.isEmpty) return;
     final cardNum = ScanUtils.getUserCarNum(result);
     if (cardNum.isEmpty) return;
@@ -509,7 +553,7 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
     setState(() {
       _birthdayController.text = DateFormatUtils.format(
         picked,
-        pattern: 'dd/MM/yyyy',
+        pattern: 'yyyy-MM-dd',
       );
     });
   }
@@ -524,16 +568,22 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
     });
   }
 
-  Future<void> _pickImage(bool isCardImage) async {
+  Future<void> _pickImage(
+    bool isCardImage, {
+    required ImageSource source,
+  }) async {
     final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.gallery);
+    final picked = await picker.pickImage(source: source);
     if (picked == null) return;
 
     final url = await widget.notifier.uploadCardImage(picked.path);
     if (url != null && mounted) {
       setState(() {
         if (isCardImage) {
-          _cardImgUrl = url;
+          if (_cardImgUrls.length < 4) {
+            _cardImgUrls.add(url);
+          }
+          _cardImgUrl = _cardImgUrls.join(',');
         } else {
           _personImgUrl = url;
         }
@@ -542,27 +592,44 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
   }
 
   bool _canSubmit() {
-    return _accountController.text.isNotEmpty &&
+    final baseValid =
+        _accountController.text.isNotEmpty &&
         _firstNameController.text.isNotEmpty &&
         _lastNameController.text.isNotEmpty &&
-        _phoneController.text.isNotEmpty &&
+        _phoneController.text.isNotEmpty;
+    if (!widget.advancedMode) {
+      return baseValid;
+    }
+    return baseValid &&
         _nidController.text.isNotEmpty &&
-        _addressController.text.isNotEmpty;
+        _addressController.text.isNotEmpty &&
+        _cardImgUrls.length >= 2 &&
+        (_personImgUrl?.isNotEmpty ?? false);
   }
 
   void _submit() {
+    final state = ref.read(sellBindProvider);
+    final user = state.user;
     Navigator.of(context).pop(
       ApplicantResult(
         cardNum: _userIdController.text.trim(),
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         phone: _phoneController.text.trim(),
-        idNumber: _nidController.text.trim(),
+        idNumber: widget.advancedMode
+            ? _nidController.text.trim()
+            : (user?.idNumber ?? ''),
         birthday: _birthdayController.text.trim(),
         email: _emailController.text.trim(),
-        address: _addressController.text.trim(),
-        cardImgUrl: _cardImgUrl,
-        personImgUrl: _personImgUrl,
+        address: widget.advancedMode
+            ? _addressController.text.trim()
+            : (user?.address ?? ''),
+        cardImgUrl: widget.advancedMode
+            ? (_cardImgUrls.isEmpty ? null : _cardImgUrls.join(','))
+            : (user?.cardImg ?? _cardImgUrl),
+        personImgUrl: widget.advancedMode
+            ? _personImgUrl
+            : (user?.personImg ?? _personImgUrl),
       ),
     );
   }

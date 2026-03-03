@@ -348,11 +348,11 @@ class _ReceiveCard extends StatelessWidget {
               children: [
                 Image.asset(
                   'assets/android/mipmap-xxhdpi/icon_device_issuse_state.png',
-                  width: 16,
-                  height: 16,
+                  width: 14,
+                  height: 14,
                   errorBuilder: (_, __, ___) => const Icon(
                     Icons.home_outlined,
-                    size: 16,
+                    size: 14,
                     color: Color(0xFF666666),
                   ),
                 ),
@@ -395,7 +395,7 @@ class _ReceiveCard extends StatelessWidget {
   }
 
   String _formatWarehouseName(String name, AppLocalizations l10n) {
-    if (name.trim().isEmpty) return '-';
+    if (name.trim().isEmpty) return '';
     if (name.toLowerCase().contains('platform')) {
       return l10n.commonPlatform;
     }

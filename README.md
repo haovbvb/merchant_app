@@ -27,6 +27,7 @@ flutter run -d <device-id>
 首次登录前，请向后端申请可用的账号密码。密码会在客户端侧通过 MD5（32 位小写）处理后再发送。
 
 自动打包上传 ios 安卓 需要先安装 fastlane：
+
 ```bash
 cd ios && bundle exec fastlane pgyer_all
 

@@ -723,7 +723,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
 
   Future<void> _scanAndOpenDetail() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
+      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: true, parseDeviceSn: true)),
     );
     if (!mounted || result == null || result.isEmpty) return;
     await Navigator.of(context).push(

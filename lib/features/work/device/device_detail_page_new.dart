@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
+import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
@@ -15,18 +16,22 @@ import 'package:merchant_app/data/models/cabin.dart';
 import 'package:merchant_app/data/models/cabinet_detail_base_info_bean.dart';
 import 'package:merchant_app/data/models/device_search_result.dart';
 import 'package:merchant_app/data/models/vehicle_detail.dart';
+import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/device/device_detail_controller.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class DeviceDetailPageNew extends ConsumerStatefulWidget {
   const DeviceDetailPageNew({
     super.key,
     this.initialSn,
     this.readOnly = false,
+    this.popToSearchOnClear = false,
   });
 
   final String? initialSn;
   final bool readOnly;
+  final bool popToSearchOnClear;
 
   @override
   ConsumerState<DeviceDetailPageNew> createState() =>
@@ -59,7 +64,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     }
   }
 
-  void _updateTabController(int deviceType, {required bool cabinetHasWarehouse}) {
+  void _updateTabController(
+    int deviceType, {
+    required bool cabinetHasWarehouse,
+  }) {
     if (_currentDeviceType == deviceType &&
         _tabController != null &&
         _tabController!.length ==
@@ -68,8 +76,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     }
     _currentDeviceType = deviceType;
     // 电池: 3 tabs, 车辆: 3 tabs, 电柜: 2/4 tabs
-    final tabCount =
-        deviceType == 3 ? (cabinetHasWarehouse ? 4 : 2) : 3;
+    final tabCount = deviceType == 3 ? (cabinetHasWarehouse ? 4 : 2) : 3;
     final previous = _tabController;
     _tabController = TabController(length: tabCount, vsync: this);
     if (previous != null) {
@@ -93,7 +100,8 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     final l10n = context.l10n;
     final state = ref.watch(deviceDetailProvider);
     final deviceType = state.deviceType;
-    final hasData = state.cabinetDetail != null ||
+    final hasData =
+        state.cabinetDetail != null ||
         state.batteryDetail != null ||
         state.vehicleDetail != null ||
         (state.deviceType == 3 && state.searchResult?.deviceInfo != null);
@@ -113,7 +121,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
       canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
-        Navigator.of(context).pop(hasData);
+        _backToSource(hasData);
       },
       child: Scaffold(
         backgroundColor: AppColors.bgColor,
@@ -122,10 +130,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
-            onPressed: () => Navigator.of(context).pop(hasData),
+            onPressed: () => _backToSource(hasData),
           ),
           titleSpacing: 0,
-          title: _buildSearchBar(l10n),
+          title: _buildSearchBar(l10n, deviceType),
         ),
         body: Column(
           children: [
@@ -145,16 +153,16 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               child: !hasData
                   ? _buildEmptyState(l10n, state.loading)
                   : _tabController == null
-                      ? const SizedBox.shrink()
-                      : TabBarView(
-                          controller: _tabController,
-                          children: _buildTabViewsByType(
-                            l10n,
-                            state,
-                            deviceType,
-                            cabinetHasWarehouse: cabinetHasWarehouse,
-                          ),
-                        ),
+                  ? const SizedBox.shrink()
+                  : TabBarView(
+                      controller: _tabController,
+                      children: _buildTabViewsByType(
+                        l10n,
+                        state,
+                        deviceType,
+                        cabinetHasWarehouse: cabinetHasWarehouse,
+                      ),
+                    ),
             ),
           ],
         ),
@@ -162,10 +170,20 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     );
   }
 
+  void _backToSource(bool hasData) {
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.pop(hasData);
+      return;
+    }
+    AppRouter.goHome();
+  }
+
   /// 根据设备类型构建头部
   Widget _buildDeviceHeaderByType(DeviceDetailState state, dynamic l10n) {
     if (state.deviceType == 3 &&
-        (state.cabinetDetail != null || state.searchResult?.deviceInfo != null)) {
+        (state.cabinetDetail != null ||
+            state.searchResult?.deviceInfo != null)) {
       return _buildCabinetHeader(
         state.searchResult?.deviceInfo,
         state.cabinetDetail,
@@ -236,12 +254,11 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     DeviceDetailState state,
     int deviceType, {
     required bool cabinetHasWarehouse,
-  }
-  ) {
+  }) {
     if (deviceType == 1 && state.batteryDetail != null) {
       // 电池: 基础信息、位置信息、维修记录
       return [
-        _buildBatteryBasicInfoTab(l10n, state.batteryDetail!),
+        _buildBatteryBasicInfoTab(l10n, state),
         _buildBatteryLocationTab(l10n, state.batteryDetail!),
         _buildRepairRecordsTab(l10n, state),
       ];
@@ -252,7 +269,8 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         _buildRepairRecordsTab(l10n, state),
         _buildMaintenanceRecordsTab(l10n, state),
       ];
-    } else if (state.cabinetDetail != null || state.searchResult?.deviceInfo != null) {
+    } else if (state.cabinetDetail != null ||
+        state.searchResult?.deviceInfo != null) {
       // 电柜: 基础信息、仓位信息、位置信息、维修记录（未上架仅基础信息+维修记录）
       final info = state.searchResult?.deviceInfo;
       final detail = state.cabinetDetail;
@@ -272,7 +290,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     return [];
   }
 
-  Widget _buildSearchBar(dynamic l10n) {
+  Widget _buildSearchBar(dynamic l10n, int deviceType) {
+    final hintText = deviceType == 3
+        ? l10n.deviceSearchStationHint
+        : l10n.deviceSearchHint;
     return Container(
       height: 36,
       margin: const EdgeInsets.only(right: 16),
@@ -289,7 +310,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
             child: TextField(
               controller: _controller,
               decoration: InputDecoration(
-                hintText: l10n.deviceSearchHint,
+                hintText: hintText,
                 hintStyle: const TextStyle(
                   color: Color(0xFF999999),
                   fontSize: 15,
@@ -307,6 +328,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
             GestureDetector(
               onTap: () {
                 _controller.clear();
+                if (widget.popToSearchOnClear) {
+                  _backToSource(false);
+                  return;
+                }
                 setState(() {});
               },
               child: Container(
@@ -322,10 +347,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
           const SizedBox(width: 8),
           GestureDetector(
             onTap: _scanSn,
-            child: AppIcons.scanIcon(
-              size: 24,
-              color: AppColors.black06Text,
-            ),
+            child: AppIcons.scanIcon(size: 24, color: AppColors.black06Text),
           ),
         ],
       ),
@@ -337,23 +359,25 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     CabinetDetailBaseInfoBean? detail,
     dynamic l10n,
   ) {
-    final isOnline = info?.onlineStatus == 1 ||
+    final isOnline =
+        info?.onlineStatus == 1 ||
         info?.showOnlineStatus == 'Online' ||
         detail?.online == '1' ||
         detail?.showOnlineStatus == 'Online';
     final headerImg = (info?.img?.trim().isNotEmpty == true)
         ? info!.img!.trim()
         : info == null
-            ? (detail?.standardImg?.trim().isNotEmpty == true)
-                ? detail!.standardImg!.trim()
-                : (detail?.installImgSet.isNotEmpty == true
+        ? (detail?.standardImg?.trim().isNotEmpty == true)
+              ? detail!.standardImg!.trim()
+              : (detail?.installImgSet.isNotEmpty == true
                     ? detail!.installImgSet.first
                     : null)
-            : null;
+        : null;
     final stationName = info?.stationName?.trim();
     final sn = info?.sn ?? detail?.stationSn ?? '-';
-    final title =
-        (stationName != null && stationName.isNotEmpty) ? stationName : 'SN: $sn';
+    final title = (stationName != null && stationName.isNotEmpty)
+        ? stationName
+        : 'SN: $sn';
     final showOperate = info?.hasPermission == 1 && !widget.readOnly;
 
     return Container(
@@ -490,7 +514,19 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
   /// 电池头部
   Widget _buildBatteryHeader(BatteryDetail detail, dynamic l10n) {
-    final isOnline = detail.online == 1;
+    final deviceInfo = ref.read(deviceDetailProvider).searchResult?.deviceInfo;
+    final bindStatus = deviceInfo?.deviceBindStatus;
+    final isBound = bindStatus != null && bindStatus != 0;
+    final bindSource = deviceInfo?.bindSource;
+    String? sourceLabel;
+    Color? sourceColor;
+    if (bindSource == 1) {
+      sourceLabel = l10n.deviceDetailSale;
+      sourceColor = AppColors.primaryColor;
+    } else if (bindSource == 2) {
+      sourceLabel = l10n.deviceDetailLease;
+      sourceColor = const Color(0xFFF49300);
+    }
 
     return Container(
       color: Colors.white,
@@ -541,18 +577,17 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                 Row(
                   children: [
                     _buildStatusBadge(
-                      isOnline ? l10n.online : l10n.offline,
-                      isOnline ? AppColors.primaryColor : Colors.grey,
+                      isBound
+                          ? l10n.deviceDetailBound
+                          : l10n.deviceDetailUnbound,
+                      isBound
+                          ? AppColors.primaryColor
+                          : const Color(0xFFFA4B51),
                     ),
-                    const SizedBox(width: 8),
-                    if (detail.soc != null)
-                      Text(
-                        'SOC: ${detail.soc}%',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF666666),
-                        ),
-                      ),
+                    if (sourceLabel != null && sourceColor != null) ...[
+                      const SizedBox(width: 8),
+                      _buildStatusBadge(sourceLabel, sourceColor),
+                    ],
                   ],
                 ),
               ],
@@ -633,21 +668,13 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                       isBound
                           ? l10n.deviceDetailBound
                           : l10n.deviceDetailUnbound,
-                      isBound ? AppColors.primaryColor : Colors.grey,
+                      isBound
+                          ? AppColors.primaryColor
+                          : const Color(0xFFFA4B51),
                     ),
                     if (sourceLabel != null && sourceColor != null) ...[
                       const SizedBox(width: 8),
                       _buildStatusBadge(sourceLabel, sourceColor),
-                    ],
-                    if (detail.carNumber != null && detail.carNumber!.isNotEmpty) ...[
-                      const SizedBox(width: 8),
-                      Text(
-                        detail.carNumber!,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Color(0xFF666666),
-                        ),
-                      ),
                     ],
                   ],
                 ),
@@ -667,10 +694,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: color),
       ),
-      child: Text(
-        text,
-        style: TextStyle(fontSize: 12, color: color),
-      ),
+      child: Text(text, style: TextStyle(fontSize: 12, color: color)),
     );
   }
 
@@ -679,9 +703,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(
-            'assets/android/mipmap-xxhdpi/icon_empty_search.png',
-          ),
+          Image.asset('assets/android/mipmap-xxhdpi/icon_empty_search.png'),
           const SizedBox(height: 16),
           Text(
             l10n.deviceDetailEmpty,
@@ -709,8 +731,8 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
       info != null
           ? info.installTime
           : (detail?.putOnShelvesTime != null
-              ? detail!.putOnShelvesTime.toString()
-              : null),
+                ? detail!.putOnShelvesTime.toString()
+                : null),
       withSeconds: true,
     );
     final managerName = info?.managerList?.isNotEmpty == true
@@ -751,10 +773,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
           child: Column(
             children: [
               if (installStatus == null)
-                _InfoRow(
-                  label: l10n.deviceDetailBindingStateLabel,
-                  value: '-',
-                )
+                _InfoRow(label: l10n.deviceDetailBindingStateLabel, value: '-')
               else
                 _InfoRow(
                   label: l10n.deviceDetailBindingStateLabel,
@@ -792,7 +811,9 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               ),
               _InfoRow(
                 label: l10n.deviceDetailResponsibleLabel,
-                value: (managerName ?? '-').isNotEmpty ? managerName ?? '-' : '-',
+                value: (managerName ?? '-').isNotEmpty
+                    ? managerName ?? '-'
+                    : '-',
               ),
             ],
           ),
@@ -807,7 +828,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
             children: [
               Text(
                 l10n.deviceDetailPhotoLabel,
-                style: const TextStyle(fontSize: 15, color: AppColors.black06Text),
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AppColors.black06Text,
+                ),
               ),
               const SizedBox(height: 12),
               if (photos.isNotEmpty)
@@ -847,28 +871,33 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   Widget _buildPortDetailTab(dynamic l10n, DeviceDetailState state) {
     final ports = state.cabinPorts;
     final info = state.searchResult?.deviceInfo;
-    final hasPermission = info?.hasPermission ??
+    final hasPermission =
+        info?.hasPermission ??
         (info == null ? state.cabinetDetail?.hasPermission : null);
     final showSetup = hasPermission == 1 && !widget.readOnly;
 
     // 统计各状态数量
     final freeCount = ports.where((p) => (p.batteryStatus ?? 0) == 0).length;
     final disabledCount = ports.where((p) => p.status == 0).length;
-    final occupiedCount = ports.where((p) => (p.batteryStatus ?? 0) == 1).length;
+    final occupiedCount = ports
+        .where((p) => (p.batteryStatus ?? 0) == 1)
+        .length;
 
     // 过滤端口
     List<Cabin> filteredPorts;
     switch (_portFilter) {
       case 'available':
-        filteredPorts =
-            ports.where((p) => (p.batteryStatus ?? 0) == 0).toList();
+        filteredPorts = ports
+            .where((p) => (p.batteryStatus ?? 0) == 0)
+            .toList();
         break;
       case 'disabled':
         filteredPorts = ports.where((p) => p.status == 0).toList();
         break;
       case 'inuse':
-        filteredPorts =
-            ports.where((p) => (p.batteryStatus ?? 0) == 1).toList();
+        filteredPorts = ports
+            .where((p) => (p.batteryStatus ?? 0) == 1)
+            .toList();
         break;
       default:
         filteredPorts = ports;
@@ -889,8 +918,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               ),
               const SizedBox(width: 8),
               _FilterChip(
-                label:
-                    '${l10n.deviceDetailPortFilterAvailable}  $freeCount',
+                label: '${l10n.deviceDetailPortFilterAvailable}  $freeCount',
                 isSelected: _portFilter == 'available',
                 onTap: () => setState(() => _portFilter = 'available'),
               ),
@@ -933,11 +961,11 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                     padding: const EdgeInsets.all(16),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 0.85,
-                    ),
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 12,
+                          crossAxisSpacing: 12,
+                          childAspectRatio: 0.85,
+                        ),
                     itemCount: filteredPorts.length,
                     itemBuilder: (context, index) {
                       return _PortCard(
@@ -1161,7 +1189,26 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   /// 电池基础信息 Tab
-  Widget _buildBatteryBasicInfoTab(dynamic l10n, BatteryDetail detail) {
+  Widget _buildBatteryBasicInfoTab(dynamic l10n, DeviceDetailState state) {
+    final detail = state.batteryDetail;
+    if (detail == null) {
+      return const SizedBox.shrink();
+    }
+
+    final deviceInfo = state.searchResult?.deviceInfo;
+    final isOnline = deviceInfo?.onlineStatus == 1;
+    final spec = deviceInfo?.showDeviceModel;
+    final model = deviceInfo?.deviceModel;
+    final inputTime = _formatTimeString(
+      deviceInfo?.createTime,
+      withSeconds: true,
+    );
+    final bindUserId = deviceInfo?.bindUserId;
+    final bindUserName = deviceInfo?.bindUserName;
+    final bindUserPhone = _formatBindUserPhone(deviceInfo?.bindUserPhone);
+    final bindTime = _formatTimeString(deviceInfo?.bindTime, withSeconds: true);
+    final photos = _collectDevicePhotos(deviceInfo);
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -1169,41 +1216,103 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
           child: Column(
             children: [
               _InfoRow(
-                label: l10n.deviceDetailSnLabel,
-                value: detail.deviceSn ?? '-',
+                label: l10n.deviceDetailStatus,
+                value: isOnline ? l10n.online : l10n.offline,
               ),
               _InfoRow(
-                label: l10n.deviceDetailBatterySocLabel,
-                value: detail.soc != null ? '${detail.soc}%' : '-',
+                label: l10n.deviceDetailSpecLabel,
+                value: spec?.isNotEmpty == true ? spec : '-',
               ),
               _InfoRow(
-                label: l10n.deviceDetailBatteryCycleLabel,
-                value: detail.cycle?.toString() ?? '-',
+                label: l10n.deviceDetailModelLabel,
+                value: model?.isNotEmpty == true ? model : '-',
               ),
               _InfoRow(
-                label: l10n.deviceDetailBatteryMileLabel,
-                value: detail.mile != null ? '${detail.mile} km' : '-',
+                label: l10n.deviceDetailInputTimeLabel,
+                value: inputTime,
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        _CardSection(
+          child: Column(
+            children: [
+              _InfoRow(
+                label: l10n.vehicleDetailBindingId,
+                value: bindUserId ?? '-',
               ),
               _InfoRow(
-                label: l10n.deviceDetailBatteryTodayMileLabel,
-                value: detail.todayMile != null ? '${detail.todayMile} km' : '-',
+                label: l10n.vehicleDetailOwner,
+                valueWidget: Text(
+                  bindUserName ?? '-',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF0B61D9),
+                  ),
+                ),
               ),
               _InfoRow(
-                label: l10n.deviceDetailBatteryAvgSpeedLabel,
-                value: detail.avgSpeed != null
-                    ? '${detail.avgSpeed} km/h'
-                    : '-',
+                label: l10n.vehicleDetailUserPhone,
+                valueWidget: Text(
+                  bindUserPhone,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Color(0xFF0B61D9),
+                  ),
+                ),
               ),
               _InfoRow(
-                label: l10n.deviceDetailBatteryColorLabel,
-                value: detail.color?.toString() ?? '-',
+                label: l10n.deviceDetailBindingTimeLabel,
+                value: bindTime,
               ),
-              _InfoRow(
-                label: l10n.deviceDetailSignalTimeLabel,
-                value: detail.signalTime != null
-                    ? _formatTimestamp(detail.signalTime)
-                    : '-',
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        _CardSection(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.deviceDetailPhotoLabel,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AppColors.black06Text,
+                ),
               ),
+              const SizedBox(height: 12),
+              if (photos.isNotEmpty)
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: photos.map((url) {
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        url,
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          width: 100,
+                          height: 100,
+                          color: const Color(0xFFEEEEEE),
+                          child: const Icon(Icons.image_not_supported),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                )
+              else
+                const Text(
+                  '-',
+                  style: TextStyle(fontSize: 15, color: Color(0xFF999999)),
+                ),
             ],
           ),
         ),
@@ -1283,11 +1392,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     );
     final bindUserId = deviceInfo?.bindUserId;
     final bindUserName = deviceInfo?.bindUserName ?? detail.ownerName;
-    final bindUserPhone = deviceInfo?.bindUserPhone ?? detail.phone;
-    final bindTime = _formatTimeString(
-      deviceInfo?.bindTime,
-      withSeconds: true,
+    final bindUserPhone = _formatBindUserPhone(
+      deviceInfo?.bindUserPhone ?? detail.phone,
     );
+    final bindTime = _formatTimeString(deviceInfo?.bindTime, withSeconds: true);
     final insuranceNumber = deviceInfo?.insuranceNumber;
     final photos = _collectDevicePhotos(deviceInfo);
 
@@ -1297,10 +1405,6 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         _CardSection(
           child: Column(
             children: [
-              _InfoRow(
-                label: l10n.deviceDetailSnLabel,
-                value: detail.sn ?? '-',
-              ),
               _InfoRow(
                 label: l10n.deviceDetailSpecLabel,
                 value: spec?.isNotEmpty == true ? spec : '-',
@@ -1322,10 +1426,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         _CardSection(
           child: Column(
             children: [
-              _InfoRow(
-                label: l10n.vehicleDetailVin,
-                value: detail.vin ?? '-',
-              ),
+              _InfoRow(label: l10n.vehicleDetailVin, value: detail.vin ?? '-'),
               _InfoRow(
                 label: l10n.vehicleDetailPlateNumber,
                 value: detail.carNumber ?? '-',
@@ -1360,7 +1461,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               _InfoRow(
                 label: l10n.vehicleDetailUserPhone,
                 valueWidget: Text(
-                  bindUserPhone ?? '-',
+                  bindUserPhone,
                   style: const TextStyle(
                     fontSize: 15,
                     color: Color(0xFF0B61D9),
@@ -1476,9 +1577,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               ),
               const SizedBox(height: 8),
               Text(
-                record.date ?? (record.createTime != null
-                    ? _formatTimestamp(record.createTime)
-                    : '-'),
+                record.date ??
+                    (record.createTime != null
+                        ? _formatTimestamp(record.createTime)
+                        : '-'),
                 style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
               ),
             ],
@@ -1489,24 +1591,29 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   String _formatTimestamp(int? timestamp, {bool withSeconds = false}) {
-    final pattern =
-        withSeconds ? 'yyyy/MM/dd HH:mm:ss' : 'yyyy/MM/dd HH:mm';
-    return DateFormatUtils.formatTimestamp(
-      timestamp,
-      pattern: pattern,
-    );
+    final pattern = withSeconds ? 'yyyy/MM/dd HH:mm:ss' : 'yyyy/MM/dd HH:mm';
+    return DateFormatUtils.formatTimestamp(timestamp, pattern: pattern);
   }
 
   String _formatTimeString(String? value, {bool withSeconds = false}) {
     if (value == null || value.trim().isEmpty) return '-';
     final trimmed = value.trim();
-    final pattern =
-        withSeconds ? 'yyyy/MM/dd HH:mm:ss' : 'yyyy/MM/dd HH:mm';
+    final pattern = withSeconds ? 'yyyy/MM/dd HH:mm:ss' : 'yyyy/MM/dd HH:mm';
     final parsed = DateFormatUtils.parse(trimmed);
     if (parsed != null) {
       return DateFormatUtils.format(parsed, pattern: pattern);
     }
     return trimmed;
+  }
+
+  String _formatBindUserPhone(String? phone) {
+    final value = (phone ?? '').trim();
+    if (value.isEmpty) return '-';
+    final areaCode = (AuthSession.instance.current?.areaCode ?? '').trim();
+    if (areaCode.isEmpty || value.startsWith(areaCode)) {
+      return value;
+    }
+    return '$areaCode $value';
   }
 
   bool _cabinetHasWarehouse(DeviceInfo? info) {
@@ -1588,7 +1695,11 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => const QrScanPage(parseDeviceSn: true, deviceType: 3),
+        builder: (_) => const QrScanPage(
+          allowManualInput: true,
+          parseDeviceSn: true,
+          deviceType: 3,
+        ),
       ),
     );
     if (!mounted || result == null || result.isEmpty) return;
@@ -1632,9 +1743,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                   isDoorOpen
                       ? l10n.deviceDetailPortOpened
                       : l10n.deviceDetailPortOpen,
-                  style: TextStyle(
-                    color: isDoorOpen ? Colors.grey : null,
-                  ),
+                  style: TextStyle(color: isDoorOpen ? Colors.grey : null),
                 ),
                 onTap: isDoorOpen
                     ? null
@@ -1750,8 +1859,9 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
     if (confirmed != true || !mounted) return;
 
-    final success =
-        await ref.read(deviceDetailProvider.notifier).openCabinBackDoor();
+    final success = await ref
+        .read(deviceDetailProvider.notifier)
+        .openCabinBackDoor();
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -1787,8 +1897,9 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
     if (confirmed != true || !mounted) return;
 
-    final success =
-        await ref.read(deviceDetailProvider.notifier).openCabinBackDoor();
+    final success = await ref
+        .read(deviceDetailProvider.notifier)
+        .openCabinBackDoor();
 
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -1839,21 +1950,34 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         content: Text(
           success
               ? (enable
-                  ? l10n.deviceDetailPortEnableSuccess
-                  : l10n.deviceDetailPortDisableSuccess)
+                    ? l10n.deviceDetailPortEnableSuccess
+                    : l10n.deviceDetailPortDisableSuccess)
               : l10n.deviceDetailToggleFailed,
         ),
       ),
     );
   }
 
-  void _openNavigation(double lat, double lng) {
-    // 导航功能需要 url_launcher 包支持
-    // 这里暂时不做实现，可以后续添加
+  Future<void> _openNavigation(double lat, double lng) async {
+    Uri uri;
+    if (defaultTargetPlatform == TargetPlatform.iOS) {
+      uri = Uri.parse('http://maps.apple.com/?daddr=$lat,$lng');
+    } else {
+      uri = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving',
+      );
+    }
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      return;
+    }
+
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Navigation to: $lat, $lng'),
-        duration: const Duration(seconds: 2),
+      const SnackBar(
+        content: Text('请用手机安装地图App 进行导航'),
+        duration: Duration(seconds: 2),
       ),
     );
   }
@@ -1895,7 +2019,10 @@ class _InfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(fontSize: 15, color: AppColors.black06Text),
+              style: const TextStyle(
+                fontSize: 15,
+                color: AppColors.black06Text,
+              ),
             ),
           ),
           valueWidget ??
@@ -1975,15 +2102,13 @@ class _PortCard extends StatelessWidget {
     // 电量颜色（与 Android 逻辑一致：禁用灰，低于阈值红，否则绿）
     final socColor = isDisabled
         ? const Color(0x330C0C0D)
-        : (swapFlag == 0
-            ? const Color(0xFFFA4B51)
-            : const Color(0xFF0ABF83));
+        : (swapFlag == 0 ? const Color(0xFFFA4B51) : const Color(0xFF0ABF83));
 
     final portBadgeColor = isDisabled
         ? const Color(0x330C0C0D)
         : hasBattery
-            ? const Color(0xE60C0C0D)
-            : const Color(0x330C0C0D);
+        ? const Color(0xE60C0C0D)
+        : const Color(0x330C0C0D);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -2067,10 +2192,7 @@ class _PortCard extends StatelessWidget {
           else
             Text(
               l10n.deviceDetailPortAvailable,
-              style: TextStyle(
-                fontSize: 17,
-                color: const Color(0x800C0C0D),
-              ),
+              style: TextStyle(fontSize: 17, color: const Color(0x800C0C0D)),
             ),
           const SizedBox(height: 4),
 

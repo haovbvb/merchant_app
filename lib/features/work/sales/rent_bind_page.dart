@@ -5,7 +5,9 @@ import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
 import 'package:merchant_app/data/models/pack.dart';
+import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/rent_bind_controller.dart';
 import 'package:merchant_app/features/work/sales/widgets/rent_applicant_sheet.dart';
@@ -22,10 +24,26 @@ class RentBindPage extends ConsumerStatefulWidget {
 class _RentBindPageState extends ConsumerState<RentBindPage> {
   final _snController = TextEditingController();
   final _snFocusNode = FocusNode();
+  bool _didInit = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _didInit) return;
+      _didInit = true;
+      final notifier = ref.read(rentBindProvider.notifier);
+      notifier.reset();
+      _snController.clear();
+    });
+    final notifier = ref.read(rentBindProvider.notifier);
+    notifier.reset();
+    notifier.clearDeviceAndPack();
+    final shopNo = AuthSession.instance.current?.shopNo ?? '';
+    if (shopNo.isNotEmpty) {
+      notifier.loadShopPayConfig(shopNo);
+    }
+    _snController.clear();
     _snFocusNode.addListener(_onSnFocusChanged);
   }
 
@@ -42,6 +60,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
 
   @override
   void dispose() {
+    ref.read(rentBindProvider.notifier).reset();
     _snFocusNode
       ..removeListener(_onSnFocusChanged)
       ..dispose();
@@ -106,9 +125,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
         Container(
           width: 64,
           height: 64,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-          ),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
             child: Image.asset(
@@ -125,7 +142,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: AppColors.black06Text,
+            color: AppColors.black09Text,
           ),
         ),
       ],
@@ -149,10 +166,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
         children: [
           Text(
             l10n.rentBindDeviceSn,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF999999),
-            ),
+            style: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
           ),
           const SizedBox(height: 8),
           Row(
@@ -206,10 +220,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
               child: Text(
                 l10n.rentBindNoDeviceInfo,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFFCCCCCC),
-                ),
+                style: const TextStyle(fontSize: 14, color: Color(0xFFCCCCCC)),
               ),
             ),
           ],
@@ -241,11 +252,24 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
-                    Icons.electric_moped,
-                    size: 40,
-                    color: Color(0xFF666666),
-                  ),
+                  child: _normalizedImageUrl(car.img) != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            _normalizedImageUrl(car.img)!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.electric_moped,
+                              size: 40,
+                              color: Color(0xFF666666),
+                            ),
+                          ),
+                        )
+                      : const Icon(
+                          Icons.electric_moped,
+                          size: 40,
+                          color: Color(0xFF666666),
+                        ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -264,8 +288,8 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
                       Wrap(
                         spacing: 8,
                         children: [
-                          _buildTag('Vehicle · ${car.model}'),
-                          _buildTag(car.spec),
+                          _buildTag('Vehicle · ${_carModelText(car)}'),
+                          _buildTag(_carSpecText(car)),
                         ],
                       ),
                     ],
@@ -282,9 +306,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
               ),
               child: Row(
                 children: [
-                  Expanded(
-                    child: _buildInfoItem('VIN', car.vin ?? '-'),
-                  ),
+                  Expanded(child: _buildInfoItem('VIN', car.vin ?? '-')),
                   Container(
                     width: 1,
                     height: 32,
@@ -319,11 +341,24 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(
-                    Icons.battery_charging_full,
-                    size: 40,
-                    color: Color(0xFF666666),
-                  ),
+                  child: _normalizedImageUrl(battery.img) != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            _normalizedImageUrl(battery.img)!,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => const Icon(
+                              Icons.battery_charging_full,
+                              size: 40,
+                              color: Color(0xFF666666),
+                            ),
+                          ),
+                        )
+                      : const Icon(
+                          Icons.battery_charging_full,
+                          size: 40,
+                          color: Color(0xFF666666),
+                        ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -342,8 +377,8 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
                       Wrap(
                         spacing: 8,
                         children: [
-                          _buildTag('Battery · ${battery.model ?? ''}'),
-                          _buildTag(battery.spec ?? ''),
+                          _buildTag('Battery · ${_batteryModelText(battery)}'),
+                          _buildTag(_batterySpecText(battery)),
                         ],
                       ),
                     ],
@@ -361,7 +396,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
               child: Row(
                 children: [
                   Expanded(
-                    child: _buildInfoItem('SOC', '${battery.soc ?? '-'}%'),
+                    child: _buildInfoItem('SOC', _numberOrDash(battery.soc)),
                   ),
                   Container(
                     width: 1,
@@ -369,7 +404,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
                     color: const Color(0xFFEEEEEE),
                   ),
                   Expanded(
-                    child: _buildInfoItem('SOH', '${battery.soh ?? '-'}%'),
+                    child: _buildInfoItem('SOH', _numberOrDash(battery.soh)),
                   ),
                   Container(
                     width: 1,
@@ -377,7 +412,10 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
                     color: const Color(0xFFEEEEEE),
                   ),
                   Expanded(
-                    child: _buildInfoItem('Cycle', '${battery.cycle ?? '-'}'),
+                    child: _buildInfoItem(
+                      'Cycle',
+                      _numberOrDash(battery.cycle),
+                    ),
                   ),
                 ],
               ),
@@ -400,10 +438,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 12,
-          color: Color(0xFF666666),
-        ),
+        style: const TextStyle(fontSize: 12, color: Color(0xFF666666)),
       ),
     );
   }
@@ -413,10 +448,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Color(0xFF999999),
-          ),
+          style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
         ),
         const SizedBox(height: 4),
         Text(
@@ -450,10 +482,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
         children: [
           Text(
             l10n.rentBindPackage,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF999999),
-            ),
+            style: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
           ),
           const SizedBox(height: 12),
           if (selectedPack != null) ...[
@@ -520,7 +549,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
         height: 48,
         child: ElevatedButton(
           onPressed: canSubmit && !state.submitting
-              ? () => _showApplicantSheet(notifier, state)
+              ? () => _showPaymentSheet(notifier, state)
               : null,
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primaryColor,
@@ -533,11 +562,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
             elevation: 0,
           ),
           child: state.submitting
-              ? const SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: SizedBox.shrink(),
-                )
+              ? const SizedBox(width: 20, height: 20, child: SizedBox.shrink())
               : Text(
                   l10n.rentBindSubmit,
                   style: const TextStyle(
@@ -552,9 +577,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
 
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(
-        builder: (_) => const QrScanPage(parseDeviceSn: true),
-      ),
+      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
@@ -589,23 +612,43 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
 
   Future<void> _showApplicantSheet(
     RentBindNotifier notifier,
-    RentBindState state,
+    bool advancedMode,
   ) async {
-    final result = await RentApplicantSheet.show(context, notifier);
+    final result = await RentApplicantSheet.show(
+      context,
+      notifier,
+      advancedMode: advancedMode,
+    );
     if (result == null || !mounted) return;
+    final latestState = ref.read(rentBindProvider);
+    if (latestState.selectedPack == null) return;
+    final l10n = context.l10n;
+    final success = await notifier.submit(
+      address: result.address,
+      birthday: result.birthday,
+      cardNum: result.cardNum,
+      email: result.email,
+      firstName: result.firstName,
+      lastName: result.lastName,
+      idNumber: result.idNumber,
+      phone: result.phone,
+      deviceSn: _snController.text.trim(),
+      cardImgUrl: result.cardImgUrl,
+      personImgUrl: result.personImgUrl,
+    );
 
-    // Show payment sheet
-    await _showPaymentSheet(notifier, state, result);
+    if (!mounted) return;
+    if (!success) {
+      showToast(l10n.rentBindFailed);
+    }
   }
 
   Future<void> _showPaymentSheet(
     RentBindNotifier notifier,
     RentBindState state,
-    RentApplicantResult applicantResult,
   ) async {
     final pack = state.selectedPack;
     if (pack == null) return;
-
     final paymentResult = await RentPaymentSheet.show(
       context,
       notifier,
@@ -613,27 +656,57 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
       pack.depositAmount ?? 0,
     );
     if (paymentResult == null || !mounted) return;
+    final useAdvancedApplicant = paymentResult.paySource != 2;
+    await _showApplicantSheet(notifier, useAdvancedApplicant);
+  }
 
-    // Submit
-    final l10n = context.l10n;
-    final success = await notifier.submit(
-      address: applicantResult.address,
-      birthday: applicantResult.birthday,
-      cardNum: applicantResult.cardNum,
-      email: applicantResult.email,
-      firstName: applicantResult.firstName,
-      lastName: applicantResult.lastName,
-      idNumber: applicantResult.idNumber,
-      phone: applicantResult.phone,
-      deviceSn: _snController.text.trim(),
-      cardImgUrl: applicantResult.cardImgUrl,
-      personImgUrl: applicantResult.personImgUrl,
-    );
+  String _carModelText(CarVo car) {
+    return _firstValid([car.carModel, car.carType, car.model]);
+  }
 
-    if (!mounted) return;
-    if (!success) {
-      showToast(l10n.rentBindFailed);
+  String _batteryModelText(BatteryVo battery) {
+    return _firstValid([battery.batModel, battery.batteryType, battery.model]);
+  }
+
+  String _carSpecText(CarVo car) {
+    return _firstValid([car.carSpec, car.spec]);
+  }
+
+  String _batterySpecText(BatteryVo battery) {
+    return _firstValid([battery.batSpec, battery.spec]);
+  }
+
+  String _numberOrDash(int? value) {
+    return value == null ? '-' : value.toString();
+  }
+
+  String _firstValid(List<String?> values) {
+    for (final value in values) {
+      final current = value?.trim();
+      if (current != null &&
+          current.isNotEmpty &&
+          current != '-' &&
+          current.toLowerCase() != 'null') {
+        return current;
+      }
     }
+    return '-';
+  }
+
+  String? _normalizedImageUrl(String? raw) {
+    final value = raw?.trim();
+    if (value == null || value.isEmpty || value == '-' || value == 'null') {
+      return null;
+    }
+    final first = value
+        .split(',')
+        .map((item) => item.trim())
+        .firstWhere(
+          (item) =>
+              item.isNotEmpty && item != '-' && item.toLowerCase() != 'null',
+          orElse: () => '',
+        );
+    return first.isEmpty ? null : first;
   }
 }
 
@@ -758,7 +831,11 @@ class _PackageCard extends StatelessWidget {
 
   String _buildPeriodText(Pack pack) {
     final periodValue = pack.duration ?? 30;
-    return 'Fixed period · ${periodValue}days';
+    final infoType = pack.infoType;
+    if (infoType == 0 || (infoType == null && periodValue == 30)) {
+      return '整月';
+    }
+    return '固定周期 · $periodValue天';
   }
 }
 
@@ -804,11 +881,7 @@ class _SuccessPage extends StatelessWidget {
                   color: AppColors.primaryColor,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 32,
-                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 32),
               ),
               const SizedBox(height: 16),
               Text(

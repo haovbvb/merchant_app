@@ -20,7 +20,6 @@ import 'package:merchant_app/features/work/maintenance/repair_record_create_page
 import 'package:merchant_app/features/work/maintenance/repair_record_page.dart';
 import 'package:merchant_app/features/work/map/battery_location_page.dart';
 import 'package:merchant_app/features/work/promote/promote_web_page.dart';
-import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/roadside/roadside_deal_page.dart';
 import 'package:merchant_app/features/work/roadside/roadside_detail_page.dart';
@@ -126,11 +125,11 @@ class WorkModulePage extends StatelessWidget {
       case 'sale_summary':
         return const SaleSummaryPage();
       case 'qrcode_scan':
-        return const QrScanPage();
+        return const QrScanPage(allowManualInput: true);
       case 'qrcode_list':
-        return const QrBatchScanPage();
+        return const QrScanPage(allowManualInput: true);
       case 'cabinet_scan':
-        return const QrScanPage();
+        return const QrScanPage(allowManualInput: true);
       case 'cabinet_putaway':
         return const CabinetPutawayPage();
       case 'cabinet_unshelve':

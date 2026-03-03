@@ -130,25 +130,39 @@ class ReceiveListNotifier extends Notifier<ReceiveListState> {
 // ==================== 接收详情状态 ====================
 class ReceiveDetailState {
   final bool loading;
+  final bool loadingMore;
+  final int page;
+  final int total;
   final String transferNo;
   final DeviceTransportDetail? detail;
   final List<DeviceTransportDetailPageData> items;
 
   const ReceiveDetailState({
     this.loading = false,
+    this.loadingMore = false,
+    this.page = 1,
+    this.total = 0,
     this.transferNo = '',
     this.detail,
     this.items = const [],
   });
 
+  bool get hasMore => items.length < total;
+
   ReceiveDetailState copyWith({
     bool? loading,
+    bool? loadingMore,
+    int? page,
+    int? total,
     String? transferNo,
     DeviceTransportDetail? detail,
     List<DeviceTransportDetailPageData>? items,
   }) {
     return ReceiveDetailState(
       loading: loading ?? this.loading,
+      loadingMore: loadingMore ?? this.loadingMore,
+      page: page ?? this.page,
+      total: total ?? this.total,
       transferNo: transferNo ?? this.transferNo,
       detail: detail ?? this.detail,
       items: items ?? this.items,
@@ -168,7 +182,13 @@ class ReceiveDetailNotifier extends Notifier<ReceiveDetailState> {
   ReceiveDetailState build() => const ReceiveDetailState();
 
   Future<void> loadDetail(String transferNo) async {
-    state = state.copyWith(loading: true, transferNo: transferNo);
+    state = state.copyWith(
+      loading: true,
+      loadingMore: false,
+      page: 1,
+      total: 0,
+      transferNo: transferNo,
+    );
 
     final response = await _api.get<DeviceTransportDetail>(
       ApiPath.transportQueryIssueDetail,
@@ -186,6 +206,42 @@ class ReceiveDetailNotifier extends Notifier<ReceiveDetailState> {
       loading: false,
       detail: detail,
       items: detail?.detailPage?.list ?? const [],
+      total: detail?.detailPage?.total ?? 0,
+    );
+  }
+
+  Future<void> loadMoreDetail() async {
+    if (state.loading || state.loadingMore || !state.hasMore) {
+      return;
+    }
+    if (state.transferNo.isEmpty) {
+      return;
+    }
+
+    final nextPage = state.page + 1;
+    state = state.copyWith(loadingMore: true);
+
+    final response = await _api.get<DeviceTransportDetail>(
+      ApiPath.transportQueryIssueDetail,
+      queryParameters: {
+        'transferNo': state.transferNo,
+        'pageNum': nextPage,
+        'pageSize': _pageSize,
+      },
+      parser: (json) =>
+          DeviceTransportDetail.fromJson(Map<String, dynamic>.from(json as Map)),
+    );
+
+    final detail = response.result;
+    final pageList =
+        detail?.detailPage?.list ?? const <DeviceTransportDetailPageData>[];
+
+    state = state.copyWith(
+      loadingMore: false,
+      page: nextPage,
+      detail: detail ?? state.detail,
+      items: [...state.items, ...pageList],
+      total: detail?.detailPage?.total ?? state.total,
     );
   }
 

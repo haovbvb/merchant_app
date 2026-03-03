@@ -120,6 +120,20 @@ void main() {
         expect(result.vin, 'PLAINVIN');
         expect(result.vcu, '');
       });
+
+      test('should extract value after sn= for vehicle raw QR', () {
+        final result = ScanUtils.parseVehicleQr('sn=AG1423434', 0);
+        expect(result.sn, 'AG1423434');
+        expect(result.vin, 'AG1423434');
+        expect(result.vcu, '');
+      });
+
+      test('should extract value after sn: for vehicle raw QR', () {
+        final result = ScanUtils.parseVehicleQr('sn:AG1423434', 0);
+        expect(result.sn, 'AG1423434');
+        expect(result.vin, 'AG1423434');
+        expect(result.vcu, '');
+      });
     });
 
     group('parseStationQr', () {
@@ -160,6 +174,10 @@ void main() {
 
       test('should parse vehicle SN for deviceType=2', () {
         expect(ScanUtils.parseSnByDeviceType('VIN=VEH001,VCU=123', 2), 'VEH001');
+      });
+
+      test('should parse vehicle SN from sn= for deviceType=2', () {
+        expect(ScanUtils.parseSnByDeviceType('sn=AG1423434', 2), 'AG1423434');
       });
 
       test('should parse station SN for deviceType=3', () {

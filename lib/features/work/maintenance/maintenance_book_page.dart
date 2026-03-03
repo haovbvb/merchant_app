@@ -287,6 +287,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) => const QrScanPage(
+          allowManualInput: true,
           parseDeviceSn: true,
           deviceType: 2,
         ),

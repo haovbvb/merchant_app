@@ -125,6 +125,18 @@ abstract class AppLocalizations {
   /// **'Confirm'**
   String get confirm;
 
+  /// No description provided for @imageSourceCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Take Photo'**
+  String get imageSourceCamera;
+
+  /// No description provided for @imageSourceGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose From Gallery'**
+  String get imageSourceGallery;
+
   /// No description provided for @logout.
   ///
   /// In en, this message translates to:
@@ -683,11 +695,23 @@ abstract class AppLocalizations {
   /// **'About'**
   String get profileAbout;
 
-  /// No description provided for @commonPlatform.
+  /// Label for platform warehouse.
   ///
   /// In en, this message translates to:
   /// **'Platform'**
   String get commonPlatform;
+
+  /// Label for agent warehouse type.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent'**
+  String get commonAgent;
+
+  /// Label for shop warehouse type.
+  ///
+  /// In en, this message translates to:
+  /// **'Shop'**
+  String get commonShop;
 
   /// Label prefix for app version on About page.
   ///
@@ -1802,7 +1826,7 @@ abstract class AppLocalizations {
   /// No description provided for @repairRecordDeviceEntryTime.
   ///
   /// In en, this message translates to:
-  /// **'Entry Time'**
+  /// **'Creation Time'**
   String get repairRecordDeviceEntryTime;
 
   /// No description provided for @repairRecordBound.
@@ -2519,6 +2543,18 @@ abstract class AppLocalizations {
   /// **'Inventory Count'**
   String get inventoryCountTitle;
 
+  /// No description provided for @inventoryStockLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stock'**
+  String get inventoryStockLabel;
+
+  /// No description provided for @inventoryCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Inventory'**
+  String get inventoryCountLabel;
+
   /// No description provided for @inventorySearchHint.
   ///
   /// In en, this message translates to:
@@ -3047,6 +3083,12 @@ abstract class AppLocalizations {
   /// **'Manual input'**
   String get scanManualInput;
 
+  /// No description provided for @scanManualVehicleVin.
+  ///
+  /// In en, this message translates to:
+  /// **'Manually enter vehicle VIN'**
+  String get scanManualVehicleVin;
+
   /// No description provided for @scanInputHint.
   ///
   /// In en, this message translates to:
@@ -3230,7 +3272,7 @@ abstract class AppLocalizations {
   /// No description provided for @deviceSearchHint.
   ///
   /// In en, this message translates to:
-  /// **'Enter device SN or keyword'**
+  /// **'Enter device SN or scan QR code'**
   String get deviceSearchHint;
 
   /// No description provided for @deviceSearchStationHint.
@@ -3238,6 +3280,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Enter station SN or scan QR code'**
   String get deviceSearchStationHint;
+
+  /// No description provided for @deviceSearchInvalidStationSn.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid station SN'**
+  String get deviceSearchInvalidStationSn;
 
   /// No description provided for @deviceSearchEmpty.
   ///
@@ -6530,8 +6578,56 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetPutawayImageLimit.
   ///
   /// In en, this message translates to:
-  /// **'Up to 4 images'**
+  /// **'Up to 5 images'**
   String get cabinetPutawayImageLimit;
+
+  /// No description provided for @cabinetPutawayConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Putaway?'**
+  String get cabinetPutawayConfirmTitle;
+
+  /// No description provided for @cabinetPutawayConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm the putaway information. The station will be put away after submission.'**
+  String get cabinetPutawayConfirmMessage;
+
+  /// No description provided for @cabinetPutawayNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter station name'**
+  String get cabinetPutawayNameRequired;
+
+  /// No description provided for @cabinetPutawaySnRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter station SN'**
+  String get cabinetPutawaySnRequired;
+
+  /// No description provided for @cabinetPutawayAddressRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter station address'**
+  String get cabinetPutawayAddressRequired;
+
+  /// No description provided for @cabinetPutawayCoordinateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select coordinates'**
+  String get cabinetPutawayCoordinateRequired;
+
+  /// No description provided for @cabinetPutawaySwapTimeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter battery exchange indicator'**
+  String get cabinetPutawaySwapTimeRequired;
+
+  /// No description provided for @cabinetPutawayImageRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please upload at least 1 image'**
+  String get cabinetPutawayImageRequired;
 
   /// No description provided for @cabinetPutawaySubmit.
   ///
@@ -7523,6 +7619,18 @@ abstract class AppLocalizations {
   /// **'Move map to pick a location'**
   String get addressPickerEmpty;
 
+  /// No description provided for @addressPickerSearchNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Address not found'**
+  String get addressPickerSearchNotFound;
+
+  /// No description provided for @addressPickerFetchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to fetch address'**
+  String get addressPickerFetchFailed;
+
   /// No description provided for @addressPickerCoordinates.
   ///
   /// In en, this message translates to:
@@ -7790,7 +7898,7 @@ abstract class AppLocalizations {
   /// No description provided for @deviceDetailTabAddress.
   ///
   /// In en, this message translates to:
-  /// **'Address'**
+  /// **'Location'**
   String get deviceDetailTabAddress;
 
   /// No description provided for @deviceDetailTabRepairRecords.

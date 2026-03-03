@@ -411,11 +411,16 @@ class _TransportCard extends StatelessWidget {
               child: Row(
                 children: [
                   Image.asset(
-                    'assets/android/mipmap-xxhdpi/icon_issue_warehouse.webp',
-                    width: 20,
-                    height: 20,
+                    'assets/android/mipmap-xxhdpi/icon_device_issuse_state.png',
+                    width: 14,
+                    height: 14,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.home_outlined,
+                      size: 14,
+                      color: Color(0xFF666666),
+                    ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                         item.inWarehouseName,

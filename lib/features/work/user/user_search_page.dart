@@ -145,7 +145,7 @@ class _UserSearchPageState extends ConsumerState<UserSearchPage> {
 
   Future<void> _scan() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
+      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: true)),
     );
     if (!mounted || result == null || result.isEmpty) return;
     await _search(result);

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/root_tab_scaffold.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/car_type.dart';
 import 'package:merchant_app/features/work/entry/battery_ship_page.dart';
-import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
@@ -352,24 +353,32 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
   }
 
   Future<void> _addByScan() async {
-    final result = await Navigator.of(context).push<List<String>>(
+    final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => QrBatchScanPage(
-          initialItems: _items.map((item) => item.sn).toList(),
-          fixedDeviceType: 2,
+        builder: (_) => const QrScanPage(
+          allowManualInput: true,
+          deviceType: 2,
+          returnRaw: true,
         ),
       ),
     );
-    if (result == null) return;
+    if (result == null || result.trim().isEmpty) return;
+    final parsed = ScanUtils.parseVehicleQr(result, 0);
+    final sn = (parsed.sn ?? '').trim();
+    if (sn.isEmpty) return;
+    // 重复检查
+    if (_items.any((item) => item.sn == sn)) {
+      showToast(context.l10n.warehouseInventoryScanRepeat);
+      return;
+    }
+    final vin = (parsed.vin ?? '').trim();
+    final ctrlId = (parsed.vcu ?? '').trim();
     setState(() {
-      final existingBySn = {
-        for (final item in _items) item.sn: item,
-      };
-      _items
-        ..clear()
-        ..addAll(
-          result.map((sn) => existingBySn[sn] ?? _VehicleItem(sn: sn)),
-        );
+      _items.add(_VehicleItem(
+        sn: sn,
+        vin: vin.isNotEmpty ? vin : sn,
+        ctrlId: ctrlId,
+      ));
     });
   }
 
@@ -392,9 +401,8 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
   Future<_VehicleItem?> _showManualEntrySheet({_VehicleItem? initial}) async {
     final l10n = context.l10n;
     final snController = TextEditingController(text: initial?.sn ?? '');
-    final imeiController = TextEditingController(text: initial?.imei ?? '');
-    final iccidController = TextEditingController(text: initial?.iccid ?? '');
     final vinController = TextEditingController(text: initial?.vin ?? '');
+    final ctrlIdController = TextEditingController(text: initial?.ctrlId ?? '');
 
     return showModalBottomSheet<_VehicleItem>(
       context: context,
@@ -448,27 +456,20 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
               ),
               const SizedBox(height: 16),
 
-              // IMEI
-              _buildInputField(
-                label: 'IMEI',
-                hint: l10n.entryImeiHint,
-                controller: imeiController,
-              ),
-              const SizedBox(height: 16),
-
-              // ICCID
-              _buildInputField(
-                label: 'ICCID',
-                hint: l10n.entryIccidHint,
-                controller: iccidController,
-              ),
-              const SizedBox(height: 16),
-
               // VIN
               _buildInputField(
-                label: 'VIN',
+                label: l10n.entryVinLabel,
                 hint: l10n.entryVinRequired.replaceAll('请填写', '请输入'),
                 controller: vinController,
+                isRequired: true,
+              ),
+              const SizedBox(height: 16),
+
+              // VCU
+              _buildInputField(
+                label: 'VCU',
+                hint: '请输入VCU（可选）',
+                controller: ctrlIdController,
               ),
               const SizedBox(height: 24),
 
@@ -483,12 +484,16 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                       showToast(l10n.entrySnRequired);
                       return;
                     }
+                    final vin = vinController.text.trim();
+                    if (vin.isEmpty) {
+                      showToast(l10n.entryVinRequired);
+                      return;
+                    }
                     Navigator.of(context).pop(
                       _VehicleItem(
                         sn: sn,
-                        imei: imeiController.text.trim(),
-                        iccid: iccidController.text.trim(),
-                        vin: vinController.text.trim(),
+                        vin: vin,
+                        ctrlId: ctrlIdController.text.trim(),
                       ),
                     );
                   },
@@ -550,6 +555,10 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
               Expanded(
                 child: TextField(
                   controller: controller,
+                  textAlignVertical: TextAlignVertical.center,
+                  inputFormatters: [
+                    LengthLimitingTextInputFormatter(50),
+                  ],
                   decoration: InputDecoration(
                     hintText: hint,
                     hintStyle: const TextStyle(
@@ -557,6 +566,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                       fontSize: 15,
                     ),
                     border: InputBorder.none,
+                    isCollapsed: true,
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 12,
                       vertical: 14,
@@ -595,7 +605,7 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
 
     setState(() => _submitting = true);
     try {
-      await _api.post<Object>(
+      final response = await _api.post<Object>(
         ApiPath.vehicleRegister,
         data: {
           'model': _selected?.model ?? '',
@@ -603,6 +613,10 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
         },
         parser: (json) => json ?? Object(),
       );
+
+      if (!response.isSuccess) {
+        return;
+      }
 
       final sns = _items.map((item) => item.sn).toList();
       if (!mounted) return;
@@ -795,22 +809,19 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
 
 class _VehicleItem {
   final String sn;
-  final String imei;
-  final String iccid;
   final String vin;
+  final String ctrlId;
 
   const _VehicleItem({
     required this.sn,
-    this.imei = '',
-    this.iccid = '',
     this.vin = '',
+    this.ctrlId = '',
   });
 
   Map<String, dynamic> toJson() => {
     'sn': sn,
-    'imei': imei,
-    'iccid': iccid,
     'vin': vin,
+    'ctrlId': ctrlId,
   };
 }
 
@@ -850,26 +861,19 @@ class _DeviceCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
 
-          // IMEI / ICCID
+          // VIN / VCU
           Row(
             children: [
               Text(
-                'IMEI: ${item.imei.isNotEmpty ? item.imei : '-'}',
+                'VIN: ${item.vin.isNotEmpty ? item.vin : '-'}',
                 style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
               ),
               const SizedBox(width: 24),
               Text(
-                'ICCID: ${item.iccid.isNotEmpty ? item.iccid : '-'}',
+                'VCU: ${item.ctrlId.isNotEmpty ? item.ctrlId : '-'}',
                 style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
               ),
             ],
-          ),
-          const SizedBox(height: 4),
-
-          // VIN
-          Text(
-            'VIN: ${item.vin.isNotEmpty ? item.vin : '-'}',
-            style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
           ),
           const SizedBox(height: 12),
 

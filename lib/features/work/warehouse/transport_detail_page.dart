@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/data/models/device_transport_resp.dart';
-import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/warehouse/transport_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
@@ -46,6 +46,7 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
     final state = ref.watch(transportDetailProvider);
     final notifier = ref.read(transportDetailProvider.notifier);
     final detail = state.detail;
+    final totalCount = state.total > 0 ? state.total : state.items.length;
     final canEditTracking = widget.mode == TransportMode.issue &&
         (widget.status == null || (widget.status != 1 && widget.status != 3));
 
@@ -59,17 +60,19 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
               icon: AppIcons.scanIcon(),
               onPressed: () => _scanAndReceive(context, notifier),
             ),
-          if (widget.mode == TransportMode.receive)
-            IconButton(
-              icon: const Icon(Icons.playlist_add),
-              tooltip: l10n.qrcodeBatchScan,
-              onPressed: () => _openBatchReceive(context, notifier),
-            ),
         ],
       ),
       body: state.loading
           ? const Center(child: SizedBox.shrink())
-          : SingleChildScrollView(
+          : NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification.metrics.pixels >=
+                    notification.metrics.maxScrollExtent - 120) {
+                  notifier.loadMoreDetail();
+                }
+                return false;
+              },
+              child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -82,70 +85,91 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
                   const SizedBox(height: 8),
                   // 物流单号
                   Container(
-                    color: Colors.white,
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    padding: const EdgeInsets.fromLTRB(12, 11, 12, 11),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Image.asset(
-                          'assets/android/mipmap-xxhdpi/icon_edt_traknumber.png',
-                          width: 20,
-                          height: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          l10n.deviceIssueTrackingNumber,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: AppColors.black06Text,
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          (detail?.trackingNumber.isNotEmpty ?? false)
-                              ? detail!.trackingNumber
-                              : '- -',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF1A1A1A),
-                          ),
-                        ),
-                        if (canEditTracking) ...[
-                          const SizedBox(width: 8),
-                          GestureDetector(
-                            onTap: () =>
-                                _showTrackingDialog(context, notifier, detail),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: const Color(0xFFE5E5E5),
-                                ),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.edit_outlined,
-                                    size: 14,
-                                    color: Color(0xFF666666),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    l10n.entryEditAction,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF666666),
-                                    ),
-                                  ),
-                                ],
+                        Row(
+                          children: [
+                            Image.asset(
+                              'assets/android/mipmap-xxhdpi/icon_tacking.png',
+                              width: 20,
+                              height: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              l10n.deviceIssueTrackingNumber,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: AppColors.black06Text,
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                (detail?.trackingNumber.isNotEmpty ?? false)
+                                    ? detail!.trackingNumber
+                                    : '- -',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xFF1A1A1A),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (canEditTracking) ...[
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () => _showTrackingDialog(
+                                  context,
+                                  notifier,
+                                  detail,
+                                ),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: const Color(0x4D0C0C0D),
+                                    ),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Image.asset(
+                                        'assets/android/mipmap-xxhdpi/icon_edt_traknumber.png',
+                                        width: 14,
+                                        height: 14,
+                                      ),
+                                      const SizedBox(width: 3),
+                                      Text(
+                                        l10n.entryEditAction,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          color: Color(0xFF1A1A1A),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
                       ],
                     ),
                   ),
@@ -159,7 +183,7 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
                       children: [
                         // 标题行
                         Text(
-                          '${_getDeviceTypeLabel(l10n, detail?.deviceType)} (${state.items.length})',
+                          '${_getDeviceTypeLabel(l10n, detail?.deviceType)} ($totalCount)',
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -182,17 +206,17 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
                               _StatItem(
                                 label: l10n.deviceIssueStatusInTransit,
                                 value: (detail?.inTransitNum ?? 0).toString(),
-                                color: const Color(0xFFED942F),
+                                color: AppColors.black09Text,
                               ),
                               _StatItem(
                                 label: l10n.deviceIssueReceived,
                                 value: (detail?.receivedNum ?? 0).toString(),
-                                color: AppColors.primaryColor,
+                                color: AppColors.black09Text,
                               ),
                               _StatItem(
                                 label: l10n.deviceIssueWithdrawn,
                                 value: (detail?.withdrawNum ?? 0).toString(),
-                                color: const Color(0xFFE25C5C),
+                                color: AppColors.black09Text,
                               ),
                             ],
                           ),
@@ -276,12 +300,24 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
                               ],
                             );
                           }),
+                        if (state.loadingMore)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 12),
+                            child: Center(
+                              child: SizedBox(
+                                width: 16,
+                                height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            ),
+                          ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 24),
                 ],
               ),
+            ),
             ),
     );
   }
@@ -292,35 +328,171 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
     DeviceTransportDetail? detail,
   ) async {
     final l10n = context.l10n;
-    final controller =
-        TextEditingController(text: detail?.trackingNumber ?? '');
-    final result = await showDialog<String>(
+    final controller = TextEditingController(text: detail?.trackingNumber ?? '');
+    final result = await showModalBottomSheet<String>(
       context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
       builder: (context) {
-        return AlertDialog(
-          title: Text(l10n.deviceIssueTrackingNumber),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            decoration: InputDecoration(
-              hintText: l10n.deviceIssueEnterTracking,
-              border: const OutlineInputBorder(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(l10n.cancel),
-            ),
-            FilledButton(
-              onPressed: () =>
-                  Navigator.of(context).pop(controller.text.trim()),
-              child: Text(l10n.confirm),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          height: 50,
+                          child: Center(
+                            child: Text(
+                              l10n.deviceIssueTrackingNumber,
+                              style: const TextStyle(
+                                fontSize: 17,
+                                color: Color(0xE60C0C0D),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        SizedBox(
+                          height: 40,
+                          child: Stack(
+                            alignment: Alignment.centerRight,
+                            children: [
+                              TextField(
+                                controller: controller,
+                                autofocus: true,
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(50),
+                                ],
+                                onChanged: (_) => setModalState(() {}),
+                                decoration: InputDecoration(
+                                  hintText: l10n.deviceIssueEnterTracking,
+                                  hintStyle: const TextStyle(
+                                    color: Color(0x4D0C0C0D),
+                                    fontSize: 15,
+                                  ),
+                                  filled: true,
+                                  fillColor: const Color(0xFFF2F4F7),
+                                  contentPadding: const EdgeInsets.fromLTRB(
+                                    12,
+                                    8,
+                                    40,
+                                    8,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  counterText: '',
+                                ),
+                                style: const TextStyle(
+                                  color: Color(0xE60C0C0D),
+                                  fontSize: 15,
+                                ),
+                              ),
+                              if (controller.text.isNotEmpty)
+                                GestureDetector(
+                                  onTap: () {
+                                    controller.clear();
+                                    setModalState(() {});
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                    ),
+                                    child: Image.asset(
+                                      'assets/android/mipmap-xxhdpi/icon_clear.webp',
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 25),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 44,
+                                child: TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: const Color(0xFFF2F4F7),
+                                    foregroundColor: const Color(0xE6000000),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(l10n.cancel),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: SizedBox(
+                                height: 44,
+                                child: FilledButton(
+                                  onPressed: () {
+                                    final value = controller.text.trim();
+                                    if (value.isEmpty) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            l10n.deviceIssueEnterTracking,
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+                                    Navigator.of(context).pop(value);
+                                  },
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: AppColors.primaryColor,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(l10n.confirm),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         );
       },
     );
+    controller.dispose();
     if (result == null || result.isEmpty) return;
     await notifier.editTrackingNumber(result);
   }
@@ -332,6 +504,7 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) => QrScanPage(
+          allowManualInput: true,
           parseDeviceSn: true,
           deviceType: ref.read(transportDetailProvider).detail?.deviceType,
         ),
@@ -339,31 +512,6 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
     );
     if (result == null || result.isEmpty) return;
     await notifier.receiveDevice(result);
-  }
-
-  Future<void> _openBatchReceive(
-    BuildContext context,
-    TransportDetailNotifier notifier,
-  ) async {
-    final state = ref.read(transportDetailProvider);
-    final existing = state.items.map((item) => item.deviceSn).toList();
-    final result = await Navigator.of(context).push<List<String>>(
-      MaterialPageRoute(
-        builder: (_) => QrBatchScanPage(
-          initialItems: existing,
-          fixedDeviceType: state.detail?.deviceType,
-        ),
-      ),
-    );
-    if (result == null || result.isEmpty) return;
-    for (final sn in result) {
-      await notifier.receiveDevice(sn);
-    }
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-          content: Text(context.l10n.warehouseTransportBatchReceiveComplete)),
-    );
   }
 
   String _getDeviceTypeLabel(AppLocalizations l10n, int? type) {

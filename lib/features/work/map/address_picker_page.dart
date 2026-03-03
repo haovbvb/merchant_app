@@ -59,11 +59,15 @@ class _AddressPickerPageState extends State<AddressPickerPage> {
 
     if (_center == null) {
       setState(() => _center = _userLocation);
-      await _reverseGeocode(_center!);
+      await _reverseGeocode(_center!, showError: false);
     }
   }
 
-  Future<void> _reverseGeocode(_MapCenter target) async {
+  Future<void> _reverseGeocode(
+    _MapCenter target, {
+    bool showError = true,
+  }) async {
+    if (_loading) return;
     setState(() => _loading = true);
     try {
       final placemarks = await placemarkFromCoordinates(
@@ -89,7 +93,12 @@ class _AddressPickerPageState extends State<AddressPickerPage> {
         setState(() => _address = parts.join(' '));
       }
     } catch (_) {
-      showToast('获取地址失败');
+      if (showError && mounted) {
+        showToast(context.l10n.addressPickerFetchFailed);
+      }
+      if (mounted && _address.isEmpty) {
+        setState(() => _address = '--');
+      }
     } finally {
       if (mounted) {
         setState(() => _loading = false);
@@ -164,7 +173,7 @@ class _AddressPickerPageState extends State<AddressPickerPage> {
     if (_userLocation != null) {
       _moveCamera(_userLocation!.latitude, _userLocation!.longitude);
       setState(() => _center = _userLocation);
-      _reverseGeocode(_center!);
+      _reverseGeocode(_center!, showError: false);
     }
   }
 
@@ -198,7 +207,7 @@ class _AddressPickerPageState extends State<AddressPickerPage> {
         ],
       ),
       body: _center == null
-          ? const Center(child: const SizedBox.shrink())
+          ? const Center(child: SizedBox.shrink())
           : Stack(
               children: [
                 // 地图
@@ -224,7 +233,7 @@ class _AddressPickerPageState extends State<AddressPickerPage> {
                     children: [
                       _MapButton(
                         icon: Icons.refresh,
-                        onTap: () => _reverseGeocode(_center!),
+                        onTap: () => _reverseGeocode(_center!, showError: true),
                       ),
                       const SizedBox(height: 8),
                       _MapButton(icon: Icons.my_location, onTap: _relocate),
@@ -277,7 +286,7 @@ class _AddressPickerPageState extends State<AddressPickerPage> {
         onMapCreated: (controller) => _googleMapController = controller,
         onCameraIdle: () {
           if (_center != null) {
-            _reverseGeocode(_center!);
+            _reverseGeocode(_center!, showError: false);
           }
         },
         onCameraMove: (position) {
@@ -299,7 +308,7 @@ class _AddressPickerPageState extends State<AddressPickerPage> {
         onMapCreated: (controller) => _appleMapController = controller,
         onCameraIdle: () {
           if (_center != null) {
-            _reverseGeocode(_center!);
+            _reverseGeocode(_center!, showError: false);
           }
         },
         onCameraMove: (position) {
@@ -408,7 +417,7 @@ class _AddressCard extends StatelessWidget {
                     ? const SizedBox(
                         width: 16,
                         height: 16,
-                        child: const SizedBox.shrink(),
+                        child: SizedBox.shrink(),
                       )
                     : Text(
                         placeName,
@@ -674,7 +683,16 @@ class _AddressSearchPageState extends State<_AddressSearchPage> {
         ),
       ),
       body: _loading
-          ? const Center(child: const SizedBox.shrink())
+          ? const Center(child: SizedBox.shrink())
+          : _results.isEmpty
+          ? Center(
+              child: Text(
+                _searchController.text.trim().isEmpty
+                    ? l10n.addressPickerEmpty
+                    : l10n.addressPickerSearchNotFound,
+                style: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
+              ),
+            )
           : ListView.separated(
               padding: const EdgeInsets.only(top: 12),
               itemCount: _results.length,

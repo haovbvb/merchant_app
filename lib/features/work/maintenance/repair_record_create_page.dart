@@ -30,6 +30,9 @@ class _RepairRecordCreatePageState
   @override
   void initState() {
     super.initState();
+    ref.read(repairRecordCreateProvider.notifier).resetForm();
+    _snController.clear();
+    _remarkController.clear();
     _snFocusNode.addListener(_handleSnFocusChange);
   }
 
@@ -125,10 +128,14 @@ class _RepairRecordCreatePageState
                             controller: _snController,
                             focusNode: _snFocusNode,
                             onChanged: (value) {
-                              notifier.updateSn(value);
-                              if (value.trim().isEmpty) {
+                              final oldSn = state.sn.trim();
+                              final newSn = value.trim();
+                              final changed = oldSn != newSn;
+                              if (changed) {
+                                notifier.resetForNewSnInput(value);
                                 _remarkController.clear();
-                                notifier.resetForm();
+                              } else {
+                                notifier.updateSn(value);
                               }
                             },
                             onScan: _scanSn,
@@ -141,7 +148,9 @@ class _RepairRecordCreatePageState
                               l10n: l10n,
                             )
                           else
-                            _EmptyInfoCard(text: l10n.repairRecordDeviceInfoEmpty),
+                            _EmptyInfoCard(
+                              text: l10n.repairRecordDeviceInfoEmpty,
+                            ),
                         ],
                       ),
                     ),
@@ -157,7 +166,12 @@ class _RepairRecordCreatePageState
                         label: l10n.repairRecordProjectLabel,
                         hint: l10n.repairRecordProjectHint,
                         value: state.selectedProject?.itemName,
-                        onTap: () => _showProjectSelector(context, state, notifier, l10n),
+                        onTap: () => _showProjectSelector(
+                          context,
+                          state,
+                          notifier,
+                          l10n,
+                        ),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -172,7 +186,8 @@ class _RepairRecordCreatePageState
                         label: l10n.repairRecordResultLabel,
                         hint: l10n.repairRecordResultHint,
                         value: state.selectedResult?.result,
-                        onTap: () => _showResultSelector(context, state, notifier, l10n),
+                        onTap: () =>
+                            _showResultSelector(context, state, notifier, l10n),
                       ),
                     ),
                     const SizedBox(height: 12),
@@ -233,8 +248,9 @@ class _RepairRecordCreatePageState
                       : null,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
-                    disabledBackgroundColor:
-                        AppColors.primaryColor.withOpacity(0.5),
+                    disabledBackgroundColor: AppColors.primaryColor.withOpacity(
+                      0.5,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
@@ -306,17 +322,16 @@ class _RepairRecordCreatePageState
                   ),
                   onChanged: onChanged,
                   onSubmitted: (_) {
-                    ref.read(repairRecordCreateProvider.notifier).fetchDeviceInfo();
+                    ref
+                        .read(repairRecordCreateProvider.notifier)
+                        .fetchDeviceInfo();
                   },
                 ),
               ),
               if (onScan != null)
                 GestureDetector(
                   onTap: onScan,
-                  child: AppIcons.scanIcon(
-                    size: 24,
-                    color: Colors.black54,
-                  ),
+                  child: AppIcons.scanIcon(size: 24, color: Colors.black54),
                 ),
             ],
           ),
@@ -328,13 +343,14 @@ class _RepairRecordCreatePageState
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => const QrScanPage(parseDeviceSn: true),
+        builder: (_) =>
+            const QrScanPage(allowManualInput: true, parseDeviceSn: true),
       ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
     final notifier = ref.read(repairRecordCreateProvider.notifier);
-    notifier.updateSn(result);
+    notifier.resetForNewSnInput(result);
     _remarkController.clear();
     notifier.updateRemark('');
     await notifier.fetchDeviceInfo();
@@ -350,16 +366,22 @@ class _RepairRecordCreatePageState
       showToast(l10n.deviceSearchEmpty);
       return;
     }
+    final items = state.deviceFix!.itemList;
+    final selectedIndex = state.selectedProject == null
+        ? -1
+        : items.indexWhere((e) => e.itemNo == state.selectedProject!.itemNo);
     showModalBottomSheet(
       context: context,
+      isDismissible: false,
+      enableDrag: false,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _SelectionSheet(
+      builder: (_) => _FixSelectionSheet(
         title: l10n.repairRecordSelectProject,
-        items: state.deviceFix!.itemList.map((e) => e.itemName).toList(),
+        items: items.map((e) => e.itemName).toList(),
+        selectedIndex: selectedIndex,
         onSelected: (index) {
-          notifier.selectProject(state.deviceFix!.itemList[index]);
-          Navigator.of(context).pop();
+          notifier.selectProject(items[index]);
         },
         cancelText: l10n.repairRecordCancel,
       ),
@@ -376,16 +398,22 @@ class _RepairRecordCreatePageState
       showToast(l10n.deviceSearchEmpty);
       return;
     }
+    final items = state.deviceFix!.resultList;
+    final selectedIndex = state.selectedResult == null
+        ? -1
+        : items.indexWhere((e) => e.code == state.selectedResult!.code);
     showModalBottomSheet(
       context: context,
+      isDismissible: false,
+      enableDrag: false,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _SelectionSheet(
+      builder: (_) => _FixSelectionSheet(
         title: l10n.repairRecordSelectResult,
-        items: state.deviceFix!.resultList.map((e) => e.result).toList(),
+        items: items.map((e) => e.result).toList(),
+        selectedIndex: selectedIndex,
         onSelected: (index) {
-          notifier.selectResult(state.deviceFix!.resultList[index]);
-          Navigator.of(context).pop();
+          notifier.selectResult(items[index]);
         },
         cancelText: l10n.repairRecordCancel,
       ),
@@ -428,10 +456,7 @@ class _EmptyInfoCard extends StatelessWidget {
         child: Center(
           child: Text(
             text,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
           ),
         ),
       ),
@@ -481,10 +506,7 @@ class _DropdownSelector extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Icon(
-                  Icons.keyboard_arrow_down,
-                  color: Colors.grey,
-                ),
+                const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
               ],
             ),
           ),
@@ -494,93 +516,165 @@ class _DropdownSelector extends StatelessWidget {
   }
 }
 
-class _SelectionSheet extends StatelessWidget {
-  const _SelectionSheet({
+class _FixSelectionSheet extends StatefulWidget {
+  const _FixSelectionSheet({
     required this.title,
     required this.items,
     required this.onSelected,
     required this.cancelText,
+    this.selectedIndex = -1,
   });
 
   final String title;
   final List<String> items;
   final ValueChanged<int> onSelected;
   final String cancelText;
+  final int selectedIndex;
+
+  @override
+  State<_FixSelectionSheet> createState() => _FixSelectionSheetState();
+}
+
+class _FixSelectionSheetState extends State<_FixSelectionSheet> {
+  late int _currentSelected;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentSelected = widget.selectedIndex;
+  }
+
+  void _onItemTap(int index) {
+    if (_currentSelected == index) return;
+    setState(() {
+      _currentSelected = index;
+    });
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
+      widget.onSelected(index);
+      Navigator.of(context).pop();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
+      height: 342,
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: Color(0xFFF3F4F5),
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          // Title
+          SizedBox(
+            height: 50,
+            child: Center(
               child: Text(
-                title,
+                widget.title,
                 style: const TextStyle(
                   fontSize: 18,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w500,
                   color: Colors.black,
                 ),
               ),
             ),
-            const Divider(height: 1),
-            ...items.asMap().entries.map((entry) {
-              return Column(
-                children: [
-                  ListTile(
-                    title: Text(
-                      entry.value,
-                      style: const TextStyle(fontSize: 16),
+          ),
+          // List area
+          Expanded(
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: widget.items.isEmpty
+                  ? const Center(
+                      child: Text(
+                        'No Data',
+                        style: TextStyle(fontSize: 14, color: Colors.grey),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: EdgeInsets.zero,
+                      itemCount: widget.items.length,
+                      itemBuilder: (context, index) {
+                        final isSelected = _currentSelected == index;
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            InkWell(
+                              onTap: () => _onItemTap(index),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 16,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        widget.items[index],
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          color: Color(0xE60C0C0D),
+                                        ),
+                                      ),
+                                    ),
+                                    Image.asset(
+                                      isSelected
+                                          ? 'assets/android/mipmap-xxhdpi/icon_green_checked.png'
+                                          : 'assets/android/mipmap-xxhdpi/icon_grey_unchecked.png',
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            if (index < widget.items.length - 1)
+                              const Divider(
+                                height: 0.5,
+                                thickness: 0.5,
+                                color: Color(0xFFE6E6E6),
+                              ),
+                          ],
+                        );
+                      },
                     ),
-                    onTap: () => onSelected(entry.key),
-                  ),
-                  if (entry.key < items.length - 1)
-                    const Divider(height: 1, indent: 16, endIndent: 16),
-                ],
-              );
-            }),
-            const SizedBox(height: 8),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
+            ),
+          ),
+          // Cancel button
+          Padding(
+            padding: const EdgeInsets.fromLTRB(10, 0, 10, 16),
+            child: GestureDetector(
+              onTap: () => Navigator.of(context).pop(),
+              child: Container(
                 width: double.infinity,
-                height: 50,
-                child: OutlinedButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.black),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                  ),
-                  child: Text(
-                    cancelText,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.black,
-                    ),
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  widget.cancelText,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xE6000000),
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _DeviceInfoCard extends StatelessWidget {
-  const _DeviceInfoCard({
-    required this.deviceFix,
-    required this.l10n,
-  });
+  const _DeviceInfoCard({required this.deviceFix, required this.l10n});
 
   final DeviceFix deviceFix;
   final AppLocalizations l10n;
@@ -608,7 +702,7 @@ class _BatteryInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isBound = battery?.cardNum != null && battery!.cardNum!.isNotEmpty;
-    
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Container(
@@ -631,7 +725,11 @@ class _BatteryInfoCard extends StatelessWidget {
                     ),
                     child: battery?.img != null && battery!.img!.isNotEmpty
                         ? Image.network(battery!.img!, fit: BoxFit.contain)
-                        : const Icon(Icons.battery_full, size: 32, color: Colors.grey),
+                        : const Icon(
+                            Icons.battery_full,
+                            size: 32,
+                            color: Colors.grey,
+                          ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -714,7 +812,7 @@ class _VehicleInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isBound = vehicle?.cardNum.isNotEmpty == true;
-    
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Container(
@@ -737,7 +835,11 @@ class _VehicleInfoCard extends StatelessWidget {
                     ),
                     child: vehicle?.img != null && vehicle!.img!.isNotEmpty
                         ? Image.network(vehicle!.img!, fit: BoxFit.contain)
-                        : const Icon(Icons.electric_moped, size: 32, color: Colors.grey),
+                        : const Icon(
+                            Icons.electric_moped,
+                            size: 32,
+                            color: Colors.grey,
+                          ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -826,9 +928,7 @@ class _StationInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isOnline = (station?.onlineFlag ?? 0) != 0;
     final storeNum = station?.storeNum?.trim() ?? '';
-    final specText = storeNum.isEmpty
-        ? '-'
-        : '$storeNum ${l10n.cabinetOfflinePortLabel}';
+    final specText = storeNum.isEmpty ? '-' : '$storeNum plots';
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -894,9 +994,34 @@ class _StationInfoCard extends StatelessWidget {
               margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
               child: Column(
                 children: [
-                  _InfoRow(
-                    label: l10n.cabinetOfflineAddressLabel,
-                    value: station?.address ?? '-',
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Image.asset(
+                          'assets/android/mipmap-xxhdpi/icon_location_item.webp',
+                          width: 14,
+                          height: 14,
+                          fit: BoxFit.contain,
+                        ),
+                        const SizedBox(width: 5),
+                        Expanded(
+                          child: Text(
+                            (station?.address ?? '-').trim().isEmpty
+                                ? '-'
+                                : (station?.address ?? '-'),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 8),
                   _InfoRow(
@@ -1008,10 +1133,7 @@ class _StatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 12, color: Colors.grey),
-        ),
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
         const SizedBox(height: 4),
         Text(
           value,
@@ -1037,10 +1159,7 @@ class _InfoRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
-        ),
+        Text(label, style: const TextStyle(fontSize: 14, color: Colors.grey)),
         Text(
           value,
           style: const TextStyle(

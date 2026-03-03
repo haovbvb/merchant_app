@@ -43,15 +43,6 @@ class CabinetOperatePage extends StatelessWidget {
             ),
           ),
           _OperateItem(
-            iconPath: 'assets/android/mipmap-xxhdpi/icon_station_open_door.webp',
-            title: l10n.cabinetOperateOpenDoor,
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => const DeviceSearchPage(deviceType: 3),
-              ),
-            ),
-          ),
-          _OperateItem(
             iconPath: 'assets/android/mipmap-xxhdpi/icon_offline_op.png',
             title: l10n.cabinetOperateOfflineOM,
             onTap: () => _scanAndOpenOfflineDetail(context),

@@ -24,6 +24,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirm => 'Confirm';
 
   @override
+  String get imageSourceCamera => 'Take Photo';
+
+  @override
+  String get imageSourceGallery => 'Choose From Gallery';
+
+  @override
   String get logout => 'Logout';
 
   @override
@@ -304,6 +310,12 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get commonPlatform => 'Platform';
+
+  @override
+  String get commonAgent => 'Agent';
+
+  @override
+  String get commonShop => 'Shop';
 
   @override
   String get aboutVersionLabel => 'Version';
@@ -861,7 +873,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repairRecordDevicePlateNumber => 'Plate Number';
 
   @override
-  String get repairRecordDeviceEntryTime => 'Entry Time';
+  String get repairRecordDeviceEntryTime => 'Creation Time';
 
   @override
   String get repairRecordBound => 'Bound';
@@ -1221,6 +1233,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inventoryCountTitle => 'Inventory Count';
 
   @override
+  String get inventoryStockLabel => 'Stock';
+
+  @override
+  String get inventoryCountLabel => 'Inventory';
+
+  @override
   String get inventorySearchHint => 'Enter inventory number to search';
 
   @override
@@ -1485,6 +1503,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanManualInput => 'Manual input';
 
   @override
+  String get scanManualVehicleVin => 'Manually enter vehicle VIN';
+
+  @override
   String get scanInputHint => 'Enter code';
 
   @override
@@ -1575,10 +1596,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qrcodeResolveFailed => 'Resolve failed';
 
   @override
-  String get deviceSearchHint => 'Enter device SN or keyword';
+  String get deviceSearchHint => 'Enter device SN or scan QR code';
 
   @override
   String get deviceSearchStationHint => 'Enter station SN or scan QR code';
+
+  @override
+  String get deviceSearchInvalidStationSn => 'Invalid station SN';
 
   @override
   String get deviceSearchEmpty => 'No results';
@@ -3225,7 +3249,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetPutawayAddImage => 'Add Image';
 
   @override
-  String get cabinetPutawayImageLimit => 'Up to 4 images';
+  String get cabinetPutawayImageLimit => 'Up to 5 images';
+
+  @override
+  String get cabinetPutawayConfirmTitle => 'Confirm Putaway?';
+
+  @override
+  String get cabinetPutawayConfirmMessage => 'Please confirm the putaway information. The station will be put away after submission.';
+
+  @override
+  String get cabinetPutawayNameRequired => 'Please enter station name';
+
+  @override
+  String get cabinetPutawaySnRequired => 'Please enter station SN';
+
+  @override
+  String get cabinetPutawayAddressRequired => 'Please enter station address';
+
+  @override
+  String get cabinetPutawayCoordinateRequired => 'Please select coordinates';
+
+  @override
+  String get cabinetPutawaySwapTimeRequired => 'Please enter battery exchange indicator';
+
+  @override
+  String get cabinetPutawayImageRequired => 'Please upload at least 1 image';
 
   @override
   String get cabinetPutawaySubmit => 'Submit';
@@ -3725,6 +3773,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addressPickerEmpty => 'Move map to pick a location';
 
   @override
+  String get addressPickerSearchNotFound => 'Address not found';
+
+  @override
+  String get addressPickerFetchFailed => 'Failed to fetch address';
+
+  @override
   String get addressPickerCoordinates => 'Coordinates';
 
   @override
@@ -3857,7 +3911,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceDetailTabPortDetail => 'Port Detail';
 
   @override
-  String get deviceDetailTabAddress => 'Address';
+  String get deviceDetailTabAddress => 'Location';
 
   @override
   String get deviceDetailTabRepairRecords => 'Repair Records';

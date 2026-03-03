@@ -142,25 +142,39 @@ class TransportListNotifier extends Notifier<TransportListState> {
 
 class TransportDetailState {
   final bool loading;
+  final bool loadingMore;
+  final int page;
+  final int total;
   final String transferNo;
   final DeviceTransportDetail? detail;
   final List<DeviceTransportDetailPageData> items;
 
   const TransportDetailState({
     this.loading = false,
+    this.loadingMore = false,
+    this.page = 1,
+    this.total = 0,
     this.transferNo = '',
     this.detail,
     this.items = const [],
   });
 
+  bool get hasMore => items.length < total;
+
   TransportDetailState copyWith({
     bool? loading,
+    bool? loadingMore,
+    int? page,
+    int? total,
     String? transferNo,
     DeviceTransportDetail? detail,
     List<DeviceTransportDetailPageData>? items,
   }) {
     return TransportDetailState(
       loading: loading ?? this.loading,
+      loadingMore: loadingMore ?? this.loadingMore,
+      page: page ?? this.page,
+      total: total ?? this.total,
       transferNo: transferNo ?? this.transferNo,
       detail: detail ?? this.detail,
       items: items ?? this.items,
@@ -180,11 +194,21 @@ class TransportDetailNotifier extends Notifier<TransportDetailState> {
   TransportDetailState build() => const TransportDetailState();
 
   Future<void> loadDetail(String transferNo) async {
-    state = state.copyWith(loading: true, transferNo: transferNo);
+    state = state.copyWith(
+      loading: true,
+      loadingMore: false,
+      page: 1,
+      total: 0,
+      transferNo: transferNo,
+    );
 
     final response = await _api.get<DeviceTransportDetail>(
       ApiPath.transportQueryIssueDetail,
-      queryParameters: {'transferNo': transferNo},
+      queryParameters: {
+        'transferNo': transferNo,
+        'pageNum': 1,
+        'pageSize': _pageSize,
+      },
       parser: (json) => DeviceTransportDetail.fromJson(
         Map<String, dynamic>.from(json as Map),
       ),
@@ -195,6 +219,43 @@ class TransportDetailNotifier extends Notifier<TransportDetailState> {
       loading: false,
       detail: detail,
       items: detail?.detailPage?.list ?? const [],
+      total: detail?.detailPage?.total ?? 0,
+    );
+  }
+
+  Future<void> loadMoreDetail() async {
+    if (state.loading || state.loadingMore || !state.hasMore) {
+      return;
+    }
+    final transferNo = state.transferNo;
+    if (transferNo.isEmpty) {
+      return;
+    }
+
+    final nextPage = state.page + 1;
+    state = state.copyWith(loadingMore: true);
+
+    final response = await _api.get<DeviceTransportDetail>(
+      ApiPath.transportQueryIssueDetail,
+      queryParameters: {
+        'transferNo': transferNo,
+        'pageNum': nextPage,
+        'pageSize': _pageSize,
+      },
+      parser: (json) => DeviceTransportDetail.fromJson(
+        Map<String, dynamic>.from(json as Map),
+      ),
+    );
+
+    final detail = response.result;
+    final pageList = detail?.detailPage?.list ?? const <DeviceTransportDetailPageData>[];
+
+    state = state.copyWith(
+      loadingMore: false,
+      page: nextPage,
+      detail: detail ?? state.detail,
+      items: [...state.items, ...pageList],
+      total: detail?.detailPage?.total ?? state.total,
     );
   }
 
@@ -222,7 +283,7 @@ class TransportDetailNotifier extends Notifier<TransportDetailState> {
     if (state.transferNo.isEmpty) return;
     await _api.post<Object>(
       ApiPath.transportEditTrackingNumber,
-      data: {'trackingNo': state.transferNo, 'trackingNumber': trackingNumber},
+      data: {'transferNo': state.transferNo, 'trackingNumber': trackingNumber},
       parser: (json) => json ?? Object(),
     );
     await loadDetail(state.transferNo);

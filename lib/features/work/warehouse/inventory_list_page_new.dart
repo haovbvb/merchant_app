@@ -78,9 +78,18 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
             color: Colors.white,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
             child: InkWell(
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const InventorySearchPage()),
-              ),
+              onTap: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const InventorySearchPage()),
+                );
+                if (!mounted) return;
+                await ref
+                    .read(inventoryListProvider.notifier)
+                    .refresh(
+                      status: _mapStatus(_selectedTabIndex),
+                      resetStatus: _selectedTabIndex == 0,
+                    );
+              },
               borderRadius: BorderRadius.circular(8),
               child: Container(
                 height: 36,
@@ -134,7 +143,10 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
               enablePullDown: true,
               enablePullUp: state.hasMore,
               onRefresh: () async {
-                await notifier.refresh(status: _mapStatus(_selectedTabIndex));
+                await notifier.refresh(
+                  status: _mapStatus(_selectedTabIndex),
+                  resetStatus: _selectedTabIndex == 0,
+                );
                 _refreshController.refreshCompleted();
               },
               onLoading: () async {
@@ -164,7 +176,10 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
         });
         ref
             .read(inventoryListProvider.notifier)
-            .refresh(status: _mapStatus(index));
+            .refresh(
+              status: _mapStatus(index),
+              resetStatus: index == 0,
+            );
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -196,7 +211,12 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.home_work_outlined, size: 80, color: Colors.grey.shade300),
+          Image.asset(
+            'assets/android/mipmap-xxhdpi/icon_empty_inventory.png',
+            width: 80,
+            height: 80,
+            fit: BoxFit.contain,
+          ),
           const SizedBox(height: 16),
           Text(
             l10n.inventoryEmptyHint,
@@ -216,24 +236,34 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
         final item = state.items[index];
         return _InventoryCard(
           inventoryNo: item.inventoryNo ?? '-',
-          warehouseName: item.warehouseName ?? '-',
+          warehouseName: _warehouseNameForDisplay(l10n, item.warehouseName),
           deviceType: _deviceTypeLabel(l10n, item.deviceType),
           stock: item.stock ?? 0,
           inventory: item.inventory ?? 0,
           status: item.status ?? 0,
           statusLabel: _inventoryStatusLabel(l10n, item.status),
+          deviceLabel: _deviceLabelForDisplay(l10n),
+          stockLabel: l10n.inventoryStockLabel,
+          inventoryLabel: l10n.inventoryCountLabel,
           onTap: () => _goToDetail(item.inventoryNo ?? ''),
         );
       },
     );
   }
 
-  void _goToDetail(String inventoryNo) {
-    Navigator.of(context).push(
+  Future<void> _goToDetail(String inventoryNo) async {
+    await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => InventoryDetailPageNew(inventoryNo: inventoryNo),
       ),
     );
+    if (!mounted) return;
+    await ref
+        .read(inventoryListProvider.notifier)
+        .refresh(
+          status: _mapStatus(_selectedTabIndex),
+          resetStatus: _selectedTabIndex == 0,
+        );
   }
 
   Future<void> _showCreateSheet(BuildContext context) async {
@@ -248,7 +278,10 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
     );
     ref
         .read(inventoryListProvider.notifier)
-        .refresh(status: _mapStatus(_selectedTabIndex));
+        .refresh(
+          status: _mapStatus(_selectedTabIndex),
+          resetStatus: _selectedTabIndex == 0,
+        );
   }
 
   int? _mapStatus(int index) {
@@ -291,6 +324,20 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
         return '-';
     }
   }
+
+  String _warehouseNameForDisplay(AppLocalizations l10n, String? warehouseName) {
+    final name = (warehouseName ?? '').trim();
+    if (name.isEmpty) return '-';
+    if (name.toLowerCase().contains('platform')) {
+      return l10n.commonPlatform;
+    }
+    return name;
+  }
+
+  String _deviceLabelForDisplay(AppLocalizations l10n) {
+    return l10n.warehouseInventoryTypeLabel;
+  }
+
 }
 
 class _InventoryCard extends StatelessWidget {
@@ -298,6 +345,9 @@ class _InventoryCard extends StatelessWidget {
     required this.inventoryNo,
     required this.warehouseName,
     required this.deviceType,
+    required this.deviceLabel,
+    required this.stockLabel,
+    required this.inventoryLabel,
     required this.stock,
     required this.inventory,
     required this.status,
@@ -308,6 +358,9 @@ class _InventoryCard extends StatelessWidget {
   final String inventoryNo;
   final String warehouseName;
   final String deviceType;
+  final String deviceLabel;
+  final String stockLabel;
+  final String inventoryLabel;
   final int stock;
   final int inventory;
   final int status;
@@ -360,10 +413,11 @@ class _InventoryCard extends StatelessWidget {
             // 仓库信息
             Row(
               children: [
-                const Icon(
-                  Icons.home_work_outlined,
-                  size: 18,
-                  color: Color(0xFF666666),
+                Image.asset(
+                  'assets/android/mipmap-xxhdpi/icon_issue_warehouse.webp',
+                  width: 18,
+                  height: 18,
+                  fit: BoxFit.cover,
                 ),
                 const SizedBox(width: 8),
                 Text(
@@ -386,7 +440,7 @@ class _InventoryCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Device',
+                        deviceLabel,
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade500,
@@ -409,7 +463,7 @@ class _InventoryCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Stock',
+                        stockLabel,
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade500,
@@ -432,7 +486,7 @@ class _InventoryCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Inventory',
+                        inventoryLabel,
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.grey.shade500,

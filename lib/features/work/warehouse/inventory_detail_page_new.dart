@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/widgets/confirm_dialog.dart';
-import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
+import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -35,14 +36,24 @@ class _InventoryDetailPageNewState
   final RefreshController _refreshController = RefreshController(
     initialRefresh: false,
   );
+  late final String _currentTimeText;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    _currentTimeText = DateFormatUtils.format(
+      DateTime.now(),
+      pattern: 'yyyy-MM-dd HH:mm',
+      fallback: '',
+    );
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final notifier = ref.read(inventoryDetailProvider.notifier);
+      await notifier.loadMyWarehouseInfo();
       if (widget.createMode && widget.deviceType != null) {
-        notifier.startInventory(widget.deviceType!);
+        final code = await notifier.startInventory(widget.deviceType!);
+        if (mounted && code == 5030) {
+          Navigator.of(context).pop();
+        }
       } else if ((widget.inventoryNo ?? '').isNotEmpty) {
         notifier.loadDetail(widget.inventoryNo ?? '');
       }
@@ -88,6 +99,7 @@ class _InventoryDetailPageNewState
         enablePullDown: true,
         enablePullUp: state.hasMore,
         onRefresh: () async {
+          _refreshController.resetNoData();
           if (state.inventoryNo.isNotEmpty) {
             await notifier.loadDetail(state.inventoryNo);
           }
@@ -101,25 +113,22 @@ class _InventoryDetailPageNewState
             _refreshController.loadNoData();
           }
         },
-        child: SingleChildScrollView(
+        child: ListView(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 头部信息卡片
-              _buildHeaderCard(l10n, detail, state),
+          children: [
+            // 头部信息卡片
+            _buildHeaderCard(l10n, detail, state),
 
-              const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-              // Battery 区域
-              _buildBatterySection(l10n, detail, state, canOperate),
+            // Battery 区域
+            _buildBatterySection(l10n, detail, state, canOperate),
 
-              const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-              // 设备列表
-              _buildDeviceList(l10n, state),
-            ],
-          ),
+            // 设备列表
+            _buildDeviceList(l10n, state),
+          ],
         ),
       ),
       bottomNavigationBar: canOperate
@@ -133,6 +142,9 @@ class _InventoryDetailPageNewState
     dynamic detail,
     InventoryDetailState state,
   ) {
+    final warehouseName = _warehouseName(l10n, detail, state);
+    final warehouseSubTitle = _warehouseSubTitle(l10n, detail, state);
+
     // 详情模式显示绿色头部
     if (!widget.createMode && detail != null) {
       return Container(
@@ -157,7 +169,7 @@ class _InventoryDetailPageNewState
                     ),
                   ),
                   Text(
-                    detail.createTime ?? '',
+                    _inventoryDateText(detail),
                     style: const TextStyle(fontSize: 14, color: Colors.white70),
                   ),
                 ],
@@ -174,17 +186,13 @@ class _InventoryDetailPageNewState
               ),
               child: Row(
                 children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE3F2FD),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: const Icon(
-                      Icons.home_work,
-                      color: Color(0xFF2196F3),
-                      size: 28,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      'assets/android/mipmap-xxhdpi/icon_issue_warehouse.webp',
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -193,7 +201,7 @@ class _InventoryDetailPageNewState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          detail.warehouseName ?? '-',
+                          warehouseName,
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -202,7 +210,7 @@ class _InventoryDetailPageNewState
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${detail.warehouseAddress ?? ''} | ${_warehouseTypeLabel(detail.warehouseType)}',
+                          warehouseSubTitle,
                           style: const TextStyle(
                             fontSize: 13,
                             color: Color(0xFF999999),
@@ -228,17 +236,13 @@ class _InventoryDetailPageNewState
       ),
       child: Row(
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: const Color(0xFFE3F2FD),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.home_work,
-              color: Color(0xFF2196F3),
-              size: 28,
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              'assets/android/mipmap-xxhdpi/icon_issue_warehouse.webp',
+              width: 48,
+              height: 48,
+              fit: BoxFit.cover,
             ),
           ),
           const SizedBox(width: 12),
@@ -247,29 +251,67 @@ class _InventoryDetailPageNewState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  detail?.warehouseName ?? l10n.inventorySelectWarehouse,
+                  warehouseName,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
                     color: AppColors.black06Text,
                   ),
                 ),
-                if (detail?.warehouseAddress != null) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    '${detail.warehouseAddress} | ${_warehouseTypeLabel(detail.warehouseType)}',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF999999),
-                    ),
+                const SizedBox(height: 4),
+                Text(
+                  warehouseSubTitle,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF999999),
                   ),
-                ],
+                ),
               ],
             ),
           ),
         ],
       ),
     );
+  }
+
+  String _inventoryDateText(dynamic detail) {
+    if (widget.createMode) return _currentTimeText;
+    final formatted = DateFormatUtils.formatString(
+      detail?.createTime?.toString(),
+      pattern: 'yyyy-MM-dd HH:mm',
+      fallback: '',
+    );
+    return formatted.isNotEmpty ? formatted : _currentTimeText;
+  }
+
+  String _warehouseName(
+    AppLocalizations l10n,
+    dynamic detail,
+    InventoryDetailState state,
+  ) {
+    final warehouse = state.warehouse;
+    final name = warehouse?.warehouseName ?? detail?.warehouseName ?? '';
+    if (name.trim().isEmpty) {
+      return l10n.inventorySelectWarehouse;
+    }
+    if (name.toLowerCase().contains('platform')) {
+      return l10n.commonPlatform;
+    }
+    return name;
+  }
+
+  String _warehouseSubTitle(
+    AppLocalizations l10n,
+    dynamic detail,
+    InventoryDetailState state,
+  ) {
+    final city = (state.warehouse?.cityName ?? '').trim();
+    final type = _warehouseTypeLabel(
+      l10n,
+      detail?.warehouseType ?? state.warehouse?.warehouseType,
+    );
+    if (city.isEmpty) return type;
+    return '$city | $type';
   }
 
   Widget _buildBatterySection(
@@ -315,7 +357,7 @@ class _InventoryDetailPageNewState
                   child: Column(
                     children: [
                       Text(
-                        'Stock',
+                        l10n.inventoryStockLabel,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey.shade500,
@@ -338,7 +380,7 @@ class _InventoryDetailPageNewState
                   child: Column(
                     children: [
                       Text(
-                        'Inventory',
+                        l10n.inventoryCountLabel,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey.shade500,
@@ -520,37 +562,27 @@ class _InventoryDetailPageNewState
   Future<void> _scanDevice(BuildContext context) async {
     final state = ref.read(inventoryDetailProvider);
     final notifier = ref.read(inventoryDetailProvider.notifier);
-    final initialItems = state.items.map((e) => e.deviceSn).toList();
 
-    final result = await Navigator.of(context).push<List<String>>(
+    final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => QrBatchScanPage(
-          fixedDeviceType: state.detail?.deviceType ?? state.deviceType,
-          initialItems: initialItems,
-          title: context.l10n.inventoryScanToReceive,
+        builder: (_) => QrScanPage(
+          allowManualInput: true,
+          parseDeviceSn: true,
+          deviceType: state.detail?.deviceType ?? state.deviceType,
         ),
       ),
     );
 
-    if (result == null || result.isEmpty) return;
+    if (result == null || result.trim().isEmpty) return;
 
-    var success = 0;
-    var repeat = 0;
-    var failed = 0;
-    for (final sn in result) {
-      if (sn.trim().isEmpty) continue;
-      final code = await notifier.scanInventory(sn);
-      if (code == 1) {
-        success++;
-      } else if (code == 2) {
-        repeat++;
-      } else {
-        failed++;
-      }
-    }
+    final code = await notifier.scanInventory(result);
     if (!mounted) return;
 
-    _showBatchScanResult(context, success: success, repeat: repeat, failed: failed);
+    _showBatchScanResult(context,
+      success: code == 1 ? 1 : 0,
+      repeat: code == 2 ? 1 : 0,
+      failed: (code != 1 && code != 2) ? 1 : 0,
+    );
   }
 
   void _showBatchScanResult(
@@ -615,18 +647,20 @@ class _InventoryDetailPageNewState
       case 3:
         return l10n.warehouseDeviceTypeStation;
       default:
-        return 'Battery';
+        return l10n.warehouseDeviceTypeBattery;
     }
   }
 
-  String _warehouseTypeLabel(int? type) {
+  String _warehouseTypeLabel(AppLocalizations l10n, int? type) {
     switch (type) {
       case 1:
-        return 'Stores';
+        return l10n.commonPlatform;
       case 2:
-        return 'Warehouse';
+        return l10n.commonAgent;
+      case 3:
+        return l10n.commonShop;
       default:
-        return 'Stores';
+        return l10n.commonPlatform;
     }
   }
 }

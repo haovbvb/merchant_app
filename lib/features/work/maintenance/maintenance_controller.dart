@@ -199,7 +199,6 @@ class MaintenanceBookNotifier extends Notifier<MaintenanceBookState> {
     final ext = extIndex == -1 ? 'jpg' : last.substring(extIndex + 1);
     return '${DateTime.now().millisecondsSinceEpoch}.$ext';
   }
-
 }
 
 class RepairRecordState {
@@ -275,7 +274,7 @@ class RepairRecordCreateState {
     bool? submitting,
     String? sn,
     String? remark,
-    DeviceFix? deviceFix,
+    Object? deviceFix = _unset,
     Object? selectedProject = _unset,
     Object? selectedResult = _unset,
   }) {
@@ -284,7 +283,7 @@ class RepairRecordCreateState {
       submitting: submitting ?? this.submitting,
       sn: sn ?? this.sn,
       remark: remark ?? this.remark,
-      deviceFix: deviceFix ?? this.deviceFix,
+      deviceFix: deviceFix == _unset ? this.deviceFix : deviceFix as DeviceFix?,
       selectedProject: selectedProject == _unset
           ? this.selectedProject
           : selectedProject as DeviceFixProject?,
@@ -364,6 +363,16 @@ class RepairRecordCreateNotifier extends Notifier<RepairRecordCreateState> {
 
   void updateSn(String value) {
     state = state.copyWith(sn: value);
+  }
+
+  void resetForNewSnInput(String value) {
+    state = state.copyWith(
+      sn: value,
+      deviceFix: null,
+      selectedProject: null,
+      selectedResult: null,
+      remark: '',
+    );
   }
 
   void updateRemark(String value) {

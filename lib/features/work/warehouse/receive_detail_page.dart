@@ -5,8 +5,8 @@ import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/data/models/device_transport_resp.dart';
+import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/warehouse/receive_controller.dart';
-import 'package:merchant_app/features/work/warehouse/receive_scan_page.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
 class ReceiveDetailPage extends ConsumerStatefulWidget {
@@ -37,6 +37,8 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
     final l10n = context.l10n;
     final state = ref.watch(receiveDetailProvider);
     final detail = state.detail;
+    final notifier = ref.read(receiveDetailProvider.notifier);
+    final totalCount = state.total > 0 ? state.total : state.items.length;
 
     // Android 接收详情页始终展示扫码入口；具体操作按钮仍按 item 状态控制
     const canReceive = true;
@@ -59,7 +61,15 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
         ),
         body: state.loading
             ? const Center(child: SizedBox.shrink())
-            : SingleChildScrollView(
+            : NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (notification.metrics.pixels >=
+                      notification.metrics.maxScrollExtent - 120) {
+                    notifier.loadMoreDetail();
+                  }
+                  return false;
+                },
+                child: SingleChildScrollView(
                 child: Column(
                   children: [
                     // 订单头部卡片
@@ -98,7 +108,7 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
                           Text(
                             (detail?.trackingNumber.isNotEmpty ?? false)
                                 ? detail!.trackingNumber
-                                : '- -',
+                                : '',
                             style: const TextStyle(
                               fontSize: 14,
                               color: Color(0xFF1A1A1A),
@@ -111,6 +121,8 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
                     _DeviceListSection(
                       detail: detail,
                       items: state.items,
+                      totalCount: totalCount,
+                      loadingMore: state.loadingMore,
                       l10n: l10n,
                       canReceive: canReceive,
                       onScanToReceive: () => _navigateToScan(context),
@@ -121,19 +133,24 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
                   ],
                 ),
               ),
+              ),
       ),
     );
   }
 
   Future<void> _navigateToScan(BuildContext context) async {
-    final result = await Navigator.of(context).push<bool>(
+    final detail = ref.read(receiveDetailProvider).detail;
+    final sn = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => ReceiveScanPage(transferNo: widget.transferNo),
+        builder: (_) => QrScanPage(
+          allowManualInput: true,
+          parseDeviceSn: true,
+          deviceType: detail?.deviceType,
+        ),
       ),
     );
-    if (result == true && mounted) {
-      _hasChanged = true;
-      ref.read(receiveDetailProvider.notifier).loadDetail(widget.transferNo);
+    if (sn != null && sn.isNotEmpty && mounted) {
+      await _handleReceive(context, sn);
     }
   }
 
@@ -149,6 +166,15 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
           backgroundColor: result.success ? AppColors.primaryColor : Colors.red,
         ),
       );
+
+      if (result.success) {
+        final listState = ref.read(receiveListProvider);
+        ref.read(receiveListProvider.notifier).refresh(
+              status: listState.status,
+              resetStatus: listState.status == null,
+              keyword: listState.keyword,
+            );
+      }
     }
   }
 
@@ -339,6 +365,8 @@ class _DeviceListSection extends StatelessWidget {
   const _DeviceListSection({
     required this.detail,
     required this.items,
+    required this.totalCount,
+    required this.loadingMore,
     required this.l10n,
     required this.canReceive,
     required this.onScanToReceive,
@@ -348,6 +376,8 @@ class _DeviceListSection extends StatelessWidget {
 
   final DeviceTransportDetail? detail;
   final List<DeviceTransportDetailPageData> items;
+  final int totalCount;
+  final bool loadingMore;
   final AppLocalizations l10n;
   final bool canReceive;
   final VoidCallback onScanToReceive;
@@ -382,7 +412,7 @@ class _DeviceListSection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
             child: Text(
-              '${_getDeviceTypeName()} (${detail?.detailPage?.total ?? 0})',
+              '${_getDeviceTypeName()} ($totalCount)',
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
@@ -445,6 +475,17 @@ class _DeviceListSection extends StatelessWidget {
               onWithdraw: onWithdraw,
             ),
           ),
+          if (loadingMore)
+            const Padding(
+              padding: EdgeInsets.only(top: 8),
+              child: Center(
+                child: SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            ),
           const SizedBox(height: 8),
         ],
       ),
@@ -571,33 +612,39 @@ class _DeviceItem extends StatelessWidget {
           // 操作按钮（仅在途状态显示）
           if (canOperate && isInTransit)
             Padding(
-              padding: const EdgeInsets.only(top: 12),
+              padding: const EdgeInsets.only(top: 14),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Expanded(
+                  SizedBox(
+                    height: 36,
                     child: OutlinedButton(
                       onPressed: () => onWithdraw(item.deviceSn),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF666666),
-                        side: const BorderSide(color: Color(0xFFE5E5E5)),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        foregroundColor: const Color(0xE6000000),
+                        side: const BorderSide(color: Color(0x66000000)),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(8),
                         ),
+                        textStyle: const TextStyle(fontSize: 14),
                       ),
                       child: Text(l10n.deviceReceiveWithdraw),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    height: 36,
                     child: OutlinedButton(
                       onPressed: () => onReceive(item.deviceSn),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF1A1A1A),
-                        side: const BorderSide(color: Color(0xFFE5E5E5)),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        foregroundColor: const Color(0xE6000000),
+                        side: const BorderSide(color: Color(0x66000000)),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(8),
                         ),
+                        textStyle: const TextStyle(fontSize: 14),
                       ),
                       child: Text(l10n.deviceReceiveAction),
                     ),

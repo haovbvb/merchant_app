@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/app/ui.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/core/widgets/confirm_dialog.dart';
+import 'package:merchant_app/features/debug/network/network_debug_store.dart';
 import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/login/providers/auth_controller.dart';
 import 'package:merchant_app/features/me/message_controller.dart';
@@ -39,6 +42,8 @@ class ProfileTab extends ConsumerStatefulWidget {
 
 class _ProfileTabState extends ConsumerState<ProfileTab> {
   final ImagePicker _imagePicker = ImagePicker();
+  Timer? _debugPressTimer;
+  bool _debugPressActivated = false;
 
   @override
   void initState() {
@@ -47,6 +52,12 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
       ref.read(messageListProvider.notifier).refresh();
       ref.read(profileProvider.notifier).refresh();
     });
+  }
+
+  @override
+  void dispose() {
+    _debugPressTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -132,7 +143,26 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: _ProfileCard(actions: allActions),
               ),
-              const SizedBox(height: 32),
+              Listener(
+                behavior: HitTestBehavior.opaque,
+                onPointerDown: (_) {
+                  _debugPressActivated = false;
+                  _debugPressTimer?.cancel();
+                  _debugPressTimer = Timer(const Duration(seconds: 7), () {
+                    if (_debugPressActivated) return;
+                    _debugPressActivated = true;
+                    NetworkDebugStore.instance.showFloatingEntry();
+                    showToast('已开启悬浮调试入口');
+                  });
+                },
+                onPointerUp: (_) {
+                  _debugPressTimer?.cancel();
+                },
+                onPointerCancel: (_) {
+                  _debugPressTimer?.cancel();
+                },
+                child: const SizedBox(height: 120, width: double.infinity),
+              ),
             ],
           ),
         ),

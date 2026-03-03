@@ -331,13 +331,13 @@ class SellBindNotifier extends Notifier<SellBindState> {
   }
 
   /// 查询门店支付配置 - 对应 Android 的 getShopPaymentMethod
-  Future<void> loadShopPayConfig(String shopId) async {
-    if (shopId.isEmpty) return;
+  Future<void> loadShopPayConfig(String shopNo) async {
+    if (shopNo.isEmpty) return;
     state = state.copyWith(loadingShopPayment: true);
     try {
       final response = await _api.get<ShopPaymentMethod>(
         ApiPath.queryShopPayConfig,
-        queryParameters: {'shopId': shopId},
+        queryParameters: {'shopNo': shopNo},
         parser: (json) =>
             ShopPaymentMethod.fromJson(Map<String, dynamic>.from(json as Map)),
       );

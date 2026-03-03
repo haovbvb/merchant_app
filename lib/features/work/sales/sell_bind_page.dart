@@ -64,8 +64,13 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
       return _SuccessPage(
         documentNo: state.documentNo!,
         paySource: state.paySource,
+        onBack: () {
+          notifier.reset();
+          _snController.clear();
+        },
         onReturn: () {
           notifier.reset();
+          _snController.clear();
           Navigator.of(context).pop();
         },
       );
@@ -173,10 +178,16 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
                 children: [
                   Expanded(
                     child: Text(
-                      l10n.sellBindPackageHint,
-                      style: const TextStyle(
+                      state.selectedPlan?.infoName?.trim().isNotEmpty == true
+                          ? state.selectedPlan!.infoName!
+                          : l10n.sellBindPackageHint,
+                      style: TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF999999),
+                        color:
+                            state.selectedPlan?.infoName?.trim().isNotEmpty ==
+                                true
+                            ? AppColors.black06Text
+                            : const Color(0xFF999999),
                       ),
                     ),
                   ),
@@ -342,7 +353,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
 
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
+      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: true, parseDeviceSn: true)),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
@@ -393,10 +404,12 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
     if (paymentResult == null || !mounted || !pageContext.mounted) return;
 
     // Step 2: Select Applicant
+    final useAdvancedApplicant =
+        !(paymentResult.paySource == 2 && paymentResult.payType == 1);
     final applicantResult = await ApplicantSheet.show(
       pageContext,
       notifier,
-      false,
+      useAdvancedApplicant,
     );
     if (applicantResult == null || !mounted || !pageContext.mounted) return;
 
@@ -452,15 +465,7 @@ class _PackageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final price = plan.packageAmount?.toStringAsFixed(2) ?? '0.00';
-    final hasBatteryType = (plan.batteryType ?? '').isNotEmpty;
-    final hasCarType = (plan.carType ?? '').isNotEmpty;
-    final typeLabel = hasBatteryType
-        ? 'Battery'
-        : hasCarType
-        ? 'Vehicle'
-        : 'Device';
     final typeValue = _valueOrDash(_resolveTypeValue(plan));
-    final modelValue = _valueOrDash(_resolveModelValue(plan));
 
     return Container(
       decoration: BoxDecoration(
@@ -497,8 +502,7 @@ class _PackageCard extends StatelessWidget {
             spacing: 8,
             runSpacing: 6,
             children: [
-              _buildInfoTag('$typeLabel · $typeValue'),
-              _buildInfoTag('Model · $modelValue'),
+              _buildInfoTag(typeValue),
             ],
           ),
         ],
@@ -523,14 +527,6 @@ class _PackageCard extends StatelessWidget {
       return batteryType;
     }
     return null;
-  }
-
-  String? _resolveModelValue(ServicePlanBean plan) {
-    final model = plan.deviceModel?.trim();
-    if (model != null && model.isNotEmpty && model != '-') {
-      return model;
-    }
-    return _resolveTypeValue(plan);
   }
 
   Widget _buildInfoTag(String text) {
@@ -1142,11 +1138,13 @@ class _SuccessPage extends StatelessWidget {
   const _SuccessPage({
     required this.documentNo,
     required this.paySource,
+    required this.onBack,
     required this.onReturn,
   });
 
   final String documentNo;
   final int paySource;
+  final VoidCallback onBack;
   final VoidCallback onReturn;
 
   @override
@@ -1163,7 +1161,7 @@ class _SuccessPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: onReturn,
+          onPressed: onBack,
         ),
         title: Text(
           l10n.sellBindTitle,

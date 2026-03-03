@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/data/models/pack.dart';
 import 'package:merchant_app/data/models/purchasing_user.dart';
 import 'package:merchant_app/data/models/rent_device_info_bean.dart';
+import 'package:merchant_app/data/models/shop_payment_method.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
@@ -14,6 +15,7 @@ class RentBindState {
 
   final bool loadingUser;
   final bool loadingDevice;
+  final bool loadingShopPayment;
   final bool submitting;
   final bool submitSuccess;
   final String? documentNo;
@@ -23,10 +25,12 @@ class RentBindState {
   final int paySource;
   final String? cardImgUrl;
   final String? personImgUrl;
+  final ShopPaymentMethod? shopPaymentMethod;
 
   const RentBindState({
     this.loadingUser = false,
     this.loadingDevice = false,
+    this.loadingShopPayment = false,
     this.submitting = false,
     this.submitSuccess = false,
     this.documentNo,
@@ -36,11 +40,13 @@ class RentBindState {
     this.paySource = 2,
     this.cardImgUrl,
     this.personImgUrl,
+    this.shopPaymentMethod,
   });
 
   RentBindState copyWith({
     bool? loadingUser,
     bool? loadingDevice,
+    bool? loadingShopPayment,
     bool? submitting,
     bool? submitSuccess,
     Object? documentNo = _sentinel,
@@ -50,10 +56,12 @@ class RentBindState {
     int? paySource,
     Object? cardImgUrl = _sentinel,
     Object? personImgUrl = _sentinel,
+    Object? shopPaymentMethod = _sentinel,
   }) {
     return RentBindState(
       loadingUser: loadingUser ?? this.loadingUser,
       loadingDevice: loadingDevice ?? this.loadingDevice,
+      loadingShopPayment: loadingShopPayment ?? this.loadingShopPayment,
       submitting: submitting ?? this.submitting,
       submitSuccess: submitSuccess ?? this.submitSuccess,
       documentNo: documentNo == _sentinel ? this.documentNo : documentNo as String?,
@@ -63,6 +71,9 @@ class RentBindState {
       paySource: paySource ?? this.paySource,
       cardImgUrl: cardImgUrl == _sentinel ? this.cardImgUrl : cardImgUrl as String?,
       personImgUrl: personImgUrl == _sentinel ? this.personImgUrl : personImgUrl as String?,
+      shopPaymentMethod: shopPaymentMethod == _sentinel
+          ? this.shopPaymentMethod
+          : shopPaymentMethod as ShopPaymentMethod?,
     );
   }
 }
@@ -79,17 +90,21 @@ class RentBindNotifier extends Notifier<RentBindState> {
   Future<void> queryUser(String cardNum) async {
     if (cardNum.isEmpty) return;
     state = state.copyWith(loadingUser: true);
-    final response = await _api.get<PurchasingUser>(
-      ApiPath.queryUserForRent,
-      queryParameters: {'cardNum': cardNum},
-      parser: (json) => PurchasingUser.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
-    );
-    state = state.copyWith(
-      loadingUser: false,
-      user: response.result,
-    );
+    try {
+      final response = await _api.get<PurchasingUser>(
+        ApiPath.queryUserForRent,
+        queryParameters: {'cardNum': cardNum},
+        parser: (json) => PurchasingUser.fromJson(
+          Map<String, dynamic>.from(json as Map),
+        ),
+      );
+      state = state.copyWith(
+        loadingUser: false,
+        user: response.result,
+      );
+    } catch (_) {
+      state = state.copyWith(loadingUser: false, user: null);
+    }
   }
 
   Future<bool> queryDevice(String sn) async {
@@ -210,6 +225,28 @@ class RentBindNotifier extends Notifier<RentBindState> {
 
   void reset() {
     state = const RentBindState();
+  }
+
+  Future<void> loadShopPayConfig(String shopNo) async {
+    if (shopNo.isEmpty) return;
+    state = state.copyWith(loadingShopPayment: true);
+    try {
+      final response = await _api.get<ShopPaymentMethod>(
+        ApiPath.queryShopPayConfig,
+        queryParameters: {'shopNo': shopNo},
+        parser: (json) =>
+            ShopPaymentMethod.fromJson(Map<String, dynamic>.from(json as Map)),
+      );
+      state = state.copyWith(
+        loadingShopPayment: false,
+        shopPaymentMethod: response.result,
+      );
+    } catch (_) {
+      state = state.copyWith(
+        loadingShopPayment: false,
+        shopPaymentMethod: null,
+      );
+    }
   }
 
   int _deviceType(RentDeviceInfoBean? info) {

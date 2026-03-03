@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/service_plan.dart';
 import 'package:merchant_app/features/work/sales/sell_bind_controller.dart';
@@ -181,15 +181,7 @@ class _PackageItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final price = plan.packageAmount?.toStringAsFixed(2) ?? '0.00';
-    final hasBatteryType = (plan.batteryType ?? '').isNotEmpty;
-    final hasCarType = (plan.carType ?? '').isNotEmpty;
-    final typeLabel = hasBatteryType
-        ? 'Battery'
-        : hasCarType
-        ? 'Vehicle'
-        : 'Device';
     final typeValue = _valueOrDash(_resolveTypeValue(plan));
-    final modelValue = _valueOrDash(_resolveModelValue(plan));
 
     return GestureDetector(
       onTap: onTap,
@@ -234,8 +226,7 @@ class _PackageItem extends StatelessWidget {
                     spacing: 8,
                     runSpacing: 6,
                     children: [
-                      _buildInfoTag('$typeLabel · $typeValue'),
-                      _buildInfoTag('Model · $modelValue'),
+                      _buildInfoTag(typeValue),
                     ],
                   ),
                 ],
@@ -274,14 +265,6 @@ class _PackageItem extends StatelessWidget {
       return batteryType;
     }
     return null;
-  }
-
-  String? _resolveModelValue(ServicePlanBean plan) {
-    final model = plan.deviceModel?.trim();
-    if (model != null && model.isNotEmpty && model != '-') {
-      return model;
-    }
-    return _resolveTypeValue(plan);
   }
 
   Widget _buildInfoTag(String text) {

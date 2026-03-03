@@ -37,6 +37,10 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
   bool _loadingHistory = true;
   bool _showHistory = true;
 
+  String get _historyKey => widget.deviceType == 3
+      ? StorageKeys.stationSearchHistory
+      : StorageKeys.deviceSearchHistory;
+
   @override
   void initState() {
     super.initState();
@@ -223,7 +227,7 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
 
   Future<void> _loadHistory() async {
     final prefs = await SharedPreferences.getInstance();
-    final items = prefs.getStringList(StorageKeys.deviceSearchHistory) ?? [];
+    final items = prefs.getStringList(_historyKey) ?? [];
     setState(() {
       _history
         ..clear()
@@ -234,12 +238,12 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
 
   Future<void> _saveHistory() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setStringList(StorageKeys.deviceSearchHistory, _history);
+    await prefs.setStringList(_historyKey, _history);
   }
 
   Future<void> _clearHistory() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(StorageKeys.deviceSearchHistory);
+    await prefs.remove(_historyKey);
     setState(() {
       _history.clear();
       _showHistory = true;
@@ -262,15 +266,34 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
   Future<void> _submit(String value) async {
     final l10n = context.l10n;
     final input = value.trim();
+    final isStationMode = widget.deviceType == 3;
     if (input.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.deviceSearchHint)));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            isStationMode
+                ? l10n.deviceSearchStationHint
+                : l10n.deviceSearchHint,
+          ),
+        ),
+      );
       return;
     }
-    final sn = widget.deviceType == null
-        ? ScanUtils.getDeviceSn(input).trim()
-        : ScanUtils.parseSnByDeviceType(input, widget.deviceType).trim();
+    String sn;
+    if (isStationMode) {
+      sn = ScanUtils.parseSnByDeviceType(input, 3).trim();
+      if (!_isValidStationSnInput(input, sn)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.deviceSearchInvalidStationSn)),
+        );
+        return;
+      }
+    } else {
+      sn = widget.deviceType == null
+          ? ScanUtils.getDeviceSn(input).trim()
+          : ScanUtils.parseSnByDeviceType(input, widget.deviceType).trim();
+    }
+
     if (sn.isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -291,6 +314,7 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
         builder: (_) => DeviceDetailPageNew(
           initialSn: sn,
           readOnly: widget.readOnly,
+          popToSearchOnClear: true,
         ),
       ),
     );
@@ -306,6 +330,7 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) => QrScanPage(
+          allowManualInput: true,
           parseDeviceSn: true,
           deviceType: widget.deviceType,
         ),
@@ -314,6 +339,28 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
     if (!mounted || result == null || result.isEmpty) return;
     _controller.text = result;
     await _submit(result);
+  }
+
+  bool _isValidStationSnInput(String rawInput, String parsedSn) {
+    if (parsedSn.isEmpty) return false;
+    final input = rawInput.trim();
+    final lower = input.toLowerCase();
+    if (lower.isEmpty) return false;
+
+    final containsNonStationKey =
+        lower.contains('vin=') ||
+        lower.contains('vin:') ||
+        lower.contains('imei=') ||
+        lower.contains('imei:') ||
+        lower.contains('iccid=') ||
+        lower.contains('iccid:') ||
+        lower.contains('vcu=') ||
+        lower.contains('vcu:');
+    if (containsNonStationKey) return false;
+
+    if (lower.startsWith('b:')) return false;
+
+    return true;
   }
 }
 

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/data/models/new_cabinet_bean.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_unshelve_controller.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 
@@ -25,6 +27,11 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
   @override
   void initState() {
     super.initState();
+    ref.read(cabinetUnshelveProvider.notifier).clearState();
+    _snController.clear();
+    _reasonController.clear();
+    _selectedReason = null;
+    _lastQueriedSn = '';
     _snFocusNode.addListener(_onSnFocusChanged);
   }
 
@@ -197,6 +204,9 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
                         child: TextField(
                           controller: _reasonController,
                           onChanged: (_) => setState(() {}),
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(200),
+                          ],
                           decoration: InputDecoration(
                             hintText: l10n.cabinetUnshelveReasonHint,
                             hintStyle: const TextStyle(
@@ -284,7 +294,9 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
               width: double.infinity,
               height: 48,
               child: FilledButton(
-                onPressed: _canSubmit ? () => _showConfirmDialog(context) : null,
+                onPressed: _canSubmit
+                    ? () => _showConfirmDialog(context)
+                    : null,
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
                   disabledBackgroundColor: const Color(0xFFB8E6B8),
@@ -488,54 +500,100 @@ class _InputRow extends StatelessWidget {
 class _CabinetInfoWidget extends StatelessWidget {
   const _CabinetInfoWidget({required this.cabinet});
 
-  final dynamic cabinet;
+  final NewCabinetBean cabinet;
 
   @override
   Widget build(BuildContext context) {
+    final modelInfo = [
+      (cabinet.stationModel ?? '').trim(),
+      (cabinet.stationModelName ?? '').trim(),
+    ].where((e) => e.isNotEmpty).join(' | ');
+    final address = (cabinet.address ?? '').trim();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 电柜图片占位
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEEEEEE),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(
-              Icons.ev_station,
-              color: Color(0xFF999999),
-              size: 32,
-            ),
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  color: const Color(0xFFEEEEEE),
+                  child: (cabinet.standardImg ?? '').trim().isNotEmpty
+                      ? Image.network(
+                          cabinet.standardImg!.trim(),
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.ev_station,
+                            color: Color(0xFF999999),
+                            size: 32,
+                          ),
+                        )
+                      : const Icon(
+                          Icons.ev_station,
+                          color: Color(0xFF999999),
+                          size: 32,
+                        ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      cabinet.stationName ?? '-',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.black06Text,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      modelInfo.isEmpty ? '-' : modelInfo,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF999999),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
+          if (address.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  cabinet.stationName ?? '-',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black06Text,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                Image.asset(
+                  'assets/android/mipmap-xxhdpi/locate_tag_1.webp',
+                  width: 16,
+                  height: 16,
+                  fit: BoxFit.contain,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  cabinet.stationModel ?? '-',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF999999),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    address,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.black06Text,
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
+          ],
         ],
       ),
     );

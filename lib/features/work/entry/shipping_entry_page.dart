@@ -501,10 +501,9 @@ class _ShippingEntryBottomSheetState extends State<_ShippingEntryBottomSheet>
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
-      height: screenHeight * 0.7,
+      height: 390,
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

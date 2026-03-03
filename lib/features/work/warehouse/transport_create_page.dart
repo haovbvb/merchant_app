@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
-import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/city.dart';
 import 'package:merchant_app/data/models/warehouse_info.dart';
@@ -51,13 +51,6 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
     final l10n = context.l10n;
     final state = ref.watch(transportCreateProvider);
     final notifier = ref.read(transportCreateProvider.notifier);
-
-    if (_trackingController.text != state.trackingNumber) {
-      _trackingController.value = TextEditingValue(
-        text: state.trackingNumber,
-        selection: TextSelection.collapsed(offset: state.trackingNumber.length),
-      );
-    }
 
     return Scaffold(
       backgroundColor: AppColors.bgColor,
@@ -144,11 +137,11 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
                   _SectionCard(
                     child: _InputField(
                       icon:
-                          'assets/android/mipmap-xxhdpi/icon_edt_traknumber.png',
+                          'assets/android/mipmap-xxhdpi/icon_tacking.png',
                       label: l10n.deviceIssueTrackingNumber,
                       hintText: l10n.deviceIssuePleaseEnterTracking,
-                      controller: _trackingController,
-                      onChanged: notifier.setTrackingNumber,
+                      value: state.trackingNumber,
+                      onTap: () => _showTrackingInputSheet(context, notifier),
                     ),
                   ),
                   // 选择设备
@@ -169,10 +162,10 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
                           children: [
                             Expanded(
                               child: _ActionButton(
-                                icon: const Icon(
-                                  Icons.edit_outlined,
-                                  size: 18,
-                                  color: Color(0xFF666666),
+                                icon: Image.asset(
+                                  'assets/android/mipmap-xxhdpi/icon_enter_sn.png',
+                                  width: 16,
+                                  height: 16,
                                 ),
                                 label: l10n.deviceIssueEnterSn,
                                 outlined: true,
@@ -183,9 +176,10 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: _ActionButton(
-                                icon: AppIcons.scanIcon(
-                                  size: 18,
-                                  color: Theme.of(context).colorScheme.primary,
+                                icon: Image.asset(
+                                  'assets/android/mipmap-xxhdpi/icon_blue_scan.png',
+                                  width: 16,
+                                  height: 16,
                                 ),
                                 label: l10n.deviceIssueScanQrCode,
                                 outlined: false,
@@ -369,33 +363,335 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
     TransportCreateNotifier notifier,
   ) async {
     final controller = TextEditingController();
-    final result = await showDialog<String>(
+    final result = await showModalBottomSheet<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.deviceIssueEnterDeviceSn),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: InputDecoration(
-            hintText: l10n.deviceIssueEnterDeviceSn,
-            border: const OutlineInputBorder(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(controller.text.trim()),
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          height: 50,
+                          child: Center(
+                            child: Text(
+                              l10n.deviceIssueEnterDeviceSn,
+                              style: const TextStyle(
+                                fontSize: 17,
+                                color: Color(0xE60C0C0D),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        SizedBox(
+                          height: 40,
+                          child: Stack(
+                            alignment: Alignment.centerRight,
+                            children: [
+                              TextField(
+                                controller: controller,
+                                autofocus: true,
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(50),
+                                ],
+                                onChanged: (_) => setModalState(() {}),
+                                decoration: InputDecoration(
+                                  hintText: l10n.deviceIssueEnterDeviceSn,
+                                  hintStyle: const TextStyle(
+                                    color: Color(0x4D0C0C0D),
+                                    fontSize: 15,
+                                  ),
+                                  filled: true,
+                                  fillColor: const Color(0xFFF2F4F7),
+                                  contentPadding: const EdgeInsets.fromLTRB(
+                                    12,
+                                    8,
+                                    40,
+                                    8,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  counterText: '',
+                                ),
+                                style: const TextStyle(
+                                  color: Color(0xE60C0C0D),
+                                  fontSize: 15,
+                                ),
+                              ),
+                              if (controller.text.isNotEmpty)
+                                GestureDetector(
+                                  onTap: () {
+                                    controller.clear();
+                                    setModalState(() {});
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                    ),
+                                    child: Image.asset(
+                                      'assets/android/mipmap-xxhdpi/icon_clear.webp',
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 25),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 44,
+                                child: TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: const Color(0xFFF2F4F7),
+                                    foregroundColor: const Color(0xE6000000),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(l10n.cancel),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: SizedBox(
+                                height: 44,
+                                child: FilledButton(
+                                  onPressed: () {
+                                    Navigator.of(
+                                      context,
+                                    ).pop(controller.text.trim());
+                                  },
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: AppColors.primaryColor,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(l10n.confirm),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
+    controller.dispose();
     if (result != null && result.isNotEmpty) {
       await notifier.addSn(result);
     }
+  }
+
+  Future<void> _showTrackingInputSheet(
+    BuildContext context,
+    TransportCreateNotifier notifier,
+  ) async {
+    final l10n = context.l10n;
+    _trackingController.value = TextEditingValue(
+      text: ref.read(transportCreateProvider).trackingNumber,
+      selection: TextSelection.collapsed(
+        offset: ref.read(transportCreateProvider).trackingNumber.length,
+      ),
+    );
+
+    final result = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                child: SafeArea(
+                  top: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(
+                          height: 50,
+                          child: Center(
+                            child: Text(
+                              l10n.deviceIssueTrackingNumber,
+                              style: const TextStyle(
+                                fontSize: 17,
+                                color: Color(0xE60C0C0D),
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        SizedBox(
+                          height: 40,
+                          child: Stack(
+                            alignment: Alignment.centerRight,
+                            children: [
+                              TextField(
+                                controller: _trackingController,
+                                autofocus: true,
+                                inputFormatters: [
+                                  LengthLimitingTextInputFormatter(50),
+                                ],
+                                onChanged: (_) => setModalState(() {}),
+                                decoration: InputDecoration(
+                                  hintText: l10n.deviceIssuePleaseEnterTracking,
+                                  hintStyle: const TextStyle(
+                                    color: Color(0x4D0C0C0D),
+                                    fontSize: 15,
+                                  ),
+                                  filled: true,
+                                  fillColor: const Color(0xFFF2F4F7),
+                                  contentPadding: const EdgeInsets.fromLTRB(
+                                    12,
+                                    8,
+                                    40,
+                                    8,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  counterText: '',
+                                ),
+                                style: const TextStyle(
+                                  color: Color(0xE60C0C0D),
+                                  fontSize: 15,
+                                ),
+                              ),
+                              if (_trackingController.text.isNotEmpty)
+                                GestureDetector(
+                                  onTap: () {
+                                    _trackingController.clear();
+                                    setModalState(() {});
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                    ),
+                                    child: Image.asset(
+                                      'assets/android/mipmap-xxhdpi/icon_clear.webp',
+                                      width: 20,
+                                      height: 20,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 25),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SizedBox(
+                                height: 44,
+                                child: TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  style: TextButton.styleFrom(
+                                    backgroundColor: const Color(0xFFF2F4F7),
+                                    foregroundColor: const Color(0xE6000000),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(l10n.cancel),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: SizedBox(
+                                height: 44,
+                                child: FilledButton(
+                                  onPressed: () {
+                                    Navigator.of(
+                                      context,
+                                    ).pop(_trackingController.text.trim());
+                                  },
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: AppColors.primaryColor,
+                                    foregroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(l10n.confirm),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+
+    if (result == null) return;
+    notifier.setTrackingNumber(result);
   }
 
   Future<void> _scanAndAdd(
@@ -405,7 +701,7 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) =>
-            QrScanPage(parseDeviceSn: true, deviceType: widget.deviceType),
+            QrScanPage(allowManualInput: true, parseDeviceSn: true, deviceType: widget.deviceType),
       ),
     );
     if (result != null && result.isNotEmpty) {
@@ -508,15 +804,15 @@ class _InputField extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.hintText,
-    required this.controller,
-    required this.onChanged,
+    required this.value,
+    required this.onTap,
   });
 
   final String icon;
   final String label;
   final String hintText;
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
+  final String value;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -534,17 +830,26 @@ class _InputField extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 10),
-        TextField(
-          controller: controller,
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            hintText: hintText,
-            hintStyle: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
-            border: InputBorder.none,
-            isDense: true,
-            contentPadding: EdgeInsets.zero,
+        GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: SizedBox(
+            height: 44,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                value.isEmpty ? hintText : value,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: value.isEmpty
+                      ? const Color(0x4D0C0C0D)
+                      : const Color(0xE60C0C0D),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ),
-          style: const TextStyle(fontSize: 14, color: Color(0xFF1A1A1A)),
         ),
       ],
     );
@@ -566,29 +871,28 @@ class _ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).colorScheme.primary;
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
         height: 44,
         decoration: BoxDecoration(
-          color: outlined ? Colors.white : const Color(0xFFEEF7E9),
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: outlined ? const Color(0xFFE5E5E5) : primaryColor,
+            color: outlined ? const Color(0x66000000) : const Color(0xFF56B327),
+            width: 0.5,
           ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             icon,
-            const SizedBox(width: 6),
+            const SizedBox(width: 4),
             Text(
               label,
               style: TextStyle(
                 fontSize: 14,
-                color: outlined ? const Color(0xFF666666) : primaryColor,
+                color: outlined ? const Color(0xE60C0C0D) : const Color(0xFF56B327),
               ),
             ),
           ],

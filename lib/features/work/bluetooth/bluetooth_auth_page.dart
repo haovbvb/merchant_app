@@ -339,7 +339,7 @@ class _BluetoothAuthorizationPageState
 
   Future<void> _scanQRCode() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
+      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: true, parseDeviceSn: true)),
     );
     if (result != null && result.isNotEmpty) {
       _snController.text = result;

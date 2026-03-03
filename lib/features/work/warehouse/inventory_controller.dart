@@ -34,6 +34,7 @@ class InventoryListState {
     bool? loadingMore,
     int? page,
     int? status,
+    bool resetStatus = false,
     String? keyword,
     List<DeviceInventory>? items,
     int? total,
@@ -42,7 +43,7 @@ class InventoryListState {
       loading: loading ?? this.loading,
       loadingMore: loadingMore ?? this.loadingMore,
       page: page ?? this.page,
-      status: status ?? this.status,
+      status: resetStatus ? null : (status ?? this.status),
       keyword: keyword ?? this.keyword,
       items: items ?? this.items,
       total: total ?? this.total,
@@ -61,11 +62,16 @@ class InventoryListNotifier extends Notifier<InventoryListState> {
   @override
   InventoryListState build() => const InventoryListState();
 
-  Future<void> refresh({int? status, String? keyword}) async {
+  Future<void> refresh({
+    int? status,
+    bool resetStatus = false,
+    String? keyword,
+  }) async {
     state = state.copyWith(
       loading: true,
       page: 1,
-      status: status ?? state.status,
+      status: status,
+      resetStatus: resetStatus,
       keyword: keyword ?? state.keyword,
     );
 
@@ -76,7 +82,8 @@ class InventoryListNotifier extends Notifier<InventoryListState> {
         'pageSize': _pageSize,
         if ((keyword ?? state.keyword).trim().isNotEmpty)
           'keyword': (keyword ?? state.keyword).trim(),
-        if ((status ?? state.status) != null) 'status': status ?? state.status,
+        if ((resetStatus ? null : (status ?? state.status)) != null)
+          'status': resetStatus ? null : (status ?? state.status),
       },
       parser: (json) =>
           DeviceInventoryResp.fromJson(Map<String, dynamic>.from(json as Map)),
@@ -180,14 +187,14 @@ class InventoryDetailNotifier extends Notifier<InventoryDetailState> {
   @override
   InventoryDetailState build() => const InventoryDetailState();
 
-  Future<void> startInventory(int deviceType) async {
+  Future<int?> startInventory(int deviceType) async {
     state = state.copyWith(loading: true, deviceType: deviceType);
 
     final warehouse = state.warehouse ?? await _loadMyWarehouseInfo();
     final warehouseNo = warehouse?.warehouseNo ?? '';
     if (warehouseNo.isEmpty) {
       state = state.copyWith(loading: false);
-      return;
+      return null;
     }
 
     final response = await _api.post<DeviceInventoryDetail>(
@@ -207,6 +214,12 @@ class InventoryDetailNotifier extends Notifier<InventoryDetailState> {
       total: detail?.detailPage?.total ?? 0,
       warehouse: warehouse,
     );
+    return response.code;
+  }
+
+  Future<void> loadMyWarehouseInfo() async {
+    final warehouse = await _loadMyWarehouseInfo();
+    state = state.copyWith(warehouse: warehouse);
   }
 
   Future<void> loadDetail(String inventoryNo) async {

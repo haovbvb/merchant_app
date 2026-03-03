@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/root_tab_scaffold.dart';
@@ -9,7 +10,6 @@ import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/battery_type.dart';
 import 'package:merchant_app/features/work/entry/battery_ship_page.dart';
-import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
@@ -139,7 +139,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${type.model ?? '-'} (${type.voltage ?? 0}V)',
+                      '${type.model ?? '-'} (${type.modelName ?? '-'})',
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -381,41 +381,32 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
   }
 
   Future<void> _addByScan() async {
-    final result = await Navigator.of(context).push<List<String>>(
+    final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => QrBatchScanPage(
-          initialItems: _items.map((item) => item.sn).toList(),
-          fixedDeviceType: 1,
-          returnResolved: false,
+        builder: (_) => const QrScanPage(
+          allowManualInput: true,
+          deviceType: 1,
+          returnRaw: true,
         ),
       ),
     );
-    if (result == null) return;
+    if (result == null || result.trim().isEmpty) return;
+    final parsed = ScanUtils.parseBatteryQr(result, 0);
+    final sn = (parsed.sn ?? '').trim();
+    if (sn.isEmpty) return;
+    // 重复检查
+    if (_items.any((item) => item.sn == sn)) {
+      showToast(context.l10n.warehouseInventoryScanRepeat);
+      return;
+    }
+    final imei = (parsed.imei ?? '').trim();
+    final iccid = (parsed.iccid ?? '').trim();
     setState(() {
-      final existingBySn = {
-        for (final item in _items) item.sn: item,
-      };
-      _items
-        ..clear()
-        ..addAll(result.map((raw) {
-          final parsed = ScanUtils.parseBatteryQr(raw, 0);
-          final sn = (parsed.sn ?? '').trim();
-          final imei = (parsed.imei ?? '').trim();
-          final iccid = (parsed.iccid ?? '').trim();
-          final existing = existingBySn[sn];
-          if (existing == null) {
-            return _BatteryItem(
-              sn: sn,
-              imei: imei,
-              iccid: iccid,
-            );
-          }
-          return _BatteryItem(
-            sn: existing.sn,
-            imei: imei.isNotEmpty ? imei : existing.imei,
-            iccid: iccid.isNotEmpty ? iccid : existing.iccid,
-          );
-        }));
+      _items.add(_BatteryItem(
+        sn: sn,
+        imei: imei,
+        iccid: iccid,
+      ));
     });
   }
 
@@ -606,6 +597,9 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
               Expanded(
                 child: TextField(
                   controller: controller,
+                  inputFormatters: [
+                    LengthLimitingTextInputFormatter(50),
+                  ],
                   decoration: InputDecoration(
                     hintText: hint,
                     hintStyle: const TextStyle(
@@ -651,7 +645,7 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
 
     setState(() => _submitting = true);
     try {
-      await _api.post<Object>(
+      final response = await _api.post<Object>(
         ApiPath.batteryRegister,
         data: {
           'model': _selected?.model ?? '',
@@ -659,6 +653,10 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
         },
         parser: (json) => json ?? Object(),
       );
+
+      if (!response.isSuccess) {
+        return;
+      }
 
       final sns = _items.map((item) => item.sn).toList();
       if (!mounted) return;

@@ -22,10 +22,7 @@ class RentPackageSheet extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => RentPackageSheet(
-        packs: packs,
-        selected: selected,
-      ),
+      builder: (_) => RentPackageSheet(packs: packs, selected: selected),
     );
   }
 
@@ -126,7 +123,9 @@ class _PackageItem extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? AppColors.primaryColor : const Color(0xFFEEEEEE),
+            color: isSelected
+                ? AppColors.primaryColor
+                : const Color(0xFFEEEEEE),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -232,6 +231,10 @@ class _PackageItem extends StatelessWidget {
 
   String _buildPeriodText(Pack pack) {
     final periodValue = pack.duration ?? 30;
-    return 'Fixed period · ${periodValue}days';
+    final infoType = pack.infoType;
+    if (infoType == 0 || (infoType == null && periodValue == 30)) {
+      return '整月';
+    }
+    return '固定周期 · $periodValue天';
   }
 }

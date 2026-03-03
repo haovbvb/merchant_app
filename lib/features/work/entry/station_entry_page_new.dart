@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/root_tab_scaffold.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/station_type.dart';
 import 'package:merchant_app/features/work/entry/battery_ship_page.dart';
-import 'package:merchant_app/features/work/qrcode/qr_batch_scan_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
@@ -376,24 +377,27 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
   }
 
   Future<void> _addByScan() async {
-    final result = await Navigator.of(context).push<List<String>>(
+    final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => QrBatchScanPage(
-          initialItems: _items.map((item) => item.sn).toList(),
-          fixedDeviceType: 3,
+        builder: (_) => const QrScanPage(
+          allowManualInput: true,
+          deviceType: 3,
+          returnRaw: true,
         ),
       ),
     );
-    if (result == null) return;
+    if (result == null || result.trim().isEmpty) return;
+    final parsed = ScanUtils.parseStationQr(result);
+    final sn = (parsed.sn ?? '').trim();
+    if (sn.isEmpty) return;
+    // 重复检查
+    if (_items.any((item) => item.sn == sn)) {
+      showToast(context.l10n.warehouseInventoryScanRepeat);
+      return;
+    }
+    final lockDevId = (parsed.lockDevId ?? '').trim();
     setState(() {
-      final existingBySn = {
-        for (final item in _items) item.sn: item,
-      };
-      _items
-        ..clear()
-        ..addAll(
-          result.map((sn) => existingBySn[sn] ?? _StationItem(sn: sn)),
-        );
+      _items.add(_StationItem(sn: sn, lockDevId: lockDevId));
     });
   }
 
@@ -416,8 +420,9 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
   Future<_StationItem?> _showManualEntrySheet({_StationItem? initial}) async {
     final l10n = context.l10n;
     final snController = TextEditingController(text: initial?.sn ?? '');
-    final imeiController = TextEditingController(text: initial?.imei ?? '');
-    final iccidController = TextEditingController(text: initial?.iccid ?? '');
+    final lockDevIdController = TextEditingController(
+      text: initial?.lockDevId ?? '',
+    );
 
     return showModalBottomSheet<_StationItem>(
       context: context,
@@ -471,11 +476,11 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
               ),
               const SizedBox(height: 16),
 
-              // IMEI
+              // LockDevId
               _buildInputField(
-                label: l10n.entryImeiLabel,
-                hint: l10n.entryImeiHint,
-                controller: imeiController,
+                label: l10n.entryLockDevIdLabel,
+                hint: '请输入锁编号（可选）',
+                controller: lockDevIdController,
                 onScan: () async {
                   final result = await Navigator.of(context).push<String>(
                     MaterialPageRoute(
@@ -483,25 +488,7 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
                     ),
                   );
                   if (result != null && result.isNotEmpty) {
-                    imeiController.text = result;
-                  }
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // ICCID
-              _buildInputField(
-                label: l10n.entryIccidLabel,
-                hint: l10n.entryIccidHint,
-                controller: iccidController,
-                onScan: () async {
-                  final result = await Navigator.of(context).push<String>(
-                    MaterialPageRoute(
-                      builder: (_) => const QrScanPage(parseDeviceSn: false),
-                    ),
-                  );
-                  if (result != null && result.isNotEmpty) {
-                    iccidController.text = result;
+                    lockDevIdController.text = result;
                   }
                 },
               ),
@@ -521,8 +508,7 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
                     Navigator.of(context).pop(
                       _StationItem(
                         sn: sn,
-                        imei: imeiController.text.trim(),
-                        iccid: iccidController.text.trim(),
+                        lockDevId: lockDevIdController.text.trim(),
                       ),
                     );
                   },
@@ -584,6 +570,9 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
               Expanded(
                 child: TextField(
                   controller: controller,
+                  inputFormatters: [
+                    LengthLimitingTextInputFormatter(50),
+                  ],
                   decoration: InputDecoration(
                     hintText: hint,
                     hintStyle: const TextStyle(
@@ -829,12 +818,16 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
 
 class _StationItem {
   final String sn;
-  final String imei;
-  final String iccid;
+  final String lockDevId;
 
-  const _StationItem({required this.sn, this.imei = '', this.iccid = ''});
+  const _StationItem({required this.sn, this.lockDevId = ''});
 
-  Map<String, dynamic> toJson() => {'sn': sn, 'imei': imei, 'iccid': iccid};
+  Map<String, dynamic> toJson() => {
+    'sn': sn,
+    'imei': '',
+    'iccid': '',
+    'lockDevId': lockDevId,
+  };
 }
 
 class _DeviceCard extends StatelessWidget {
@@ -873,19 +866,10 @@ class _DeviceCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
 
-          // IMEI / ICCID
-          Row(
-            children: [
-              Text(
-                'IMEI: ${item.imei.isNotEmpty ? item.imei : '-'}',
-                style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
-              ),
-              const SizedBox(width: 24),
-              Text(
-                'ICCID: ${item.iccid.isNotEmpty ? item.iccid : '-'}',
-                style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
-              ),
-            ],
+          // LockDevId
+          Text(
+            '${l10n.entryLockDevIdLabel}: ${item.lockDevId.isNotEmpty ? item.lockDevId : '-'}',
+            style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
           ),
           const SizedBox(height: 12),
 

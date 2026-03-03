@@ -24,7 +24,6 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
   final FocusNode _focusNode = FocusNode();
   List<String> _history = [];
   bool _hasSearched = false;
-  int _selectedTabIndex = 0;
 
   @override
   void initState() {
@@ -99,6 +98,7 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
                       child: TextField(
                         controller: _controller,
                         focusNode: _focusNode,
+                        textAlignVertical: TextAlignVertical.center,
                         textInputAction: TextInputAction.search,
                         onSubmitted: (_) => _doSearch(),
                         decoration: InputDecoration(
@@ -111,6 +111,10 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
                             Icons.search,
                             color: Colors.grey.shade400,
                             size: 20,
+                          ),
+                          prefixIconConstraints: const BoxConstraints(
+                            minWidth: 36,
+                            minHeight: 36,
                           ),
                           suffixIcon: _controller.text.isNotEmpty
                               ? GestureDetector(
@@ -128,9 +132,10 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
                                 )
                               : null,
                           border: InputBorder.none,
+                          isCollapsed: true,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
-                            vertical: 10,
+                            vertical: 0,
                           ),
                         ),
                         onChanged: (value) => setState(() {}),
@@ -140,43 +145,6 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
                 ],
               ),
             ),
-            // 筛选标签（搜索后显示）
-            if (_hasSearched)
-              Container(
-                color: Colors.white,
-                height: 44,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  children: [
-                    _FilterChip(
-                      label: l10n.warehouseTabAll,
-                      selected: _selectedTabIndex == 0,
-                      onTap: () => _onTabSelected(0),
-                    ),
-                    _FilterChip(
-                      label: l10n.deviceIssueStatusInTransit,
-                      selected: _selectedTabIndex == 1,
-                      onTap: () => _onTabSelected(1),
-                    ),
-                    _FilterChip(
-                      label: l10n.deviceIssueStatusReceiveAll,
-                      selected: _selectedTabIndex == 2,
-                      onTap: () => _onTabSelected(2),
-                    ),
-                    _FilterChip(
-                      label: l10n.deviceIssueStatusPartial,
-                      selected: _selectedTabIndex == 3,
-                      onTap: () => _onTabSelected(3),
-                    ),
-                    _FilterChip(
-                      label: l10n.deviceIssueStatusWithdrawn,
-                      selected: _selectedTabIndex == 4,
-                      onTap: () => _onTabSelected(4),
-                    ),
-                  ],
-                ),
-              ),
             // 内容区
             Expanded(
               child: _hasSearched
@@ -311,12 +279,7 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
     );
   }
 
-  void _onTabSelected(int index) {
-    setState(() => _selectedTabIndex = index);
-    _doSearch(statusIndex: index);
-  }
-
-  Future<void> _doSearch({int? statusIndex}) async {
+  Future<void> _doSearch() async {
     final keyword = _controller.text.trim();
     if (keyword.isEmpty) return;
 
@@ -324,10 +287,9 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
       _hasSearched = true;
     });
 
-    final status = _mapStatus(statusIndex ?? _selectedTabIndex);
     await ref.read(transportListProvider.notifier).refresh(
           keyword: keyword,
-          status: status,
+          status: null,
           mode: widget.mode,
         );
     if (!mounted) return;
@@ -337,68 +299,6 @@ class _TransportSearchPageState extends ConsumerState<TransportSearchPage> {
     }
   }
 
-  int? _mapStatus(int index) {
-    switch (index) {
-      case 0:
-        return null;
-      case 1:
-        return 0;
-      case 2:
-        return 1;
-      case 3:
-        return 2;
-      case 4:
-        return 3;
-      default:
-        return null;
-    }
-  }
-}
-
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: GestureDetector(
-        onTap: onTap,
-        child: Center(
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: selected ? const Color(0xFFEEF7E9) : Colors.white,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: selected
-                    ? Theme.of(context).colorScheme.primary
-                    : const Color(0xFFE5E5E5),
-              ),
-            ),
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                color: selected
-                    ? Theme.of(context).colorScheme.primary
-                    : const Color(0xFF666666),
-                fontWeight: selected ? FontWeight.w500 : FontWeight.normal,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _SearchResultCard extends StatelessWidget {
@@ -478,11 +378,16 @@ class _SearchResultCard extends StatelessWidget {
               child: Row(
                 children: [
                   Image.asset(
-                    'assets/android/mipmap-xxhdpi/icon_issue_warehouse.webp',
-                    width: 20,
-                    height: 20,
+                    'assets/android/mipmap-xxhdpi/icon_device_issuse_state.png',
+                    width: 14,
+                    height: 14,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.home_outlined,
+                      size: 14,
+                      color: Color(0xFF666666),
+                    ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 6),
                   Expanded(
                     child: Text(
                       item.outWarehouseName,

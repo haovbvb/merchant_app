@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -23,6 +22,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get confirm => '确认';
+
+  @override
+  String get imageSourceCamera => '拍照';
+
+  @override
+  String get imageSourceGallery => '从相册选择';
 
   @override
   String get logout => '退出登录';
@@ -305,6 +310,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get commonPlatform => '平台';
+
+  @override
+  String get commonAgent => '代理商';
+
+  @override
+  String get commonShop => '门店';
 
   @override
   String get aboutVersionLabel => '版本';
@@ -862,7 +873,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get repairRecordDevicePlateNumber => '车牌号';
 
   @override
-  String get repairRecordDeviceEntryTime => '入库时间';
+  String get repairRecordDeviceEntryTime => '创建时间';
 
   @override
   String get repairRecordBound => '已绑定';
@@ -1147,7 +1158,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get warehouseInventoryScanStatusScanned => '已扫描';
 
   @override
-  String get warehouseInventoryScanStatusSurplus => '多余';
+  String get warehouseInventoryScanStatusSurplus => '盘盈';
 
   @override
   String get warehouseInventoryScanStatusPending => '未扫描';
@@ -1220,6 +1231,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get inventoryCountTitle => '盘点';
+
+  @override
+  String get inventoryStockLabel => '库存';
+
+  @override
+  String get inventoryCountLabel => '盘点数';
 
   @override
   String get inventorySearchHint => '输入盘点单号搜索';
@@ -1486,6 +1503,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scanManualInput => '手动输入';
 
   @override
+  String get scanManualVehicleVin => '手动输入车辆VIN';
+
+  @override
   String get scanInputHint => '输入编码';
 
   @override
@@ -1576,10 +1596,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get qrcodeResolveFailed => '解析失败';
 
   @override
-  String get deviceSearchHint => '输入设备 SN 或关键字';
+  String get deviceSearchHint => '输入设备SN或扫码';
 
   @override
   String get deviceSearchStationHint => '输入电柜SN或扫码';
+
+  @override
+  String get deviceSearchInvalidStationSn => '无效的换电柜SN';
 
   @override
   String get deviceSearchEmpty => '暂无结果';
@@ -3202,10 +3225,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetPutawaySnHint => '输入电柜SN或扫码';
 
   @override
-  String get cabinetPutawayNameHint => '输入站点名称';
+  String get cabinetPutawayNameHint => '输入电柜名称';
 
   @override
-  String get cabinetPutawayAddressHint => '输入站点地址';
+  String get cabinetPutawayAddressHint => '输入电柜地址';
 
   @override
   String get cabinetPutawayCoordinates => '坐标';
@@ -3226,7 +3249,31 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetPutawayAddImage => '添加图片';
 
   @override
-  String get cabinetPutawayImageLimit => '最多上传4张';
+  String get cabinetPutawayImageLimit => '最多上传5张';
+
+  @override
+  String get cabinetPutawayConfirmTitle => '确定上架？';
+
+  @override
+  String get cabinetPutawayConfirmMessage => '请确认上架信息无误，提交后将上架电柜。';
+
+  @override
+  String get cabinetPutawayNameRequired => '请输入电柜名称';
+
+  @override
+  String get cabinetPutawaySnRequired => '请输入电柜SN';
+
+  @override
+  String get cabinetPutawayAddressRequired => '请输入电柜地址';
+
+  @override
+  String get cabinetPutawayCoordinateRequired => '请选择坐标';
+
+  @override
+  String get cabinetPutawaySwapTimeRequired => '请输入换电指标';
+
+  @override
+  String get cabinetPutawayImageRequired => '请至少上传1张图片';
 
   @override
   String get cabinetPutawaySubmit => '提交';
@@ -3241,10 +3288,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetUnshelveTitle => '换电柜下架';
 
   @override
-  String get cabinetUnshelveSn => '站点SN';
+  String get cabinetUnshelveSn => '电柜SN';
 
   @override
-  String get cabinetUnshelveSnHint => '输入站点SN或扫码';
+  String get cabinetUnshelveSnHint => '输入电柜SN或扫码';
 
   @override
   String get cabinetUnshelveInfoTitle => '电柜信息';
@@ -3271,7 +3318,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetUnshelveCommonReasons => '常见原因';
 
   @override
-  String get cabinetUnshelveReason1 => '站点经销商不续签合同';
+  String get cabinetUnshelveReason1 => '电柜经销商不续签合同';
 
   @override
   String get cabinetUnshelveReason2 => '效率不达标';
@@ -3283,7 +3330,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetUnshelveConfirmTitle => '确认下架？';
 
   @override
-  String get cabinetUnshelveConfirmMessage => '下架后，站点的运营时间将被清除。如需重新上架，请在管理后台修改运营时间。';
+  String get cabinetUnshelveConfirmMessage => '下架后，电柜的运营时间将被清除。如需重新上架，请在管理后台修改运营时间。';
 
   @override
   String get cabinetUnshelveSubmit => '确认';
@@ -3726,6 +3773,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get addressPickerEmpty => '拖动地图选择位置';
 
   @override
+  String get addressPickerSearchNotFound => '没有找到该地址！';
+
+  @override
+  String get addressPickerFetchFailed => '获取地址失败';
+
+  @override
   String get addressPickerCoordinates => '坐标';
 
   @override
@@ -3858,7 +3911,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceDetailTabPortDetail => '仓位详情';
 
   @override
-  String get deviceDetailTabAddress => '地址';
+  String get deviceDetailTabAddress => '位置';
 
   @override
   String get deviceDetailTabRepairRecords => '维修记录';

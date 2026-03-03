@@ -45,8 +45,8 @@ class CabinetPutawayState {
 
 final cabinetPutawayProvider =
     NotifierProvider<CabinetPutawayNotifier, CabinetPutawayState>(
-  CabinetPutawayNotifier.new,
-);
+      CabinetPutawayNotifier.new,
+    );
 
 class CabinetPutawayNotifier extends Notifier<CabinetPutawayState> {
   final ApiService _api = ApiService();
@@ -54,19 +54,26 @@ class CabinetPutawayNotifier extends Notifier<CabinetPutawayState> {
   @override
   CabinetPutawayState build() => const CabinetPutawayState();
 
-  Future<void> queryCabinet(String code) async {
-    if (code.isEmpty) return;
+  Future<NewCabinetBean?> queryCabinet(String code) async {
+    final value = code.trim();
+    if (value.isEmpty) {
+      state = state.copyWith(cabinet: null);
+      return null;
+    }
     state = state.copyWith(loadingCabinet: true);
-    final response = await _api.get<NewCabinetBean>(
-      '${ApiPath.stationGetTypeBySource}/1/$code',
-      parser: (json) => NewCabinetBean.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
-    );
-    state = state.copyWith(
-      loadingCabinet: false,
-      cabinet: response.result,
-    );
+    try {
+      final response = await _api.get<NewCabinetBean>(
+        '${ApiPath.stationGetTypeBySource}/1/$value',
+        parser: (json) =>
+            NewCabinetBean.fromJson(Map<String, dynamic>.from(json as Map)),
+      );
+      final cabinet = response.isSuccess ? response.result : null;
+      state = state.copyWith(loadingCabinet: false, cabinet: cabinet);
+      return cabinet;
+    } catch (_) {
+      state = state.copyWith(loadingCabinet: false, cabinet: null);
+      return null;
+    }
   }
 
   Future<String?> uploadImage(String path) async {

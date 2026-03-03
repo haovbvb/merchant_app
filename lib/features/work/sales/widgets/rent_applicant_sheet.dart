@@ -1,12 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
+import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/features/work/map/address_picker_page.dart';
 import 'package:merchant_app/features/work/map/address_result.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -39,19 +39,26 @@ class RentApplicantResult {
 }
 
 class RentApplicantSheet extends ConsumerStatefulWidget {
-  const RentApplicantSheet({super.key, required this.notifier});
+  const RentApplicantSheet({
+    super.key,
+    required this.notifier,
+    required this.advancedMode,
+  });
 
   final RentBindNotifier notifier;
+  final bool advancedMode;
 
   static Future<RentApplicantResult?> show(
     BuildContext context,
-    RentBindNotifier notifier,
-  ) {
+    RentBindNotifier notifier, {
+    required bool advancedMode,
+  }) {
     return showModalBottomSheet<RentApplicantResult>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => RentApplicantSheet(notifier: notifier),
+      builder: (_) =>
+          RentApplicantSheet(notifier: notifier, advancedMode: advancedMode),
     );
   }
 
@@ -61,6 +68,7 @@ class RentApplicantSheet extends ConsumerStatefulWidget {
 
 class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
   final _userIdController = TextEditingController();
+  final _userIdFocusNode = FocusNode();
   final _accountController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -70,14 +78,28 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
 
-  String? _nidFrontPath;
-  String? _nidBackPath;
-  String? _personalPhotoPath;
   String? _cardImgUrl;
   String? _personImgUrl;
+  final List<String> _cardImgUrls = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _userIdFocusNode.addListener(_onUserIdFocusChanged);
+  }
+
+  void _onUserIdFocusChanged() {
+    if (_userIdFocusNode.hasFocus) return;
+    final cardNum = _userIdController.text.trim();
+    if (cardNum.isEmpty) return;
+    widget.notifier.queryUser(cardNum);
+  }
 
   @override
   void dispose() {
+    _userIdFocusNode
+      ..removeListener(_onUserIdFocusChanged)
+      ..dispose();
     _userIdController.dispose();
     _accountController.dispose();
     _firstNameController.dispose();
@@ -95,6 +117,33 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
     final l10n = context.l10n;
     final state = ref.watch(rentBindProvider);
 
+    ref.listen<RentBindState>(rentBindProvider, (prev, next) {
+      final user = next.user;
+      if (user == null || prev?.user == next.user) return;
+      setState(() {
+        _userIdController.text = user.cardNum ?? _userIdController.text;
+        _accountController.text = user.username ?? '';
+        _firstNameController.text = user.firstName ?? '';
+        _lastNameController.text = user.lastName ?? '';
+        _phoneController.text = user.phone ?? '';
+        _nidController.text = user.idNumber ?? '';
+        _birthdayController.text = user.birthday ?? '';
+        _emailController.text = user.email ?? '';
+        _addressController.text = user.address ?? '';
+        _cardImgUrls
+          ..clear()
+          ..addAll(
+            (user.cardImg ?? '')
+                .split(',')
+                .map((item) => item.trim())
+                .where((item) => item.isNotEmpty)
+                .take(4),
+          );
+        _cardImgUrl = _cardImgUrls.isEmpty ? null : _cardImgUrls.join(',');
+        _personImgUrl = user.personImg;
+      });
+    });
+
     return Container(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.9,
@@ -104,11 +153,9 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          // Header
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.all(16),
             child: Row(
               children: [
                 GestureDetector(
@@ -132,36 +179,35 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
               ],
             ),
           ),
-
-          Flexible(
+          Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // User ID search
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF8F8F8),
+                      border: Border.all(color: const Color(0xFFEEEEEE)),
                       borderRadius: BorderRadius.circular(8),
                     ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Row(
                       children: [
                         Expanded(
                           child: TextField(
                             controller: _userIdController,
+                            focusNode: _userIdFocusNode,
                             decoration: InputDecoration(
                               hintText: l10n.rentBindUserIdHint,
                               hintStyle: const TextStyle(
-                                color: Color(0xFFCCCCCC),
-                                fontSize: 14,
+                                color: Color(0xFF999999),
                               ),
                               border: InputBorder.none,
                             ),
                             onSubmitted: (value) {
-                              if (value.trim().isNotEmpty) {
-                                widget.notifier.queryUser(value.trim());
+                              final cardNum = value.trim();
+                              if (cardNum.isNotEmpty) {
+                                widget.notifier.queryUser(cardNum);
                               }
                             },
                           ),
@@ -176,188 +222,104 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
                     ),
                   ),
                   const SizedBox(height: 16),
+                  if (state.user != null) _buildUserCard(state),
+                  if (state.user != null) const SizedBox(height: 16),
 
-                  // User card
-                  if (state.user != null) ...[
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8F8F8),
-                        borderRadius: BorderRadius.circular(8),
+                  _buildInputField(
+                    label: l10n.rentBindAccount,
+                    controller: _accountController,
+                    isRequired: true,
+                    readOnly: true,
+                  ),
+                  _buildDivider(),
+                  _buildInputField(
+                    label: l10n.rentBindFirstName,
+                    controller: _firstNameController,
+                    isRequired: true,
+                  ),
+                  _buildDivider(),
+                  _buildInputField(
+                    label: l10n.rentBindLastName,
+                    controller: _lastNameController,
+                    isRequired: true,
+                  ),
+                  const SizedBox(height: 16),
+
+                  _buildInputField(
+                    label: l10n.rentBindPhone,
+                    controller: _phoneController,
+                    isRequired: true,
+                    keyboardType: TextInputType.phone,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  ),
+                  const SizedBox(height: 16),
+
+                  if (widget.advancedMode) ...[
+                    _buildInputField(
+                      label: l10n.rentBindNid,
+                      controller: _nidController,
+                      isRequired: true,
+                    ),
+                    const SizedBox(height: 16),
+                    _buildLabel(l10n.rentBindUploadNidPhoto, isRequired: true),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.rentBindNidPhotoHint,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF999999),
                       ),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 24,
-                            backgroundColor: Colors.grey[300],
-                            backgroundImage: state.user?.avatar != null
-                                ? NetworkImage(state.user!.avatar!)
-                                : null,
-                            child: state.user?.avatar == null
-                                ? const Icon(Icons.person, color: Colors.white)
-                                : null,
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'ID: ${state.user?.cardNum ?? ''}',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.black06Text,
-                                  ),
-                                ),
-                                if (state.user?.address != null &&
-                                    state.user!.address!.isNotEmpty) ...[
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    state.user!.address!,
-                                    style: const TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF999999),
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildCardImageRow(),
+                    const SizedBox(height: 16),
+                    _buildLabel(l10n.rentBindPersonalPhoto, isRequired: true),
+                    const SizedBox(height: 8),
+                    _buildImageUpload(
+                      imageUrl: _personImgUrl,
+                      onTap: () =>
+                          _pickImage(false, source: ImageSource.gallery),
+                      showCamera: _personImgUrl == null,
+                      onCameraTap: () =>
+                          _pickImage(false, source: ImageSource.camera),
                     ),
                     const SizedBox(height: 16),
                   ],
 
-                  // Form fields
-                  _buildFormField(
-                    label: l10n.rentBindAccount,
-                    controller: _accountController,
-                    required: true,
-                  ),
-                  _buildFormField(
-                    label: l10n.rentBindFirstName,
-                    controller: _firstNameController,
-                    required: true,
-                  ),
-                  _buildFormField(
-                    label: l10n.rentBindLastName,
-                    controller: _lastNameController,
-                    required: true,
-                  ),
-                  _buildFormField(
-                    label: l10n.rentBindPhone,
-                    controller: _phoneController,
-                    required: true,
-                    keyboardType: TextInputType.phone,
-                  ),
-                  _buildFormField(
-                    label: l10n.rentBindNid,
-                    controller: _nidController,
-                    required: true,
-                  ),
-
-                  // NID Photo upload
-                  const SizedBox(height: 16),
-                  RichText(
-                    text: TextSpan(
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.black06Text,
-                      ),
-                      children: [
-                        TextSpan(text: l10n.rentBindUploadNidPhoto),
-                        const TextSpan(
-                          text: ' *',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    l10n.rentBindNidPhotoHint,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF999999),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      _buildPhotoUpload(
-                        path: _nidFrontPath,
-                        onTap: () => _pickNidPhoto(true),
-                      ),
-                      const SizedBox(width: 12),
-                      _buildPhotoUpload(
-                        path: _nidBackPath,
-                        onTap: () => _pickNidPhoto(false),
-                      ),
-                    ],
-                  ),
-
-                  // Personal Photo upload
-                  const SizedBox(height: 16),
-                  RichText(
-                    text: TextSpan(
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.black06Text,
-                      ),
-                      children: [
-                        TextSpan(text: l10n.rentBindPersonalPhoto),
-                        const TextSpan(
-                          text: ' *',
-                          style: TextStyle(color: Colors.red),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _buildPhotoUpload(
-                    path: _personalPhotoPath,
-                    onTap: _pickPersonalPhoto,
-                  ),
-
-                  _buildFormField(
+                  _buildInputField(
                     label: l10n.rentBindBirthday,
                     controller: _birthdayController,
-                    required: false,
-                    onTap: () => _selectDate(context),
                     readOnly: true,
+                    onTap: _pickBirthday,
                   ),
-                  _buildFormField(
+                  _buildDivider(),
+                  _buildInputField(
                     label: l10n.rentBindEmail,
                     controller: _emailController,
-                    required: false,
                     hintText: l10n.rentBindEmailHint,
                     keyboardType: TextInputType.emailAddress,
                   ),
-                  _buildFormField(
-                    label: l10n.rentBindAddress,
-                    controller: _addressController,
-                    required: true,
-                    hintText: l10n.rentBindAddressHint,
-                    suffixIcon: GestureDetector(
-                      onTap: () => _selectAddress(context),
-                      child: const Icon(
-                        Icons.location_on_outlined,
-                        color: Color(0xFF999999),
+                  if (widget.advancedMode) ...[
+                    _buildDivider(),
+                    _buildInputField(
+                      label: l10n.rentBindAddress,
+                      controller: _addressController,
+                      isRequired: true,
+                      hintText: l10n.rentBindAddressHint,
+                      suffixIcon: GestureDetector(
+                        onTap: _pickAddress,
+                        child: const Icon(
+                          Icons.location_on_outlined,
+                          color: Color(0xFF999999),
+                        ),
                       ),
                     ),
-                  ),
-
-                  const SizedBox(height: 16),
+                  ],
+                  const SizedBox(height: 24),
                 ],
               ),
             ),
           ),
-
-          // Submit button
           Container(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
             child: SizedBox(
@@ -390,183 +352,287 @@ class _RentApplicantSheetState extends ConsumerState<RentApplicantSheet> {
     );
   }
 
-  Widget _buildFormField({
+  Widget _buildUserCard(RentBindState state) {
+    final user = state.user!;
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F8F8),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 24,
+            backgroundImage: user.avatar != null
+                ? NetworkImage(user.avatar!)
+                : null,
+            child: user.avatar == null
+                ? const Icon(Icons.person, color: Colors.grey)
+                : null,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'ID: ${user.cardNum ?? '-'}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black06Text,
+                  ),
+                ),
+                if (user.address != null)
+                  Text(
+                    user.address!,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF999999),
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInputField({
     required String label,
     required TextEditingController controller,
-    required bool required,
+    bool isRequired = false,
     String? hintText,
     TextInputType? keyboardType,
-    Widget? suffixIcon,
+    List<TextInputFormatter>? inputFormatters,
     bool readOnly = false,
     VoidCallback? onTap,
+    Widget? suffixIcon,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 12),
-        RichText(
-          text: TextSpan(
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.black06Text,
-            ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildLabel(label, isRequired: isRequired),
+          const SizedBox(height: 8),
+          Row(
             children: [
-              TextSpan(text: label),
-              if (required)
-                const TextSpan(
-                  text: ' *',
-                  style: TextStyle(color: Colors.red),
+              Expanded(
+                child: TextField(
+                  controller: controller,
+                  keyboardType: keyboardType,
+                  inputFormatters: inputFormatters,
+                  readOnly: readOnly,
+                  onTap: onTap,
+                  decoration: InputDecoration(
+                    hintText: hintText ?? controller.text,
+                    hintStyle: const TextStyle(color: Color(0xFF999999)),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: AppColors.black06Text,
+                  ),
                 ),
+              ),
+              if (suffixIcon != null) suffixIcon,
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLabel(String text, {bool isRequired = false}) {
+    return Row(
+      children: [
+        Text(
+          text,
+          style: const TextStyle(fontSize: 14, color: Color(0xFF666666)),
         ),
-        TextField(
-          controller: controller,
-          keyboardType: keyboardType,
-          readOnly: readOnly,
-          onTap: onTap,
-          decoration: InputDecoration(
-            hintText: hintText,
-            hintStyle: const TextStyle(
-              color: Color(0xFFCCCCCC),
-              fontSize: 14,
-            ),
-            suffixIcon: suffixIcon,
-            contentPadding: const EdgeInsets.symmetric(vertical: 12),
-            enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFEEEEEE)),
-            ),
-            focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: AppColors.primaryColor),
-            ),
-          ),
-        ),
+        if (isRequired)
+          const Text(' *', style: TextStyle(fontSize: 14, color: Colors.red)),
       ],
     );
   }
 
-  Widget _buildPhotoUpload({
-    required String? path,
+  Widget _buildDivider() {
+    return const Divider(height: 1, color: Color(0xFFEEEEEE));
+  }
+
+  Widget _buildImageUpload({
+    String? imageUrl,
     required VoidCallback onTap,
+    bool showCamera = false,
+    VoidCallback? onCameraTap,
   }) {
     return GestureDetector(
-      onTap: onTap,
+      onTap: imageUrl == null && showCamera && onCameraTap != null
+          ? onCameraTap
+          : onTap,
       child: Container(
         width: 80,
         height: 80,
         decoration: BoxDecoration(
-          color: const Color(0xFFF8F8F8),
+          color: const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: const Color(0xFFEEEEEE)),
         ),
-        child: path != null
+        child: imageUrl != null
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.file(
-                  File(path),
+                child: Image.network(
+                  imageUrl,
                   fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                      const Icon(Icons.image, color: Color(0xFF999999)),
                 ),
               )
-            : const Icon(
-                Icons.camera_alt,
-                color: Color(0xFF999999),
+            : Icon(
+                showCamera ? Icons.camera_alt : Icons.add,
+                color: const Color(0xFF999999),
                 size: 32,
               ),
       ),
     );
   }
 
-  Future<void> _scanUserId() async {
-    final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage()),
-    );
-    if (!mounted || result == null || result.isEmpty) return;
-    _userIdController.text = result;
-    widget.notifier.queryUser(result);
-  }
-
-  Future<void> _pickNidPhoto(bool isFront) async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.camera);
-    if (picked == null) return;
-
-    setState(() {
-      if (isFront) {
-        _nidFrontPath = picked.path;
-      } else {
-        _nidBackPath = picked.path;
+  Widget _buildCardImageRow() {
+    final children = <Widget>[];
+    final showList = _cardImgUrls.take(4).toList();
+    for (final imageUrl in showList) {
+      children.add(_buildImageUpload(imageUrl: imageUrl, onTap: () {}));
+      if (children.length < 4) {
+        children.add(const SizedBox(width: 12));
       }
-    });
-
-    // Upload the image
-    final url = await widget.notifier.uploadCardImage(picked.path);
-    if (url != null && isFront) {
-      _cardImgUrl = url;
     }
-  }
-
-  Future<void> _pickPersonalPhoto() async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(source: ImageSource.camera);
-    if (picked == null) return;
-
-    setState(() => _personalPhotoPath = picked.path);
-
-    // Upload the image
-    final url = await widget.notifier.uploadCardImage(picked.path);
-    if (url != null) {
-      _personImgUrl = url;
-    }
-  }
-
-  Future<void> _selectDate(BuildContext context) async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime(1990, 1, 1),
-      firstDate: DateTime(1900),
-      lastDate: now,
-    );
-    if (picked != null && mounted) {
-      _birthdayController.text = DateFormatUtils.format(
-        picked,
-        pattern: 'dd/MM/yyyy',
+    if (showList.length < 4) {
+      if (children.isNotEmpty) {
+        children.add(const SizedBox(width: 12));
+      }
+      children.add(
+        _buildImageUpload(
+          imageUrl: null,
+          onTap: () => _pickImage(true, source: ImageSource.gallery),
+          showCamera: true,
+          onCameraTap: () => _pickImage(true, source: ImageSource.camera),
+        ),
       );
     }
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(children: children),
+    );
   }
 
-  Future<void> _selectAddress(BuildContext context) async {
+  Future<void> _scanUserId() async {
+    final result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => const QrScanPage(allowManualInput: true),
+      ),
+    );
+    if (!mounted || result == null || result.isEmpty) return;
+    final cardNum = ScanUtils.getUserCarNum(result);
+    if (cardNum.isEmpty) return;
+    _userIdController.text = cardNum;
+    widget.notifier.queryUser(cardNum);
+  }
+
+  Future<void> _pickBirthday() async {
+    final now = DateTime.now();
+    final initial = DateTime(now.year - 18, now.month, now.day);
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: initial,
+      firstDate: DateTime(now.year - 100),
+      lastDate: now,
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _birthdayController.text = DateFormatUtils.format(
+        picked,
+        pattern: 'yyyy-MM-dd',
+      );
+    });
+  }
+
+  Future<void> _pickAddress() async {
     final result = await Navigator.of(context).push<AddressResult>(
       MaterialPageRoute(builder: (_) => const AddressPickerPage()),
     );
-    if (!mounted || result == null || result.address.isEmpty) return;
-    _addressController.text = result.address;
+    if (!mounted || result == null) return;
+    setState(() {
+      _addressController.text = result.address;
+    });
+  }
+
+  Future<void> _pickImage(
+    bool isCardImage, {
+    required ImageSource source,
+  }) async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: source);
+    if (picked == null) return;
+    final url = await widget.notifier.uploadCardImage(picked.path);
+    if (!mounted || url == null) return;
+    setState(() {
+      if (isCardImage) {
+        if (_cardImgUrls.length < 4) {
+          _cardImgUrls.add(url);
+        }
+        _cardImgUrl = _cardImgUrls.join(',');
+      } else {
+        _personImgUrl = url;
+      }
+    });
   }
 
   bool _canSubmit() {
-    return _accountController.text.isNotEmpty &&
+    final baseValid =
+        _accountController.text.isNotEmpty &&
         _firstNameController.text.isNotEmpty &&
         _lastNameController.text.isNotEmpty &&
-        _phoneController.text.isNotEmpty &&
+        _phoneController.text.isNotEmpty;
+    if (!widget.advancedMode) {
+      return baseValid;
+    }
+    return baseValid &&
         _nidController.text.isNotEmpty &&
-        _nidFrontPath != null &&
-        _personalPhotoPath != null &&
-        _addressController.text.isNotEmpty;
+        _addressController.text.isNotEmpty &&
+        _cardImgUrls.length >= 2 &&
+        (_personImgUrl?.isNotEmpty ?? false);
   }
 
   void _submit() {
+    final state = ref.read(rentBindProvider);
+    final user = state.user;
     Navigator.of(context).pop(
       RentApplicantResult(
         cardNum: _userIdController.text.trim(),
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
         phone: _phoneController.text.trim(),
-        idNumber: _nidController.text.trim(),
+        idNumber: widget.advancedMode
+            ? _nidController.text.trim()
+            : (user?.idNumber ?? ''),
         birthday: _birthdayController.text.trim(),
         email: _emailController.text.trim(),
-        address: _addressController.text.trim(),
-        cardImgUrl: _cardImgUrl,
-        personImgUrl: _personImgUrl,
+        address: widget.advancedMode
+            ? _addressController.text.trim()
+            : (user?.address ?? ''),
+        cardImgUrl: widget.advancedMode
+            ? (_cardImgUrls.isEmpty ? null : _cardImgUrls.join(','))
+            : (user?.cardImg ?? _cardImgUrl),
+        personImgUrl: widget.advancedMode
+            ? _personImgUrl
+            : (user?.personImg ?? _personImgUrl),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/theme.dart';
+import 'package:merchant_app/features/debug/network/network_debug_floating_entry.dart';
 import 'package:merchant_app/features/me/providers/language_notifier.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
@@ -37,6 +38,14 @@ class MerchantApp extends ConsumerWidget {
       localizationsDelegates: AppLocalizations.localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: AppRouter.router,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            const NetworkDebugFloatingEntry(),
+          ],
+        );
+      },
     );
   }
 }

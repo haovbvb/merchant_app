@@ -6,6 +6,7 @@ import 'package:merchant_app/core/services/language_store.dart';
 import 'package:merchant_app/core/utils/hud.dart';
 import 'package:merchant_app/core/utils/logger.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/features/debug/network/network_debug_store.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -43,6 +44,11 @@ class ApiClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
+          final requestId =
+              '${DateTime.now().microsecondsSinceEpoch}_${options.hashCode}';
+          options.extra['_debugRequestId'] = requestId;
+          options.extra['_debugStartMs'] = DateTime.now().millisecondsSinceEpoch;
+
           final buffer = StringBuffer('➡️ ${options.method} ${options.uri}');
           if (options.queryParameters.isNotEmpty) {
             buffer.write(' query=${options.queryParameters}');
@@ -70,10 +76,12 @@ class ApiClient {
             buffer.write(' headers=${options.headers}');
           }
 
+          NetworkDebugStore.instance.onRequest(options);
           logI('➡️ [$_logTag] ${buffer.toString()}');
           return handler.next(options);
         },
         onResponse: (response, handler) {
+          NetworkDebugStore.instance.onResponse(response);
           final buffer = StringBuffer('✅ path=${response.realUri.path}');
           if (response.data != null) {
             buffer.write(' data=${response.data}');
@@ -88,6 +96,7 @@ class ApiClient {
           return handler.next(response);
         },
         onError: (DioException e, handler) {
+          NetworkDebugStore.instance.onError(e);
           if (e.requestOptions.extra['_hudShown'] == true) {
             Hud.dismiss();
             e.requestOptions.extra.remove('_hudShown');

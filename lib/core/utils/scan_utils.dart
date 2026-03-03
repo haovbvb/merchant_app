@@ -131,8 +131,8 @@ class ScanUtils {
     if (qr.contains(',')) {
       if (_isContainsKeyValue(qr)) {
         final map = _splitKeyValue(qr, upperKeys: true);
-        final sn = map['VIN'];
-        final vin = map['VIN'];
+        final sn = (map['SN'] ?? '').isNotEmpty ? map['SN'] : map['VIN'];
+        final vin = (map['VIN'] ?? '').isNotEmpty ? map['VIN'] : map['SN'];
         final vcu = map['VCU'];
         if ((sn ?? '').isNotEmpty || (vin ?? '').isNotEmpty || (vcu ?? '').isNotEmpty) {
           return QrCodeVehicle(sn: sn, vin: vin, vcu: vcu);
@@ -237,6 +237,22 @@ class ScanUtils {
   }
 
   static QrCodeVehicle _dealVehicleNotContainsKeyValue(String qr, int clickType) {
+    final qrLower = qr.toLowerCase();
+    final snFromSnEq = _extractValueByKey(qr, qrLower, 'sn=');
+    if (snFromSnEq.isNotEmpty) {
+      if (clickType == 2) {
+        return QrCodeVehicle(sn: '', vin: '', vcu: qr);
+      }
+      return QrCodeVehicle(sn: snFromSnEq, vin: snFromSnEq, vcu: '');
+    }
+    final snFromSnColon = _extractValueByKey(qr, qrLower, 'sn:');
+    if (snFromSnColon.isNotEmpty) {
+      if (clickType == 2) {
+        return QrCodeVehicle(sn: '', vin: '', vcu: qr);
+      }
+      return QrCodeVehicle(sn: snFromSnColon, vin: snFromSnColon, vcu: '');
+    }
+
     final qrUpper = qr.toUpperCase();
     if (!(qrUpper.contains('VIN:') || qrUpper.contains('VIN='))) {
       if (clickType == 2) {
@@ -261,6 +277,17 @@ class ScanUtils {
       return QrCodeVehicle(sn: vehicleSn, vin: vehicleSn, vcu: '');
     }
     return QrCodeVehicle(sn: qr, vin: qr, vcu: '');
+  }
+
+  static String _extractValueByKey(String original, String lower, String key) {
+    final idx = lower.indexOf(key);
+    if (idx == -1) return '';
+    final start = idx + key.length;
+    final end = original.indexOf(',', start);
+    final value = end == -1
+        ? original.substring(start)
+        : original.substring(start, end);
+    return value.trim();
   }
 
   static QrCodeBattery _dealBatteryNotContainsKeyValue(String qr, int clickType) {

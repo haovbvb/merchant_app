@@ -68,6 +68,7 @@ class ApplicantSheet extends ConsumerStatefulWidget {
 
 class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
   final _userIdController = TextEditingController();
+  final _userIdFocusNode = FocusNode();
   final _accountController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -82,7 +83,23 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
   final List<String> _cardImgUrls = [];
 
   @override
+  void initState() {
+    super.initState();
+    _userIdFocusNode.addListener(_onUserIdFocusChanged);
+  }
+
+  void _onUserIdFocusChanged() {
+    if (_userIdFocusNode.hasFocus) return;
+    final cardNum = _userIdController.text.trim();
+    if (cardNum.isEmpty) return;
+    widget.notifier.queryUser(cardNum);
+  }
+
+  @override
   void dispose() {
+    _userIdFocusNode
+      ..removeListener(_onUserIdFocusChanged)
+      ..dispose();
     _userIdController.dispose();
     _accountController.dispose();
     _firstNameController.dispose();
@@ -182,6 +199,7 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
                         Expanded(
                           child: TextField(
                             controller: _userIdController,
+                            focusNode: _userIdFocusNode,
                             decoration: InputDecoration(
                               hintText: l10n.sellBindUserIdHint,
                               hintStyle: const TextStyle(
@@ -267,11 +285,22 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
                     const SizedBox(height: 8),
                     _buildImageUpload(
                       imageUrl: _personImgUrl,
-                      onTap: () =>
-                          _pickImage(false, source: ImageSource.gallery),
+                      onTap: () {
+                        final imageUrl = _personImgUrl;
+                        if (imageUrl == null || imageUrl.isEmpty) {
+                          _pickImage(false, source: ImageSource.gallery);
+                          return;
+                        }
+                        _previewImage(imageUrl);
+                      },
                       showCamera: _personImgUrl == null,
                       onCameraTap: () =>
                           _pickImage(false, source: ImageSource.camera),
+                      onDelete: () {
+                        setState(() {
+                          _personImgUrl = null;
+                        });
+                      },
                     ),
                     const SizedBox(height: 16),
                   ],
@@ -465,6 +494,7 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
     required VoidCallback onTap,
     bool showCamera = false,
     VoidCallback? onCameraTap,
+    VoidCallback? onDelete,
   }) {
     return GestureDetector(
       onTap: imageUrl == null && showCamera && onCameraTap != null
@@ -478,21 +508,44 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
           borderRadius: BorderRadius.circular(8),
           border: Border.all(color: const Color(0xFFEEEEEE)),
         ),
-        child: imageUrl != null
-            ? ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      const Icon(Icons.image, color: Color(0xFF999999)),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: imageUrl != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) =>
+                            const Icon(Icons.image, color: Color(0xFF999999)),
+                      ),
+                    )
+                  : Icon(
+                      showCamera ? Icons.camera_alt : Icons.add,
+                      color: const Color(0xFF999999),
+                      size: 32,
+                    ),
+            ),
+            if (imageUrl != null && onDelete != null)
+              Positioned(
+                top: 4,
+                right: 4,
+                child: GestureDetector(
+                  onTap: onDelete,
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.5),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.close, color: Colors.white, size: 14),
+                  ),
                 ),
-              )
-            : Icon(
-                showCamera ? Icons.camera_alt : Icons.add,
-                color: const Color(0xFF999999),
-                size: 32,
               ),
+          ],
+        ),
       ),
     );
   }
@@ -500,8 +553,21 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
   Widget _buildCardImageRow() {
     final children = <Widget>[];
     final showList = _cardImgUrls.take(4).toList();
-    for (final imageUrl in showList) {
-      children.add(_buildImageUpload(imageUrl: imageUrl, onTap: () {}));
+    for (int index = 0; index < showList.length; index++) {
+      final imageUrl = showList[index];
+      children.add(
+        _buildImageUpload(
+          imageUrl: imageUrl,
+          onTap: () => _previewImage(imageUrl),
+          onDelete: () {
+            setState(() {
+              _cardImgUrls.removeAt(index);
+              _cardImgUrl =
+                  _cardImgUrls.isEmpty ? null : _cardImgUrls.join(',');
+            });
+          },
+        ),
+      );
       if (children.length < 4) {
         children.add(const SizedBox(width: 12));
       }
@@ -524,6 +590,30 @@ class _ApplicantSheetState extends ConsumerState<ApplicantSheet> {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(children: children),
+    );
+  }
+
+  void _previewImage(String imageUrl) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Container(
+          color: Colors.black,
+          alignment: Alignment.center,
+          child: InteractiveViewer(
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) => const Icon(
+                Icons.broken_image,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 

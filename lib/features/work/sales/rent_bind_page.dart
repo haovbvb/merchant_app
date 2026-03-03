@@ -620,6 +620,11 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
       advancedMode: advancedMode,
     );
     if (result == null || !mounted) return;
+    final email = result.email.trim();
+    if (email.isNotEmpty && !email.contains('@')) {
+      showToast(context.l10n.offlineRegisterEmailInvalid);
+      return;
+    }
     final latestState = ref.read(rentBindProvider);
     if (latestState.selectedPack == null) return;
     final l10n = context.l10n;

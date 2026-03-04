@@ -132,7 +132,7 @@ class UserDetailFragment :
                     val indicator = LinePagerIndicator(context)
                     indicator.mode = LinePagerIndicator.MODE_EXACTLY
                     indicator.lineWidth = UIUtil.dip2px(context, 68.0).toFloat()
-                    indicator.setColors(Color.parseColor("#FF56B327"))
+                    indicator.setColors(Color.parseColor("#FF08983B"))
                     return indicator
                 }
             }

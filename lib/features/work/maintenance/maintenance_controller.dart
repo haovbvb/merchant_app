@@ -357,6 +357,7 @@ final repairRecordCreateProvider =
 
 class RepairRecordCreateNotifier extends Notifier<RepairRecordCreateState> {
   final ApiService _api = ApiService();
+  static const int _remarkMaxLength = 500;
 
   @override
   RepairRecordCreateState build() => const RepairRecordCreateState();
@@ -376,7 +377,10 @@ class RepairRecordCreateNotifier extends Notifier<RepairRecordCreateState> {
   }
 
   void updateRemark(String value) {
-    state = state.copyWith(remark: value);
+    final limited = value.length > _remarkMaxLength
+        ? value.substring(0, _remarkMaxLength)
+        : value;
+    state = state.copyWith(remark: limited);
   }
 
   void selectProject(DeviceFixProject? project) {

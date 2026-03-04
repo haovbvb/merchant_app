@@ -317,7 +317,7 @@ class SaleSummaryActivity :
             amountEntries.add(Entry(i * 1f, tempAmount, list2[i].time))
         }
         lineDataSet = LineDataSet(amountEntries, "")
-        lineDataSet?.color = Color.parseColor("#FF56B327") // 设置折线图颜色
+        lineDataSet?.color = Color.parseColor("#FF08983B") // 设置折线图颜色
         lineDataSet?.setDrawCircles(true)
         lineDataSet?.setDrawValues(true)
         lineDataSet?.lineWidth = 1.5f
@@ -325,7 +325,7 @@ class SaleSummaryActivity :
         lineDataSet?.circleHoleRadius = 12f
         // 圆点颜色和半径
         lineDataSet?.setDrawCircleHole(true)
-        lineDataSet?.setCircleColor(Color.parseColor("#FF56B327"))     // 圆点颜色
+        lineDataSet?.setCircleColor(Color.parseColor("#FF08983B"))     // 圆点颜色
         lineDataSet?.circleRadius = 3f              // 外圈半径
         lineDataSet?.circleHoleRadius = 1f          // 内圈半径（中空）
         lineDataSet?.circleHoleColor = Color.WHITE // 中心孔颜色（可选）

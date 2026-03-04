@@ -20,6 +20,7 @@ import com.base.common.base.mvvm.BaseNormalVActivity
 import com.base.common.permission.PermissionListenerImpl
 import com.base.common.permission.PermissionManager
 import com.base.common.utils.ToastUtils
+import com.base.common.utils.WindowInsetsHelper
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.okla.ops.R
@@ -94,6 +95,7 @@ class DeviceTransportCreateActivity :
 
     override fun initViews(savedInstanceState: Bundle?) {
         super.initViews(savedInstanceState)
+        WindowInsetsHelper.applyForBottom(mBinding.llBottom)
         if (mDeviceType == 0) {
             finish()
             return

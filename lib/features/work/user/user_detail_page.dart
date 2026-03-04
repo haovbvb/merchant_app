@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 // ignore_for_file: uri_does_not_exist, undefined_class, undefined_function, undefined_identifier
 
 import 'package:flutter/material.dart';
@@ -13,6 +15,7 @@ import 'package:merchant_app/data/models/power_change.dart';
 import 'package:merchant_app/data/models/user_detail.dart';
 import 'package:merchant_app/data/models/user_order_response.dart';
 import 'package:merchant_app/data/models/user_payment_record.dart';
+import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/user/user_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 import 'package:photo_view/photo_view.dart';
@@ -227,6 +230,9 @@ class _BasicInfoTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final phoneText = _formatPhoneWithAreaCode(detail?.phone);
+    final contactTextColor = Colors.blue.shade900;
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -279,9 +285,17 @@ class _BasicInfoTab extends StatelessWidget {
               Divider(height: 1, indent: 16, color: AppColors.borderColor),
               _InfoRow(label: l10n.userBasicBirthday, value: detail?.birthday ?? '-'),
               Divider(height: 1, indent: 16, color: AppColors.borderColor),
-              _InfoRow(label: l10n.userBasicPhone, value: detail?.phone ?? '-'),
+              _InfoRow(
+                label: l10n.userBasicPhone,
+                value: phoneText,
+                valueColor: contactTextColor,
+              ),
               Divider(height: 1, indent: 16, color: AppColors.borderColor),
-              _InfoRow(label: l10n.userBasicEmail, value: detail?.email ?? '-'),
+              _InfoRow(
+                label: l10n.userBasicEmail,
+                value: detail?.email ?? '-',
+                valueColor: contactTextColor,
+              ),
             ],
           ),
         ),
@@ -361,7 +375,21 @@ class _BasicInfoTab extends StatelessWidget {
 
   List<String> _parsePhotos(String? imgList) {
     if (imgList == null || imgList.isEmpty) return const [];
-    return imgList.split(',').where((s) => s.trim().isNotEmpty).toList();
+    return imgList
+        .split(',')
+        .map((s) => s.trim())
+        .where((s) => s.isNotEmpty)
+        .toList();
+  }
+
+  String _formatPhoneWithAreaCode(String? phone) {
+    final value = (phone ?? '').trim();
+    if (value.isEmpty) return '-';
+    final areaCode = (AuthSession.instance.current?.areaCode ?? '').trim();
+    if (areaCode.isEmpty || value.startsWith(areaCode)) {
+      return value;
+    }
+    return '$areaCode $value';
   }
 
   void _showDeviceSheet(
@@ -997,10 +1025,15 @@ class _InfoDivider extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.value});
+  const _InfoRow({
+    required this.label,
+    required this.value,
+    this.valueColor,
+  });
 
   final String label;
   final String value;
+  final Color? valueColor;
 
   @override
   Widget build(BuildContext context) {
@@ -1023,10 +1056,10 @@ class _InfoRow extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
-                color: AppColors.black06Text,
+                color: valueColor ?? AppColors.black06Text,
               ),
             ),
           ),
@@ -1053,23 +1086,82 @@ class _PhotoGrid extends StatelessWidget {
     return Wrap(
       spacing: 8,
       runSpacing: 8,
-      children: photos.map((url) {
-        return ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            url,
-            width: 72,
-            height: 72,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => Container(
+      children: photos.asMap().entries.map((entry) {
+        final index = entry.key;
+        final url = entry.value;
+        return GestureDetector(
+          onTap: () => _showPhotoViewer(context, index),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              url,
               width: 72,
               height: 72,
-              color: const Color(0xFFF5F5F5),
-              child: const Icon(Icons.broken_image_outlined, color: Color(0xFF999999)),
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(
+                width: 72,
+                height: 72,
+                color: const Color(0xFFF5F5F5),
+                child: const Icon(Icons.broken_image_outlined, color: Color(0xFF999999)),
+              ),
             ),
           ),
         );
       }).toList(),
+    );
+  }
+
+  void _showPhotoViewer(BuildContext context, int initialIndex) {
+    final controller = PageController(initialPage: initialIndex);
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.9),
+      builder: (context) => Dialog(
+        insetPadding: EdgeInsets.zero,
+        backgroundColor: Colors.black,
+        child: Stack(
+          children: [
+            PhotoViewGallery.builder(
+              itemCount: photos.length,
+              pageController: controller,
+              backgroundDecoration: const BoxDecoration(color: Colors.black),
+              builder: (context, index) {
+                return PhotoViewGalleryPageOptions(
+                  imageProvider: NetworkImage(photos[index]),
+                  minScale: PhotoViewComputedScale.contained,
+                  maxScale: PhotoViewComputedScale.covered * 2.5,
+                  errorBuilder: (_, __, ___) => const Center(
+                    child: Icon(
+                      Icons.broken_image_outlined,
+                      size: 48,
+                      color: Colors.white70,
+                    ),
+                  ),
+                );
+              },
+            ),
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              right: 12,
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.4),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.close,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -1269,31 +1361,40 @@ class _OrderList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (orders.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'assets/android/mipmap-xxhdpi/empty_user_orderrecord.png',
-              width: 120,
-              height: 120,
-              errorBuilder: (_, __, ___) => Icon(
-                Icons.receipt_long_outlined,
-                size: 64,
-                color: Colors.grey[400],
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height * 0.45,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'assets/android/mipmap-xxhdpi/empty_user_orderrecord.png',
+                    width: 120,
+                    height: 120,
+                    errorBuilder: (_, __, ___) => Icon(
+                      Icons.receipt_long_outlined,
+                      size: 64,
+                      color: Colors.grey[400],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.userDetailOrderEmpty,
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.userDetailOrderEmpty,
-              style: TextStyle(color: Colors.grey[600], fontSize: 14),
-            ),
-          ],
-        ),
+          ),
+        ],
       );
     }
 
     return ListView.separated(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       itemCount: orders.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -1543,7 +1644,10 @@ class _RentOrderCard extends StatelessWidget {
                     ),
                     _InfoLine(
                       label: l10n.orderLabelExpireDate,
-                      value: _formatDate(rent?.expireDate),
+                      value: DateFormatUtils.formatTimestamp(
+                        rent?.expireDate,
+                        pattern: 'yyyy-MM-dd',
+                      ),
                     ),
                   ],
                 ),
@@ -2231,6 +2335,35 @@ class _RecordsEmptyView extends StatelessWidget {
   }
 }
 
+class _PickedXFileThumb extends StatelessWidget {
+  const _PickedXFileThumb({required this.file});
+
+  final XFile file;
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Uint8List>(
+      future: file.readAsBytes(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Image.memory(
+            snapshot.data!,
+            width: 64,
+            height: 64,
+            fit: BoxFit.cover,
+          );
+        }
+        return Container(
+          width: 64,
+          height: 64,
+          color: const Color(0xFFF5F5F5),
+          child: const Icon(Icons.image_outlined, color: Color(0xFF999999)),
+        );
+      },
+    );
+  }
+}
+
 class _PaymentRecordCard extends StatelessWidget {
   const _PaymentRecordCard({
     required this.record,
@@ -2249,6 +2382,8 @@ class _PaymentRecordCard extends StatelessWidget {
         .join(' ');
     final amountText = _formatAmountOptional(record.amount);
     final timeText = DateFormatUtils.formatString(record.payTime);
+    final attachment = _resolveAttachment(record.attachment, null);
+    final hasVoucher = _parseAttachmentUrls(attachment).isNotEmpty;
 
     return Container(
       decoration: BoxDecoration(
@@ -2304,22 +2439,40 @@ class _PaymentRecordCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Text(
-                amountText,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black09Text,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    amountText,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black09Text,
+                    ),
+                  ),
+                  if (record.payType == 2) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '${l10n.userPaymentPeriod} ${record.period?.toString() ?? '-'}',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: AppColors.black06Text,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          if (record.payType == 2)
-            _recordInfoRow(
-              l10n.userPaymentPeriod,
-              record.period?.toString() ?? '-',
+          if (hasVoucher) ...[
+            const SizedBox(height: 12),
+            _VoucherButton(
+              iconPath: 'assets/android/mipmap-xxhdpi/icon_view_voucher.png',
+              label: l10n.orderVoucherView,
+              onPressed: () => _showVoucherDialog(context, l10n, attachment),
             ),
+          ],
         ],
       ),
     );
@@ -2683,16 +2836,15 @@ Future<void> _uploadVoucherImages(
   required int? payType,
   required String? existingAttachment,
 }) async {
-  final picker = ImagePicker();
-  final files = await _pickVoucherImages(context, l10n, picker);
+  final files = await _showUploadVoucherDialog(context, l10n);
+  if (files == null) {
+    return;
+  }
   if (files.isEmpty) {
     _showSnack(context, l10n.orderVoucherSelectEmpty);
     return;
   }
   final limited = files.length > 5 ? files.take(5).toList() : files;
-  if (files.length > 5) {
-    _showSnack(context, l10n.orderVoucherMaxCount);
-  }
 
   final progress = ValueNotifier<double>(0);
   _showUploadProgressDialog(context, l10n, progress);
@@ -2700,8 +2852,8 @@ Future<void> _uploadVoucherImages(
   final notifier = ProviderScope.containerOf(context, listen: false)
       .read(userDetailProvider.notifier);
   final paths = limited
-      .map((file) => (file as dynamic).path)
-      .whereType<String>()
+      .map((file) => file.path)
+      .where((path) => path.trim().isNotEmpty)
       .toList();
   final result = await notifier.uploadOrderVouchers(
     paths,
@@ -2735,6 +2887,151 @@ Future<void> _uploadVoucherImages(
     newStatus: newStatus,
   );
   _showSnack(context, l10n.orderVoucherConfirmSuccess);
+}
+
+Future<List<XFile>?> _showUploadVoucherDialog(
+  BuildContext context,
+  AppLocalizations l10n,
+) async {
+  final picker = ImagePicker();
+  final selected = <XFile>[];
+  var showRequiredError = false;
+
+  return showDialog<List<XFile>>(
+    context: context,
+    barrierDismissible: false,
+    builder: (dialogContext) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          Future<void> addImages() async {
+            if (selected.length >= 5) {
+              _showSnack(dialogContext, l10n.orderVoucherMaxCount);
+              return;
+            }
+            final picked = await _pickVoucherImages(context, l10n, picker);
+            if (picked.isEmpty) return;
+
+            final remain = 5 - selected.length;
+            if (picked.length > remain) {
+              _showSnack(dialogContext, l10n.orderVoucherMaxCount);
+            }
+            selected.addAll(picked.take(remain));
+            setState(() {
+              if (selected.isNotEmpty) {
+                showRequiredError = false;
+              }
+            });
+          }
+
+          return AlertDialog(
+            title: Text(l10n.orderVoucherUpload),
+            content: SizedBox(
+              width: 320,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${l10n.orderVoucherUploadHint} (0/5)'.replaceFirst('0', selected.length.toString()),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.black06Text,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      ...selected.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final file = entry.value;
+                        return Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: _PickedXFileThumb(file: file),
+                            ),
+                            Positioned(
+                              top: -6,
+                              right: -6,
+                              child: GestureDetector(
+                                onTap: () {
+                                  selected.removeAt(index);
+                                  setState(() {});
+                                },
+                                child: Container(
+                                  width: 18,
+                                  height: 18,
+                                  decoration: const BoxDecoration(
+                                    color: Colors.black54,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    Icons.close,
+                                    size: 12,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }),
+                      if (selected.length < 5)
+                        GestureDetector(
+                          onTap: addImages,
+                          child: Container(
+                            width: 64,
+                            height: 64,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5F6F8),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: const Color(0xFFD9D9D9)),
+                            ),
+                            child: const Icon(
+                              Icons.add,
+                              color: Color(0xFF999999),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                  if (showRequiredError) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      l10n.orderVoucherSelectEmpty,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFFFA4332),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: Text(l10n.orderVoucherPickCancel),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (selected.isEmpty) {
+                    setState(() => showRequiredError = true);
+                    return;
+                  }
+                  Navigator.of(dialogContext).pop(List<XFile>.from(selected));
+                },
+                child: Text(l10n.orderVoucherUpload),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
 }
 
 String _mergeAttachments(String? existing, List<String> next) {
@@ -2794,7 +3091,7 @@ void _showUploadProgressDialog(
   );
 }
 
-Future<List<dynamic>> _pickVoucherImages(
+Future<List<XFile>> _pickVoucherImages(
   BuildContext context,
   AppLocalizations l10n,
   ImagePicker picker,

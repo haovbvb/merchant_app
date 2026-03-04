@@ -17,6 +17,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.base.common.base.mvvm.BaseNormalListVFragment;
+import com.base.common.utils.WindowInsetsHelper;
 import com.base.library.utils.GsonUtils;
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -87,6 +88,7 @@ public class CabinetAuthorizationUserFragment extends BaseNormalListVFragment<Ca
         super.initViews(view, savedInstanceState);
         getStatusView().setEnableLoadMore(true);
         getStatusView().setEnableRefresh(true);
+        WindowInsetsHelper.applyForToolbar(mActivity, mBinding.rootlayout.getId());
         initObserver();
         initClicks();
         initData();

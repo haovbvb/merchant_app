@@ -358,7 +358,7 @@ public class SelectWarehouseReceiveDialog extends Dialog implements View.OnClick
                 LinePagerIndicator linePagerIndicator = new LinePagerIndicator(context);
                 linePagerIndicator.setMode(LinePagerIndicator.MODE_EXACTLY);
                 linePagerIndicator.setLineWidth(UIUtil.dip2px(context, 30.0) * 1.0f);
-                linePagerIndicator.setColors(Color.parseColor("#00B39B"));
+                linePagerIndicator.setColors(Color.parseColor("#FF08983B"));
                 return linePagerIndicator;
             }
         });

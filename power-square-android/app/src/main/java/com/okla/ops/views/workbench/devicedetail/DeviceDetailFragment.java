@@ -207,12 +207,12 @@ public class DeviceDetailFragment extends BaseNormalVFragment<DeviceDetailViewMo
                         if (onlineStatus == 0) {//离线
                             mBinding.tvBoundSource.setText(getString(R.string.offline));
                             mBinding.tvBoundSource.setTextColor(ContextCompat.getColor(getContext(), R.color.color_fa4b51));
-                            mBinding.tvBoundSource.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getContext(), R.mipmap.icon_signal_offline), null, null, null);
+                            mBinding.tvBoundSource.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getContext(), R.drawable.icon_wifi_us), null, null, null);
                             mBinding.tvBoundSource.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.bg_line_fa4b51_r4));
                         } else {
                             mBinding.tvBoundSource.setText(getString(R.string.online));
                             mBinding.tvBoundSource.setTextColor(ContextCompat.getColor(getContext(), R.color.main_color));
-                            mBinding.tvBoundSource.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getContext(), R.mipmap.icon_signal_online), null, null, null);
+                            mBinding.tvBoundSource.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getContext(), R.drawable.icon_wifi_s), null, null, null);
                             mBinding.tvBoundSource.setBackground(ContextCompat.getDrawable(getContext(), R.drawable.bg_line_maincolor_r4));
                         }
                     } else {

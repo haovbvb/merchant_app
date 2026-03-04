@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
@@ -224,6 +225,8 @@ class _RepairRecordCreatePageState
                                 isDense: true,
                                 contentPadding: EdgeInsets.zero,
                               ),
+                              maxLength: 500,
+                              maxLengthEnforcement: MaxLengthEnforcement.enforced,
                               maxLines: 3,
                               onChanged: notifier.updateRemark,
                             ),
@@ -701,7 +704,7 @@ class _BatteryInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBound = battery?.cardNum != null && battery!.cardNum!.isNotEmpty;
+    final isBound = _isBoundCardNum(battery?.cardNum);
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -765,14 +768,20 @@ class _BatteryInfoCard extends StatelessWidget {
                   Expanded(
                     child: _StatItem(
                       label: l10n.repairRecordDeviceModelLabel,
-                      value: battery?.model ?? battery?.batModel ?? '-',
+                      value: _firstValidText([
+                        battery?.batModel,
+                        battery?.model,
+                      ]),
                     ),
                   ),
                   Container(width: 1, height: 40, color: Colors.grey.shade200),
                   Expanded(
                     child: _StatItem(
                       label: l10n.repairRecordDeviceSpecLabel,
-                      value: battery?.spec ?? battery?.batSpec ?? '-',
+                      value: _firstValidText([
+                        battery?.batSpec,
+                        battery?.spec,
+                      ]),
                     ),
                   ),
                 ],
@@ -811,7 +820,8 @@ class _VehicleInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isBound = vehicle?.cardNum.isNotEmpty == true;
+    final isBound = _isBoundCardNum(vehicle?.cardNum);
+    final carSpecText = _firstValidText([vehicle?.carSpec, vehicle?.spec]);
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -859,7 +869,7 @@ class _VehicleInfoCard extends StatelessWidget {
                           children: [
                             _BoundTag(isBound: isBound, l10n: l10n),
                             const SizedBox(width: 8),
-                            _Tag(text: vehicle?.spec ?? '-'),
+                            _Tag(text: carSpecText),
                           ],
                         ),
                       ],
@@ -881,14 +891,18 @@ class _VehicleInfoCard extends StatelessWidget {
                   Expanded(
                     child: _StatItem(
                       label: l10n.repairRecordDeviceModelLabel,
-                      value: vehicle?.model ?? '-',
+                      value: _firstValidText([
+                        vehicle?.carModel,
+                        vehicle?.carType,
+                        vehicle?.model,
+                      ]),
                     ),
                   ),
                   Container(width: 1, height: 40, color: Colors.grey.shade200),
                   Expanded(
                     child: _StatItem(
                       label: l10n.repairRecordDevicePlateNumber,
-                      value: vehicle?.carNumber ?? '-',
+                      value: _firstValidText([vehicle?.carNumber]),
                     ),
                   ),
                 ],
@@ -899,11 +913,12 @@ class _VehicleInfoCard extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  _InfoRow(
-                    label: l10n.repairRecordDeviceCardNumLabel,
-                    value: vehicle?.cardNum ?? '-',
-                  ),
-                  const SizedBox(height: 8),
+                  if (isBound)
+                    _InfoRow(
+                      label: l10n.repairRecordDeviceCardNumLabel,
+                      value: _firstValidText([vehicle?.cardNum]),
+                    ),
+                  if (isBound) const SizedBox(height: 8),
                   _InfoRow(
                     label: l10n.repairRecordDeviceEntryTime,
                     value: _formatDateValue(vehicle?.createTime),
@@ -1047,6 +1062,23 @@ String _formatDateValue(String? raw) {
     fallback: raw,
   );
   return formatted;
+}
+
+bool _isBoundCardNum(String? value) {
+  final text = value?.trim() ?? '';
+  if (text.isEmpty) return false;
+  if (text == '-' || text.toLowerCase() == 'null') return false;
+  return true;
+}
+
+String _firstValidText(List<String?> values) {
+  for (final value in values) {
+    final text = value?.trim() ?? '';
+    if (text.isNotEmpty && text != '-' && text.toLowerCase() != 'null') {
+      return text;
+    }
+  }
+  return '-';
 }
 
 class _StatusTag extends StatelessWidget {

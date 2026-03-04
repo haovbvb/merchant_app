@@ -22,6 +22,7 @@ import com.base.common.permission.PermissionListenerImpl;
 import com.base.common.permission.PermissionManager;
 import com.base.common.utils.StatusBarUtil;
 import com.base.common.utils.ToastUtils;
+import com.base.common.utils.WindowInsetsHelper;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.ResultPoint;
 import com.google.zxing.client.android.BeepManager;
@@ -135,6 +136,8 @@ public class QRCodeListActivity extends BaseNormalVActivity<QRCodeListViewModel,
     @Override
     protected void initViews(Bundle savedInstanceState) {
         super.initViews(savedInstanceState);
+        WindowInsetsHelper.applyForBottom(mBinding.clEnterSn);
+
         StatusBarUtil.transparencyBar(this);
         StatusBarUtil.StatusBarLightMode(this);
         mBinding.setView(this);

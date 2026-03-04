@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.base.common.Preferences;
 import com.base.common.base.mvvm.BaseNormalVActivity;
 import com.base.common.utils.ToastUtils;
+import com.base.common.utils.WindowInsetsHelper;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
 import com.okla.ops.R;
@@ -76,6 +77,7 @@ public class EquipmentSearchActivityNew extends BaseNormalVActivity<EquipmentSea
     protected void initViews(Bundle savedInstanceState) {
         super.initViews(savedInstanceState);
         mBinding.setView(this);
+        WindowInsetsHelper.applyForToolbar(this,mBinding.llEditScan.getId());
         initObserver();
         initClicks();
         initData();

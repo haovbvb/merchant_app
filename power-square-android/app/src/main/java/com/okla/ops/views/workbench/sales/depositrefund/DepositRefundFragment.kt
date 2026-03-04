@@ -16,6 +16,7 @@ import com.base.common.utils.DateTimeUtils
 import com.base.common.utils.NumToStrUtil
 import com.base.common.utils.StatusBarUtil
 import com.base.common.utils.ToastUtils
+import com.base.common.utils.WindowInsetsHelper
 import com.chad.library.adapter.base.BaseViewHolder
 import com.google.zxing.integration.android.IntentIntegrator
 import com.okla.ops.R
@@ -61,6 +62,7 @@ class DepositRefundFragment :
 
     override fun initViews(view: View?, savedInstanceState: Bundle?) {
         super.initViews(view, savedInstanceState)
+        WindowInsetsHelper.applyForBottom(mBinding.layoutBottom)
         initAdapter()
         initListener()
         initObserver()

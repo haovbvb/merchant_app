@@ -1,35 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#F5F6F7">
 
 
         <!-- 底部确认按钮 (固定部分) -->
-        <androidx.appcompat.widget.AppCompatTextView
-            android:id="@+id/btnConfirm"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layout_bottom"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:background="@drawable/selector_confirm"
-            android:enabled="false"
-            android:gravity="center"
-            android:paddingTop="12dp"
-            android:paddingBottom="12dp"
-            android:text="@string/btn_confirm"
-            android:textColor="@color/white"
-            android:textSize="17sp"
-            app:layout_constraintBottom_toBottomOf="parent" />
+            android:layout_height="78dp"
+            android:background="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent">
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/btnConfirm"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                android:background="@drawable/selector_btn_enable"
+                android:enabled="false"
+                android:gravity="center"
+                android:paddingTop="12dp"
+                android:paddingBottom="12dp"
+                android:text="@string/btn_confirm"
+                android:textColor="@color/white"
+                android:textSize="17sp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
         <!-- 中间可滚动区域 -->
         <androidx.core.widget.NestedScrollView
             android:id="@+id/scrollContent"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:fillViewport="true"
-            app:layout_constraintBottom_toTopOf="@id/btnConfirm"
+            app:layout_constraintBottom_toTopOf="@id/layout_bottom"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -86,6 +95,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/title_selectable_orders"
+                        android:paddingStart="12dp"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
 
@@ -118,6 +128,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:paddingVertical="16dp"
+                        android:paddingStart="12dp"
                         android:text="@string/text_no_order_to_bind"
                         android:textColor="@color/color_999999"
                         android:textSize="13sp"

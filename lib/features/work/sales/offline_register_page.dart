@@ -679,12 +679,16 @@ class _OfflineUserRegisterPageState
 
   Future<void> _pickBirthday(BuildContext context) async {
     final now = DateTime.now();
-    final initial = DateTime(now.year - 18, now.month, now.day);
+    final today = DateTime(now.year, now.month, now.day);
+    final parsed = DateTime.tryParse(_birthdayController.text.trim());
+    final initial = (parsed != null && !parsed.isAfter(today))
+        ? DateTime(parsed.year, parsed.month, parsed.day)
+        : today;
     final picked = await showDatePicker(
       context: context,
       initialDate: initial,
       firstDate: DateTime(now.year - 100),
-      lastDate: now,
+      lastDate: today,
     );
     if (picked == null || !mounted) return;
     setState(() {

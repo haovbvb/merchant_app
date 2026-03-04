@@ -74,7 +74,7 @@ class InstallmentUserInfoView(context: Context) : ConstraintLayout(context), Tex
                 groupNotify.visibility = View.VISIBLE
                 tvStatus.text = context.getString(R.string.str_status_settled)
                 tvUserOrderStatus.text = context.getString(R.string.text_paid_up)
-                tvUserOrderStatus.setTextColor(ContextCompat.getColor(context,R.color.color_00b88a))
+                tvUserOrderStatus.setTextColor(ContextCompat.getColor(context,R.color.main_color))
                 tvUserOrderStatus.background =
                     ContextCompat.getDrawable(context, R.drawable.bg_line_00b88a_r4)
             }

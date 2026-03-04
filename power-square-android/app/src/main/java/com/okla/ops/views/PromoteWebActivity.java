@@ -2,6 +2,7 @@ package com.okla.ops.views;
 
 import static android.webkit.WebSettings.LOAD_NO_CACHE;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -148,11 +149,13 @@ public class PromoteWebActivity extends BaseNormalVActivity<BaseViewModel, Activ
         };
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     private void initWebSetting(WebView mWebView) {
         WebSettings webSettings = mWebView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setCacheMode(LOAD_NO_CACHE);
+        webSettings.setTextZoom(100); // 100% 字体大小，不随系统缩放
 
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setSupportMultipleWindows(true);

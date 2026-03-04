@@ -17,6 +17,7 @@ import com.base.common.permission.PermissionListenerImpl
 import com.base.common.permission.PermissionManager
 import com.base.common.utils.DataStoreKeyUtils
 import com.base.common.utils.DataStoreUtils
+import com.base.common.utils.WindowInsetsHelper
 import com.base.library.utils.GsonUtils
 import com.base.library.utils.StringUtil
 import com.bumptech.glide.Glide
@@ -80,6 +81,7 @@ class VehicleSearchListActivity :
         super.initViews(savedInstanceState)
         initListener()
         mBinding.searchScanTitleView.setSearchHint(getString(R.string.hint_enter_device_or_scan_qr_code))
+        WindowInsetsHelper.applyForToolbar(this,mBinding.searchScanTitleView.id)
         switchViewDefault()
         initData()
     }

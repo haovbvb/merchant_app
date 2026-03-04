@@ -9,9 +9,12 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
+        android:id="@+id/rootlayout"
         android:layout_height="match_parent">
 
         <include
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:id="@+id/includeTitle"
             layout="@layout/base_title_mvvm_layout"
             app:layout_constraintTop_toTopOf="parent" />

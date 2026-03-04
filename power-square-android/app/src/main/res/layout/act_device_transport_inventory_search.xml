@@ -9,13 +9,16 @@
         <View
             android:id="@+id/vBgSearch"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="@+id/searchTitleView"
             android:background="@color/white"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="@+id/searchTitleView" />
 
         <com.okla.ops.weight.SearchTitleView
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
             android:id="@+id/searchTitleView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

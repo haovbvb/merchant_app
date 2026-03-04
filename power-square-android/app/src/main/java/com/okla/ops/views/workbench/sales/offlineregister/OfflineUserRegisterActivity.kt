@@ -217,7 +217,7 @@ class OfflineUserRegisterActivity :
         }
 
         getViewModel().mRegisterLiveData.observe(this) {
-            if (mBinding.confirmBtn.isEnabled)
+            if (mBinding.btnConfirm.isEnabled)
                 activity?.finish()
         }
     }
@@ -266,7 +266,7 @@ class OfflineUserRegisterActivity :
                 }
             }
 
-            R.id.confirmBtn -> {
+            R.id.btnConfirm -> {
                 hideSoftInput()
                 when {
                     mBinding.phoneEdt.text.toString().isEmpty() -> {
@@ -397,7 +397,7 @@ class OfflineUserRegisterActivity :
         mBinding.birthdayEdt.setOnClickListener(this)
         mBinding.dateIv.setOnClickListener(this)
         mBinding.phoneBtn.setOnClickListener(this)
-        mBinding.confirmBtn.setOnClickListener(this)
+        mBinding.btnConfirm.setOnClickListener(this)
         mBinding.scanIv.setOnClickListener(this)
     }
 
@@ -420,7 +420,7 @@ class OfflineUserRegisterActivity :
     }
 
     private fun checkInputState() {
-        mBinding.confirmBtn.isEnabled =
+        mBinding.btnConfirm.isEnabled =
             mBinding.phoneEdt.text.toString().isNotBlank() &&
                     mBinding.codeEdt.text.toString().isNotBlank() &&
                     mBinding.passwordEdt.text.toString().isNotBlank() &&

@@ -38,6 +38,7 @@ final profileProvider = NotifierProvider<ProfileNotifier, ProfileState>(
 
 class ProfileNotifier extends Notifier<ProfileState> {
   final ApiService _api = ApiService();
+  static const int _nickNameMaxLength = 15;
 
   @override
   ProfileState build() => const ProfileState();
@@ -66,11 +67,15 @@ class ProfileNotifier extends Notifier<ProfileState> {
 
   /// 修改昵称
   Future<bool> changeNickName(String nickName) async {
-    if (nickName.trim().isEmpty) return false;
+    final normalized = nickName.trim();
+    if (normalized.isEmpty) return false;
+    final limited = normalized.length > _nickNameMaxLength
+        ? normalized.substring(0, _nickNameMaxLength)
+        : normalized;
     state = state.copyWith(updating: true);
     final response = await _api.post<Object>(
       ApiPath.accountChangeNickName,
-      data: {'nickName': nickName.trim()},
+      data: {'newNickName': limited},
       parser: (json) => json ?? Object(),
     );
     state = state.copyWith(updating: false);
@@ -85,7 +90,7 @@ class ProfileNotifier extends Notifier<ProfileState> {
           status: state.info!.status,
           showStatus: state.info!.showStatus,
           avatarUrl: state.info!.avatarUrl,
-          nickName: nickName.trim(),
+          nickName: limited,
           userId: state.info!.userId,
         ),
       );

@@ -19,6 +19,7 @@ import com.base.common.beans.RxEvent
 import com.base.common.permission.PermissionListenerImpl
 import com.base.common.permission.PermissionManager
 import com.base.common.utils.StatusBarUtil
+import com.base.common.utils.WindowInsetsHelper
 import com.google.zxing.integration.android.IntentIntegrator
 import com.okla.ops.R
 import com.okla.ops.databinding.ActivityMaintenanceBookBinding
@@ -65,6 +66,7 @@ class MaintenanceBookActivity :
 
     override fun initViews(savedInstanceState: Bundle?) {
         super.initViews(savedInstanceState)
+        WindowInsetsHelper.applyForBottom(mBinding.llBottom)
         initObserver()
         initClick()
         initData()

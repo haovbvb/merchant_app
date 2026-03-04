@@ -61,7 +61,8 @@
                 <View
                     android:id="@+id/bgTransportAddress"
                     android:layout_width="match_parent"
-                    android:layout_height="177dp"
+                    android:layout_height="0dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/tvReceiveAddress"
                     android:layout_marginHorizontal="12dp"
                     android:layout_marginTop="38dp"
                     android:background="@drawable/bg_ffffff_r10"
@@ -100,7 +101,7 @@
                     android:layout_marginEnd="12dp"
                     android:drawablePadding="10dp"
                     android:ellipsize="end"
-                    android:lines="2"
+                    android:maxLines="2"
                     android:textColor="@color/color_e60c0c0d"
                     android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="@id/bgTransportAddress"
@@ -113,7 +114,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="20dp"
                     android:layout_marginStart="12dp"
-                    android:layout_marginTop="94dp"
+                    android:layout_marginTop="12dp"
                     android:drawableStart="@drawable/shape_circle_line_00b39b"
                     android:drawablePadding="10dp"
                     android:gravity="center_vertical"
@@ -121,7 +122,7 @@
                     android:textColor="@color/color_800c0c0d"
                     android:textSize="13sp"
                     app:layout_constraintStart_toStartOf="@id/bgTransportAddress"
-                    app:layout_constraintTop_toTopOf="@id/bgTransportAddress" />
+                    app:layout_constraintTop_toBottomOf="@id/tvSendAddress" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/tvReceiveAddress"
@@ -132,9 +133,10 @@
                     android:layout_marginEnd="12dp"
                     android:drawablePadding="10dp"
                     android:ellipsize="end"
-                    android:lines="2"
+                    android:maxLines="2"
                     android:textColor="@color/color_e60c0c0d"
                     android:textSize="14sp"
+                    android:paddingBottom="10dp"
                     app:layout_constraintEnd_toEndOf="@id/bgTransportAddress"
                     app:layout_constraintStart_toStartOf="@id/bgTransportAddress"
                     app:layout_constraintTop_toBottomOf="@id/tvReceiveWarehouse"

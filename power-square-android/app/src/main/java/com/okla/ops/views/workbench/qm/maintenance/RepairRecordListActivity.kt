@@ -109,7 +109,7 @@ class RepairRecordListActivity :
                             tvState.setTextColor(
                                 ContextCompat.getColor(
                                     this@RepairRecordListActivity,
-                                    R.color.color_00b88a
+                                    R.color.main_color
                                 )
                             )
                         }

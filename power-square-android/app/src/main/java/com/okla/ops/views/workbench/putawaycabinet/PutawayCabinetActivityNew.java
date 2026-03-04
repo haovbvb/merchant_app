@@ -661,7 +661,7 @@ public class PutawayCabinetActivityNew extends BaseNormalVActivity<PutawayCabine
         builder = new CustomDialog.Builder(getActivity())
                 .setTitle(getString(R.string.putaway_cabinet_confirm_title))
                 .setMessage(getString(R.string.putaway_cabinet_submit_tip))
-//                .setPositiveButtonTextColor(R.color.color_00b39b)
+//                .setPositiveButtonTextColor(R.color.color_ff12b34b)
                 .setPositiveButton((dialog, which) -> {
                     getLoading().onStart();
                     getViewModel().updateCabinetImages(mUploadImgList).observe(PutawayCabinetActivityNew.this, mUpdateImageObserver);

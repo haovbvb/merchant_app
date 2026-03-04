@@ -14,6 +14,7 @@ import com.base.common.utils.DataStoreKeyUtils
 import com.base.common.utils.DataStoreUtils
 import com.base.common.utils.StatusBarUtil
 import com.base.common.utils.ToastUtils
+import com.base.common.utils.WindowInsetsHelper
 import com.google.zxing.integration.android.IntentIntegrator
 import com.okla.ops.R
 import com.okla.ops.adapter.SingleDataBindingNoPUseAdapter
@@ -63,6 +64,7 @@ class RentBindFragment :
 
     override fun initViews(view: View?, savedInstanceState: Bundle?) {
         super.initViews(view, savedInstanceState)
+        WindowInsetsHelper.applyForBottom(mBinding.clbottom)
         initListener()
         initData()
         mBinding.packageinfoview.visibility = View.GONE

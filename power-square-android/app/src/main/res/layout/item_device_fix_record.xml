@@ -51,7 +51,7 @@
             android:paddingHorizontal="4dp"
             android:paddingVertical="2dp"
             android:text="-"
-            android:textColor="@color/cc_color_00b88a"
+            android:textColor="@color/main_color"
             android:textSize="13sp"
             app:layout_constraintBottom_toBottomOf="@id/imArrow"
             app:layout_constraintEnd_toEndOf="parent"

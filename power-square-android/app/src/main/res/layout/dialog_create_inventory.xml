@@ -159,7 +159,7 @@
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="30dp"
         android:layout_marginBottom="12dp"
-        android:background="@drawable/bg_7accc1_r8"
+        android:background="@drawable/bg_6608983b_r8"
         android:gravity="center"
         android:text="@string/inventory_start_inventory"
         android:textColor="@color/white"

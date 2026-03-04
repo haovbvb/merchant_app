@@ -24,6 +24,6 @@
         android:fillType="evenOdd"
         android:pathData="M18.857,5.143L11.398,13.089"
         android:strokeWidth="1.8"
-        android:strokeColor="#00B39B"
+        android:strokeColor="#FF08983B"
         android:strokeLineCap="round" />
 </vector>

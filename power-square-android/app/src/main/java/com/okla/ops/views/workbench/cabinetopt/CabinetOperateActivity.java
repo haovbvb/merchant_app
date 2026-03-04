@@ -1,13 +1,16 @@
 package com.okla.ops.views.workbench.cabinetopt;
 
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.base.common.base.mvvm.BaseNormalVActivity;
@@ -43,6 +46,23 @@ public class CabinetOperateActivity extends BaseNormalVActivity<CabinetOperateVi
         super.initViews(savedInstanceState);
         TextView topTitle = findViewById(com.base.common.R.id.topTitle);
         topTitle.setGravity(Gravity.CENTER);
+        Drawable drawable = ContextCompat.getDrawable(this, R.drawable.icon_bluetooth_item);
+        int size = (int) TypedValue.applyDimension(
+                TypedValue.COMPLEX_UNIT_DIP,
+                24f,
+                getResources().getDisplayMetrics()
+        );
+
+        if (drawable != null) {
+            drawable.setBounds(0, 0, size, size);
+        }
+
+        mBinding.btnBluetooth.setCompoundDrawables(
+                drawable,
+                null,
+                null,
+                null
+        );
         initObserver();
         initClick();
     }

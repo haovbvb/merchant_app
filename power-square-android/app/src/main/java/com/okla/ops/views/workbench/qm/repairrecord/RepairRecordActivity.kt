@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.base.common.base.mvvm.BaseNormalVActivity
 import com.base.common.utils.StatusBarUtil
 import com.base.common.utils.ToastUtils
+import com.base.common.utils.WindowInsetsHelper
 import com.google.zxing.integration.android.IntentIntegrator
 import com.okla.ops.R
 import com.okla.ops.beans.DeviceFixProject
@@ -61,6 +62,7 @@ class RepairRecordActivity :
     override fun initViews(savedInstanceState: Bundle?) {
         super.initViews(savedInstanceState)
         isFromStation = intent?.getBooleanExtra("isFromStation", false) ?: false
+        WindowInsetsHelper.applyForBottom(mBinding.llBottom)
         initObserver()
         initClick()
         initData()

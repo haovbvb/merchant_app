@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.base.common.Preferences
 import com.base.common.base.mvvm.BaseNormalVActivity
 import com.base.common.utils.ToastUtils
+import com.base.common.utils.WindowInsetsHelper
 import com.base.library.utils.GsonUtils
 import com.google.gson.reflect.TypeToken
 import com.google.zxing.integration.android.IntentIntegrator
@@ -21,9 +22,6 @@ import com.okla.ops.custom.SearchHistoryView
 import com.okla.ops.custom.SearchTitleView
 import com.okla.ops.databinding.ActivityVcuDeviceSearchBinding
 import com.okla.ops.views.workbench.QRCodeActivity
-import kotlin.text.contains
-import kotlin.text.indexOf
-import kotlin.text.substring
 
 class VcuDeviceSearchActivity :
     BaseNormalVActivity<VcuViewModel, ActivityVcuDeviceSearchBinding>() {
@@ -55,6 +53,7 @@ class VcuDeviceSearchActivity :
     override fun initViews(savedInstanceState: Bundle?) {
         super.initViews(savedInstanceState)
         initListener()
+        WindowInsetsHelper.applyForToolbar(this, mBinding.searchScanTitleView.getId())
         mBinding.searchScanTitleView.editHint = getString(R.string.hint_enter_device_or_scan_qr_code)
         switchViewDefault()
         initData()

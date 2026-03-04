@@ -17,6 +17,7 @@ import com.base.common.permission.PermissionManager
 import com.base.common.utils.DataStoreKeyUtils
 import com.base.common.utils.DataStoreUtils
 import com.base.common.utils.DensityUtil
+import com.base.common.utils.WindowInsetsHelper
 import com.base.library.utils.GsonUtils
 import com.bumptech.glide.Glide
 import com.chad.library.adapter.base.BaseViewHolder
@@ -64,6 +65,7 @@ class UserSearchActivity : BaseNormalListVActivity<UserViewModel, ActivityUserSe
         super.initViews(savedInstanceState)
         getStatusView().enableRefresh = true
         getStatusView().enableLoadMore = true
+        WindowInsetsHelper.applyForToolbar(this,mBinding.searchScanTitleView.id)
         initListener()
         initData()
     }

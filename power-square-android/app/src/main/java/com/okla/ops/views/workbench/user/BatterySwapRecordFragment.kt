@@ -81,7 +81,7 @@ class BatterySwapRecordFragment :
                         tvSwapStatus.setTextColor(
                             ContextCompat.getColor(
                                 mContext,
-                                R.color.color_0abf83
+                                R.color.main_color
                             )
                         )
                     }
@@ -91,7 +91,7 @@ class BatterySwapRecordFragment :
                         tvSwapStatus.setTextColor(
                             ContextCompat.getColor(
                                 mContext,
-                                R.color.color_0abf83
+                                R.color.main_color
                             )
                         )
                     }

@@ -132,6 +132,7 @@
             android:id="@+id/ivBack"
             android:layout_width="36dp"
             android:layout_height="36dp"
+            android:layout_marginTop="40dp"
             android:layout_marginStart="12dp"
             android:onClick="@{view::onClickView}"
             android:scaleType="center"

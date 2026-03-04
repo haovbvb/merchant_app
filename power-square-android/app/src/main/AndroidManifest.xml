@@ -26,7 +26,7 @@
     <uses-permission android:name="android.permission.WRITE_MEDIA_STORAGE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-        <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
@@ -403,11 +403,13 @@
         <activity
             android:name=".views.workbench.bluetoothauthorization.BluetoothOperateActivity"
             android:exported="false" />
-        <activity android:name=".views.workbench.vcu.VcuDeviceSearchActivity"
+        <activity
+            android:name=".views.workbench.vcu.VcuDeviceSearchActivity"
             android:exported="false"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />
-        <activity android:name=".views.workbench.vcu.VcuControlActivity"
+        <activity
+            android:name=".views.workbench.vcu.VcuControlActivity"
             android:exported="false"
             android:launchMode="singleTop"
             android:screenOrientation="portrait" />

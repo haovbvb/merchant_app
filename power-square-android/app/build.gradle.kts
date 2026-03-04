@@ -13,8 +13,8 @@ android {
         applicationId = "com.okla.ops"
         minSdk = rootProject.extra["minSdkVersion"] as Int
         targetSdk = rootProject.extra["targetSdkVersion"] as Int
-        versionCode = 5
-        versionName = "1.0.0"
+        versionCode = 7
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
@@ -107,4 +107,8 @@ dependencies {
     implementation(libs.magicindicator)
 
     implementation(project(":common"))
+
+    implementation(libs.media3.exoplayer)
+    implementation(libs.media3.ui)
+
 }

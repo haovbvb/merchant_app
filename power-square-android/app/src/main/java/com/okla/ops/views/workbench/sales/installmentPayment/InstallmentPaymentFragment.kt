@@ -17,6 +17,7 @@ import com.base.common.permission.PermissionManager
 import com.base.common.utils.PicJumpUtils
 import com.base.common.utils.StatusBarUtil
 import com.base.common.utils.ToastUtils
+import com.base.common.utils.WindowInsetsHelper
 import com.base.library.utils.FileUtils
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.zxing.integration.android.IntentIntegrator
@@ -67,6 +68,7 @@ class InstallmentPaymentFragment :
 
     override fun initViews(view: View?, savedInstanceState: Bundle?) {
         super.initViews(view, savedInstanceState)
+        WindowInsetsHelper.applyForBottom(mBinding.layoutBottom)
         initListener()
         initData()
         initClick()

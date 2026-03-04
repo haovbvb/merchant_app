@@ -20,6 +20,7 @@ import com.base.common.utils.DataStoreKeyUtils
 import com.base.common.utils.DataStoreUtils
 import com.base.common.utils.StatusBarUtil
 import com.base.common.utils.ToastUtils
+import com.base.common.utils.WindowInsetsHelper
 import com.bumptech.glide.Glide
 import com.chad.library.adapter.base.BaseViewHolder
 import com.google.zxing.integration.android.IntentIntegrator
@@ -84,6 +85,7 @@ class SwapBindFragment :
 
     override fun initViews(view: View?, savedInstanceState: Bundle?) {
         super.initViews(view, savedInstanceState)
+        WindowInsetsHelper.applyForBottom(mBinding.layoutBottom)
         initAdapter()
         initListener()
         initData()

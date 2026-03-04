@@ -117,10 +117,10 @@ public class DeviceBaseInfoFragment extends BaseNormalVFragment<DeviceDetailView
                 if (onlineStatus != null) {
                     if (onlineStatus == 1) {
                         mBinding.invDeviceStatus.setValue(getContext().getString(R.string.online));
-                        mBinding.invDeviceStatus.addValueDrawable(ContextCompat.getDrawable(getContext(), R.mipmap.icon_signal_online));
+                        mBinding.invDeviceStatus.addValueDrawable(ContextCompat.getDrawable(getContext(), R.drawable.icon_wifi_s));
                     } else {
                         mBinding.invDeviceStatus.setValue(getContext().getString(R.string.offline));
-                        mBinding.invDeviceStatus.addValueDrawable(ContextCompat.getDrawable(getContext(), R.mipmap.icon_signal_offline));
+                        mBinding.invDeviceStatus.addValueDrawable(ContextCompat.getDrawable(getContext(), R.drawable.icon_wifi_us));
                     }
                 } else {
                     mBinding.invDeviceStatus.setValue("-");

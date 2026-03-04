@@ -14,6 +14,7 @@ import com.base.common.base.mvvm.BaseNormalVActivity
 import com.base.common.dialog.CustomDialog
 import com.base.common.utils.StatusBarUtil
 import com.base.common.utils.ToastUtils
+import com.base.common.utils.WindowInsetsHelper
 import com.google.zxing.integration.android.IntentIntegrator
 import com.okla.ops.R
 import com.okla.ops.custom.FeedbackReasonsView
@@ -61,6 +62,7 @@ class UnbindDeviceActivity : BaseNormalVActivity<UnbindViewModel, ActUnbindDevic
 
     override fun initViews(savedInstanceState: Bundle?) {
         super.initViews(savedInstanceState);
+        WindowInsetsHelper.applyForBottom(mBinding.llBottom)
         initObserver();
         initClicks();
         initData()

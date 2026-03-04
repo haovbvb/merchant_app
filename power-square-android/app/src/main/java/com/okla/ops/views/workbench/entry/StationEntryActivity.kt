@@ -16,6 +16,7 @@ import com.base.common.permission.PermissionListenerImpl
 import com.base.common.permission.PermissionManager
 import com.base.common.qrcode.QrCodeUtils
 import com.base.common.utils.ToastUtils
+import com.base.common.utils.WindowInsetsHelper
 import com.bumptech.glide.Glide
 import com.google.zxing.integration.android.IntentIntegrator
 import com.okla.ops.R
@@ -75,6 +76,7 @@ class StationEntryActivity :
         super.initViews(savedInstanceState)
         initClick()
         initData()
+        WindowInsetsHelper.applyForBottom(mBinding.clbottom)
     }
 
     private fun initObserver() {
@@ -167,7 +169,7 @@ class StationEntryActivity :
                 val start = string.indexOf("$newBatteryCount")
                 val end = string.indexOf(stationStr) + stationStr.length
                 val spannableString = SpannableString(string)
-                val color = Color.parseColor("#FF56B327")
+                val color = Color.parseColor("#FF08983B")
                 spannableString.setSpan(
                     ForegroundColorSpan(color),
                     start,

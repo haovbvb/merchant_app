@@ -19,6 +19,7 @@ import com.base.common.permission.PermissionListenerImpl
 import com.base.common.permission.PermissionManager
 import com.base.common.utils.PicJumpUtils
 import com.base.common.utils.ToastUtils
+import com.base.common.utils.WindowInsetsHelper
 import com.base.library.utils.FileUtils
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.okla.ops.R
@@ -79,6 +80,7 @@ class RoadSideOrderDealActivity :
     private var mRecordNo = ""
     override fun initViews(savedInstanceState: Bundle?) {
         super.initViews(savedInstanceState)
+        WindowInsetsHelper.applyForBottom(mBinding.clFooter)
         mRecordNo = intent.getStringExtra("sheetNo") ?: ""
         initVoucherView()
         initObserver()

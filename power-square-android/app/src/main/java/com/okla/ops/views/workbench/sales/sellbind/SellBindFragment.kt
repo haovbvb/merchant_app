@@ -15,6 +15,7 @@ import com.base.common.utils.DataStoreKeyUtils
 import com.base.common.utils.DataStoreUtils
 import com.base.common.utils.StatusBarUtil
 import com.base.common.utils.ToastUtils
+import com.base.common.utils.WindowInsetsHelper
 import com.google.zxing.integration.android.IntentIntegrator
 import com.okla.ops.R
 import com.okla.ops.beans.ServicePlanBean
@@ -75,6 +76,7 @@ class SellBindFragment :
 
     override fun initViews(view: View?, savedInstanceState: Bundle?) {
         super.initViews(view, savedInstanceState)
+        WindowInsetsHelper.applyForBottom(mBinding.llbottom)
         mBinding.deviceinfoView.setEditTextHint(context?.getString(R.string.hint_enter_device_sn_or_scan_qr_code))
         mBinding.deviceinfoView.setTitle(context?.getString(R.string.text_device_sn))
         initListener()

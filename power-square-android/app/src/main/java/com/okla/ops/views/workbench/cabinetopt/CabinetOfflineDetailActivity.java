@@ -154,12 +154,12 @@ public class CabinetOfflineDetailActivity extends BaseNormalVActivity<CabinetOff
                 if (cabinetBean.getOnlineStatus() == 0) {
                     status = getString(R.string.offline);
                     mBinding.tvStatus.setTextColor(ContextCompat.getColor(this, R.color.color_fa4b51));
-                    mBinding.tvStatus.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(this, R.mipmap.icon_signal_offline), null, null, null);
+                    mBinding.tvStatus.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(this, R.drawable.icon_wifi_us), null, null, null);
                     mBinding.tvStatus.setBackground(ContextCompat.getDrawable(this, R.drawable.bg_line_fa4b51_r4));
                 } else {
                     status = getString(R.string.online);
                     mBinding.tvStatus.setTextColor(ContextCompat.getColor(this, R.color.main_color));
-                    mBinding.tvStatus.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(this, R.mipmap.icon_signal_online), null, null, null);
+                    mBinding.tvStatus.setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(this, R.drawable.icon_wifi_s), null, null, null);
                     mBinding.tvStatus.setBackground(ContextCompat.getDrawable(this, R.drawable.bg_line_maincolor_r4));
                 }
                 mBinding.tvStatus.setText(status);
@@ -404,7 +404,7 @@ public class CabinetOfflineDetailActivity extends BaseNormalVActivity<CabinetOff
                 LinePagerIndicator indicator = new LinePagerIndicator(context);
                 indicator.setMode(LinePagerIndicator.MODE_EXACTLY);
                 indicator.setLineWidth(UIUtil.dip2px(context, 30));
-                indicator.setColors(Color.parseColor("#FF56B327"));
+                indicator.setColors(Color.parseColor("#FF08983B"));
                 return indicator;
             }
         });

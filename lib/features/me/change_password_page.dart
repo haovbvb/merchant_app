@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/hash_utils.dart';
 import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
@@ -136,7 +137,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                         ? const SizedBox(
                             width: 20,
                             height: 20,
-                            child: const SizedBox.shrink(),
+                            child: SizedBox.shrink(),
                           )
                         : Text(
                             l10n.changePasswordConfirmAction,
@@ -181,12 +182,15 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     }
 
     setState(() => _submitting = true);
+    final oldPwdMd5 = HashUtils.md5Lower32(oldPwd);
+    final newPwdMd5 = HashUtils.md5Lower32(newPwd);
+    final confirmPwdMd5 = HashUtils.md5Lower32(confirmPwd);
     final response = await _api.post<Object>(
       ApiPath.changePassword,
       data: {
-        'existingPassword': oldPwd,
-        'newPassword': newPwd,
-        'confirmPassword': confirmPwd,
+        'existingPassword': oldPwdMd5,
+        'newPassword': newPwdMd5,
+        'confirmPassword': confirmPwdMd5,
       },
       parser: (json) => json ?? Object(),
     );

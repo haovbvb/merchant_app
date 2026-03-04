@@ -4,7 +4,6 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-
         <variable
             name="data"
             type="Object" />
@@ -14,22 +13,27 @@
             type="com.base.library.base.mvp.BasePresenter" />
     </data>
 
-
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/white">
+        android:background="@color/white"
+        app:elevation="0dp">
 
+        <!--不写死 paddingTop，由 Java 动态计算 -->
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
             android:background="@color/white"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp"
             app:contentInsetStart="0dp"
             app:layout_scrollFlags="enterAlways">
 
             <RelativeLayout
+                android:id="@+id/rlContent"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:gravity="center_vertical">
@@ -39,23 +43,21 @@
                     android:layout_width="50dp"
                     android:layout_height="match_parent"
                     android:layout_alignParentStart="true"
-                    android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="14dp"
+                    android:paddingStart="14dp"
                     android:drawablePadding="3dp"
                     android:gravity="center"
                     android:onClick="@{() -> presenter.onBack()}"
                     android:textSize="18sp"
-                    tools:text="back" />
+                    tools:text="返回" />
 
                 <TextView
                     android:id="@+id/top_left"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentStart="true"
-                    android:layout_alignParentLeft="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginLeft="14dp"
+                    android:paddingStart="14dp"
                     android:drawablePadding="3dp"
                     android:gravity="center"
                     android:onClick="@{() -> presenter.onLeftAction()}"
@@ -69,28 +71,26 @@
                     android:gravity="center"
                     android:maxLength="12"
                     android:text="@{presenter.title()}"
-                    tools:text="title" />
+                    tools:text="标题" />
 
                 <TextView
                     android:id="@+id/top_sub_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/top_title"
+                    android:layout_below="@id/top_title"
                     android:layout_centerHorizontal="true"
                     android:gravity="center"
                     android:maxLength="12"
                     android:paddingBottom="0dp"
                     android:visibility="gone" />
 
-
                 <TextView
                     android:id="@+id/top_right"
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginRight="14dp"
+                    android:layout_marginEnd="14dp"
                     android:gravity="center_vertical"
                     android:onClick="@{() -> presenter.onRightAction()}"
                     tools:text="保存" />
@@ -100,21 +100,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentEnd="true"
-                    android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginRight="14dp"
+                    android:layout_marginEnd="14dp"
                     android:onClick="@{() -> presenter.onRightImage()}"
                     android:visibility="gone" />
-
-                <!--<View-->
-                <!--android:id="@+id/top_bottom_line"-->
-                <!--style="@style/LineStyle"-->
-                <!--android:layout_alignParentBottom="true"-->
-                <!--android:visibility="visible" />-->
             </RelativeLayout>
 
         </androidx.appcompat.widget.Toolbar>
-
     </com.google.android.material.appbar.AppBarLayout>
-
 </layout>

@@ -424,7 +424,7 @@ public class DeviceWarehouseFragment extends BaseNormalVFragment<DeviceDetailVie
                     @Override
                     public void updateDrawState(@NonNull TextPaint ds) {
                         super.updateDrawState(ds);
-                        ds.setColor(ContextCompat.getColor(mActivity, R.color.color_00b39b));
+                        ds.setColor(ContextCompat.getColor(mActivity, R.color.color_ff12b34b));
                         ds.setUnderlineText(false);
                     }
                 }, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);

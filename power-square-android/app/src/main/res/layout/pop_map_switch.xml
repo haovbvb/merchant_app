@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="243dp"
+        android:layout_width="250dp"
         android:layout_height="wrap_content">
         <ImageView
             android:id="@+id/img_triangle"
@@ -48,7 +48,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingVertical="10dp"
-                android:drawableStart="@drawable/shape_circle_ff56b327"
+                android:drawableStart="@drawable/shape_circle_main_color"
                 android:drawablePadding="8dp"
                 android:gravity="center_vertical"
                 android:text="@string/str_no_maintenance_required"

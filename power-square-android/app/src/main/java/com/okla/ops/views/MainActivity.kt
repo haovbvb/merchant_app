@@ -9,6 +9,7 @@ import com.base.common.base.mvvm.BaseNormalVActivity
 import com.base.common.beans.RxEvent
 import com.base.common.utils.StatusBarUtil
 import com.base.common.utils.ToastUtils
+import com.base.common.utils.WindowInsetsHelper
 import com.base.library.base.BaseAppCompatFragment
 import com.okla.ops.R
 import com.okla.ops.adapter.CustomFragmentPagerAdapter
@@ -41,6 +42,7 @@ class MainActivity : BaseNormalVActivity<MainViewModel, ActivityMainBinding>() {
         super.initViews(savedInstanceState)
         initViewPager()
         initClick()
+        WindowInsetsHelper.applyForBottom(mBinding.main)
     }
 
     private fun initClick() {

@@ -1,6 +1,8 @@
 package com.base.common.base.mvvm;
 
 import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.Gravity;
@@ -17,6 +19,7 @@ import com.base.common.net.loading.DialogLoading;
 import com.base.common.utils.DataStoreKeyUtils;
 import com.base.common.utils.DataStoreUtils;
 import com.base.common.utils.LanguageUtils;
+import com.base.common.utils.WindowInsetsHelper;
 import com.base.library.base.Loading;
 import com.base.library.base.delegate.RefreshLoadMoreListener;
 import com.base.library.base.delegate.RegisterSDKDelegate;
@@ -46,20 +49,31 @@ public abstract class BaseNormalVActivity<VM extends BaseViewModel, V extends Vi
 
     @Override
     protected void attachBaseContext(Context newBase) {
-        String settingLanguage = DataStoreUtils.readStringData(DataStoreKeyUtils.Companion.getLANGUAGE_SETTING(),
-                LanguageUtils.LanguageType.ENGLISH.getLanguage());
-        if (TextUtils.isEmpty(settingLanguage)) {//用户未设置
+        String settingLanguage = DataStoreUtils.readStringData(
+                DataStoreKeyUtils.Companion.getLANGUAGE_SETTING(),
+                LanguageUtils.LanguageType.ENGLISH.getLanguage()
+        );
+        if (TextUtils.isEmpty(settingLanguage)) {
             settingLanguage = LanguageUtils.LanguageUtil.INSTANCE.getSystemLanguage(newBase);
-            DataStoreUtils.INSTANCE.saveSyncStringData(DataStoreKeyUtils.Companion.getLANGUAGE_SETTING(), settingLanguage);
+            DataStoreUtils.INSTANCE.saveSyncStringData(
+                    DataStoreKeyUtils.Companion.getLANGUAGE_SETTING(),
+                    settingLanguage
+            );
         }
-        LanguageUtils.LanguageUtil.INSTANCE.attachBaseContext(newBase, settingLanguage);
-        super.attachBaseContext(newBase);
+        Context languageContext = LanguageUtils.LanguageUtil.INSTANCE.attachBaseContext(newBase, settingLanguage);
+        Configuration override = new Configuration(languageContext.getResources().getConfiguration());
+        override.fontScale = 1.0f;
+        Context finalContext = languageContext.createConfigurationContext(override);
+        super.attachBaseContext(finalContext);
     }
+
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
         super.initViews(savedInstanceState);
         initToolBar();
+        // 自动刘海屏适配（仅加padding，不改透明、颜色）
+        WindowInsetsHelper.applyForToolbar(this, R.id.toolbar);
     }
 
     public void initToolBar() {

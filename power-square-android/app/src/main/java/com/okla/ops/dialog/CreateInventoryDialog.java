@@ -60,7 +60,7 @@ public class CreateInventoryDialog extends Dialog implements View.OnClickListene
                 resetSelectStatus();
                 tvStation.setBackground(getContext().getDrawable(R.drawable.bg_fff_line_00b39b_r8));
                 tvStation.setCompoundDrawablesRelativeWithIntrinsicBounds(null, ContextCompat.getDrawable(getContext(), R.drawable.icon_station_select), null, null);
-                tvStation.setTextColor(getContext().getColor(R.color.color_00b39b));
+                tvStation.setTextColor(getContext().getColor(R.color.color_ff12b34b));
                 deviceType = 2;
                 enableStartButton();
                 break;
@@ -68,7 +68,7 @@ public class CreateInventoryDialog extends Dialog implements View.OnClickListene
                 resetSelectStatus();
                 tvBattery.setBackground(getContext().getDrawable(R.drawable.bg_fff_line_00b39b_r8));
                 tvBattery.setCompoundDrawablesRelativeWithIntrinsicBounds(null, ContextCompat.getDrawable(getContext(), R.drawable.icon_battery_select), null, null);
-                tvBattery.setTextColor(getContext().getColor(R.color.color_00b39b));
+                tvBattery.setTextColor(getContext().getColor(R.color.color_ff12b34b));
                 deviceType = 1;
                 enableStartButton();
                 break;
@@ -76,7 +76,7 @@ public class CreateInventoryDialog extends Dialog implements View.OnClickListene
                 resetSelectStatus();
                 tvVehicle.setBackground(getContext().getDrawable(R.drawable.bg_fff_line_00b39b_r8));
                 tvVehicle.setCompoundDrawablesRelativeWithIntrinsicBounds(null, ContextCompat.getDrawable(getContext(), R.drawable.icon_vehicle_select), null, null);
-                tvVehicle.setTextColor(getContext().getColor(R.color.color_00b39b));
+                tvVehicle.setTextColor(getContext().getColor(R.color.color_ff12b34b));
                 deviceType = 3;
                 enableStartButton();
                 break;
@@ -111,7 +111,7 @@ public class CreateInventoryDialog extends Dialog implements View.OnClickListene
         if (!TextUtils.isEmpty(warehouseNo) && deviceType != 0) {
             btnStart.setBackground(getContext().getDrawable(com.base.common.R.drawable.bg_maincolor_r8));
         } else {
-            btnStart.setBackground(getContext().getDrawable(R.drawable.bg_7accc1_r8));
+            btnStart.setBackground(getContext().getDrawable(R.drawable.bg_6608983b_r8));
         }
     }
 

@@ -73,7 +73,7 @@
             android:layout_width="70dp"
             android:layout_height="40dp"
             android:layout_marginEnd="16dp"
-            android:background="@drawable/bg_00bf00_r8"
+            android:background="@drawable/bg_maincolor_r8"
             android:gravity="center"
             android:text="@string/Confirm"
             android:textColor="@color/white"

@@ -217,7 +217,7 @@
             android:id="@+id/tvUserAgreement"
             android:layout_width="0dp"
             android:layout_height="55dp"
-            android:drawableStart="@mipmap/icon_user_agreement"
+            android:drawableStart="@drawable/icon_list_authorize"
             android:drawableEnd="@mipmap/arrow_next"
             android:drawablePadding="10dp"
             android:gravity="center_vertical"

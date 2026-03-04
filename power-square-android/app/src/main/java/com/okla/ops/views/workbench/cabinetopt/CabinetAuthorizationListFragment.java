@@ -26,6 +26,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.base.common.base.mvvm.BaseNormalListVFragment;
 import com.base.common.utils.DensityUtil;
+import com.base.common.utils.WindowInsetsHelper;
 import com.base.library.utils.StringUtil;
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -61,11 +62,11 @@ public class CabinetAuthorizationListFragment extends BaseNormalListVFragment<Ca
                 int onlineStatus = item.getOnlineStatus();
                 if (onlineStatus == 0) {//离线
                     ((TextView) (helper.getView(R.id.tvStatus))).setTextColor(ContextCompat.getColor(getContext(), R.color.color_fa4b51));
-                    ((TextView) (helper.getView(R.id.tvStatus))).setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getContext(), R.mipmap.icon_signal_offline), null, null, null);
+                    ((TextView) (helper.getView(R.id.tvStatus))).setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getContext(), R.drawable.icon_wifi_us), null, null, null);
                     (helper.getView(R.id.tvStatus)).setBackground(ContextCompat.getDrawable(getContext(), R.drawable.bg_line_fa4b51_r4));
                 } else {
                     ((TextView) (helper.getView(R.id.tvStatus))).setTextColor(ContextCompat.getColor(getContext(), R.color.main_color));
-                    ((TextView) (helper.getView(R.id.tvStatus))).setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getContext(), R.mipmap.icon_signal_online), null, null, null);
+                    ((TextView) (helper.getView(R.id.tvStatus))).setCompoundDrawablesWithIntrinsicBounds(ContextCompat.getDrawable(getContext(), R.drawable.icon_wifi_s), null, null, null);
                     (helper.getView(R.id.tvStatus)).setBackground(ContextCompat.getDrawable(getContext(), R.drawable.bg_line_maincolor_r4));
                 }
                 ((LinearLayout) (helper.getView(R.id.ll_detail))).removeAllViews();
@@ -153,6 +154,7 @@ public class CabinetAuthorizationListFragment extends BaseNormalListVFragment<Ca
         super.initViews(view, savedInstanceState);
         getStatusView().setEnableLoadMore(true);
         getStatusView().setEnableRefresh(true);
+        WindowInsetsHelper.applyForToolbar(mActivity, mBinding.rootlayout.getId());
         initObserver();
         initClicks();
         initData();

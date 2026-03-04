@@ -44,7 +44,7 @@ public class SlideView extends View {
         mBackPaint.setColor(Color.parseColor("#FFEDEFF2"));
         mThumbPaint = new Paint();
         mThumbPaint.setAntiAlias(true);
-        mThumbPaint.setColor(Color.parseColor("#FF00B39B"));
+        mThumbPaint.setColor(Color.parseColor("#FF08983B"));
 
 
         RectF mBackgroundRectF = new RectF();

@@ -16,6 +16,7 @@ import com.base.common.Preferences;
 import com.base.common.base.mvvm.BaseNormalListVFragment;
 import com.base.common.timepicker.DateFormatUtils;
 import com.base.common.utils.DateTimeUtils;
+import com.base.common.utils.WindowInsetsHelper;
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.okla.ops.R;
@@ -101,6 +102,7 @@ public class CabinetAuthorizationRecordFragment extends BaseNormalListVFragment<
         super.initViews(view, savedInstanceState);
         getStatusView().setEnableLoadMore(true);
         getStatusView().setEnableRefresh(true);
+        WindowInsetsHelper.applyForToolbar(mActivity, mBinding.rootlayout.getId());
         initObserver();
         initClicks();
         initData();

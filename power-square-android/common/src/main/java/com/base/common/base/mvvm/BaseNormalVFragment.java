@@ -1,14 +1,18 @@
 package com.base.common.base.mvvm;
 
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.view.View;
 
 import androidx.databinding.ViewDataBinding;
 
+import com.base.common.R;
 import com.base.common.base.delegate.CustomRegisterDelegate;
 import com.base.common.base.delegate.ToolBarEvent;
 import com.base.common.base.delegate.ToolBarEventDelegate;
 import com.base.common.net.loading.DialogLoading;
+import com.base.common.utils.WindowInsetsHelper;
 import com.base.library.base.Loading;
 import com.base.library.base.delegate.RefreshLoadMoreListener;
 import com.base.library.base.delegate.RegisterSDKDelegate;
@@ -38,6 +42,7 @@ public abstract class BaseNormalVFragment<VM extends BaseViewModel, V extends Vi
     protected void initViews(View view, Bundle savedInstanceState) {
         super.initViews(view, savedInstanceState);
         initToolBar();
+        WindowInsetsHelper.applyForToolbar(mActivity, R.id.toolbar);
     }
 
     /**

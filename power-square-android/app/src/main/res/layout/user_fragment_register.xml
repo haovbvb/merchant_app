@@ -101,6 +101,7 @@
                     app:layout_constraintTop_toTopOf="@id/phoneCodeTv" />
 
                 <androidx.appcompat.widget.AppCompatEditText
+                    android:textCursorDrawable="@drawable/bg_maincolor_cursor"
                     android:id="@+id/phoneEdt"
                     android:layout_width="0dp"
                     android:layout_height="50dp"
@@ -145,6 +146,12 @@
                     android:id="@+id/getCodeBtn"
                     android:layout_width="85dp"
                     android:layout_height="40dp"
+                    app:autoSizeMinTextSize="12sp"
+                    app:autoSizeMaxTextSize="14sp"
+                    app:autoSizeStepGranularity="1sp"
+                    app:autoSizeTextType="uniform"
+                    android:breakStrategy="simple"
+                    android:scrollHorizontally="false"
                     android:layout_marginEnd="12dp"
                     android:gravity="center"
                     android:textColor="@color/main_color"
@@ -374,29 +381,25 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/layout_bottom"
             android:layout_width="match_parent"
-            android:layout_height="78dp"
+            android:layout_height="wrap_content"
+            android:paddingTop="12dp"
             android:background="@color/white"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent">
+            app:layout_constraintBottom_toBottomOf="parent">
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/confirmBtn"
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_marginBottom="12dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:id="@+id/btnConfirm"
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
-                android:layout_gravity="center_horizontal"
                 android:layout_marginHorizontal="16dp"
-                android:background="@drawable/selector_btn_enable"
+                android:background="@drawable/selector_confirm"
                 android:enabled="false"
                 android:gravity="center"
-                android:text="@string/us_text_confirm"
+                android:text="@string/btn_confirm"
                 android:textColor="@color/white"
-                android:textSize="16sp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
-
+                android:textSize="17sp" />
         </androidx.constraintlayout.widget.ConstraintLayout>
-
         <ImageView
             android:id="@+id/img_back"
             android:layout_width="wrap_content"

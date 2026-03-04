@@ -45,6 +45,9 @@ public class CommonApplication extends BaseApplication {
         Logger.i("初始化");
 
         mAppExecutors = new AppExecutors();
+        //强制使用日间模式
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
     }
 
     public static CommonApplication getCommonApplication(){

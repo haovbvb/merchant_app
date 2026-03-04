@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/app/ui.dart';
@@ -204,6 +205,10 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
           content: TextField(
             controller: controller,
             autofocus: true,
+            maxLength: 15,
+            inputFormatters: [
+              LengthLimitingTextInputFormatter(15),
+            ],
             decoration: InputDecoration(
               hintText: l10n.profileEditNicknameHint,
             ),

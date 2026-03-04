@@ -72,7 +72,6 @@
             android:textColor="@color/color_e60c0c0d"
             android:textSize="16sp"
             app:drawableEndCompat="@drawable/icon_list_arrow_right"
-            app:drawableStartCompat="@mipmap/icon_blue_key_autho"
             tools:text="蓝牙钥匙授权" />
 
         <TextView

@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.base.common.base.mvvm.BaseNormalListVActivity
 import com.base.common.utils.DataStoreKeyUtils
 import com.base.common.utils.DataStoreUtils
+import com.base.common.utils.WindowInsetsHelper
 import com.base.library.utils.GsonUtils
 import com.base.library.utils.StringUtil
 import com.chad.library.adapter.base.BaseViewHolder
@@ -82,6 +83,7 @@ class DeviceTransorInVentorySearchActivity :
         super.initViews(savedInstanceState)
         getStatusView().enableRefresh = true
         getStatusView().enableLoadMore = true
+        WindowInsetsHelper.applyForToolbar(this,mBinding.searchTitleView.id)
         searchType = intent?.getIntExtra("searchType", 0) ?: 0
         initListener()
         initOberver()

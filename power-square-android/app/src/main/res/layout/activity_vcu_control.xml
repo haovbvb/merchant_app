@@ -104,7 +104,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/imDevice"
                 app:tabGravity="start"
-                app:tabIndicatorColor="#FF00B39B"
+                app:tabIndicatorColor="#FF08983B"
                 app:tabIndicatorFullWidth="false"
                 app:tabIndicatorHeight="2dp"
                 app:tabMode="fixed"

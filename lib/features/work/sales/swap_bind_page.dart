@@ -9,6 +9,7 @@ import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
 import 'package:merchant_app/data/models/pack.dart';
 import 'package:merchant_app/data/models/swap_bind_info.dart';
+import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/swap_bind_controller.dart';
 import 'package:merchant_app/features/work/sales/widgets/swap_battery_sheet.dart';
@@ -31,6 +32,12 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(swapBindProvider.notifier).reset();
+      _userIdController.clear();
+      _lastQueriedUserId = '';
+    });
     _userIdFocusNode.addListener(_onUserIdFocusChanged);
   }
 
@@ -173,7 +180,8 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
             l10n.swapBindUserId,
             style: const TextStyle(
               fontSize: 14,
-              color: Color(0xFF999999),
+              color: AppColors.black06Text,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(height: 8),
@@ -239,7 +247,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
-                l10n.swapBindUserEmpty,
+                l10n.depositRefundUserEmpty,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   fontSize: 14,
@@ -253,7 +261,11 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
   }
 
   Widget _buildUserInfoCard(SwapBindInfo info) {
-    final name = '${info.firstName ?? ''} ${info.lastName ?? ''}'.trim();
+    final fullName = '${info.firstName ?? ''} ${info.lastName ?? ''}'.trim();
+    final name = fullName.isNotEmpty
+        ? fullName
+        : ((info.username ?? '').trim().isNotEmpty ? info.username!.trim() : '-');
+    final phone = _formatPhoneWithAreaCode(info.phone);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -286,7 +298,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name.isEmpty ? '-' : name,
+                  name,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -295,7 +307,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Phone: ${(info.phone ?? '').isNotEmpty ? info.phone : '-'}',
+                  'Phone: $phone',
                   style: const TextStyle(
                     fontSize: 13,
                     color: Color(0xFF999999),
@@ -958,13 +970,29 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
   ) async {
     final state = ref.read(swapBindProvider);
 
+    if (state.selectedCar == null || state.selectedBatteries.isEmpty) {
+      final isZh = Localizations.localeOf(context).languageCode
+          .toLowerCase()
+          .startsWith('zh');
+      showToast(
+        isZh
+            ? '请先选择车辆和电池'
+            : 'Please select vehicle and battery first',
+      );
+      return;
+    }
+
     // 先查询套餐列表
     if (state.packs.isEmpty) {
       await notifier.queryPackList();
     }
 
     final packs = ref.read(swapBindProvider).packs;
-    if (packs.isEmpty || !mounted) return;
+    if (packs.isEmpty) {
+      showToast(context.l10n.swapBindPackEmpty);
+      return;
+    }
+    if (!mounted) return;
 
     final selected = await SwapPackageSheet.show(
       context,
@@ -998,6 +1026,16 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
     if (!success) {
       showToast(l10n.swapBindFailed);
     }
+  }
+
+  String _formatPhoneWithAreaCode(String? phone) {
+    final value = (phone ?? '').trim();
+    if (value.isEmpty) return '-';
+    final areaCode = (AuthSession.instance.current?.areaCode ?? '').trim();
+    if (areaCode.isEmpty || value.startsWith(areaCode)) {
+      return value;
+    }
+    return '$areaCode $value';
   }
 }
 

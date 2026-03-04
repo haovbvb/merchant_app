@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -2070,10 +2071,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roadsideTabAll => 'All';
 
   @override
-  String get roadsideTabWaiting => 'Pending';
+  String get roadsideTabWaiting => 'Waiting for rescue';
 
   @override
-  String get roadsideTabProcessing => 'In Progress';
+  String get roadsideTabProcessing => 'In progress';
 
   @override
   String get roadsideTabCompleted => 'Completed';
@@ -2082,19 +2083,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roadsideEmpty => 'No roadside orders';
 
   @override
-  String get roadsideStatusWaiting => 'Pending';
+  String get roadsideStatusWaiting => 'Waiting for rescue';
 
   @override
-  String get roadsideStatusProcessing => 'In Progress';
+  String get roadsideStatusProcessing => 'In progress';
 
   @override
   String get roadsideStatusCompleted => 'Completed';
 
   @override
-  String get roadsideResultReturnFactory => 'Return to factory';
+  String get roadsideResultReturnFactory => 'Returned to factory';
 
   @override
-  String get roadsideResultCompleted => 'Resolved';
+  String get roadsideResultCompleted => 'Completed';
 
   @override
   String get roadsideTimeLabel => 'Reported At';
@@ -2103,7 +2104,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roadsideResultLabel => 'Result';
 
   @override
-  String get roadsideDetailTitle => 'Roadside Order Detail';
+  String get roadsideDetailTitle => 'Roadside Assistance Detail';
 
   @override
   String get roadsideDetailEmpty => 'No detail available';

@@ -208,20 +208,26 @@ class _SwapVehicleSheetState extends State<SwapVehicleSheet> {
                 ],
               ),
             ),
-            if (isSelected)
-              Container(
-                width: 24,
-                height: 24,
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primaryColor,
-                ),
-                child: const Icon(
-                  Icons.check,
-                  size: 16,
-                  color: Colors.white,
+            Container(
+              width: 22,
+              height: 22,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isSelected ? AppColors.primaryColor : Colors.white,
+                border: Border.all(
+                  color: isSelected
+                      ? AppColors.primaryColor
+                      : const Color(0xFFCCCCCC),
                 ),
               ),
+              child: isSelected
+                  ? const Icon(
+                      Icons.check,
+                      size: 14,
+                      color: Colors.white,
+                    )
+                  : null,
+            ),
           ],
         ),
       ),

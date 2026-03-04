@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/date_format_utils.dart';
+import 'package:merchant_app/core/widgets/photo_gallery_viewer.dart';
 import 'package:merchant_app/data/models/roadside_order_detail.dart';
 import 'package:merchant_app/features/work/roadside/roadside_controller.dart';
 import 'package:merchant_app/features/work/roadside/roadside_deal_page.dart';
@@ -37,7 +41,7 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
     final detail = state.detail;
 
     return Scaffold(
-      backgroundColor: AppColors.bgColor,
+      backgroundColor: const Color(0xFFF5F6F7),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
@@ -53,10 +57,10 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
             fontWeight: FontWeight.w600,
           ),
         ),
-        centerTitle: false,
+        centerTitle: true,
       ),
       body: state.loading && detail == null
-          ? const Center(child: const SizedBox.shrink())
+          ? const Center(child: SizedBox.shrink())
           : detail == null
               ? _EmptyView(text: l10n.roadsideDetailEmpty)
               : Column(
@@ -65,35 +69,23 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
                       child: SingleChildScrollView(
                         child: Column(
                           children: [
-                            // Status header card
-                            _StatusHeaderCard(l10n: l10n, detail: detail),
-                            const SizedBox(height: 12),
-                            // User info card
-                            _UserInfoCard(
-                              l10n: l10n,
+                            _StatusHeader(l10n: l10n, detail: detail),
+                            _ContactCard(
                               detail: detail,
                               onCallPhone: () => _callPhone(detail.riderPhone),
+                              onNavigate: () => _openNavigation(detail),
                             ),
                             const SizedBox(height: 12),
-                            // Date and location row
-                            _DateLocationCard(l10n: l10n, detail: detail),
-                            const SizedBox(height: 12),
-                            // Description card
-                            _DescriptionCard(l10n: l10n, detail: detail),
-                            const SizedBox(height: 12),
-                            // Creator info card
-                            _CreatorInfoCard(l10n: l10n, detail: detail),
-                            // Processing result card (if processed)
+                            _DescriptionAndMetaCard(l10n: l10n, detail: detail),
                             if (detail.status != 0 && detail.opResponse != null) ...[
                               const SizedBox(height: 12),
                               _ProcessingResultCard(l10n: l10n, detail: detail),
                             ],
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 20),
                           ],
                         ),
                       ),
                     ),
-                    // Bottom button
                     _buildBottomButton(context, l10n, detail, notifier),
                   ],
                 ),
@@ -107,9 +99,8 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
     RoadSideDetailNotifier notifier,
   ) {
     if (detail.status == 0) {
-      // Waiting for rescue - show "Processing Result" button
       return _BottomButton(
-        text: l10n.roadsideDealAction,
+        text: _processingButtonText(context),
         onPressed: () async {
           final ok = await Navigator.of(context).push<bool>(
             MaterialPageRoute(
@@ -121,13 +112,18 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
           }
         },
       );
-    } else if (detail.status == 1) {
-      // In progress - show "Payment" button
+    }
+
+    if (detail.status == 1) {
+      if (detail.payWay == 2) {
+        return const SizedBox.shrink();
+      }
       return _BottomButton(
-        text: l10n.roadsidePayAction,
+        text: _paymentButtonText(context),
         onPressed: () => _showPaymentSheet(context, l10n, detail),
       );
     }
+
     return const SizedBox.shrink();
   }
 
@@ -136,6 +132,25 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
     final uri = Uri.parse('tel:$phone');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
+    }
+  }
+
+  Future<void> _openNavigation(RoadSideOrderDetail detail) async {
+    final lat = detail.latitude;
+    final lng = detail.longitude;
+    if (lat == null || lng == null || (lat == 0 && lng == 0)) return;
+
+    final googleNav = Uri.parse('google.navigation:q=$lat,$lng');
+    final mapUrl = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng',
+    );
+
+    if (await canLaunchUrl(googleNav)) {
+      await launchUrl(googleNav);
+      return;
+    }
+    if (await canLaunchUrl(mapUrl)) {
+      await launchUrl(mapUrl, mode: LaunchMode.externalApplication);
     }
   }
 
@@ -170,7 +185,6 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header
                     Row(
                       children: [
                         Text(
@@ -189,7 +203,6 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
                       ],
                     ),
                     const SizedBox(height: 20),
-                    // Total amount
                     Row(
                       children: [
                         Text(
@@ -203,15 +216,18 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
                         Expanded(
                           child: TextField(
                             controller: feeController,
-                            keyboardType: TextInputType.number,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            inputFormatters: const [_AmountInputFormatter()],
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFFF09A2B),
                             ),
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: '0.00',
-                              hintStyle: const TextStyle(
+                              hintStyle: TextStyle(
                                 color: Color(0xFFCCCCCC),
                                 fontSize: 24,
                                 fontWeight: FontWeight.w600,
@@ -224,7 +240,6 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
                       ],
                     ),
                     const Divider(height: 24),
-                    // Payment methods
                     Text(
                       l10n.roadsidePaymentMethodLabel,
                       style: const TextStyle(
@@ -250,7 +265,6 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
                         ),
                       ],
                     ),
-                    // Upload voucher (for cash)
                     if (payType == 1) ...[
                       const SizedBox(height: 20),
                       Text(
@@ -265,14 +279,19 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
                         spacing: 8,
                         runSpacing: 8,
                         children: [
-                          ...attachments.map((url) => _VoucherImage(
-                                url: url,
-                                onRemove: () => setState(() => attachments.remove(url)),
-                              )),
+                          ...attachments.map(
+                            (url) => _VoucherImage(
+                              url: url,
+                              onRemove: () => setState(() => attachments.remove(url)),
+                            ),
+                          ),
                           if (attachments.length < 3)
                             _AddVoucherButton(
                               onTap: () async {
-                                final source = await _showImageSourceSheet(context, l10n);
+                                final source = await _showImageSourceSheet(
+                                  context,
+                                  l10n,
+                                );
                                 if (source == null) return;
                                 final picked = await picker.pickImage(source: source);
                                 if (picked == null) return;
@@ -288,75 +307,53 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
                       ),
                     ],
                     const SizedBox(height: 24),
-                    // Action buttons
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.of(context).pop(),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              side: const BorderSide(color: Color(0xFFDDDDDD)),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final fee = feeController.text.trim();
+                          if (fee.isEmpty) return;
+                          final ok = await ref
+                              .read(roadSideDetailProvider.notifier)
+                              .payRoadSide(
+                                recordNo: detail.recordNo ?? '',
+                                fee: fee,
+                                payType: payType,
+                                attachment: attachments.join(','),
+                              );
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  ok
+                                      ? l10n.roadsidePaySuccess
+                                      : l10n.roadsidePayFailed,
+                                ),
                               ),
-                            ),
-                            child: Text(
-                              l10n.roadsideNotPayingYet,
-                              style: const TextStyle(
-                                color: Color(0xFF666666),
-                                fontSize: 16,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              final fee = feeController.text.trim();
-                              if (fee.isEmpty) return;
-                              final ok = await ref
+                            );
+                            if (ok) {
+                              await ref
                                   .read(roadSideDetailProvider.notifier)
-                                  .payRoadSide(
-                                    recordNo: detail.recordNo ?? '',
-                                    fee: fee,
-                                    payType: payType,
-                                    attachment: attachments.join(','),
-                                  );
-                              if (context.mounted) {
-                                Navigator.of(context).pop();
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(ok
-                                        ? l10n.roadsidePaySuccess
-                                        : l10n.roadsidePayFailed),
-                                  ),
-                                );
-                                if (ok) {
-                                  await ref
-                                      .read(roadSideDetailProvider.notifier)
-                                      .loadDetail(widget.recordNo);
-                                }
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primaryColor,
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: Text(
-                              l10n.roadsideConfirmPayment,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                              ),
-                            ),
+                                  .loadDetail(widget.recordNo);
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primaryColor,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
                           ),
                         ),
-                      ],
+                        child: Text(
+                          l10n.roadsideConfirmPayment,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),
@@ -368,7 +365,10 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
     );
   }
 
-  Future<ImageSource?> _showImageSourceSheet(BuildContext context, AppLocalizations l10n) {
+  Future<ImageSource?> _showImageSourceSheet(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
     return showModalBottomSheet<ImageSource>(
       context: context,
       builder: (_) => SafeArea(
@@ -392,57 +392,58 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
   }
 }
 
-// Status header card with icon
-class _StatusHeaderCard extends StatelessWidget {
-  const _StatusHeaderCard({required this.l10n, required this.detail});
+class _StatusHeader extends StatelessWidget {
+  const _StatusHeader({required this.l10n, required this.detail});
 
   final AppLocalizations l10n;
   final RoadSideOrderDetail detail;
 
   @override
   Widget build(BuildContext context) {
-    final statusColors = _getStatusColors(detail.status);
-    final statusLabel = _getStatusLabel(l10n, detail.status);
-    final statusIcon = _getStatusIcon(detail.status);
-
     return Container(
       width: double.infinity,
-      color: Colors.white,
-      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFEEF8FF), Colors.white],
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 18),
       child: Row(
         children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: statusColors.background,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(
-              statusIcon,
-              color: statusColors.text,
-              size: 28,
-            ),
+          Image.asset(
+            _statusIconPath(detail.status),
+            width: 48,
+            height: 48,
+            fit: BoxFit.contain,
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  statusLabel,
-                  style: TextStyle(
-                    fontSize: 18,
+                  _getStatusLabel(l10n, detail.status),
+                  style: const TextStyle(
+                    fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: statusColors.text,
+                    color: Color(0xFF1E1E1E),
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'NO.${detail.recordNo ?? '-'}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF999999),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: const Color(0x42262626)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    'NO.${detail.recordNo ?? '-'}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0x99000000),
+                    ),
                   ),
                 ),
               ],
@@ -453,171 +454,140 @@ class _StatusHeaderCard extends StatelessWidget {
     );
   }
 
-  IconData _getStatusIcon(int? status) {
+  String _statusIconPath(int? status) {
     switch (status) {
       case 0:
-        return Icons.warning_amber_rounded;
+        return 'assets/android/mipmap-xxhdpi/icon_roadside_status_wait.webp';
       case 1:
-        return Icons.access_time;
+        return 'assets/android/mipmap-xxhdpi/icon_roadside_status_pending.webp';
       case 2:
-        return Icons.check_circle_outline;
+        return 'assets/android/mipmap-xxhdpi/icon_roadside_status_completed.webp';
       default:
-        return Icons.help_outline;
+        return 'assets/android/mipmap-xxhdpi/icon_roadside_status_wait.webp';
     }
   }
 }
 
-// User info card with phone button
-class _UserInfoCard extends StatelessWidget {
-  const _UserInfoCard({
-    required this.l10n,
+class _ContactCard extends StatelessWidget {
+  const _ContactCard({
     required this.detail,
     required this.onCallPhone,
+    required this.onNavigate,
   });
 
-  final AppLocalizations l10n;
   final RoadSideOrderDetail detail;
   final VoidCallback onCallPhone;
+  final VoidCallback onNavigate;
 
   @override
   Widget build(BuildContext context) {
     final fullName = '${detail.firstName ?? ''} ${detail.lastName ?? ''}'.trim();
-    
+    final displayName = fullName.isNotEmpty ? fullName : (detail.rider ?? '-');
+    final address = _formatLocation(detail);
+
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 15),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        color: const Color(0xFFF6F8FC),
+        borderRadius: BorderRadius.circular(6),
       ),
-      child: Row(
+      child: Column(
         children: [
-          // Avatar
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: const Icon(
-              Icons.person_outline,
-              color: Color(0xFF999999),
-              size: 28,
-            ),
-          ),
-          const SizedBox(width: 12),
-          // Name and ID
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  fullName.isNotEmpty ? fullName : (detail.rider ?? '-'),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'ID: ${detail.cardNum ?? '-'}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF999999),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Phone button
-          if (detail.riderPhone != null && detail.riderPhone!.isNotEmpty)
-            GestureDetector(
-              onTap: onCallPhone,
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Icon(
-                  Icons.phone,
-                  color: AppColors.primaryColor,
-                  size: 20,
+          Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: _AvatarImage(url: detail.img),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      displayName,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1E1E1E),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'ID: ${detail.cardNum ?? '-'}',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0x99000000),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-// Date and location card
-class _DateLocationCard extends StatelessWidget {
-  const _DateLocationCard({required this.l10n, required this.detail});
-
-  final AppLocalizations l10n;
-  final RoadSideOrderDetail detail;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          // Date
-          Expanded(
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.calendar_today_outlined,
-                  size: 18,
-                  color: Color(0xFF999999),
+              GestureDetector(
+                onTap: onCallPhone,
+                child: Image.asset(
+                  'assets/android/mipmap-xxhdpi/icon_roadside_detail_phone.png',
+                  width: 32,
+                  height: 32,
                 ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    detail.reportTime ?? '-',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.black06Text,
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-          const SizedBox(width: 16),
-          // Location
-          Expanded(
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.location_on_outlined,
-                  size: 18,
-                  color: Color(0xFF999999),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    _formatLocation(detail),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.black06Text,
-                    ),
-                    overflow: TextOverflow.ellipsis,
+          const SizedBox(height: 12),
+          const Divider(height: 1, color: Color(0xFFE6E6E6)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Image.asset(
+                'assets/android/mipmap-xxhdpi/icon_roadside_date.png',
+                width: 16,
+                height: 16,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  '${_formatOccurrenceTime(detail.createTime)} ${_occurrenceText(context)}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0x99000000),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Image.asset(
+                'assets/android/mipmap-xxhdpi/icon_roadside_loc.png',
+                width: 16,
+                height: 16,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  address,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0x99000000),
+                  ),
+                ),
+              ),
+              GestureDetector(
+                onTap: onNavigate,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Image.asset(
+                    'assets/android/mipmap-xxhdpi/icon_distination.png',
+                    width: 18,
+                    height: 18,
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -628,13 +598,21 @@ class _DateLocationCard extends StatelessWidget {
     final lat = detail.latitude;
     final lng = detail.longitude;
     if (lat == null || lng == null) return '-';
-    return '${lat.toStringAsFixed(4)}, ${lng.toStringAsFixed(4)}';
+    return '${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}';
+  }
+
+  String _formatOccurrenceTime(int? millis) {
+    if (millis == null || millis <= 0) return '-';
+    final locale = Intl.getCurrentLocale().toLowerCase();
+    final isZh = locale.startsWith('zh');
+    final date = DateTime.fromMillisecondsSinceEpoch(millis);
+    final pattern = isZh ? 'M月dd日, yyyy HH:mm' : 'MMM dd, yyyy HH:mm';
+    return DateFormat(pattern).format(date);
   }
 }
 
-// Description card with device SN
-class _DescriptionCard extends StatelessWidget {
-  const _DescriptionCard({required this.l10n, required this.detail});
+class _DescriptionAndMetaCard extends StatelessWidget {
+  const _DescriptionAndMetaCard({required this.l10n, required this.detail});
 
   final AppLocalizations l10n;
   final RoadSideOrderDetail detail;
@@ -642,132 +620,87 @@ class _DescriptionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.fromLTRB(12, 12, 12, 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 4,
-                height: 16,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                l10n.roadsideDescriptionTitle,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          // Device SN badge
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF5F5F5),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              'SN: ${detail.deviceSn ?? '-'}',
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFF666666),
-              ),
+          Text(
+            l10n.roadsideDescriptionTitle,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Color(0x800C0C0D),
             ),
           ),
-          const SizedBox(height: 12),
-          // Description text
+          const SizedBox(height: 6),
           Text(
             detail.description ?? '-',
             style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.black06Text,
-              height: 1.5,
+              fontSize: 16,
+              color: Color(0xE60C0C0D),
+              height: 1.35,
             ),
           ),
-          // Image if available
-          if ((detail.img ?? '').isNotEmpty) ...[
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                detail.img!,
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-              ),
+          const SizedBox(height: 16),
+          Container(
+            height: 40,
+            decoration: BoxDecoration(
+              color: const Color(0xFFF6F8FC),
+              borderRadius: BorderRadius.circular(6),
             ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-// Creator info card
-class _CreatorInfoCard extends StatelessWidget {
-  const _CreatorInfoCard({required this.l10n, required this.detail});
-
-  final AppLocalizations l10n;
-  final RoadSideOrderDetail detail;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          _InfoRow(
-            label: l10n.roadsideFounderLabel,
-            value: detail.creator ?? '-',
+            child: Row(
+              children: [
+                const SizedBox(width: 6),
+                _DeviceThumb(url: detail.img),
+                const SizedBox(width: 9),
+                Expanded(
+                  child: Text(
+                    detail.deviceSn ?? '-',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0xE6000000),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 12),
-          _InfoRow(
+          const Divider(height: 1, color: Color(0xFFE6E6E6)),
+          _MetaRow(label: l10n.roadsideFounderLabel, value: detail.creator ?? '-'),
+          const Divider(height: 1, color: Color(0xFFE6E6E6)),
+          _MetaRow(
             label: l10n.roadsideCreationTimeLabel,
-            value: detail.reportTime ?? '-',
+            value: DateFormatUtils.formatString(detail.reportTime),
           ),
-          const SizedBox(height: 12),
-          _InfoRow(
+          _MetaRow(
             label: l10n.roadsideReportSourceLabel,
-            value: _getSourceLabel(l10n, detail.source),
+            value: _sourceText(context, detail.source),
           ),
         ],
       ),
     );
   }
 
-  String _getSourceLabel(AppLocalizations l10n, int? source) {
+  String _sourceText(BuildContext context, int? source) {
+    final isZh = Localizations.localeOf(context).languageCode
+        .toLowerCase()
+        .startsWith('zh');
     switch (source) {
       case 1:
-        return l10n.roadsideSourceApp;
+        return isZh ? '管理后台' : 'Admin Console';
       case 2:
-        return l10n.roadsideSourceWeb;
+        return isZh ? '用户App' : 'User App';
       default:
         return '-';
     }
   }
 }
 
-// Processing result card
 class _ProcessingResultCard extends StatelessWidget {
   const _ProcessingResultCard({required this.l10n, required this.detail});
 
@@ -776,119 +709,167 @@ class _ProcessingResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final imgList = (detail.imgList ?? '').split(',').where((e) => e.isNotEmpty).toList();
+    final images = (detail.imgList ?? '')
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            _processingButtonText(context),
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0x99000000),
+            ),
+          ),
+          const SizedBox(height: 12),
+          const Divider(height: 1, color: Color(0xFFE6E6E6)),
+          const SizedBox(height: 16),
           Row(
             children: [
-              Container(
-                width: 4,
-                height: 16,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
+              Image.asset(
+                _resultIconPath(detail.result),
+                width: 20,
+                height: 20,
+                fit: BoxFit.contain,
               ),
               const SizedBox(width: 8),
               Text(
-                l10n.roadsideProcessingResultTitle,
+                _resultText(l10n, detail.result),
                 style: const TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
-                  color: Colors.black,
+                  color: Color(0xE60C0C0D),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          // Rescue result
-          _InfoRow(
-            label: l10n.roadsideRescueResult,
-            value: _getResultLabel(l10n, detail.result),
+          const SizedBox(height: 9),
+          Text(
+            detail.opResponse ?? '-',
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xE6000000),
+              height: 1.35,
+            ),
           ),
-          const SizedBox(height: 12),
-          // Description
-          _InfoRow(
-            label: l10n.roadsideDescLabel,
-            value: detail.opResponse ?? '-',
+          const SizedBox(height: 10),
+          Text(
+            DateFormatUtils.formatTimestampMillis(
+              detail.processTime,
+              pattern: 'MMM dd, yyyy HH:mm:ss',
+            ),
+            style: const TextStyle(
+              fontSize: 12,
+              color: Color(0x66000000),
+            ),
           ),
-          // Images
-          if (imgList.isNotEmpty) ...[
+          if (images.isNotEmpty) ...[
             const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: imgList
-                  .map(
-                    (url) => ClipRRect(
+            SizedBox(
+              height: 80,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: images.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                itemBuilder: (context, index) {
+                  final image = images[index];
+                  return GestureDetector(
+                    onTap: () => PhotoGalleryViewer.show(
+                      context,
+                      images,
+                      initialIndex: index,
+                    ),
+                    child: ClipRRect(
                       borderRadius: BorderRadius.circular(8),
                       child: Image.network(
-                        url,
-                        width: 80,
+                        image,
+                        width: 100,
                         height: 80,
                         fit: BoxFit.cover,
                         errorBuilder: (_, __, ___) => Container(
-                          width: 80,
+                          width: 100,
                           height: 80,
-                          color: const Color(0xFFF5F5F5),
+                          color: const Color(0xFFF2F2F2),
                           child: const Icon(Icons.broken_image_outlined),
                         ),
                       ),
                     ),
-                  )
-                  .toList(),
+                  );
+                },
+              ),
             ),
           ],
-          // Payment info if completed
-          if (detail.status == 2 && detail.fee != null) ...[
-            const SizedBox(height: 16),
-            const Divider(height: 1),
-            const SizedBox(height: 16),
+          if (detail.status == 2) ...[
+            const SizedBox(height: 20),
+            const Divider(height: 1, color: Color(0xFFE6E6E6)),
+            const SizedBox(height: 10),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  l10n.roadsideTotalLabel,
+                  _paymentMethodsText(context),
                   style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF666666),
+                    fontSize: 13,
+                    color: Color(0x99000000),
                   ),
                 ),
+                const Spacer(),
                 Text(
-                  detail.fee?.toStringAsFixed(2) ?? '0.00',
+                  _payWayText(context, detail.payWay),
                   style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFFF09A2B),
+                    fontSize: 13,
+                    color: Color(0xE6000000),
                   ),
                 ),
+                if ((detail.attachment ?? '').trim().isNotEmpty)
+                  GestureDetector(
+                    onTap: () => PhotoGalleryViewer.show(
+                      context,
+                      (detail.attachment ?? '')
+                          .split(',')
+                          .map((item) => item.trim())
+                          .where((item) => item.isNotEmpty)
+                          .toList(),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: Text(
+                        _viewVoucherText(context),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Color(0xFF0A5BCC),
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 2),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  l10n.roadsidePaymentMethodLabel,
+                  _totalText(context),
                   style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF666666),
+                    fontSize: 13,
+                    color: Color(0x99000000),
                   ),
                 ),
+                const Spacer(),
                 Text(
-                  detail.payWay == 1 ? l10n.roadsidePayTypeCash : l10n.roadsidePayTypeOnline,
+                  '\$${(detail.fee ?? 0).toStringAsFixed(2)}',
                   style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.black06Text,
+                    fontSize: 15,
+                    color: Color(0xFFFA7D00),
                   ),
                 ),
               ],
@@ -899,7 +880,7 @@ class _ProcessingResultCard extends StatelessWidget {
     );
   }
 
-  String _getResultLabel(AppLocalizations l10n, int? result) {
+  String _resultText(AppLocalizations l10n, int? result) {
     switch (result) {
       case 1:
         return l10n.roadsideResultReturnFactory;
@@ -909,45 +890,126 @@ class _ProcessingResultCard extends StatelessWidget {
         return '-';
     }
   }
+
+  String _resultIconPath(int? result) {
+    switch (result) {
+      case 1:
+        return 'assets/android/mipmap-xxhdpi/icon_green_return_factory.png';
+      case 2:
+        return 'assets/android/mipmap-xxhdpi/icon_result_completed_green.png';
+      default:
+        return 'assets/android/mipmap-xxhdpi/icon_result_completed_green.png';
+    }
+  }
+
+  String _payWayText(BuildContext context, int? payWay) {
+    final isZh = Localizations.localeOf(context).languageCode
+        .toLowerCase()
+        .startsWith('zh');
+    if (payWay == 1) return isZh ? '现金' : 'Cash';
+    if (payWay == 2) return isZh ? '线上' : 'Online';
+    return '-';
+  }
 }
 
-// Info row widget
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.value});
+class _MetaRow extends StatelessWidget {
+  const _MetaRow({required this.label, required this.value});
 
   final String label;
   final String value;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 100,
-          child: Text(
+    return SizedBox(
+      height: 44,
+      child: Row(
+        children: [
+          Text(
             label,
             style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF999999),
+              fontSize: 15,
+              color: Color(0xE60C0C0D),
             ),
           ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              color: AppColors.black06Text,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 15,
+                color: Color(0x800C0C0D),
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-// Bottom button
+class _AvatarImage extends StatelessWidget {
+  const _AvatarImage({this.url});
+
+  final String? url;
+
+  @override
+  Widget build(BuildContext context) {
+    if (url == null || url!.trim().isEmpty) {
+      return Image.asset(
+        'assets/android/mipmap-xxhdpi/icon_def_avatar.webp',
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+      );
+    }
+    return Image.network(
+      url!,
+      width: 40,
+      height: 40,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Image.asset(
+        'assets/android/mipmap-xxhdpi/icon_def_avatar.webp',
+        width: 40,
+        height: 40,
+        fit: BoxFit.cover,
+      ),
+    );
+  }
+}
+
+class _DeviceThumb extends StatelessWidget {
+  const _DeviceThumb({this.url});
+
+  final String? url;
+
+  @override
+  Widget build(BuildContext context) {
+    if (url == null || url!.trim().isEmpty) {
+      return Image.asset(
+        'assets/android/mipmap-xxhdpi/icon_empty_record.png',
+        width: 32,
+        height: 32,
+        fit: BoxFit.contain,
+      );
+    }
+    return Image.network(
+      url!,
+      width: 32,
+      height: 32,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Image.asset(
+        'assets/android/mipmap-xxhdpi/icon_empty_record.png',
+        width: 32,
+        height: 32,
+        fit: BoxFit.contain,
+      ),
+    );
+  }
+}
+
 class _BottomButton extends StatelessWidget {
   const _BottomButton({required this.text, required this.onPressed});
 
@@ -957,36 +1019,25 @@ class _BottomButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x0D000000),
-            blurRadius: 8,
-            offset: Offset(0, -2),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: onPressed,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primaryColor,
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+      height: 78,
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primaryColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Text(
-              text,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+          ),
+          child: Text(
+            text,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 17,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ),
@@ -995,7 +1046,6 @@ class _BottomButton extends StatelessWidget {
   }
 }
 
-// Payment method button
 class _PaymentMethodButton extends StatelessWidget {
   const _PaymentMethodButton({
     required this.icon,
@@ -1017,7 +1067,9 @@ class _PaymentMethodButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primaryColor.withValues(alpha: 0.1) : const Color(0xFFF5F5F5),
+            color: isSelected
+                ? AppColors.primaryColor.withValues(alpha: 0.1)
+                : const Color(0xFFF5F5F5),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: isSelected ? AppColors.primaryColor : Colors.transparent,
@@ -1049,7 +1101,6 @@ class _PaymentMethodButton extends StatelessWidget {
   }
 }
 
-// Voucher image widget
 class _VoucherImage extends StatelessWidget {
   const _VoucherImage({required this.url, required this.onRemove});
 
@@ -1084,11 +1135,7 @@ class _VoucherImage extends StatelessWidget {
                   bottomLeft: Radius.circular(8),
                 ),
               ),
-              child: const Icon(
-                Icons.close,
-                size: 14,
-                color: Colors.white,
-              ),
+              child: const Icon(Icons.close, size: 14, color: Colors.white),
             ),
           ),
         ),
@@ -1097,7 +1144,6 @@ class _VoucherImage extends StatelessWidget {
   }
 }
 
-// Add voucher button
 class _AddVoucherButton extends StatelessWidget {
   const _AddVoucherButton({required this.onTap});
 
@@ -1113,19 +1159,14 @@ class _AddVoucherButton extends StatelessWidget {
         decoration: BoxDecoration(
           color: const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFDDDDDD), style: BorderStyle.solid),
+          border: Border.all(color: const Color(0xFFDDDDDD)),
         ),
-        child: const Icon(
-          Icons.add,
-          color: Color(0xFF999999),
-          size: 28,
-        ),
+        child: const Icon(Icons.add, color: Color(0xFF999999), size: 28),
       ),
     );
   }
 }
 
-// Empty view
 class _EmptyView extends StatelessWidget {
   const _EmptyView({required this.text});
 
@@ -1139,18 +1180,11 @@ class _EmptyView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.inbox_outlined,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               text,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
             ),
           ],
         ),
@@ -1159,36 +1193,22 @@ class _EmptyView extends StatelessWidget {
   }
 }
 
-// Status colors helper
-class _StatusColors {
-  const _StatusColors({required this.text, required this.background});
+class _AmountInputFormatter extends TextInputFormatter {
+  const _AmountInputFormatter();
 
-  final Color text;
-  final Color background;
-}
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text;
+    if (text.isEmpty) return newValue;
+    if (text.length > 9) return oldValue;
+    if (text.startsWith('.')) return oldValue;
 
-_StatusColors _getStatusColors(int? status) {
-  switch (status) {
-    case 0: // Waiting for rescue
-      return const _StatusColors(
-        text: Color(0xFFE25C5C),
-        background: Color(0xFFFFF1F1),
-      );
-    case 1: // In progress
-      return const _StatusColors(
-        text: Color(0xFFF09A2B),
-        background: Color(0xFFFFF4E6),
-      );
-    case 2: // Completed
-      return const _StatusColors(
-        text: Color(0xFF00B88A),
-        background: Color(0xFFE9F7F2),
-      );
-    default:
-      return const _StatusColors(
-        text: Color(0xFF7A7A7A),
-        background: Color(0xFFF2F2F2),
-      );
+    final pattern = RegExp(r'^(?!\.)\d*(\.\d{0,2})?$');
+    if (!pattern.hasMatch(text)) return oldValue;
+    return newValue;
   }
 }
 
@@ -1203,4 +1223,46 @@ String _getStatusLabel(AppLocalizations l10n, int? status) {
     default:
       return '-';
   }
+}
+
+String _processingButtonText(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '处理结果' : 'Processing Result';
+}
+
+String _paymentButtonText(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '支付' : 'Payment';
+}
+
+String _paymentMethodsText(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '支付方式' : 'Payment Methods';
+}
+
+String _viewVoucherText(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '查看凭证' : 'View Voucher';
+}
+
+String _totalText(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '总计' : 'Total';
+}
+
+String _occurrenceText(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '发生' : 'occurrence';
 }

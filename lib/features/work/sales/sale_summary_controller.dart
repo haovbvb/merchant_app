@@ -85,11 +85,19 @@ final saleSummaryProvider =
 class SaleSummaryNotifier extends Notifier<SaleSummaryState> {
   final ApiService _api = ApiService();
 
-  @override
-  SaleSummaryState build() {
+  SaleSummaryState _initialState() {
     final now = DateTime.now();
     final start = DateTime(now.year, now.month, 1);
     return SaleSummaryState(startDate: start, endDate: now);
+  }
+
+  @override
+  SaleSummaryState build() {
+    return _initialState();
+  }
+
+  void resetForEnter() {
+    state = _initialState();
   }
 
   Future<void> refresh() async {

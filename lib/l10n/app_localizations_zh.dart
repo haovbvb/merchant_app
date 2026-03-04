@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -2070,10 +2071,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roadsideTabAll => '全部';
 
   @override
-  String get roadsideTabWaiting => '待处理';
+  String get roadsideTabWaiting => '等待救援';
 
   @override
-  String get roadsideTabProcessing => '处理中';
+  String get roadsideTabProcessing => '进行中';
 
   @override
   String get roadsideTabCompleted => '已完成';
@@ -2082,19 +2083,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roadsideEmpty => '暂无救援订单';
 
   @override
-  String get roadsideStatusWaiting => '待处理';
+  String get roadsideStatusWaiting => '等待救援';
 
   @override
-  String get roadsideStatusProcessing => '处理中';
+  String get roadsideStatusProcessing => '进行中';
 
   @override
   String get roadsideStatusCompleted => '已完成';
 
   @override
-  String get roadsideResultReturnFactory => '返厂';
+  String get roadsideResultReturnFactory => '已返厂';
 
   @override
-  String get roadsideResultCompleted => '已处理';
+  String get roadsideResultCompleted => '已完成';
 
   @override
   String get roadsideTimeLabel => '报修时间';
@@ -2103,7 +2104,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roadsideResultLabel => '处理结果';
 
   @override
-  String get roadsideDetailTitle => '救援订单详情';
+  String get roadsideDetailTitle => '道路救援详情';
 
   @override
   String get roadsideDetailEmpty => '暂无详情';

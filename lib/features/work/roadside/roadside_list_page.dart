@@ -87,14 +87,19 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage> {
                         notifier.refresh(status: _statusForTab(index));
                       },
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(6),
+                          color: isSelected
+                              ? Colors.white
+                              : const Color(0xFFF2F2F2),
+                          borderRadius: BorderRadius.circular(12),
                           border: Border.all(
                             color: isSelected
                                 ? AppColors.primaryColor
-                                : Colors.white,
+                                : const Color(0xFFF2F2F2),
                           ),
                         ),
                         child: Text(
@@ -196,92 +201,109 @@ class _RoadSideCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusColors = _statusColors(item.status ?? -1);
     final statusLabel = _statusLabel(l10n, item.status);
-    final showResult = (item.status == 1 || item.status == 2) && item.result != null;
+    final showResult = item.status == 1 || item.status == 2;
     final showCompleteTime = item.status == 2;
+    final resultText = _resultLabel(l10n, item.result);
+    final resultDotColor = _resultDotColor(item.result);
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header with NO. and date
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Text(
-                    'NO.${item.recordNo ?? '-'}',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                    ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'NO.${item.recordNo ?? '-'}',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF1E1E1E),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        _formatTime(item.createTime),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF999999),
+                        ),
+                      ),
+                    ],
                   ),
-                  const Spacer(),
-                  Text(
-                    _formatTime(item.createTime),
-                    style: const TextStyle(
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: statusColors.background,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    statusLabel,
+                    style: TextStyle(
                       fontSize: 12,
-                      color: Color(0xFF999999),
+                      color: statusColors.text,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const Divider(height: 1, color: Color(0xFFEEEEEE)),
-            // Device SN card
-            Padding(
-              padding: const EdgeInsets.all(16),
+            const SizedBox(height: 12),
+            const Divider(height: 1, color: Color(0xFFE6E6E6)),
+            const SizedBox(height: 12),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF6F8FC),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              padding: const EdgeInsets.fromLTRB(8, 10, 10, 12),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Vehicle image
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: _ImageBox(url: item.img),
-                  ),
-                  const SizedBox(width: 12),
-                  // SN info
+                  _ImageBox(url: item.img),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF5F5F5),
-                            borderRadius: BorderRadius.circular(4),
+                        Text(
+                          'SN: ${item.deviceSn ?? '-'}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1E1E1E),
                           ),
-                          child: Text(
-                            'SN: ${item.deviceSn ?? '-'}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: AppColors.black06Text,
-                              fontWeight: FontWeight.w500,
-                            ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          (item.description == null ||
+                                  item.description!.trim().isEmpty)
+                              ? '-'
+                              : item.description!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            height: 1.35,
+                            color: Color(0xFF666666),
                           ),
                         ),
                       ],
-                    ),
-                  ),
-                  // Status tag
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: statusColors.background,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      statusLabel,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: statusColors.text,
-                        fontWeight: FontWeight.w500,
-                      ),
                     ),
                   ),
                 ],
@@ -289,34 +311,38 @@ class _RoadSideCard extends StatelessWidget {
             ),
             // Rescue result row (if completed)
             if (showResult) ...[
-              const Divider(height: 1, color: Color(0xFFEEEEEE)),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              const SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF6F8FC),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 child: Column(
                   children: [
                     Row(
                       children: [
-                        Container(
-                          width: 4,
-                          height: 16,
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryColor,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
                         Text(
                           l10n.roadsideRescueResult,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             color: Color(0xFF999999),
                           ),
                         ),
                         const Spacer(),
+                        Container(
+                          width: 10,
+                          height: 10,
+                          decoration: BoxDecoration(
+                            color: resultDotColor,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 6),
                         Text(
-                          _resultLabel(l10n, item.result),
+                          resultText,
                           style: const TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             color: AppColors.black06Text,
                             fontWeight: FontWeight.w500,
                           ),
@@ -328,9 +354,9 @@ class _RoadSideCard extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            l10n.roadsideProcessTime,
+                            _completionTimeLabel(context),
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 13,
                               color: Color(0xFF999999),
                             ),
                           ),
@@ -338,7 +364,7 @@ class _RoadSideCard extends StatelessWidget {
                           Text(
                             _formatTime(item.processTime ?? item.completetime),
                             style: const TextStyle(
-                              fontSize: 14,
+                              fontSize: 13,
                               color: AppColors.black06Text,
                               fontWeight: FontWeight.w500,
                             ),
@@ -369,41 +395,30 @@ class _ImageBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final fallback = Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Image.asset(
+        'assets/android/mipmap-xxhdpi/icon_empty_record.png',
+        fit: BoxFit.contain,
+      ),
+    );
+
     if (url == null || url!.isEmpty) {
-      return Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Icon(
-          Icons.electric_bike_outlined,
-          color: Color(0xFFBBBBBB),
-          size: 32,
-        ),
-      );
+      return fallback;
     }
     return ClipRRect(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(6),
       child: Image.network(
         url!,
-        width: 60,
-        height: 60,
+        width: 40,
+        height: 40,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            color: const Color(0xFFF5F5F5),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: const Icon(
-            Icons.electric_bike_outlined,
-            color: Color(0xFFBBBBBB),
-            size: 32,
-          ),
-        ),
+        errorBuilder: (_, __, ___) => fallback,
       ),
     );
   }
@@ -463,6 +478,24 @@ String _resultLabel(AppLocalizations l10n, int? result) {
     default:
       return '-';
   }
+}
+
+Color _resultDotColor(int? result) {
+  switch (result) {
+    case 1:
+      return const Color(0xFFED942F);
+    case 2:
+      return const Color(0xFF56B337);
+    default:
+      return const Color(0xFFCCCCCC);
+  }
+}
+
+String _completionTimeLabel(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '完成时间' : 'Completion time';
 }
 
 class _EmptyView extends StatelessWidget {

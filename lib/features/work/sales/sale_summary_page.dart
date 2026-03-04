@@ -34,6 +34,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
     Future.microtask(() async {
       final isManager = AuthSession.instance.current?.managerFlag == true;
       final notifier = ref.read(saleSummaryProvider.notifier);
+      notifier.resetForEnter();
       if (!isManager) {
         notifier.setShowSalesData(true);
       }
@@ -89,11 +90,11 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                         child: CircularProgressIndicator(strokeWidth: 2),
                       ),
                     if (!state.loadingList && !state.loadingMore && !state.hasMore)
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.symmetric(vertical: 16),
                         child: Text(
-                          'No more data',
-                          style: TextStyle(
+                          _noMoreDataText(context),
+                          style: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFF999999),
                           ),
@@ -156,36 +157,36 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
             ),
             const SizedBox(height: 8),
             // 日期选择
-            GestureDetector(
-              onTap: () => _pickDateRange(context, notifier, state),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.calendar_today,
-                      color: Colors.white70,
-                      size: 16,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${_formatDate(state.startDate)} ~ ${_formatDate(state.endDate)}',
-                      style: const TextStyle(
-                        fontSize: 14,
+            Align(
+              alignment: Alignment.centerLeft,
+              child: GestureDetector(
+                onTap: () => _pickDateRange(context, notifier, state),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.calendar_today,
                         color: Colors.white70,
+                        size: 16,
                       ),
-                    ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.white70,
-                      size: 18,
-                    ),
-                  ],
+                      const SizedBox(width: 6),
+                      Text(
+                        '${_formatDate(state.startDate)}~${_formatDate(state.endDate)}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.white70,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.keyboard_arrow_down,
+                        color: Colors.white70,
+                        size: 18,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -266,14 +267,14 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
-                Icons.emoji_events,
-                size: 14,
-                color: Color(0xFFFFB800),
+              Image.asset(
+                'assets/android/mipmap-xxhdpi/icon_rank.png',
+                width: 12,
+                height: 12,
               ),
               const SizedBox(width: 4),
               Text(
-                'Store Ranking',
+                _storeRankingText(context),
                 style: TextStyle(
                   fontSize: 11,
                   color: Colors.white.withValues(alpha: 0.8),
@@ -302,6 +303,9 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
   ) {
     final summary = state.summary;
     final chartData = state.chartData;
+    final normalizedChartData = chartData == null
+        ? null
+        : _normalizeChartData(chartData);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -332,7 +336,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
               ),
             ],
           ),
-          const SizedBox(height: 16),
+            const SizedBox(height: 16),
           // 签约率和平均订单价格
           Row(
             children: [
@@ -341,7 +345,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${(summary?.signRate ?? 0).toStringAsFixed(1)} %',
+                      '${((summary?.signRate ?? 0) * 100).toStringAsFixed(2)}%',
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -361,8 +365,8 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                         const SizedBox(width: 4),
                         GestureDetector(
                           onTap: () => _showInfoDialog(
-                            'Order Signing Rate',
-                            'Order signing rate = (Transaction order quantity / Total order quantity ) *100%',
+                            _orderSigningRateTitle(context),
+                            _orderSigningRateContent(context),
                           ),
                           child: const Icon(
                             Icons.info_outline,
@@ -400,8 +404,8 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                         const SizedBox(width: 4),
                         GestureDetector(
                           onTap: () => _showInfoDialog(
-                            'Average Order Price',
-                            'Average Order Price = Total Sales Amount ÷ Transaction Order',
+                            _averageOrderAmountTitle(context),
+                            _averageOrderAmountContent(context),
                           ),
                           child: const Icon(
                             Icons.info_outline,
@@ -443,14 +447,14 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
           // 图表
           SizedBox(
             height: 220,
-            child: chartData == null || chartData.timeList.isEmpty
-                ? const Center(child: Text('No data'))
+            child: normalizedChartData == null || normalizedChartData.timeList.isEmpty
+                ? Center(child: Text(l10n.saleSummaryListEmpty))
                 : AnimatedBuilder(
                     animation: _tabController,
                     builder: (context, child) {
                       return _tabController.index == 0
-                          ? _AmountLineChart(data: chartData)
-                          : _OrderBarChart(data: chartData);
+                          ? _AmountLineChart(data: normalizedChartData)
+                          : _OrderBarChart(data: normalizedChartData);
                     },
                   ),
           ),
@@ -601,6 +605,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
     bool isSalesData,
   ) {
     final orderTypeInfo = _getOrderTypeInfo(
+      l10n,
       order.orderType ?? 0,
       isAfterSalesData: !isSalesData,
     );
@@ -614,17 +619,12 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
       child: Row(
         children: [
           // 图标
-          Container(
+          SizedBox(
             width: 40,
             height: 40,
-            decoration: BoxDecoration(
-              color: orderTypeInfo['bgColor'] as Color,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(
-              orderTypeInfo['icon'] as IconData,
-              size: 20,
-              color: orderTypeInfo['iconColor'] as Color,
+            child: Image.asset(
+              orderTypeInfo['iconPath'] as String,
+              fit: BoxFit.contain,
             ),
           ),
           const SizedBox(width: 12),
@@ -698,6 +698,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
   }
 
   Map<String, dynamic> _getOrderTypeInfo(
+    AppLocalizations l10n,
     int orderType, {
     required bool isAfterSalesData,
   }) {
@@ -705,24 +706,20 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
       switch (orderType) {
         case 1:
           return {
-            'name': 'Schedule Maintenance',
-            'icon': Icons.build,
-            'bgColor': const Color(0xFFFFF8E1),
-            'iconColor': const Color(0xFFFFC107),
+            'name': l10n.workbenchScheduleMaintenance,
+            'iconPath':
+                'assets/android/mipmap-xxhdpi/icon_roadside_assistance.png',
           };
         case 2:
           return {
-            'name': 'Road rescue',
-            'icon': Icons.local_shipping,
-            'bgColor': const Color(0xFFFFEBEE),
-            'iconColor': const Color(0xFFF44336),
+            'name': l10n.workbenchRoadsideAssistance,
+            'iconPath':
+                'assets/android/mipmap-xxhdpi/icon_schedule_maintenance.png',
           };
         default:
           return {
-            'name': 'Order',
-            'icon': Icons.receipt,
-            'bgColor': const Color(0xFFF5F5F5),
-            'iconColor': const Color(0xFF999999),
+            'name': l10n.saleSummaryTransactionOrder,
+            'iconPath': 'assets/android/mipmap-xxhdpi/icon_sale_bind.webp',
           };
       }
     }
@@ -730,45 +727,35 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
     switch (orderType) {
       case 1:
         return {
-          'name': 'Sale',
-          'icon': Icons.sell,
-          'bgColor': const Color(0xFFFFF3E0),
-          'iconColor': const Color(0xFFFF9800),
+          'name': _saleTypeText(context),
+          'iconPath': 'assets/android/mipmap-xxhdpi/icon_sale_bind.webp',
         };
       case 2:
         return {
-          'name': 'Lease',
-          'icon': Icons.key,
-          'bgColor': const Color(0xFFE8F5E9),
-          'iconColor': AppColors.primaryColor,
+          'name': _leaseTypeText(context),
+          'iconPath': 'assets/android/mipmap-xxhdpi/icon_lease_bind.png',
         };
       case 3:
         return {
-          'name': 'Swap Battery',
-          'icon': Icons.battery_charging_full,
-          'bgColor': const Color(0xFFE3F2FD),
-          'iconColor': const Color(0xFF2196F3),
+          'name': l10n.userOrderTabSwap,
+          'iconPath': 'assets/android/mipmap-xxhdpi/icon_swap_bind.webp',
         };
       case 4:
         return {
-          'name': 'Road rescue',
-          'icon': Icons.local_shipping,
-          'bgColor': const Color(0xFFFFEBEE),
-          'iconColor': const Color(0xFFF44336),
+          'name': l10n.workbenchRoadsideAssistance,
+          'iconPath':
+              'assets/android/mipmap-xxhdpi/icon_roadside_assistance.png',
         };
       case 5:
         return {
-          'name': 'Schedule Maintenance',
-          'icon': Icons.build,
-          'bgColor': const Color(0xFFFFF8E1),
-          'iconColor': const Color(0xFFFFC107),
+          'name': l10n.workbenchScheduleMaintenance,
+          'iconPath':
+              'assets/android/mipmap-xxhdpi/icon_schedule_maintenance.png',
         };
       default:
         return {
-          'name': 'Order',
-          'icon': Icons.receipt,
-          'bgColor': const Color(0xFFF5F5F5),
-          'iconColor': const Color(0xFF999999),
+          'name': l10n.saleSummaryTransactionOrder,
+          'iconPath': 'assets/android/mipmap-xxhdpi/icon_sale_bind.webp',
         };
     }
   }
@@ -900,7 +887,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
     final days = range.end.difference(range.start).inDays + 1;
     if (days > 30) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Date range cannot exceed 30 days')),
+        SnackBar(content: Text(_dateRangeExceededText(context))),
       );
       return;
     }
@@ -1094,31 +1081,162 @@ double _bottomInterval(int length) {
 }
 
 String _formatDateLabel(String raw) {
-  // 尝试解析日期格式 yyyy-MM 或 yyyy-MM-dd
-  if (raw.length >= 7) {
-    try {
-      final parts = raw.split('-');
-      if (parts.length >= 2) {
-        final month = int.parse(parts[1]);
-        final months = [
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ];
-        return months[month - 1];
-      }
-    } catch (_) {}
+  final value = raw.trim();
+  if (value.isEmpty) return '-';
+  final parts = value.split('-');
+  if (parts.length >= 2) {
+    final month = parts[1].padLeft(2, '0');
+    if (int.tryParse(month) != null) {
+      return month;
+    }
   }
-  return raw;
+  return value;
+}
+
+SalesBarData _normalizeChartData(SalesBarData source) {
+  final minLength = [
+    source.timeList.length,
+    source.amountList.length,
+    source.numList.length,
+  ].reduce(math.min);
+  if (minLength <= 0) {
+    return const SalesBarData(amountList: [], numList: [], timeList: []);
+  }
+
+  final list = <_ChartPoint>[];
+  for (var index = 0; index < minLength; index++) {
+    list.add(
+      _ChartPoint(
+        time: source.timeList[index],
+        amount: source.amountList[index],
+        num: source.numList[index],
+        parsed: _parseChartDate(source.timeList[index]),
+      ),
+    );
+  }
+
+  list.sort((a, b) {
+    final aDate = a.parsed;
+    final bDate = b.parsed;
+    if (aDate != null && bDate != null) {
+      return aDate.compareTo(bDate);
+    }
+    if (aDate != null) return -1;
+    if (bDate != null) return 1;
+    return 0;
+  });
+
+  final now = DateTime.now();
+  final start = DateTime(now.year, now.month - (list.length - 1), 1);
+  final timeline = <String>[];
+  for (var index = 0; index < list.length; index++) {
+    final pointDate = DateTime(start.year, start.month + index, 1);
+    timeline.add(
+      '${pointDate.year}-${pointDate.month.toString().padLeft(2, '0')}',
+    );
+  }
+
+  return SalesBarData(
+    amountList: list.map((item) => item.amount).toList(),
+    numList: list.map((item) => item.num).toList(),
+    timeList: timeline,
+  );
+}
+
+DateTime? _parseChartDate(String raw) {
+  final value = raw.trim();
+  if (value.isEmpty) return null;
+  final normalized = value.contains('-') ? value : value.replaceAll('.', '-');
+  final parts = normalized.split('-').where((item) => item.isNotEmpty).toList();
+  if (parts.length >= 2) {
+    final year = int.tryParse(parts[0]);
+    final month = int.tryParse(parts[1]);
+    if (year != null && month != null && month >= 1 && month <= 12) {
+      return DateTime(year, month, 1);
+    }
+  }
+  return DateTime.tryParse(value);
+}
+
+String _noMoreDataText(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '暂无更多数据' : 'No more data';
+}
+
+String _dateRangeExceededText(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '时间范围不能超过30天' : 'Date range cannot exceed 30 days';
+}
+
+String _orderSigningRateTitle(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '订单签约率' : 'Order Signing Rate';
+}
+
+String _storeRankingText(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '门店排名' : 'Store Ranking';
+}
+
+String _saleTypeText(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '销售' : 'Sale';
+}
+
+String _leaseTypeText(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '租赁' : 'Lease';
+}
+
+String _orderSigningRateContent(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh
+      ? '订单签约率 = (成交订单数/总订单数)×100%'
+      : 'Order signing rate = (Transaction order quantity / Total order quantity) * 100%';
+}
+
+String _averageOrderAmountTitle(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '平均订单金额' : 'Average order amount';
+}
+
+String _averageOrderAmountContent(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh
+      ? '平均订单金额 = 总销售额 ÷ 成交订单数'
+      : 'Average order amount = Total sales amount ÷ Transaction order';
+}
+
+class _ChartPoint {
+  const _ChartPoint({
+    required this.time,
+    required this.amount,
+    required this.num,
+    required this.parsed,
+  });
+
+  final String time;
+  final double amount;
+  final int num;
+  final DateTime? parsed;
 }
 
 SideTitleWidget _buildBottomTitle(

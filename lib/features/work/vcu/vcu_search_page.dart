@@ -146,7 +146,8 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
     final result = await notifier.searchDeviceBySn(sn);
     if (!mounted) return;
     final deviceInfo = result?.deviceInfo;
-    if (deviceInfo == null ||
+    if (result?.type != 4 ||
+        deviceInfo == null ||
         deviceInfo.ctrlId == null ||
         deviceInfo.ctrlId!.isEmpty) {
       showToast(l10n.deviceSearchEmpty);

@@ -12,6 +12,7 @@ enum VcuHistoryFilter {
 class VcuHistoryItem {
   final String vin;
   final String command;
+  final String? data;
   final String? version;
   final VcuHistoryType type;
   final int timestamp;
@@ -22,6 +23,7 @@ class VcuHistoryItem {
     required this.command,
     required this.type,
     required this.timestamp,
+    this.data,
     this.version,
     this.success,
   });

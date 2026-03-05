@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/data/models/vcu_device_search.dart';
 import 'package:merchant_app/data/models/vcu_history.dart';
@@ -100,6 +102,7 @@ class VcuNotifier extends Notifier<VcuState> {
       VcuHistoryItem(
         vin: displayId,
         command: commandLabel,
+        data: jsonEncode({'cmd': cmd, 'devId': trimmedDevId}),
         type: VcuHistoryType.request,
         timestamp: DateTime.now().millisecondsSinceEpoch,
       ),
@@ -114,6 +117,7 @@ class VcuNotifier extends Notifier<VcuState> {
       VcuHistoryItem(
         vin: displayId,
         command: commandLabel,
+        data: response.isSuccess ? 'success' : 'failed',
         type: VcuHistoryType.response,
         timestamp: DateTime.now().millisecondsSinceEpoch,
         success: response.isSuccess,

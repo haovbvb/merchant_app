@@ -391,6 +391,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
                       if (item.version != null && item.version!.isNotEmpty)
                         item.version!,
                     ].join(' · ');
+                    final payload = (item.data ?? '').trim();
                     return Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: ListTile(
@@ -442,6 +443,15 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(info),
+                            if (payload.isNotEmpty) ...[
+                              const SizedBox(height: 4),
+                              Text(
+                                payload,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
                           ],
                         ),
                         trailing: Text(
@@ -678,6 +688,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
       VcuHistoryItem(
         vin: _bleHistoryVin(),
         command: label,
+        data: command.payload,
         type: VcuHistoryType.request,
         timestamp: DateTime.now().millisecondsSinceEpoch,
         version: version,
@@ -733,6 +744,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
         VcuHistoryItem(
           vin: _bleHistoryVin(),
           command: label ?? 'BLE 响应',
+          data: data,
           type: VcuHistoryType.response,
           timestamp: DateTime.now().millisecondsSinceEpoch,
           success: success,
@@ -1705,72 +1717,6 @@ const List<_VcuCommand> _commands = [
     bleId: VcuBleCommandIds.remoteUnlock,
     bleValue: 1,
     icon: Icons.lock_open,
-  ),
-  _VcuCommand(
-    16,
-    '复位',
-    bleId: VcuBleCommandIds.reset,
-    bleValue: 1,
-    icon: Icons.restart_alt,
-  ),
-  // 4轮车命令
-  _VcuCommand(
-    8,
-    '锁车+断电(4轮)',
-    bleId: VcuBleCommandIds.lockCut4,
-    bleValue: 1,
-    icon: Icons.power_off,
-  ),
-  _VcuCommand(
-    9,
-    '解锁(4轮)',
-    bleId: VcuBleCommandIds.unlockCut4,
-    bleValue: 1,
-    icon: Icons.power,
-  ),
-  _VcuCommand(
-    10,
-    '找车(4轮)',
-    bleId: VcuBleCommandIds.find4,
-    bleValue: 1,
-    icon: Icons.location_searching,
-  ),
-  // 高尔夫车命令
-  _VcuCommand(
-    14,
-    '高尔夫解锁',
-    bleId: VcuBleCommandIds.golfCommand,
-    bleValue: 1,
-    icon: Icons.sports_golf,
-  ),
-  _VcuCommand(
-    15,
-    '高尔夫锁车',
-    bleId: VcuBleCommandIds.golfCommand,
-    bleValue: 0,
-    icon: Icons.sports_golf_outlined,
-  ),
-  // 查询命令
-  _VcuCommand(
-    109,
-    '查询车辆状态',
-    bleId: VcuBleCommandIds.queryStatus,
-    bleValue: 1,
-    icon: Icons.directions_car,
-  ),
-  _VcuCommand(
-    101,
-    '查询 MCU 版本',
-    bleId: VcuBleCommandIds.queryMcuVersion,
-    bleValue: 1,
-    icon: Icons.memory,
-  ),
-  _VcuCommand(
-    104,
-    '查询 ICCID',
-    bleId: VcuBleCommandIds.queryIccid,
-    bleValue: 1,
-    icon: Icons.sim_card,
   ),
 ];
 

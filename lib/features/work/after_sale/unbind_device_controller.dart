@@ -57,6 +57,7 @@ final unbindDeviceProvider =
 
 class UnbindDeviceNotifier extends Notifier<UnbindDeviceState> {
   final ApiService _api = ApiService();
+  static const int _maxRemarkLength = 200;
 
   @override
   UnbindDeviceState build() => const UnbindDeviceState();
@@ -80,11 +81,17 @@ class UnbindDeviceNotifier extends Notifier<UnbindDeviceState> {
   }
 
   void updateCheckRemark(String value) {
-    state = state.copyWith(checkRemark: value);
+    final next = value.length > _maxRemarkLength
+        ? value.substring(0, _maxRemarkLength)
+        : value;
+    state = state.copyWith(checkRemark: next);
   }
 
   void updateRemark(String value) {
-    state = state.copyWith(remark: value);
+    final next = value.length > _maxRemarkLength
+        ? value.substring(0, _maxRemarkLength)
+        : value;
+    state = state.copyWith(remark: next);
   }
 
   Future<void> checkUnfinishedOrder() async {

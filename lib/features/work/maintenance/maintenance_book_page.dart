@@ -9,6 +9,7 @@ import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/maintenance.dart';
 import 'package:merchant_app/features/work/device/device_search_page.dart';
 import 'package:merchant_app/features/work/maintenance/maintenance_controller.dart';
+import 'package:merchant_app/features/work/payment/widgets/work_payment_sheet.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -29,6 +30,9 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
   @override
   void initState() {
     super.initState();
+    ref.read(maintenanceBookProvider.notifier).clearAll();
+    _snController.clear();
+    _noteController.clear();
     _snFocusNode.addListener(_onSnFocusChanged);
   }
 
@@ -100,7 +104,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w600,
-                              color: Colors.black,
+                              color: Color(0xE6000000),
                             ),
                           ),
                         ],
@@ -194,7 +198,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
                 height: 50,
                 child: FilledButton(
                   onPressed: canConfirm
-                      ? () => _showCostDialog(context, l10n, state, notifier)
+                      ? () => _showCostDialog(context, l10n, notifier)
                       : null,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
@@ -289,7 +293,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
         builder: (_) => const QrScanPage(
           allowManualInput: true,
           parseDeviceSn: true,
-          deviceType: 2,
+          // deviceType: 2,
         ),
       ),
     );
@@ -325,15 +329,29 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
   Future<void> _showCostDialog(
     BuildContext context,
     AppLocalizations l10n,
-    MaintenanceBookState state,
     MaintenanceBookNotifier notifier,
   ) async {
     notifier.clearCostDialog();
-    final result = await showModalBottomSheet<bool>(
+    final result = await showWorkPaymentSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => _MaintenanceCostSheet(l10n: l10n),
+      l10n: l10n,
+      title: l10n.maintenanceCostsTitle,
+      totalLabel: l10n.maintenanceTotalLabel,
+      amountHint: l10n.maintenanceTotalHint,
+      paymentMethodsLabel: l10n.maintenancePaymentMethods,
+      payTypeCashText: l10n.maintenancePayCash,
+      payTypeOnlineText: l10n.maintenancePayOnline,
+      uploadVoucherText: l10n.maintenanceUploadVoucher,
+      confirmButtonText: l10n.maintenanceSubmit,
+      initialPayType: 2,
+      requireAttachmentsForCash: false,
+      onUploadImage: notifier.uploadVoucher,
+      onConfirmPayment: (submit) async {
+        notifier.updateAmount(submit.fee);
+        notifier.updatePaySource(submit.payType);
+        notifier.replaceVoucherImages(submit.attachments);
+        return true;
+      },
     );
     if (!mounted || result != true) return;
 
@@ -550,7 +568,7 @@ class _VehicleInfoCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          l10n.maintenanceRecords,
+                          _maintenanceRecordsText(context, l10n),
                           style: const TextStyle(
                             fontSize: 14,
                             color: Colors.black,
@@ -640,6 +658,13 @@ class _VehicleInfoCard extends StatelessWidget {
       fallback: dateStr,
     );
   }
+}
+
+String _maintenanceRecordsText(BuildContext context, AppLocalizations l10n) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '保养记录' : l10n.maintenanceRecords;
 }
 
 class _Tag extends StatelessWidget {

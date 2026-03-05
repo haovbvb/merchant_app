@@ -108,6 +108,10 @@ class MaintenanceBookNotifier extends Notifier<MaintenanceBookState> {
     }
   }
 
+  void replaceVoucherImages(List<String> urls) {
+    state = state.copyWith(voucherImages: List<String>.from(urls));
+  }
+
   void clearCostDialog() {
     state = state.copyWith(amount: '', paySource: 2, voucherImages: []);
   }

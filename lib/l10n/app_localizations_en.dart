@@ -2884,7 +2884,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get depositRefundFailed => 'Submit failed';
 
   @override
-  String get depositRefundOrderEmpty => 'No orders';
+  String get depositRefundOrderEmpty => 'No orders eligible for deposit refund';
 
   @override
   String get depositRefundAmount => 'Deposit refund amount';
@@ -2915,6 +2915,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get depositRefundViewVoucher => 'View Voucher';
+
+  @override
+  String get depositRefundVoucherUnconfirmedTip => 'Voucher is not confirmed yet. Continue?';
 
   @override
   String get depositRefundRemarkHint => 'Enter the remarks';

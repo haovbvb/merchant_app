@@ -5909,6 +5909,12 @@ abstract class AppLocalizations {
   /// **'View Voucher'**
   String get depositRefundViewVoucher;
 
+  /// No description provided for @depositRefundVoucherUnconfirmedTip.
+  ///
+  /// In en, this message translates to:
+  /// **'Voucher is not confirmed yet. Continue?'**
+  String get depositRefundVoucherUnconfirmedTip;
+
   /// No description provided for @depositRefundRemarkHint.
   ///
   /// In en, this message translates to:

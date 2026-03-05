@@ -6,9 +6,9 @@ import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/widgets/photo_gallery_viewer.dart';
 import 'package:merchant_app/data/models/roadside_order_detail.dart';
+import 'package:merchant_app/features/work/payment/widgets/work_payment_sheet.dart';
 import 'package:merchant_app/features/work/roadside/roadside_controller.dart';
 import 'package:merchant_app/features/work/roadside/roadside_deal_page.dart';
-import 'package:merchant_app/features/work/roadside/roadside_payment_sheet.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -158,9 +158,21 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
     AppLocalizations l10n,
     RoadSideOrderDetail detail,
   ) async {
-    final result = await showRoadsidePaymentSheet(
+    final result = await showWorkPaymentSheet(
       context: context,
       l10n: l10n,
+      title: l10n.roadsideCostsTitle,
+      totalLabel: l10n.roadsideTotalLabel,
+      amountHint: Localizations.localeOf(context).languageCode
+              .toLowerCase()
+              .startsWith('zh')
+          ? '请输入金额（无费用填 0）'
+          : 'Please enter amount  (No fee, fill in 0)',
+      paymentMethodsLabel: l10n.roadsidePaymentMethodLabel,
+      payTypeCashText: l10n.roadsidePayTypeCash,
+      payTypeOnlineText: l10n.roadsidePayTypeOnline,
+      uploadVoucherText: l10n.roadsideUploadVoucherLabel,
+      confirmButtonText: l10n.roadsideConfirmPayment,
       initialPayType: 1,
       closeOnFailure: true,
       successMessage: l10n.roadsidePaySuccess,

@@ -97,6 +97,14 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
   Future<bool> fetchUserDetail() async {
     final cardNum = state.cardNum.trim();
     if (cardNum.isEmpty) {
+      state = state.copyWith(
+        userDetail: null,
+        orders: const [],
+        selectedOrder: null,
+        deviceSn: '',
+        deviceInfo: null,
+        errorMessage: null,
+      );
       return false;
     }
 
@@ -167,6 +175,10 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
     final order = state.selectedOrder;
     final deviceSn = state.deviceSn.trim();
     if (order == null || deviceSn.isEmpty) {
+      state = state.copyWith(
+        deviceInfo: null,
+        errorMessage: null,
+      );
       return false;
     }
 

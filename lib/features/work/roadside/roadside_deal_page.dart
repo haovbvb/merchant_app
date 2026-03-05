@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/features/work/payment/widgets/work_payment_sheet.dart';
 import 'package:merchant_app/features/work/roadside/roadside_controller.dart';
-import 'package:merchant_app/features/work/roadside/roadside_payment_sheet.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
 class RoadSideDealPage extends ConsumerStatefulWidget {
@@ -252,9 +252,21 @@ class _RoadSideDealPageState extends ConsumerState<RoadSideDealPage> {
     AppLocalizations l10n,
     RoadSideDealNotifier notifier,
   ) async {
-    final result = await showRoadsidePaymentSheet(
+    final result = await showWorkPaymentSheet(
       context: context,
       l10n: l10n,
+      title: l10n.roadsideCostsTitle,
+      totalLabel: l10n.roadsideTotalLabel,
+      amountHint: Localizations.localeOf(context).languageCode
+              .toLowerCase()
+              .startsWith('zh')
+          ? '请输入金额（无费用填 0）'
+          : 'Please enter amount  (No fee, fill in 0)',
+      paymentMethodsLabel: l10n.roadsidePaymentMethodLabel,
+      payTypeCashText: l10n.roadsidePayTypeCash,
+      payTypeOnlineText: l10n.roadsidePayTypeOnline,
+      uploadVoucherText: l10n.roadsideUploadVoucherLabel,
+      confirmButtonText: l10n.roadsideConfirmPayment,
       initialPayType: 2,
       failureMessage: l10n.roadsidePayFailed,
       onUploadImage: notifier.uploadImage,

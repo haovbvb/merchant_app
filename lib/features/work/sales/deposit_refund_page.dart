@@ -8,6 +8,7 @@ import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/core/widgets/photo_gallery_viewer.dart';
 import 'package:merchant_app/data/models/deposit_refund_info_bean.dart';
+import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/deposit_refund_controller.dart';
 import 'package:merchant_app/features/work/sales/widgets/deposit_order_sheet.dart';
@@ -28,6 +29,10 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
   @override
   void initState() {
     super.initState();
+    ref.read(depositRefundProvider.notifier).reset();
+    _userIdController.clear();
+    _remarkController.clear();
+    _lastQueriedUserId = '';
     _userIdFocusNode.addListener(_onUserIdFocusChanged);
   }
 
@@ -232,7 +237,16 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
   }
 
   Widget _buildUserInfoCard(DepositRefundInfoBean info) {
-    final name = '${info.firstName} ${info.lastName}'.trim();
+    final account = info.username.trim().isNotEmpty
+        ? info.username.trim()
+        : '${info.firstName} ${info.lastName}'.trim();
+    final areaCode = AuthSession.instance.current?.areaCode.trim() ?? '';
+    final phone = info.phone.trim();
+    final displayPhone = phone.isEmpty
+        ? '-'
+        : areaCode.isEmpty || phone.startsWith(areaCode)
+        ? phone
+        : '$areaCode $phone';
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -265,7 +279,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name.isEmpty ? '-' : name,
+                  account.isEmpty ? '-' : account,
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -274,7 +288,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Phone: ${info.phone.isNotEmpty ? info.phone : '-'}',
+                  '${context.l10n.depositRefundUserPhone}: $displayPhone',
                   style: const TextStyle(
                     fontSize: 13,
                     color: Color(0xFF999999),
@@ -334,9 +348,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
             _buildSelectedOrder(selected)
           else
             GestureDetector(
-              onTap: deposits.isNotEmpty
-                  ? () => _selectOrder(context, deposits, notifier)
-                  : null,
+              onTap: () => _selectOrder(context, deposits, notifier),
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
@@ -541,6 +553,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
           TextField(
             controller: _remarkController,
             maxLines: 3,
+            maxLength: 200,
             decoration: InputDecoration(
               hintText: l10n.depositRefundRemarkHint,
               hintStyle: const TextStyle(
@@ -550,6 +563,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
               border: InputBorder.none,
               isDense: true,
               contentPadding: EdgeInsets.zero,
+              counterText: '',
             ),
             style: const TextStyle(fontSize: 14, color: AppColors.black06Text),
           ),
@@ -630,7 +644,11 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
       _userIdController.text = userId;
       _lastQueriedUserId = userId;
       notifier.queryUser(userId);
+      return;
     }
+    _lastQueriedUserId = '';
+    _remarkController.clear();
+    notifier.reset();
   }
 
   void _handleUserIdBlur() {
@@ -669,7 +687,10 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
     List<Deposit> deposits,
     DepositRefundNotifier notifier,
   ) async {
-    if (deposits.isEmpty) return;
+    if (deposits.isEmpty) {
+      showToast(context.l10n.depositRefundOrderEmpty);
+      return;
+    }
 
     final selected = await DepositOrderSheet.show(
       context,
@@ -694,7 +715,7 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
         builder: (context) {
           return AlertDialog(
             title: Text(l10n.depositRefundTitle),
-            content: const Text('Voucher is not confirmed yet. Continue?'),
+            content: Text(l10n.depositRefundVoucherUnconfirmedTip),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),

@@ -30,6 +30,9 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
   @override
   void initState() {
     super.initState();
+    ref.read(afterSaleBindProvider.notifier).reset();
+    _cardController.clear();
+    _deviceController.clear();
     _cardFocusNode.addListener(() {
       if (!_cardFocusNode.hasFocus) {
         _fetchUserDetailWithFeedback();
@@ -133,7 +136,6 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
                           if (state.userDetail != null)
                             _UserInfoCard(
                               avatar: state.userDetail?.avatar,
-                              cardNum: state.userDetail?.cardNum ?? '-',
                               name: _getUserName(state),
                               phone: _getUserPhone(state),
                             )
@@ -329,15 +331,17 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
   String _getUserPhone(AfterSaleBindState state) {
     final detail = state.userDetail;
     if (detail == null || (detail.phone?.isEmpty ?? true)) return '-';
-    final areaCode = AuthSession.instance.current?.areaCode ?? '';
-    if (areaCode.isEmpty) return detail.phone ?? '-';
-    return '$areaCode${detail.phone ?? ''}';
+    final phone = detail.phone?.trim() ?? '';
+    final areaCode = AuthSession.instance.current?.areaCode.trim() ?? '';
+    if (areaCode.isEmpty) return phone.isEmpty ? '-' : phone;
+    if (phone.startsWith(areaCode)) return phone;
+    return '$areaCode $phone';
   }
 
   Future<void> _scanCardNum() async {
     final result = await Navigator.of(
       context,
-    ).push<String>(MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: true)));
+    ).push<String>(MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: false)));
     if (!mounted || result == null || result.isEmpty) return;
     final cardNum = ScanUtils.getUserCarNum(result);
     if (cardNum.isEmpty) return;
@@ -348,7 +352,7 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
 
   Future<void> _scanDeviceSn() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: true, parseDeviceSn: true)),
+      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: false, parseDeviceSn: true)),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _deviceController.text = result;
@@ -444,90 +448,67 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
 class _UserInfoCard extends StatelessWidget {
   const _UserInfoCard({
     required this.avatar,
-    required this.cardNum,
     required this.name,
     required this.phone,
   });
 
   final String? avatar;
-  final String cardNum;
   final String name;
   final String phone;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 24,
-              backgroundColor: Colors.grey.shade300,
-              backgroundImage: avatar != null && avatar!.isNotEmpty
-                  ? NetworkImage(avatar!)
-                  : null,
-              child: avatar == null || avatar!.isEmpty
-                  ? const Icon(Icons.person, color: Colors.grey)
-                  : null,
-            ),
-            const SizedBox(width: 12),
-            Column(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      child: Row(
+        children: [
+          ClipOval(
+            child: (avatar != null && avatar!.trim().isNotEmpty)
+                ? Image.network(
+                    avatar!,
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Image.asset(
+                      'assets/android/mipmap-xxhdpi/icon_def_avatar.webp',
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Image.asset(
+                    'assets/android/mipmap-xxhdpi/icon_def_avatar.webp',
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.cover,
+                  ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                _InfoRow(
-                  label: context.l10n.afterSaleBindUserIdLabel,
-                  value: cardNum,
+                Text(
+                  name,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Color(0xE6000000),
+                  ),
                 ),
                 const SizedBox(height: 4),
-                _InfoRow(
-                  label: context.l10n.afterSaleBindUserNameLabel,
-                  value: name,
-                ),
-                const SizedBox(height: 4),
-                _InfoRow(
-                  label: context.l10n.afterSaleBindUserPhoneLabel,
-                  value: phone,
+                Text(
+                  '${context.l10n.afterSaleBindUserPhoneLabel}: $phone',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xB30C0C0D),
+                  ),
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  const _InfoRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          '$label: ',
-          style: const TextStyle(fontSize: 13, color: Colors.grey),
-        ),
-        Flexible(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.black87,
-              fontWeight: FontWeight.w500,
-            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

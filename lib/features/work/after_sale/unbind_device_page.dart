@@ -26,6 +26,16 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
   Timer? _debounce;
 
   @override
+  void initState() {
+    super.initState();
+    ref.read(unbindDeviceProvider.notifier).clearForm();
+    _cardController.clear();
+    _deviceController.clear();
+    _checkRemarkController.clear();
+    _remarkController.clear();
+  }
+
+  @override
   void dispose() {
     _debounce?.cancel();
     _cardController.dispose();
@@ -142,6 +152,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                         label: l10n.unbindDeviceCheckRemarkLabel,
                         hint: l10n.unbindDeviceCheckRemarkHint,
                         controller: _checkRemarkController,
+                        maxLength: 200,
                         onChanged: notifier.updateCheckRemark,
                       ),
                     ),
@@ -160,6 +171,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                             label: l10n.unbindDeviceReasonTitle,
                             hint: l10n.unbindDeviceReasonHint,
                             controller: _remarkController,
+                            maxLength: 200,
                             onChanged: notifier.updateRemark,
                           ),
                           const Divider(height: 1, indent: 16, endIndent: 16),
@@ -269,6 +281,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
     required String hint,
     required TextEditingController controller,
     required ValueChanged<String> onChanged,
+    int? maxLength,
     ValueChanged<String>? onSubmitted,
     VoidCallback? onScan,
   }) {
@@ -291,6 +304,15 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
               Expanded(
                 child: TextField(
                   controller: controller,
+                  maxLength: maxLength,
+                  buildCounter: (
+                    _, {
+                    required int currentLength,
+                    required bool isFocused,
+                    required int? maxLength,
+                  }) {
+                    return null;
+                  },
                   decoration: InputDecoration(
                     hintText: hint,
                     hintStyle: const TextStyle(
@@ -312,6 +334,19 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
                 ),
             ],
           ),
+          if (maxLength != null) ...[
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                '${controller.text.length}/$maxLength',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Color(0x99000000),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -360,7 +395,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
   Future<void> _scanCardNum() async {
     final result = await Navigator.of(
       context,
-    ).push<String>(MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: true)));
+    ).push<String>(MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: false)));
     if (!mounted || result == null || result.isEmpty) return;
     final cardNum = ScanUtils.getUserCarNum(result);
     if (cardNum.isEmpty) return;
@@ -370,7 +405,7 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
 
   Future<void> _scanDeviceSn() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: true, parseDeviceSn: true)),
+      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: false, parseDeviceSn: true)),
     );
     if (!mounted || result == null || result.isEmpty) return;
     ref.read(unbindDeviceProvider.notifier).updateDeviceSn(result);

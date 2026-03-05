@@ -57,7 +57,10 @@ class DepositRefundNotifier extends Notifier<DepositRefundState> {
   DepositRefundState build() => const DepositRefundState();
 
   Future<void> queryUser(String cardNum) async {
-    if (cardNum.isEmpty) return;
+    if (cardNum.isEmpty) {
+      state = const DepositRefundState();
+      return;
+    }
     state = state.copyWith(loading: true, selectedDeposit: null);
     final response = await _api.get<DepositRefundInfoBean>(
       ApiPath.queryUserForRefundDeposit,

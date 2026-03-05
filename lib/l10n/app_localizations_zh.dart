@@ -2884,7 +2884,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get depositRefundFailed => '提交失败';
 
   @override
-  String get depositRefundOrderEmpty => '暂无订单';
+  String get depositRefundOrderEmpty => '暂无可退还押金的订单';
 
   @override
   String get depositRefundAmount => '押金退还金额';
@@ -2915,6 +2915,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get depositRefundViewVoucher => '查看凭证';
+
+  @override
+  String get depositRefundVoucherUnconfirmedTip => '凭证未确认，是否继续？';
 
   @override
   String get depositRefundRemarkHint => '请输入备注';

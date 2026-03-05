@@ -4,8 +4,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
-class RoadsidePaymentSubmit {
-  const RoadsidePaymentSubmit({
+class WorkPaymentSubmit {
+  const WorkPaymentSubmit({
     required this.fee,
     required this.payType,
     required this.attachments,
@@ -16,14 +16,23 @@ class RoadsidePaymentSubmit {
   final List<String> attachments;
 }
 
-Future<bool?> showRoadsidePaymentSheet({
+Future<bool?> showWorkPaymentSheet({
   required BuildContext context,
   required AppLocalizations l10n,
+  required String title,
+  required String totalLabel,
+  required String amountHint,
+  required String paymentMethodsLabel,
+  required String payTypeCashText,
+  required String payTypeOnlineText,
+  required String uploadVoucherText,
+  required String confirmButtonText,
   required Future<String?> Function(String path) onUploadImage,
-  required Future<bool> Function(RoadsidePaymentSubmit submit) onConfirmPayment,
+  required Future<bool> Function(WorkPaymentSubmit submit) onConfirmPayment,
   int initialPayType = 2,
   int maxAttachments = 5,
   bool closeOnFailure = false,
+  bool requireAttachmentsForCash = true,
   String? successMessage,
   String? failureMessage,
 }) async {
@@ -42,9 +51,9 @@ Future<bool?> showRoadsidePaymentSheet({
         builder: (sheetContext, setState) {
           final fee = feeController.text.trim();
           final meaningful = _isAmountMeaningful(fee);
-          final canConfirm = !paying &&
-              meaningful &&
-              (payType == 2 || attachmentUrls.isNotEmpty);
+          final attachmentsOk =
+              !requireAttachmentsForCash || payType == 2 || attachmentUrls.isNotEmpty;
+          final canConfirm = !paying && meaningful && attachmentsOk;
 
           return Container(
             decoration: const BoxDecoration(
@@ -63,12 +72,13 @@ Future<bool?> showRoadsidePaymentSheet({
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
+                      width: double.infinity,
                       height: 50,
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
                           Text(
-                            _costsTitle(context),
+                            title,
                             style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
@@ -79,6 +89,11 @@ Future<bool?> showRoadsidePaymentSheet({
                             right: 0,
                             child: IconButton(
                               onPressed: () => Navigator.of(sheetContext).pop(),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints.tightFor(
+                                width: 50,
+                                height: 50,
+                              ),
                               icon: const Icon(
                                 Icons.close,
                                 color: Color(0x99000000),
@@ -99,7 +114,7 @@ Future<bool?> showRoadsidePaymentSheet({
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _totalWithDollarText(context),
+                            totalLabel,
                             style: const TextStyle(
                               fontSize: 14,
                               color: Color(0x99000000),
@@ -118,7 +133,7 @@ Future<bool?> showRoadsidePaymentSheet({
                             ),
                             decoration: InputDecoration(
                               border: InputBorder.none,
-                              hintText: _amountHint(context),
+                              hintText: amountHint,
                               hintStyle: const TextStyle(
                                 fontSize: 17,
                                 color: Color(0x40000000),
@@ -141,7 +156,7 @@ Future<bool?> showRoadsidePaymentSheet({
                           Padding(
                             padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
                             child: Text(
-                              _paymentMethodsText(context),
+                              paymentMethodsLabel,
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: Color(0x99000000),
@@ -151,7 +166,7 @@ Future<bool?> showRoadsidePaymentSheet({
                           Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: _PayMethodRow(
-                              text: l10n.roadsidePayTypeCash,
+                              text: payTypeCashText,
                               selected: payType == 1,
                               onTap: () => setState(() => payType = 1),
                             ),
@@ -160,7 +175,7 @@ Future<bool?> showRoadsidePaymentSheet({
                           Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: _PayMethodRow(
-                              text: l10n.roadsidePayTypeOnline,
+                              text: payTypeOnlineText,
                               selected: payType == 2,
                               onTap: () => setState(() => payType = 2),
                             ),
@@ -181,7 +196,7 @@ Future<bool?> showRoadsidePaymentSheet({
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _uploadVoucherText(context),
+                              uploadVoucherText,
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: Color(0x99000000),
@@ -235,7 +250,7 @@ Future<bool?> showRoadsidePaymentSheet({
                             ? () async {
                                 setState(() => paying = true);
                                 final ok = await onConfirmPayment(
-                                  RoadsidePaymentSubmit(
+                                  WorkPaymentSubmit(
                                     fee: fee,
                                     payType: payType,
                                     attachments: List.of(attachmentUrls),
@@ -267,7 +282,7 @@ Future<bool?> showRoadsidePaymentSheet({
                           ),
                         ),
                         child: Text(
-                          l10n.roadsideConfirmPayment,
+                          confirmButtonText,
                           style: const TextStyle(
                             fontSize: 16,
                             color: Colors.white,
@@ -470,39 +485,4 @@ bool _isAmountMeaningful(String value) {
   final pure = value.trim();
   if (pure.runes.every((ch) => String.fromCharCode(ch) == '.')) return false;
   return pure.contains(RegExp(r'[0-9]'));
-}
-
-String _costsTitle(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
-  return isZh ? '费用' : 'Costs';
-}
-
-String _totalWithDollarText(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
-  return isZh ? '总计 (\$)' : 'Total (\$)';
-}
-
-String _amountHint(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
-  return isZh ? '请输入金额（无费用填 0）' : 'Please enter amount  (No fee, fill in 0)';
-}
-
-String _paymentMethodsText(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
-  return isZh ? '支付方式' : 'Payment Methods';
-}
-
-String _uploadVoucherText(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
-  return isZh ? '上传凭证' : 'Upload Voucher';
 }

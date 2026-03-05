@@ -172,11 +172,21 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
   void _backToSource(bool hasData) {
     final navigator = Navigator.of(context);
-    if (navigator.canPop()) {
-      navigator.pop(hasData);
+    if (!navigator.canPop()) {
+      AppRouter.goHome();
       return;
     }
-    AppRouter.goHome();
+
+    navigator.pop(hasData);
+
+    if (widget.popToSearchOnClear) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!navigator.mounted) return;
+        if (navigator.canPop()) {
+          navigator.pop();
+        }
+      });
+    }
   }
 
   /// 根据设备类型构建头部
@@ -1101,52 +1111,43 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final record = records[index];
-        final isCompleted =
-            record.result == 'completed' || record.result == '1';
+        final status = _resolveRepairStatus(l10n, record.result);
 
         return _CardSection(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 头部：头像、姓名、状态
+              // 头部：头像、姓名、状态（安卓 item_device_fix_record）
               Row(
                 children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: const Color(0xFFEEEEEE),
-                    child: Text(
-                      (record.fixMan ?? 'U').substring(0, 1).toUpperCase(),
-                      style: const TextStyle(
-                        color: Color(0xFF666666),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                  _RecordAvatar(
+                    imageUrl: record.fixManAvatar,
+                    showFixBadge: true,
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       record.fixMan ?? '-',
                       style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
                         color: AppColors.black06Text,
                       ),
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: status.backgroundColor,
+                      borderRadius: BorderRadius.circular(4),
                     ),
                     child: Text(
-                      isCompleted
-                          ? l10n.deviceDetailRepairCompleted
-                          : l10n.deviceDetailRepairMissingParts,
+                      status.label,
                       style: TextStyle(
                         fontSize: 13,
-                        color: isCompleted
-                            ? AppColors.primaryColor
-                            : const Color(0xFFE57373),
+                        color: status.textColor,
                       ),
                     ),
                   ),
@@ -1154,12 +1155,14 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               ),
               const SizedBox(height: 12),
 
+              const Divider(height: 1, color: Color(0xFFE6E6E6)),
+              const SizedBox(height: 12),
+
               // 问题标题
               Text(
                 record.itemName ?? '-',
                 style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
                   color: AppColors.black06Text,
                 ),
               ),
@@ -1178,8 +1181,8 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
               // 时间
               Text(
-                _formatTimestamp(record.createTime),
-                style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
+                _formatRecordTime(record.createTime),
+                style: const TextStyle(fontSize: 12, color: Color(0x4D0C0C0D)),
               ),
             ],
           ),
@@ -1558,11 +1561,28 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Row(
+                children: [
+                  _RecordAvatar(imageUrl: record.img, showFixBadge: false),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      record.username ?? '-',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.black06Text,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Divider(height: 1, color: Color(0xFFE6E6E6)),
+              const SizedBox(height: 12),
               Text(
-                record.itemName ?? '-',
+                l10n.maintenanceNoteLabel,
                 style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
                   color: AppColors.black06Text,
                 ),
               ),
@@ -1577,11 +1597,8 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               ),
               const SizedBox(height: 8),
               Text(
-                record.date ??
-                    (record.createTime != null
-                        ? _formatTimestamp(record.createTime)
-                        : '-'),
-                style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
+                record.date ?? _formatRecordTime(record.createTime),
+                style: const TextStyle(fontSize: 12, color: Color(0x4D0C0C0D)),
               ),
             ],
           ),
@@ -1590,9 +1607,41 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     );
   }
 
-  String _formatTimestamp(int? timestamp, {bool withSeconds = false}) {
-    final pattern = withSeconds ? 'yyyy/MM/dd HH:mm:ss' : 'yyyy/MM/dd HH:mm';
-    return DateFormatUtils.formatTimestamp(timestamp, pattern: pattern);
+  String _formatRecordTime(int? timestamp) {
+    return DateFormatUtils.formatTimestamp(
+      timestamp,
+      pattern: 'yyyy-MM-dd HH:mm:ss',
+    );
+  }
+
+  _RepairStatusDisplay _resolveRepairStatus(dynamic l10n, String? result) {
+    final value = (result ?? '').trim();
+    if (value == '2') {
+      return _RepairStatusDisplay(
+        label: l10n.deviceDetailRepairMissingParts,
+        textColor: const Color(0xFFED942F),
+        backgroundColor: const Color(0xFFFDF5EB),
+      );
+    }
+    if (value == '3') {
+      return _RepairStatusDisplay(
+        label: l10n.repairRecordStatusDiscard,
+        textColor: const Color(0xFFFA4B51),
+        backgroundColor: const Color(0xFFFFF0F0),
+      );
+    }
+    if (value == '1') {
+      return _RepairStatusDisplay(
+        label: l10n.deviceDetailRepairCompleted,
+        textColor: AppColors.primaryColor,
+        backgroundColor: const Color(0xFFE9F7F2),
+      );
+    }
+    return _RepairStatusDisplay(
+      label: value.isEmpty ? '-' : value,
+      textColor: AppColors.primaryColor,
+      backgroundColor: const Color(0xFFE9F7F2),
+    );
   }
 
   String _formatTimeString(String? value, {bool withSeconds = false}) {
@@ -1978,6 +2027,71 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
       const SnackBar(
         content: Text('请用手机安装地图App 进行导航'),
         duration: Duration(seconds: 2),
+      ),
+    );
+  }
+}
+
+class _RepairStatusDisplay {
+  const _RepairStatusDisplay({
+    required this.label,
+    required this.textColor,
+    required this.backgroundColor,
+  });
+
+  final String label;
+  final Color textColor;
+  final Color backgroundColor;
+}
+
+class _RecordAvatar extends StatelessWidget {
+  const _RecordAvatar({required this.imageUrl, required this.showFixBadge});
+
+  final String? imageUrl;
+  final bool showFixBadge;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasImage = imageUrl != null && imageUrl!.trim().isNotEmpty;
+    return SizedBox(
+      width: 28,
+      height: 28,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          ClipOval(
+            child: hasImage
+                ? Image.network(
+                    imageUrl!,
+                    width: 28,
+                    height: 28,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Image.asset(
+                      'assets/android/mipmap-xxhdpi/icon_def_avatar.webp',
+                      width: 28,
+                      height: 28,
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                : Image.asset(
+                    'assets/android/mipmap-xxhdpi/icon_def_avatar.webp',
+                    width: 28,
+                    height: 28,
+                    fit: BoxFit.cover,
+                  ),
+          ),
+          if (showFixBadge)
+            Positioned(
+              right: -1,
+              bottom: -1,
+              child: Image.asset(
+                'assets/android/mipmap-xxhdpi/icon_fix.png',
+                width: 12,
+                height: 12,
+                fit: BoxFit.contain,
+              ),
+            ),
+        ],
       ),
     );
   }

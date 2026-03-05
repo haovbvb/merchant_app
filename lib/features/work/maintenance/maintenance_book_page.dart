@@ -620,7 +620,7 @@ class _VehicleInfoCard extends StatelessWidget {
                     Expanded(
                       child: _StatItem(
                         label: l10n.maintenanceAvgMileage,
-                        value: '${appointment.day30AvgMilePerDay?.toInt() ?? 0}',
+                        value: _formatTwoDecimals(appointment.day30AvgMilePerDay),
                         unit: 'km',
                       ),
                     ),
@@ -628,7 +628,7 @@ class _VehicleInfoCard extends StatelessWidget {
                     Expanded(
                       child: _StatItem(
                         label: l10n.maintenanceAvgSpeed,
-                        value: '${appointment.day30AvgSpeed?.toInt() ?? 0}',
+                        value: _formatTwoDecimals(appointment.day30AvgSpeed),
                         unit: 'km/hr',
                       ),
                     ),
@@ -636,7 +636,7 @@ class _VehicleInfoCard extends StatelessWidget {
                     Expanded(
                       child: _StatItem(
                         label: l10n.maintenanceAvgSwapCount,
-                        value: '${appointment.day30AvgSwapCount?.toInt() ?? 0}',
+                        value: _formatTwoDecimals(appointment.day30AvgSwapCount),
                         unit: '',
                       ),
                     ),
@@ -657,6 +657,10 @@ class _VehicleInfoCard extends StatelessWidget {
       pattern: 'dd MMM, yyyy',
       fallback: dateStr,
     );
+  }
+
+  String _formatTwoDecimals(num? value) {
+    return (value ?? 0).toDouble().toStringAsFixed(2);
   }
 }
 

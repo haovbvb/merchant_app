@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/storage_keys.dart';
@@ -191,104 +192,118 @@ class _HomeSearchPageState extends State<HomeSearchPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-    return Scaffold(
-      backgroundColor: const Color(0xFFF2F4F7),
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          children: [
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.arrow_back_ios_new),
-                    color: const Color(0xE60C0C0D),
-                  ),
-                  Expanded(
-                    child: Container(
-                      height: 38,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF2F4F7),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          const SizedBox(width: 10),
-                          const Icon(
-                            Icons.search,
-                            size: 22,
-                            color: Color(0x4D0C0C0D),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: TextField(
-                              controller: _searchController,
-                              focusNode: _focusNode,
-                              textInputAction: TextInputAction.search,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                isDense: true,
-                                hintText: l10n.deviceSearchHint,
-                                hintStyle: const TextStyle(
-                                  color: Color(0x4D0C0C0D),
-                                  fontSize: 20,
-                                ),
-                              ),
-                              style: const TextStyle(
-                                color: Color(0xE60C0C0D),
-                                fontSize: 20,
-                              ),
-                              onSubmitted: _search,
-                              onChanged: (_) => setState(() {}),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.white,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarColor: Colors.white,
+        systemNavigationBarIconBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              Container(
+                color: Colors.white,
+                padding: const EdgeInsets.fromLTRB(8, 8, 12, 8),
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.arrow_back_ios_new),
+                      color: const Color(0xE60C0C0D),
+                    ),
+                    Expanded(
+                      child: Container(
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF2F4F7),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            const SizedBox(width: 10),
+                            const Icon(
+                              Icons.search,
+                              size: 22,
+                              color: Color(0x4D0C0C0D),
                             ),
-                          ),
-                          if (_searchController.text.trim().isNotEmpty)
-                            GestureDetector(
-                              onTap: () {
-                                _searchController.clear();
-                                setState(() {
-                                  _hasSearched = false;
-                                  _results = const <NearByVehicle>[];
-                                });
-                              },
-                              child: const Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 4),
-                                child: Icon(
-                                  Icons.cancel,
-                                  size: 18,
-                                  color: Color(0x660C0C0D),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: TextField(
+                                controller: _searchController,
+                                focusNode: _focusNode,
+                                textInputAction: TextInputAction.search,
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  isDense: true,
+                                  hintText: l10n.deviceSearchHint,
+                                  hintStyle: const TextStyle(
+                                    color: Color(0x4D0C0C0D),
+                                    fontSize: 14,
+                                  ),
                                 ),
+                                style: const TextStyle(
+                                  color: Color(0xE60C0C0D),
+                                  fontSize: 14,
+                                ),
+                                onSubmitted: _search,
+                                onChanged: (_) => setState(() {}),
                               ),
                             ),
-                          Container(
-                            width: 1,
-                            height: 20,
-                            color: const Color(0x260C0C0D),
-                          ),
-                          IconButton(
-                            onPressed: _scan,
-                            icon: const Icon(Icons.qr_code_scanner_rounded),
-                            color: const Color(0xE60C0C0D),
-                            iconSize: 23,
-                          ),
-                        ],
+                            if (_searchController.text.trim().isNotEmpty)
+                              GestureDetector(
+                                onTap: () {
+                                  _searchController.clear();
+                                  setState(() {
+                                    _hasSearched = false;
+                                    _results = const <NearByVehicle>[];
+                                  });
+                                },
+                                child: const Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 4),
+                                  child: Icon(
+                                    Icons.cancel,
+                                    size: 18,
+                                    color: Color(0x660C0C0D),
+                                  ),
+                                ),
+                              ),
+                            Container(
+                              width: 1,
+                              height: 20,
+                              color: const Color(0x260C0C0D),
+                            ),
+                            IconButton(
+                              onPressed: _scan,
+                              icon: Image.asset(
+                                'assets/android/mipmap-xxhdpi/icon_grey_scan.png',
+                                width: 23,
+                                height: 23,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: _loadingHistory
-                  ? const SizedBox.shrink()
-                  : !_hasSearched
-                  ? _buildHistory(context)
-                  : _buildResults(context),
-            ),
-          ],
+              Expanded(
+                child: Container(
+                  color: const Color(0xFFF2F4F7),
+                  child: _loadingHistory
+                      ? const SizedBox.shrink()
+                      : !_hasSearched
+                      ? _buildHistory(context)
+                      : _buildResults(context),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

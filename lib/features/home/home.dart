@@ -14,10 +14,10 @@ import 'package:google_maps_flutter/google_maps_flutter.dart' as gmaps;
 import 'package:merchant_app/app/ui.dart';
 import 'package:merchant_app/core/utils/location_permission.dart';
 import 'package:merchant_app/data/models/near_by_vehicle.dart';
+import 'package:merchant_app/features/home/home_search_page.dart';
 import 'package:merchant_app/features/home/widgets/vehicle_map.dart';
 import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/device/device_detail_page_new.dart';
-import 'package:merchant_app/features/work/device/device_search_page.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -445,20 +445,14 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   Future<void> _openSearch() async {
     final lat = _latitude ?? _fallbackLatitude;
     final lng = _longitude ?? _fallbackLongitude;
-    final sn = await Navigator.of(context).push<String>(
+    await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => DeviceSearchPage(
-          returnResult: true,
+        builder: (_) => HomeSearchPage(
           latitude: lat,
           longitude: lng,
         ),
       ),
     );
-    if (!mounted) return;
-    if (sn != null && sn.trim().isNotEmpty) {
-      setState(() => _vehicleSnFilter = sn.trim());
-      await _fetchVehicles();
-    }
   }
 
   void _selectVehicle(NearByVehicle? vehicle) {

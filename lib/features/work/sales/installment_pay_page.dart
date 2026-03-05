@@ -13,6 +13,7 @@ import 'package:merchant_app/data/models/installment_payment_response.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/installment_pay_controller.dart';
 import 'package:merchant_app/features/work/sales/widgets/installment_order_sheet.dart';
+import 'package:merchant_app/features/work/user/user_detail_page.dart';
 
 class InstallmentPayPage extends ConsumerStatefulWidget {
   const InstallmentPayPage({super.key});
@@ -29,6 +30,12 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(installmentPayProvider.notifier).reset();
+      _userIdController.clear();
+      _lastQueriedUserId = '';
+    });
     _userIdFocusNode.addListener(_onUserIdFocusChanged);
   }
 
@@ -104,17 +111,8 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
             ),
           ),
           // 绿色钱包图标
-          SizedBox(
-            width: 64,
-            height: 64,
-            child: ClipRRect(
-              child: Image.asset(
-                'assets/android/mipmap-xxhdpi/icon_offline_register.webp',
-                width: 64,
-                height: 64,
-                fit: BoxFit.cover,
-              ),
-            ),
+          Image.asset(
+            'assets/android/mipmap-xxhdpi/icon_installmentpage.png',
           ),
           const SizedBox(height: 12),
           Text(
@@ -232,9 +230,12 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
 
   Widget _buildUserInfoCard(BuildContext context, InstallmentPaymentResponse info) {
     final l10n = context.l10n;
-    final name = '${info.firstName ?? ''} ${info.lastName ?? ''}'.trim();
-    // 状态标签
-    final statusText = _getStatusText(info.userOrderStatus);
+    final fullName = '${info.firstName ?? ''} ${info.lastName ?? ''}'.trim();
+    final account = (info.username ?? '').trim();
+    final displayName = account.isNotEmpty ? account : fullName;
+    final status = _resolveStatusPresentation(context, info.userOrderStatus);
+    final tipText = _resolveStatusTip(context, info.userOrderStatus);
+    final userCardNum = (info.cardNum ?? '').trim();
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -245,68 +246,78 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
       child: Column(
         children: [
           // 用户头像和名称行
-          Row(
-            children: [
-              // 头像
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFFEEEEEE),
-                  image: (info.avatar ?? '').isNotEmpty
-                      ? DecorationImage(
-                          image: NetworkImage(info.avatar!),
-                          fit: BoxFit.cover,
-                        )
+          GestureDetector(
+            onTap: userCardNum.isEmpty
+                ? null
+                : () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => UserDetailPage(cardNum: userCardNum),
+                      ),
+                    );
+                  },
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: const Color(0xFFEEEEEE),
+                    image: (info.personImg ?? '').isNotEmpty
+                        ? DecorationImage(
+                            image: NetworkImage(info.personImg!),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: (info.personImg ?? '').isEmpty
+                      ? const Icon(Icons.person, color: Color(0xFF999999))
                       : null,
                 ),
-                child: (info.avatar ?? '').isEmpty
-                    ? const Icon(Icons.person, color: Color(0xFF999999))
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      name.isEmpty ? '-' : name,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.black06Text,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        displayName.isEmpty ? '-' : displayName,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.black06Text,
+                        ),
                       ),
-                    ),
-                    if (statusText.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE8F5E9),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: AppColors.primaryColor),
-                        ),
-                        child: Text(
-                          statusText,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.primaryColor,
+                      if (status != null) ...[
+                        const SizedBox(height: 4),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: status.backgroundColor,
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: status.borderColor),
+                          ),
+                          child: Text(
+                            status.label,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: status.textColor,
+                            ),
                           ),
                         ),
-                      ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
-              ),
-              const Icon(
-                Icons.chevron_right,
-                color: Color(0xFFCCCCCC),
-              ),
-            ],
+                const Icon(
+                  Icons.chevron_right,
+                  color: Color(0xFFCCCCCC),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
           // 统计行
@@ -332,25 +343,26 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
           ),
           const SizedBox(height: 12),
           // 提示文字
-          Row(
-            children: [
-              const Icon(
-                Icons.volume_up_outlined,
-                size: 16,
-                color: Color(0xFF999999),
-              ),
-              const SizedBox(width: 6),
-              Expanded(
-                child: Text(
-                  l10n.installmentPayNoOverdue,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF999999),
+          if (tipText.isNotEmpty)
+            Row(
+              children: [
+                Image.asset(
+                  'assets/android/mipmap-xxhdpi/icon_order_notify.png',
+                  width: 16,
+                  height: 16,
+                ),
+                const SizedBox(width: 6),
+                Expanded(
+                  child: Text(
+                    tipText,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF999999),
+                    ),
                   ),
                 ),
-              ),
-            ],
-          ),
+              ],
+            ),
         ],
       ),
     );
@@ -381,14 +393,62 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
     );
   }
 
-  String _getStatusText(int? status) {
+  _StatusPresentation? _resolveStatusPresentation(BuildContext context, int? status) {
+    final l10n = context.l10n;
     switch (status) {
       case 1:
-        return 'In installments';
+        return const _StatusPresentation(
+          label: '',
+          textColor: Color(0xFFF49300),
+          borderColor: Color(0xFFF49300),
+          backgroundColor: Color(0x1AF49300),
+        ).copyWith(label: l10n.orderStatusFullPayment);
       case 2:
-        return 'Completed';
+        return _StatusPresentation(
+          label: l10n.orderStatusPaidUp,
+          textColor: AppColors.primaryColor,
+          borderColor: AppColors.primaryColor,
+          backgroundColor: AppColors.primaryColor.withValues(alpha: 0.1),
+        );
       case 3:
-        return 'Overdue';
+        return const _StatusPresentation(
+          label: '',
+          textColor: Color(0xFF1184F7),
+          borderColor: Color(0xFF1184F7),
+          backgroundColor: Color(0x1A1184F7),
+        ).copyWith(label: l10n.orderStatusInstallments);
+      case 4:
+        return const _StatusPresentation(
+          label: '',
+          textColor: Color(0xFFFA4332),
+          borderColor: Color(0xFFFA4332),
+          backgroundColor: Color(0x1AFA4332),
+        ).copyWith(label: l10n.orderStatusOverdue);
+      case 5:
+        return const _StatusPresentation(
+          label: '',
+          textColor: Color(0xFFFA4332),
+          borderColor: Color(0xFFFA4332),
+          backgroundColor: Color(0x1AFA4332),
+        ).copyWith(label: l10n.orderStatusDishonest);
+      default:
+        return null;
+    }
+  }
+
+  String _resolveStatusTip(BuildContext context, int? status) {
+    final l10n = context.l10n;
+    switch (status) {
+      case 1:
+        return l10n.orderStatusFullPayment;
+      case 2:
+        return l10n.orderStatusPaidUp;
+      case 3:
+        return l10n.installmentPayNoOverdue;
+      case 4:
+        return l10n.userTipOverdue;
+      case 5:
+        return l10n.userTipDishonest;
       default:
         return '';
     }
@@ -471,10 +531,10 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
         // 订单头部
         Row(
           children: [
-            const Icon(
-              Icons.description_outlined,
-              size: 18,
-              color: AppColors.black06Text,
+            Image.asset(
+              'assets/android/mipmap-xxhdpi/icon_installpayment_order.png',
+              width: 16,
+              height: 16,
             ),
             const SizedBox(width: 8),
             Expanded(
@@ -550,10 +610,23 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                           spacing: 6,
                           runSpacing: 4,
                           children: [
-                            _buildTag('In installments', AppColors.primaryColor),
-                            _buildTag('Cash installment', const Color(0xFF999999)),
-                            if (order.spec?.isNotEmpty == true)
-                              _buildTag(order.spec!, const Color(0xFF999999)),
+                            if (_resolveStatusPresentation(context, order.status) case final status?)
+                              _buildTag(
+                                status.label,
+                                status.textColor,
+                                borderColor: status.borderColor,
+                                backgroundColor: status.backgroundColor,
+                              ),
+                            _buildTag(
+                              _resolvePaySourceText(context, order.paySource),
+                              const Color(0xFF666666),
+                            ),
+                            _buildTag(
+                              (order.model ?? '').trim().isEmpty
+                                  ? '-'
+                                  : order.model!.trim(),
+                              const Color(0xFF999999),
+                            ),
                           ],
                         ),
                       ],
@@ -667,13 +740,26 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
     );
   }
 
-  Widget _buildTag(String text, Color color) {
+  String _resolvePaySourceText(BuildContext context, int? paySource) {
+    final l10n = context.l10n;
+    final paySourceText = paySource == 2 ? l10n.orderPayOnline : l10n.orderPayCash;
+    return '$paySourceText ${l10n.orderPayInstallment}';
+  }
+
+  Widget _buildTag(
+    String text,
+    Color color, {
+    Color? borderColor,
+    Color? backgroundColor,
+  }) {
+    final effectiveBorderColor = borderColor ?? color.withValues(alpha: 0.5);
+    final effectiveBackgroundColor = backgroundColor ?? color.withValues(alpha: 0.1);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: effectiveBackgroundColor,
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: color.withValues(alpha: 0.5)),
+        border: Border.all(color: effectiveBorderColor),
       ),
       child: Text(
         text,
@@ -688,14 +774,14 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
   String _formatDate(int? timestamp) {
     return DateFormatUtils.formatTimestamp(
       timestamp,
-      pattern: 'MMM dd, yyyy',
+      pattern: 'yyyy/MM/dd',
     );
   }
 
   String _formatDateTime(int? timestamp) {
     return DateFormatUtils.formatTimestamp(
       timestamp,
-      pattern: 'yyyy.MM.dd HH:mm:ss',
+      pattern: 'yyyy/MM/dd HH:mm:ss',
     );
   }
 
@@ -715,7 +801,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.installmentPayVoucher,
+            '${l10n.installmentPayVoucher} (${state.attachments.length}/5)',
             style: const TextStyle(
               fontSize: 14,
               color: AppColors.black06Text,
@@ -931,10 +1017,47 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
       showToast(l10n.installmentPayUploadLimit);
       return;
     }
-    final picks = await picker.pickMultiImage();
-    if (!mounted || picks.isEmpty) return;
+
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (_) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.photo_camera),
+                title: Text(l10n.orderVoucherPickCamera),
+                onTap: () => Navigator.of(context).pop(ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library),
+                title: Text(l10n.orderVoucherPickGallery),
+                onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+    if (!mounted || source == null) return;
+
+    List<XFile> picks;
+    if (source == ImageSource.camera) {
+      final cameraPick = await picker.pickImage(source: ImageSource.camera);
+      if (!mounted || cameraPick == null) return;
+      picks = [cameraPick];
+    } else {
+      final galleryPicks = await picker.pickMultiImage();
+      if (!mounted || galleryPicks.isEmpty) return;
+      if (galleryPicks.length > remaining) {
+        showToast(l10n.installmentPayUploadLimit);
+      }
+      picks = galleryPicks.take(remaining).toList();
+    }
+
     var failed = 0;
-    for (final item in picks.take(remaining)) {
+    for (final item in picks) {
       final url = await notifier.uploadAttachment(item.path);
       if (url == null || url.isEmpty) {
         failed += 1;
@@ -1115,6 +1238,29 @@ class _SuccessPage extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _StatusPresentation {
+  final String label;
+  final Color textColor;
+  final Color borderColor;
+  final Color backgroundColor;
+
+  const _StatusPresentation({
+    required this.label,
+    required this.textColor,
+    required this.borderColor,
+    required this.backgroundColor,
+  });
+
+  _StatusPresentation copyWith({String? label}) {
+    return _StatusPresentation(
+      label: label ?? this.label,
+      textColor: textColor,
+      borderColor: borderColor,
+      backgroundColor: backgroundColor,
     );
   }
 }

@@ -1786,7 +1786,9 @@ class _SwapOrderCard extends StatelessWidget {
                     ),
                     _InfoLine(
                       label: l10n.orderLabelRemainTimes,
-                      value: _formatUnit(swap?.remainTime, l10n.orderUnitTimes),
+                      value: swap?.status == 0
+                          ? _formatUnit(null, l10n.orderUnitTimes)
+                          : _formatUnit(swap?.remainTime, l10n.orderUnitTimes),
                     ),
                     _InfoLine(
                       label: l10n.orderLabelExpireDate,

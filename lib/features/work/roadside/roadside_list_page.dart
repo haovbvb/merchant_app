@@ -73,11 +73,13 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage> {
           Container(
             color: Colors.transparent,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: List.generate(tabs.length, (index) {
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: List.generate(tabs.length, (index) {
                   final isSelected = _selectedTabIndex == index;
                   return Padding(
                     padding: EdgeInsets.only(right: index < tabs.length - 1 ? 12 : 0),
@@ -96,11 +98,6 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage> {
                               ? Colors.white
                               : const Color(0xFFF2F2F2),
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isSelected
-                                ? AppColors.primaryColor
-                                : const Color(0xFFF2F2F2),
-                          ),
                         ),
                         child: Text(
                           tabs[index],
@@ -115,7 +112,8 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage> {
                       ),
                     ),
                   );
-                }),
+                  }),
+                ),
               ),
             ),
           ),

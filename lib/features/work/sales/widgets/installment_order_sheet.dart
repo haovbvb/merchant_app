@@ -46,7 +46,7 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
   String _formatDate(int? timestamp) {
     return DateFormatUtils.formatTimestamp(
       timestamp,
-      pattern: 'MMM dd, yyyy',
+      pattern: 'yyyy/MM/dd',
     );
   }
 
@@ -134,8 +134,8 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
 
   Widget _buildOrderCard(BuildContext context, PeriodOrder order, bool isSelected) {
     final l10n = context.l10n;
-    // 设备类型: 1=Vehicle, 2=Battery
-    final deviceType = order.type == 1 ? 'Vehicle' : 'Battery';
+    // Android: 1=Battery, 2=Vehicle
+    final deviceType = order.type == 1 ? l10n.deviceTypeBattery : l10n.deviceTypeVehicle;
     final deviceInfo = '$deviceType | ${order.sn ?? '-'}';
 
     return GestureDetector(
@@ -150,9 +150,6 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: isSelected
-              ? Border.all(color: AppColors.primaryColor, width: 2)
-              : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -160,15 +157,15 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
             // Order NO + 选中图标
             Row(
               children: [
-                const Icon(
-                  Icons.description_outlined,
-                  size: 18,
-                  color: Color(0xFF999999),
+                Image.asset(
+                  'assets/android/mipmap-xxhdpi/icon_installpayment_order.png',
+                  width: 16,
+                  height: 16,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
-                    'Order NO: ${order.orderNo ?? '-'}',
+                    order.orderNo ?? '-',
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -176,20 +173,13 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
                     ),
                   ),
                 ),
-                if (isSelected)
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.primaryColor,
-                    ),
-                    child: const Icon(
-                      Icons.check,
-                      size: 16,
-                      color: Colors.white,
-                    ),
-                  ),
+                Image.asset(
+                  isSelected
+                      ? 'assets/android/mipmap-xxhdpi/icon_green_checked.png'
+                      : 'assets/android/mipmap-xxhdpi/icon_grey_unchecked.png',
+                  width: 24,
+                  height: 24,
+                ),
               ],
             ),
             const SizedBox(height: 12),

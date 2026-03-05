@@ -5,7 +5,6 @@ import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
-import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
 import 'package:merchant_app/data/models/purchasing_user.dart';
 import 'package:merchant_app/data/models/service_plan.dart';
@@ -415,21 +414,11 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
 
     final latestState = ref.read(sellBindProvider);
 
-    // Step 3: Validate device matches package
+    // Step 3: Validate required data
     final device = latestState.deviceInfo;
     final plan = latestState.selectedPlan;
     if (device == null || plan == null) {
       showToast(l10n.sellBindUnableSubmit);
-      return;
-    }
-    final deviceModel =
-        device.batteryVo?.batModel ??
-        device.batteryVo?.model ??
-        device.carVo?.carModel ??
-        device.carVo?.model;
-    final planModel = plan.batteryType ?? plan.carType;
-    if (deviceModel != null && planModel != null && deviceModel != planModel) {
-      _showModelMismatchDialog(pageContext, l10n);
       return;
     }
 
@@ -444,14 +433,6 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
           user: latestState.user,
         ),
       ),
-    );
-  }
-
-  void _showModelMismatchDialog(BuildContext context, AppLocalizations l10n) {
-    ConfirmDialog.alert(
-      context: context,
-      message: l10n.sellBindModelMismatch,
-      buttonText: l10n.confirm,
     );
   }
 }

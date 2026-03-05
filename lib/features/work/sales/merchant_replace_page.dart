@@ -16,6 +16,8 @@ class MerchantReplacePage extends ConsumerStatefulWidget {
 }
 
 class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
+  static const int _reasonMaxLength = 200;
+
   final _userIdController = TextEditingController();
   final _boundBatterySnController = TextEditingController();
   final _newBatterySnController = TextEditingController();
@@ -252,6 +254,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
           TextField(
             controller: _reasonController,
             onChanged: (_) => setState(() {}),
+            maxLength: _reasonMaxLength,
             maxLines: 3,
             decoration: InputDecoration(
               hintText: l10n.merchantReplaceReasonsHint,
@@ -344,6 +347,9 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
     MerchantReplaceNotifier notifier,
   ) async {
     final l10n = context.l10n;
+    final reason = _reasonController.text.trim().length > _reasonMaxLength
+        ? _reasonController.text.trim().substring(0, _reasonMaxLength)
+        : _reasonController.text.trim();
     if (_boundBatterySnController.text.trim() ==
         _newBatterySnController.text.trim()) {
       showToast(l10n.merchantReplaceSameSn);
@@ -353,7 +359,7 @@ class _MerchantReplacePageState extends ConsumerState<MerchantReplacePage> {
       cardNum: _userIdController.text.trim(),
       oldSn: _boundBatterySnController.text.trim(),
       newSn: _newBatterySnController.text.trim(),
-      reason: _reasonController.text.trim(),
+      reason: reason,
     );
     if (!context.mounted) return;
     showToast(ok ? l10n.merchantReplaceSuccess : l10n.merchantReplaceFailed);

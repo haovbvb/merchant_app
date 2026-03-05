@@ -37,8 +37,8 @@ class MerchantReplaceNotifier extends Notifier<MerchantReplaceState> {
       ApiPath.manualReplace,
       data: {
         'cardNum': cardNum,
-        'outSn': oldSn,
-        'inSn': newSn,
+        'inSn': oldSn,
+        'outSn': newSn,
         'reason': reason,
       },
       parser: (json) => json ?? Object(),

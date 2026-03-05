@@ -264,7 +264,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                                     ),
                                     if (_selectedPlan != null)
                                       Text(
-                                        '${_selectedPlan!.rate ?? 0}% annual interest rate',
+                                        '${_formatRatePercent(_selectedPlan!.rate)} ${l10n.sellBindAnnualRate}',
                                         style: const TextStyle(
                                           fontSize: 12,
                                           color: Color(0xFF999999),
@@ -471,13 +471,19 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
 
   double _calculateInterest() {
     if (_selectedPlan == null) return 0;
-    final rate = (_selectedPlan!.rate ?? 0) / 100;
-    final periods = _selectedPlan!.period ?? 12;
-    return widget.packageAmount * rate * (periods / 12);
+    return _selectedPlan!.fee ?? 0;
   }
 
   double _calculateTotal() {
-    return widget.packageAmount + _calculateInterest();
+    return widget.packageAmount + (_selectedPlan?.fee ?? 0);
+  }
+
+  String _formatRatePercent(double? rawRate) {
+    final value = (rawRate ?? 0) * 100;
+    final text = value.toStringAsFixed(2);
+    return text.endsWith('00')
+        ? value.toStringAsFixed(0)
+        : (text.endsWith('0') ? value.toStringAsFixed(1) : text);
   }
 
   bool _canProceed() {
@@ -537,7 +543,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
                         ),
                       ),
                       subtitle: Text(
-                        '${plan.rate ?? 0}% annual interest rate',
+                        '${_formatRatePercent(plan.rate)} ${l10n.sellBindAnnualRate}',
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 12,

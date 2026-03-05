@@ -136,7 +136,7 @@ class InstallmentPayNotifier extends Notifier<InstallmentPayState> {
       return false;
     }
     state = state.copyWith(submitting: true);
-    final response = await _api.post<Map<String, dynamic>>(
+    final response = await _api.post<dynamic>(
       ApiPath.payPeriod,
       data: {
         'cardNum': cardNum,
@@ -144,10 +144,24 @@ class InstallmentPayNotifier extends Notifier<InstallmentPayState> {
         'orderNo': order.orderNo ?? '',
         'period': order.period ?? 0,
       },
-      parser: (json) => json is Map<String, dynamic> ? json : <String, dynamic>{},
+      parser: (json) => json,
     );
     if (response.isSuccess) {
-      final docNo = response.result?['documentNo'] as String?;
+      final payload = response.result;
+      String? docNo;
+      if (payload is Map) {
+        final map = Map<String, dynamic>.from(payload);
+        docNo =
+            map['documentNo']?.toString() ??
+            map['orderId']?.toString() ??
+            map['orderNo']?.toString();
+      } else if (payload != null) {
+        final value = payload.toString().trim();
+        if (value.isNotEmpty) {
+          docNo = value;
+        }
+      }
+      docNo ??= (order.orderNo ?? '').trim().isEmpty ? null : order.orderNo;
       state = state.copyWith(
         submitting: false,
         submitSuccess: true,

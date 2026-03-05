@@ -142,7 +142,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get workbenchSwapBinding => '换电绑定';
 
   @override
-  String get workbenchManualSwap => '手动换电';
+  String get workbenchManualSwap => '人工换电';
 
   @override
   String get workbenchSalesStatistics => '销售统计';
@@ -3058,7 +3058,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get installmentPayReturnWorkbench => '返回工作台';
 
   @override
-  String get merchantReplaceTitle => '商户置换';
+  String get merchantReplaceTitle => '人工换电';
 
   @override
   String get merchantReplaceCardNum => '卡号';

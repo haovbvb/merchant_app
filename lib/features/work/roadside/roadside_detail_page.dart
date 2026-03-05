@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
@@ -10,6 +8,7 @@ import 'package:merchant_app/core/widgets/photo_gallery_viewer.dart';
 import 'package:merchant_app/data/models/roadside_order_detail.dart';
 import 'package:merchant_app/features/work/roadside/roadside_controller.dart';
 import 'package:merchant_app/features/work/roadside/roadside_deal_page.dart';
+import 'package:merchant_app/features/work/roadside/roadside_payment_sheet.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -159,236 +158,28 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
     AppLocalizations l10n,
     RoadSideOrderDetail detail,
   ) async {
-    final feeController = TextEditingController();
-    int payType = 1;
-    final attachments = <String>[];
-    final picker = ImagePicker();
-
-    await showModalBottomSheet<void>(
+    final result = await showRoadsidePaymentSheet(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) => Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            ),
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Text(
-                          l10n.roadsideCostsTitle,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.black,
-                          ),
-                        ),
-                        const Spacer(),
-                        GestureDetector(
-                          onTap: () => Navigator.of(context).pop(),
-                          child: const Icon(Icons.close, color: Color(0xFF999999)),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
-                      children: [
-                        Text(
-                          l10n.roadsideTotalLabel,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF666666),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: TextField(
-                            controller: feeController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            inputFormatters: const [_AmountInputFormatter()],
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFFF09A2B),
-                            ),
-                            decoration: const InputDecoration(
-                              hintText: '0.00',
-                              hintStyle: TextStyle(
-                                color: Color(0xFFCCCCCC),
-                                fontSize: 24,
-                                fontWeight: FontWeight.w600,
-                              ),
-                              border: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Divider(height: 24),
-                    Text(
-                      l10n.roadsidePaymentMethodLabel,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF666666),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        _PaymentMethodButton(
-                          icon: Icons.money,
-                          label: l10n.roadsidePayTypeCash,
-                          isSelected: payType == 1,
-                          onTap: () => setState(() => payType = 1),
-                        ),
-                        const SizedBox(width: 12),
-                        _PaymentMethodButton(
-                          icon: Icons.phone_android,
-                          label: l10n.roadsidePayTypeOnline,
-                          isSelected: payType == 2,
-                          onTap: () => setState(() => payType = 2),
-                        ),
-                      ],
-                    ),
-                    if (payType == 1) ...[
-                      const SizedBox(height: 20),
-                      Text(
-                        l10n.roadsideUploadVoucherLabel,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF666666),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          ...attachments.map(
-                            (url) => _VoucherImage(
-                              url: url,
-                              onRemove: () => setState(() => attachments.remove(url)),
-                            ),
-                          ),
-                          if (attachments.length < 3)
-                            _AddVoucherButton(
-                              onTap: () async {
-                                final source = await _showImageSourceSheet(
-                                  context,
-                                  l10n,
-                                );
-                                if (source == null) return;
-                                final picked = await picker.pickImage(source: source);
-                                if (picked == null) return;
-                                final url = await ref
-                                    .read(roadSideDealProvider.notifier)
-                                    .uploadImage(picked.path);
-                                if (url != null) {
-                                  setState(() => attachments.add(url));
-                                }
-                              },
-                            ),
-                        ],
-                      ),
-                    ],
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final fee = feeController.text.trim();
-                          if (fee.isEmpty) return;
-                          final ok = await ref
-                              .read(roadSideDetailProvider.notifier)
-                              .payRoadSide(
-                                recordNo: detail.recordNo ?? '',
-                                fee: fee,
-                                payType: payType,
-                                attachment: attachments.join(','),
-                              );
-                          if (context.mounted) {
-                            Navigator.of(context).pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  ok
-                                      ? l10n.roadsidePaySuccess
-                                      : l10n.roadsidePayFailed,
-                                ),
-                              ),
-                            );
-                            if (ok) {
-                              await ref
-                                  .read(roadSideDetailProvider.notifier)
-                                  .loadDetail(widget.recordNo);
-                            }
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryColor,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          l10n.roadsideConfirmPayment,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
+      l10n: l10n,
+      initialPayType: 1,
+      closeOnFailure: true,
+      successMessage: l10n.roadsidePaySuccess,
+      failureMessage: l10n.roadsidePayFailed,
+      onUploadImage: (path) =>
+          ref.read(roadSideDealProvider.notifier).uploadImage(path),
+      onConfirmPayment: (submit) {
+        return ref.read(roadSideDetailProvider.notifier).payRoadSide(
+              recordNo: detail.recordNo ?? '',
+              fee: submit.fee,
+              payType: submit.payType,
+              attachment: submit.attachments.join(','),
+            );
       },
     );
-  }
 
-  Future<ImageSource?> _showImageSourceSheet(
-    BuildContext context,
-    AppLocalizations l10n,
-  ) {
-    return showModalBottomSheet<ImageSource>(
-      context: context,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: Text(l10n.orderVoucherPickCamera),
-              onTap: () => Navigator.of(context).pop(ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: Text(l10n.orderVoucherPickGallery),
-              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
-            ),
-          ],
-        ),
-      ),
-    );
+    if (result == true && mounted) {
+      await ref.read(roadSideDetailProvider.notifier).loadDetail(widget.recordNo);
+    }
   }
 }
 
@@ -1046,127 +837,6 @@ class _BottomButton extends StatelessWidget {
   }
 }
 
-class _PaymentMethodButton extends StatelessWidget {
-  const _PaymentMethodButton({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.primaryColor.withValues(alpha: 0.1)
-                : const Color(0xFFF5F5F5),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isSelected ? AppColors.primaryColor : Colors.transparent,
-              width: 1.5,
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 20,
-                color: isSelected ? AppColors.primaryColor : const Color(0xFF666666),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isSelected ? AppColors.primaryColor : const Color(0xFF666666),
-                  fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _VoucherImage extends StatelessWidget {
-  const _VoucherImage({required this.url, required this.onRemove});
-
-  final String url;
-  final VoidCallback onRemove;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            url,
-            width: 72,
-            height: 72,
-            fit: BoxFit.cover,
-          ),
-        ),
-        Positioned(
-          right: 0,
-          top: 0,
-          child: GestureDetector(
-            onTap: onRemove,
-            child: Container(
-              width: 20,
-              height: 20,
-              decoration: const BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.only(
-                  topRight: Radius.circular(8),
-                  bottomLeft: Radius.circular(8),
-                ),
-              ),
-              child: const Icon(Icons.close, size: 14, color: Colors.white),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _AddVoucherButton extends StatelessWidget {
-  const _AddVoucherButton({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 72,
-        height: 72,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFDDDDDD)),
-        ),
-        child: const Icon(Icons.add, color: Color(0xFF999999), size: 28),
-      ),
-    );
-  }
-}
-
 class _EmptyView extends StatelessWidget {
   const _EmptyView({required this.text});
 
@@ -1190,25 +860,6 @@ class _EmptyView extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class _AmountInputFormatter extends TextInputFormatter {
-  const _AmountInputFormatter();
-
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    final text = newValue.text;
-    if (text.isEmpty) return newValue;
-    if (text.length > 9) return oldValue;
-    if (text.startsWith('.')) return oldValue;
-
-    final pattern = RegExp(r'^(?!\.)\d*(\.\d{0,2})?$');
-    if (!pattern.hasMatch(text)) return oldValue;
-    return newValue;
   }
 }
 

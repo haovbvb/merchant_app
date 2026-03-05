@@ -57,13 +57,13 @@ Future<bool?> showRoadsidePaymentSheet({
             child: SafeArea(
               top: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 10, 12, 20),
+                padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
-                      height: 44,
+                      height: 50,
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
@@ -88,7 +88,7 @@ Future<bool?> showRoadsidePaymentSheet({
                         ],
                       ),
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 10),
                     Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
@@ -148,16 +148,22 @@ Future<bool?> showRoadsidePaymentSheet({
                               ),
                             ),
                           ),
-                          _PayMethodRow(
-                            text: l10n.roadsidePayTypeCash,
-                            selected: payType == 1,
-                            onTap: () => setState(() => payType = 1),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: _PayMethodRow(
+                              text: l10n.roadsidePayTypeCash,
+                              selected: payType == 1,
+                              onTap: () => setState(() => payType = 1),
+                            ),
                           ),
                           const Divider(height: 1, color: Color(0xFFE6E6E6)),
-                          _PayMethodRow(
-                            text: l10n.roadsidePayTypeOnline,
-                            selected: payType == 2,
-                            onTap: () => setState(() => payType = 2),
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: _PayMethodRow(
+                              text: l10n.roadsidePayTypeOnline,
+                              selected: payType == 2,
+                              onTap: () => setState(() => payType = 2),
+                            ),
                           ),
                         ],
                       ),
@@ -334,7 +340,7 @@ class _PayMethodRow extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: SizedBox(
-        height: 58,
+        height: 50,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(

@@ -17,7 +17,8 @@ class InventoryListPageNew extends ConsumerStatefulWidget {
       _InventoryListPageNewState();
 }
 
-class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
+class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew>
+    with WidgetsBindingObserver {
   final RefreshController _refreshController = RefreshController(
     initialRefresh: false,
   );
@@ -28,13 +29,25 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(inventoryListProvider.notifier).refresh();
+      ref.read(inventoryListProvider.notifier).refresh(keyword: '');
     });
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed || !mounted) return;
+    ref.read(inventoryListProvider.notifier).refresh(
+      status: _mapStatus(_selectedTabIndex),
+      resetStatus: _selectedTabIndex == 0,
+      keyword: '',
+    );
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _refreshController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -88,6 +101,7 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
                     .refresh(
                       status: _mapStatus(_selectedTabIndex),
                       resetStatus: _selectedTabIndex == 0,
+                      keyword: '',
                     );
               },
               borderRadius: BorderRadius.circular(8),
@@ -146,6 +160,7 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
                 await notifier.refresh(
                   status: _mapStatus(_selectedTabIndex),
                   resetStatus: _selectedTabIndex == 0,
+                  keyword: '',
                 );
                 _refreshController.refreshCompleted();
               },
@@ -179,6 +194,7 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
             .refresh(
               status: _mapStatus(index),
               resetStatus: index == 0,
+              keyword: '',
             );
       },
       child: Container(
@@ -263,6 +279,7 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
         .refresh(
           status: _mapStatus(_selectedTabIndex),
           resetStatus: _selectedTabIndex == 0,
+          keyword: '',
         );
   }
 
@@ -281,6 +298,7 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew> {
         .refresh(
           status: _mapStatus(_selectedTabIndex),
           resetStatus: _selectedTabIndex == 0,
+          keyword: '',
         );
   }
 
@@ -414,7 +432,7 @@ class _InventoryCard extends StatelessWidget {
             Row(
               children: [
                 Image.asset(
-                  'assets/android/mipmap-xxhdpi/icon_issue_warehouse.webp',
+                  'assets/android/mipmap-xxhdpi/icon_inventory.png',
                   width: 18,
                   height: 18,
                   fit: BoxFit.cover,

@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:merchant_app/app/app_router.dart';
-import 'package:merchant_app/app/root_tab_scaffold.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
@@ -10,6 +7,7 @@ import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/battery_type.dart';
 import 'package:merchant_app/features/work/entry/battery_ship_page.dart';
+import 'package:merchant_app/features/work/entry/entry_success_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
@@ -381,24 +379,30 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
   }
 
   Future<void> _addByScan() async {
-    final result = await Navigator.of(context).push<String>(
+    await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => const QrScanPage(
+        builder: (_) => QrScanPage(
           allowManualInput: true,
           deviceType: 1,
           returnRaw: true,
+          continuousScan: true,
+          onContinuousScan: _handleContinuousBatteryScan,
         ),
       ),
     );
-    if (result == null || result.trim().isEmpty) return;
-    final parsed = ScanUtils.parseBatteryQr(result, 0);
+  }
+
+  String _handleContinuousBatteryScan(String rawValue) {
+    final parsed = ScanUtils.parseBatteryQr(rawValue, 0);
     final sn = (parsed.sn ?? '').trim();
-    if (sn.isEmpty) return;
-    // 重复检查
-    if (_items.any((item) => item.sn == sn)) {
-      showToast(context.l10n.warehouseInventoryScanRepeat);
-      return;
+    if (sn.isEmpty) {
+      return '无效二维码';
     }
+
+    if (_items.any((item) => item.sn == sn)) {
+      return '已扫过';
+    }
+
     final imei = (parsed.imei ?? '').trim();
     final iccid = (parsed.iccid ?? '').trim();
     setState(() {
@@ -408,6 +412,8 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
         iccid: iccid,
       ));
     });
+
+    return context.l10n.scanSuccessEntry;
   }
 
   Future<void> _addManual() async {
@@ -454,7 +460,9 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
               // 标题
               Center(
                 child: Text(
-                  l10n.entryManualEntryTitle,
+                  initial == null
+                      ? l10n.entryManualEntryTitle
+                      : l10n.entryEditDeviceTitle,
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
@@ -672,7 +680,11 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
           ),
         );
       } else {
-        _goToWorkbenchHome();
+        await Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => EntrySuccessPage(title: l10n.batteryEntryTitle),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -839,12 +851,6 @@ class _BatteryEntryPageNewState extends State<BatteryEntryPageNew> {
       },
     );
   }
-
-  void _goToWorkbenchHome() {
-    final container = ProviderScope.containerOf(context, listen: false);
-    container.read(bottomNavIndexProvider.notifier).setIndex(1);
-    AppRouter.goHome();
-  }
 }
 
 class _BatteryItem {
@@ -896,14 +902,22 @@ class _DeviceCard extends StatelessWidget {
           // IMEI / ICCID
           Row(
             children: [
-              Text(
-                'IMEI: ${item.imei.isNotEmpty ? item.imei : '-'}',
-                style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
+              Expanded(
+                child: Text(
+                  'IMEI: ${item.imei.isNotEmpty ? item.imei : '-'}',
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               const SizedBox(width: 24),
-              Text(
-                'ICCID: ${item.iccid.isNotEmpty ? item.iccid : '-'}',
-                style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
+              Expanded(
+                child: Text(
+                  'ICCID: ${item.iccid.isNotEmpty ? item.iccid : '-'}',
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
           ),

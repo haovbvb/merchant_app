@@ -315,6 +315,7 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
           initialSn: sn,
           readOnly: widget.readOnly,
           popToSearchOnClear: true,
+          expectedDeviceType: widget.deviceType,
         ),
       ),
     );
@@ -330,7 +331,7 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) => QrScanPage(
-          allowManualInput: true,
+          allowManualInput: false,
           parseDeviceSn: true,
           deviceType: widget.deviceType,
         ),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/features/work/sales/rent_bind_controller.dart';
+import 'package:merchant_app/features/work/sales/widgets/base_payment_sheet.dart';
 
 class RentPaymentResult {
   final int paySource;
@@ -66,136 +67,48 @@ class _RentPaymentSheetState extends ConsumerState<RentPaymentSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final total = widget.leaseAmount + widget.deposit;
-
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                const Spacer(),
-                Text(
-                  l10n.rentBindSelectPayment,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black06Text,
-                  ),
-                ),
-                const Spacer(),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: const Icon(Icons.close, color: Color(0xFF999999)),
-                ),
-              ],
+    return BasePaymentSheet(
+      title: l10n.rentBindSelectPayment,
+      paymentMethodsTitle: l10n.rentBindPaymentMethods,
+      payCashText: l10n.rentBindPayCash,
+      payOnlineText: l10n.rentBindPayOnline,
+      paymentPeriodTitle: l10n.rentBindPaymentPeriod,
+      payFullText: l10n.rentBindPayFull,
+      confirmText: l10n.rentBindConfirm,
+      availablePaySources: _availablePaySources,
+      initialPaySource: _paySource,
+      initialPayType: 1,
+      availablePayTypesBySource: (_) => const {1},
+      amountSectionBuilder: (context, selection, _) {
+        return _buildSectionCard(
+          children: [
+            _buildFinancialRow(
+              label: l10n.rentBindLeaseAmount,
+              value: '\$ ${widget.leaseAmount.toStringAsFixed(2)}',
             ),
-          ),
-
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Payment Methods
-                _buildSectionCard(
-                  title: l10n.rentBindPaymentMethods,
-                  children: [
-                    if (_availablePaySources.contains(1))
-                      _buildRadioOption(
-                        title: l10n.rentBindPayCash,
-                        isSelected: _paySource == 1,
-                        onTap: () => setState(() => _paySource = 1),
-                      ),
-                    if (_availablePaySources.contains(1) &&
-                        _availablePaySources.contains(2))
-                      const Divider(height: 1, color: Color(0xFFEEEEEE)),
-                    if (_availablePaySources.contains(2))
-                      _buildRadioOption(
-                        title: l10n.rentBindPayOnline,
-                        isSelected: _paySource == 2,
-                        onTap: () => setState(() => _paySource = 2),
-                      ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Payment Period (Full Payment only for rent)
-                _buildSectionCard(
-                  title: l10n.rentBindPaymentPeriod,
-                  children: [
-                    _buildRadioOption(
-                      title: l10n.rentBindPayFull,
-                      isSelected: true,
-                      onTap: () {},
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                // Financial summary
-                _buildSectionCard(
-                  children: [
-                    _buildFinancialRow(
-                      label: l10n.rentBindLeaseAmount,
-                      value: '\$ ${widget.leaseAmount.toStringAsFixed(2)}',
-                    ),
-                    const Divider(height: 1, color: Color(0xFFEEEEEE)),
-                    _buildFinancialRow(
-                      label: l10n.rentBindDeposit,
-                      value: '\$ ${widget.deposit.toStringAsFixed(2)}',
-                    ),
-                    Container(
-                      margin: const EdgeInsets.symmetric(vertical: 8),
-                      child: const DottedLine(),
-                    ),
-                    _buildFinancialRow(
-                      label: l10n.rentBindTotal,
-                      value: '\$ ${total.toStringAsFixed(2)}',
-                      isTotal: true,
-                    ),
-                  ],
-                ),
-              ],
+            const Divider(height: 1, color: Color(0xFFEEEEEE)),
+            _buildFinancialRow(
+              label: l10n.rentBindDeposit,
+              value: '\$ ${widget.deposit.toStringAsFixed(2)}',
             ),
-          ),
-
-          // Confirm button
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-            child: SafeArea(
-              child: SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: _confirm,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    l10n.rentBindConfirm,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 8),
+              child: const DottedLine(),
             ),
-          ),
-        ],
-      ),
+            _buildFinancialRow(
+              label: l10n.rentBindTotal,
+              value: '\$ ${total.toStringAsFixed(2)}',
+              isTotal: true,
+            ),
+          ],
+        );
+      },
+      onConfirm: (context, selection) {
+        widget.notifier.updatePaySource(selection.paySource);
+        Navigator.of(context).pop(
+          RentPaymentResult(paySource: selection.paySource),
+        );
+      },
     );
   }
 
@@ -218,48 +131,6 @@ class _RentPaymentSheetState extends ConsumerState<RentPaymentSheet> {
             ),
           ...children,
         ],
-      ),
-    );
-  }
-
-  Widget _buildRadioOption({
-    required String title,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                color: AppColors.black06Text,
-              ),
-            ),
-            const Spacer(),
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected
-                      ? AppColors.primaryColor
-                      : const Color(0xFFDDDDDD),
-                  width: 2,
-                ),
-                color: isSelected ? AppColors.primaryColor : Colors.white,
-              ),
-              child: isSelected
-                  ? const Icon(Icons.check, color: Colors.white, size: 16)
-                  : null,
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -293,11 +164,6 @@ class _RentPaymentSheetState extends ConsumerState<RentPaymentSheet> {
         ],
       ),
     );
-  }
-
-  void _confirm() {
-    widget.notifier.updatePaySource(_paySource);
-    Navigator.of(context).pop(RentPaymentResult(paySource: _paySource));
   }
 
   Set<int> _parseOptions(String? raw, {required Set<int> defaultValues}) {

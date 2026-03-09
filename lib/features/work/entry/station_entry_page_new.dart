@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:merchant_app/app/app_router.dart';
-import 'package:merchant_app/app/root_tab_scaffold.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
@@ -10,6 +7,7 @@ import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/station_type.dart';
 import 'package:merchant_app/features/work/entry/battery_ship_page.dart';
+import 'package:merchant_app/features/work/entry/entry_success_page.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
@@ -377,28 +375,36 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
   }
 
   Future<void> _addByScan() async {
-    final result = await Navigator.of(context).push<String>(
+    await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => const QrScanPage(
+        builder: (_) => QrScanPage(
           allowManualInput: true,
           deviceType: 3,
           returnRaw: true,
+          continuousScan: true,
+          onContinuousScan: _handleContinuousStationScan,
         ),
       ),
     );
-    if (result == null || result.trim().isEmpty) return;
-    final parsed = ScanUtils.parseStationQr(result);
+  }
+
+  String _handleContinuousStationScan(String rawValue) {
+    final parsed = ScanUtils.parseStationQr(rawValue);
     final sn = (parsed.sn ?? '').trim();
-    if (sn.isEmpty) return;
-    // 重复检查
-    if (_items.any((item) => item.sn == sn)) {
-      showToast(context.l10n.warehouseInventoryScanRepeat);
-      return;
+    if (sn.isEmpty) {
+      return '无效二维码';
     }
+
+    if (_items.any((item) => item.sn == sn)) {
+      return '已扫过';
+    }
+
     final lockDevId = (parsed.lockDevId ?? '').trim();
     setState(() {
       _items.add(_StationItem(sn: sn, lockDevId: lockDevId));
     });
+
+    return context.l10n.scanSuccessEntry;
   }
 
   Future<void> _addManual() async {
@@ -446,7 +452,9 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
               // 标题
               Center(
                 child: Text(
-                  l10n.entryManualEntryTitle,
+                  initial == null
+                      ? l10n.entryManualEntryTitle
+                      : l10n.entryEditDeviceTitle,
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w600,
@@ -466,11 +474,19 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
                   final result = await Navigator.of(context).push<String>(
                     MaterialPageRoute(
                       builder: (_) =>
-                          const QrScanPage(parseDeviceSn: true, deviceType: 3),
+                          const QrScanPage(returnRaw: true, deviceType: 3),
                     ),
                   );
                   if (result != null && result.isNotEmpty) {
-                    snController.text = result;
+                    final parsed = ScanUtils.parseStationQr(result);
+                    final sn = (parsed.sn ?? '').trim();
+                    final lockDevId = (parsed.lockDevId ?? '').trim();
+                    if (sn.isNotEmpty) {
+                      snController.text = sn;
+                    }
+                    if (lockDevId.isNotEmpty) {
+                      lockDevIdController.text = lockDevId;
+                    }
                   }
                 },
               ),
@@ -484,11 +500,15 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
                 onScan: () async {
                   final result = await Navigator.of(context).push<String>(
                     MaterialPageRoute(
-                      builder: (_) => const QrScanPage(parseDeviceSn: false),
+                      builder: (_) =>
+                          const QrScanPage(returnRaw: true, deviceType: 3),
                     ),
                   );
                   if (result != null && result.isNotEmpty) {
-                    lockDevIdController.text = result;
+                    final parsed = ScanUtils.parseStationQr(result);
+                    final lockDevId = (parsed.lockDevId ?? '').trim();
+                    lockDevIdController.text =
+                        lockDevId.isNotEmpty ? lockDevId : result.trim();
                   }
                 },
               ),
@@ -618,7 +638,7 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
 
     setState(() => _submitting = true);
     try {
-      await _api.post<Object>(
+      final response = await _api.post<Object>(
         ApiPath.stationRegister,
         data: {
           'model': _selected?.model ?? '',
@@ -626,6 +646,10 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
         },
         parser: (json) => json ?? Object(),
       );
+
+      if (!response.isSuccess) {
+        return;
+      }
 
       final sns = _items.map((item) => item.sn).toList();
       if (!mounted) return;
@@ -641,7 +665,11 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
           ),
         );
       } else {
-        _goToWorkbenchHome();
+        await Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => EntrySuccessPage(title: l10n.stationEntryTitle),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -808,12 +836,6 @@ class _StationEntryPageNewState extends State<StationEntryPageNew> {
       },
     );
   }
-
-  void _goToWorkbenchHome() {
-    final container = ProviderScope.containerOf(context, listen: false);
-    container.read(bottomNavIndexProvider.notifier).setIndex(1);
-    AppRouter.goHome();
-  }
 }
 
 class _StationItem {
@@ -867,9 +889,21 @@ class _DeviceCard extends StatelessWidget {
           const SizedBox(height: 8),
 
           // LockDevId
-          Text(
-            '${l10n.entryLockDevIdLabel}: ${item.lockDevId.isNotEmpty ? item.lockDevId : '-'}',
-            style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
+          Row(
+            children: [
+              Text(
+                '${l10n.entryLockDevIdLabel}: ',
+                style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
+              ),
+              Expanded(
+                child: Text(
+                  item.lockDevId.isNotEmpty ? item.lockDevId : '-',
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
 

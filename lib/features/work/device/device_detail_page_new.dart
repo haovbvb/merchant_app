@@ -27,11 +27,13 @@ class DeviceDetailPageNew extends ConsumerStatefulWidget {
     this.initialSn,
     this.readOnly = false,
     this.popToSearchOnClear = false,
+    this.expectedDeviceType,
   });
 
   final String? initialSn;
   final bool readOnly;
   final bool popToSearchOnClear;
+  final int? expectedDeviceType;
 
   @override
   ConsumerState<DeviceDetailPageNew> createState() =>
@@ -57,8 +59,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         if (!mounted || _autoSearched) return;
         final value = _controller.text.trim();
         if (value.isEmpty) return;
-        // 使用 commonSearch 自动识别设备类型
-        ref.read(deviceDetailProvider.notifier).commonSearch(value);
+        _submit(value);
         _autoSearched = true;
       });
     }
@@ -106,8 +107,8 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         state.vehicleDetail != null ||
         (state.deviceType == 3 && state.searchResult?.deviceInfo != null);
     final cabinetHasWarehouse = deviceType == 3
-        ? _cabinetHasWarehouse(state.searchResult?.deviceInfo)
-        : true;
+      ? _cabinetHasWarehouse(state.searchResult?.deviceInfo)
+      : true;
 
     // 根据设备类型更新 TabController
     if (hasData) {
@@ -440,7 +441,6 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    if (showOperate) _buildCabinetOperateButton(),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -498,26 +498,6 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               ),
             ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildCabinetOperateButton() {
-    return GestureDetector(
-      onTap: _confirmOpenBackDoor,
-      child: Container(
-        margin: const EdgeInsets.only(left: 8),
-        width: 32,
-        height: 32,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          border: Border.all(color: const Color(0x330C0C0D)),
-        ),
-        padding: const EdgeInsets.all(6),
-        child: Image.asset(
-          'assets/android/mipmap-xxhdpi/icon_station_operation.png',
-          fit: BoxFit.contain,
-        ),
       ),
     );
   }
@@ -612,9 +592,8 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   Widget _buildVehicleHeader(VehicleDetail detail, dynamic l10n) {
     final deviceInfo = ref.read(deviceDetailProvider).searchResult?.deviceInfo;
     final bindStatus = deviceInfo?.deviceBindStatus;
-    final isBound = bindStatus == null
-        ? (detail.ownerName != null && detail.ownerName!.isNotEmpty)
-        : bindStatus != 0;
+    final showBindStatus = bindStatus != null;
+    final isBound = bindStatus != null && bindStatus != 0;
     final bindSource = deviceInfo?.bindSource;
     String? sourceLabel;
     Color? sourceColor;
@@ -674,17 +653,20 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    _buildStatusBadge(
-                      isBound
-                          ? l10n.deviceDetailBound
-                          : l10n.deviceDetailUnbound,
-                      isBound
-                          ? AppColors.primaryColor
-                          : const Color(0xFFFA4B51),
-                    ),
                     if (sourceLabel != null && sourceColor != null) ...[
-                      const SizedBox(width: 8),
                       _buildStatusBadge(sourceLabel, sourceColor),
+                    ],
+                    if (showBindStatus) ...[
+                      if (sourceLabel != null && sourceColor != null)
+                        const SizedBox(width: 8),
+                      _buildStatusBadge(
+                        isBound
+                            ? l10n.deviceDetailBound
+                            : l10n.deviceDetailUnbound,
+                        isBound
+                            ? AppColors.primaryColor
+                            : const Color(0xFFFA4B51),
+                      ),
                     ],
                   ],
                 ),
@@ -848,19 +830,24 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                 Wrap(
                   spacing: 12,
                   runSpacing: 12,
-                  children: photos.map((url) {
+                  children: photos.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final url = entry.value;
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        url,
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
+                      child: GestureDetector(
+                        onTap: () => _openPhotoBrowser(photos, index),
+                        child: Image.network(
+                          url,
                           width: 100,
                           height: 100,
-                          color: const Color(0xFFEEEEEE),
-                          child: const Icon(Icons.image_not_supported),
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            width: 100,
+                            height: 100,
+                            color: const Color(0xFFEEEEEE),
+                            child: const Icon(Icons.image_not_supported),
+                          ),
                         ),
                       ),
                     );
@@ -1220,7 +1207,29 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
             children: [
               _InfoRow(
                 label: l10n.deviceDetailStatus,
-                value: isOnline ? l10n.online : l10n.offline,
+                valueWidget: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      isOnline
+                          ? 'assets/android/mipmap-xxhdpi/icon_signal_online.png'
+                          : 'assets/android/mipmap-xxhdpi/icon_signal_offline.webp',
+                      width: 14,
+                      height: 14,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      isOnline ? l10n.online : l10n.offline,
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: isOnline
+                            ? AppColors.primaryColor
+                            : const Color(0xFFFA4B51),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               _InfoRow(
                 label: l10n.deviceDetailSpecLabel,
@@ -1293,19 +1302,24 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                 Wrap(
                   spacing: 12,
                   runSpacing: 12,
-                  children: photos.map((url) {
+                  children: photos.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final url = entry.value;
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        url,
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
+                      child: GestureDetector(
+                        onTap: () => _openPhotoBrowser(photos, index),
+                        child: Image.network(
+                          url,
                           width: 100,
                           height: 100,
-                          color: const Color(0xFFEEEEEE),
-                          child: const Icon(Icons.image_not_supported),
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            width: 100,
+                            height: 100,
+                            color: const Color(0xFFEEEEEE),
+                            child: const Icon(Icons.image_not_supported),
+                          ),
                         ),
                       ),
                     );
@@ -1497,19 +1511,24 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                 Wrap(
                   spacing: 12,
                   runSpacing: 12,
-                  children: photos.map((url) {
+                  children: photos.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final url = entry.value;
                     return ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        url,
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
+                      child: GestureDetector(
+                        onTap: () => _openPhotoBrowser(photos, index),
+                        child: Image.network(
+                          url,
                           width: 100,
                           height: 100,
-                          color: const Color(0xFFEEEEEE),
-                          child: const Icon(Icons.image_not_supported),
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            width: 100,
+                            height: 100,
+                            color: const Color(0xFFEEEEEE),
+                            child: const Icon(Icons.image_not_supported),
+                          ),
                         ),
                       ),
                     );
@@ -1667,7 +1686,8 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
   bool _cabinetHasWarehouse(DeviceInfo? info) {
     final status = info?.installStatus;
-    if (status == null) return false;
+    // 搜索接口部分场景不返回 installStatus，按有仓位处理，避免误隐藏“仓位详情”Tab
+    if (status == null) return true;
     return status != 0;
   }
 
@@ -1733,27 +1753,75 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   Future<void> _submit(String value) async {
+    final l10n = context.l10n;
     final input = value.trim();
     if (input.isEmpty) return;
-    final sn = ScanUtils.getDeviceSn(input).trim();
+    final isStationOnly = widget.expectedDeviceType == 3;
+    final sn = isStationOnly
+        ? ScanUtils.parseSnByDeviceType(input, 3).trim()
+        : ScanUtils.getDeviceSn(input).trim();
     if (sn.isEmpty) return;
-    // 使用 commonSearch 自动识别设备类型
-    ref.read(deviceDetailProvider.notifier).commonSearch(sn);
+    if (isStationOnly && !_isValidStationSnInput(input, sn)) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.deviceSearchInvalidStationSn)));
+      return;
+    }
+
+    if (isStationOnly) {
+      final found = await ref
+          .read(deviceDetailProvider.notifier)
+          .searchDevice(sn: sn, deviceType: 3);
+      if (!mounted) return;
+      if (!found) {
+        _backToSource(false);
+      }
+      return;
+    }
+
+    // 默认场景下仍使用 commonSearch 自动识别设备类型
+    final result = await ref.read(deviceDetailProvider.notifier).commonSearch(sn);
+    if (!mounted) return;
+    if (result == null) {
+      _backToSource(false);
+    }
   }
 
   Future<void> _scanSn() async {
+    final expectedType = widget.expectedDeviceType;
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) => const QrScanPage(
+        builder: (_) => QrScanPage(
           allowManualInput: true,
           parseDeviceSn: true,
-          deviceType: 3,
+          deviceType: expectedType,
         ),
       ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _controller.text = result;
     _submit(result);
+  }
+
+  bool _isValidStationSnInput(String rawInput, String parsedSn) {
+    if (parsedSn.isEmpty) return false;
+    final input = rawInput.trim().toLowerCase();
+    if (input.isEmpty) return false;
+
+    final containsNonStationKey =
+        input.contains('vin=') ||
+        input.contains('vin:') ||
+        input.contains('imei=') ||
+        input.contains('imei:') ||
+        input.contains('iccid=') ||
+        input.contains('iccid:') ||
+        input.contains('vcu=') ||
+        input.contains('vcu:');
+    if (containsNonStationKey) return false;
+
+    if (input.startsWith('b:')) return false;
+
+    return true;
   }
 
   void _setupPort(Cabin port) {
@@ -1924,44 +1992,6 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     );
   }
 
-  Future<void> _confirmOpenBackDoor() async {
-    final l10n = context.l10n;
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.cabinetOperateOpenDoorConfirmTitle),
-        content: Text(l10n.cabinetOperateOpenDoorConfirmContent),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true || !mounted) return;
-
-    final success = await ref
-        .read(deviceDetailProvider.notifier)
-        .openCabinBackDoor();
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          success
-              ? l10n.deviceDetailCabinOpenBackDoorSuccess
-              : l10n.deviceDetailCabinOpenBackDoorFailed,
-        ),
-      ),
-    );
-  }
-
   Future<void> _confirmTogglePort(Cabin port, bool enable) async {
     final l10n = context.l10n;
     final confirmed = await showDialog<bool>(
@@ -2027,6 +2057,83 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
       const SnackBar(
         content: Text('请用手机安装地图App 进行导航'),
         duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _openPhotoBrowser(List<String> photos, int initialIndex) {
+    if (photos.isEmpty) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => _PhotoGalleryPage(
+          photos: photos,
+          initialIndex: initialIndex,
+        ),
+      ),
+    );
+  }
+}
+
+class _PhotoGalleryPage extends StatefulWidget {
+  const _PhotoGalleryPage({required this.photos, required this.initialIndex});
+
+  final List<String> photos;
+  final int initialIndex;
+
+  @override
+  State<_PhotoGalleryPage> createState() => _PhotoGalleryPageState();
+}
+
+class _PhotoGalleryPageState extends State<_PhotoGalleryPage> {
+  late final PageController _pageController;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex.clamp(0, widget.photos.length - 1);
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final total = widget.photos.length;
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: Text('${_currentIndex + 1}/$total'),
+      ),
+      body: PageView.builder(
+        controller: _pageController,
+        itemCount: total,
+        onPageChanged: (index) => setState(() => _currentIndex = index),
+        itemBuilder: (context, index) {
+          final url = widget.photos[index];
+          return InteractiveViewer(
+            minScale: 1,
+            maxScale: 4,
+            child: Center(
+              child: Image.network(
+                url,
+                fit: BoxFit.contain,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.image_not_supported,
+                  color: Colors.white70,
+                  size: 48,
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -2258,7 +2365,11 @@ class _PortCard extends StatelessWidget {
               if (!isDisabled && hasBattery && swapFlag == 1)
                 Row(
                   children: [
-                    const Icon(Icons.bolt, size: 14, color: Color(0xFF0ABF83)),
+                    Image.asset(
+                      'assets/android/mipmap-xxhdpi/icon_cabin_enable.webp',
+                      width: 14,
+                      height: 14,
+                    ),
                     const SizedBox(width: 2),
                     Text(
                       l10n.deviceDetailPortReplaceable,
@@ -2272,7 +2383,11 @@ class _PortCard extends StatelessWidget {
               if (isDisabled)
                 Row(
                   children: [
-                    const Icon(Icons.block, size: 14, color: Color(0xE60C0C0D)),
+                    Image.asset(
+                      'assets/android/mipmap-xxhdpi/icon_cabin_unable.webp',
+                      width: 14,
+                      height: 14,
+                    ),
                     const SizedBox(width: 2),
                     Text(
                       l10n.deviceDetailPortDisabled,
@@ -2290,8 +2405,13 @@ class _PortCard extends StatelessWidget {
           // 电量或可用状态
           if (hasBattery)
             Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.battery_std, size: 18, color: socColor),
+                _BatteryCapacityView(
+                  soc: soc,
+                  swapFlag: swapFlag,
+                  isDisabled: isDisabled,
+                ),
                 const SizedBox(width: 4),
                 Text(
                   '$soc%',
@@ -2304,9 +2424,11 @@ class _PortCard extends StatelessWidget {
               ],
             )
           else
-            Text(
-              l10n.deviceDetailPortAvailable,
-              style: TextStyle(fontSize: 17, color: const Color(0x800C0C0D)),
+            Center(
+              child: Text(
+                l10n.deviceDetailPortAvailable,
+                style: TextStyle(fontSize: 17, color: const Color(0x800C0C0D)),
+              ),
             ),
           const SizedBox(height: 4),
 
@@ -2362,6 +2484,68 @@ class _PortCard extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// 电池电量视图，模拟 Android BatteryCapacityView
+class _BatteryCapacityView extends StatelessWidget {
+  const _BatteryCapacityView({
+    required this.soc,
+    required this.swapFlag,
+    required this.isDisabled,
+  });
+
+  final int soc;
+  final int swapFlag;
+  final bool isDisabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final bgImage = isDisabled
+        ? 'assets/android/mipmap-xxhdpi/bg_battery_capacity_disable.webp'
+        : 'assets/android/mipmap-xxhdpi/bg_battery_capacity.webp';
+
+    final fillColor = isDisabled
+        ? const Color(0x330C0C0D)
+        : (swapFlag == 0
+            ? const Color(0xFFFA4B51)
+            : const Color(0xFF0ABF83));
+
+    final progress = (soc / 100.0).clamp(0.0, 1.0);
+
+    return SizedBox(
+      width: 22,
+      height: 18,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final w = constraints.maxWidth;
+          final h = constraints.maxHeight;
+          // 与 Android BatteryCapacityView 保持一致的填充区域比例
+          final left = w * 0.08;
+          final top = h * 0.18;
+          final maxFillWidth = w * 0.72;
+          final fillHeight = h * 0.64;
+
+          return Stack(
+            children: [
+              Image.asset(bgImage, width: w, height: h, fit: BoxFit.fill),
+              Positioned(
+                left: left,
+                top: top,
+                child: Container(
+                  width: progress * maxFillWidth,
+                  height: fillHeight,
+                  decoration: BoxDecoration(
+                    color: fillColor,
+                    borderRadius: BorderRadius.circular(1),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

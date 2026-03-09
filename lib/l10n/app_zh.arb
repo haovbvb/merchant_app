@@ -598,10 +598,10 @@
   "deviceDetailTodayMile": "今日里程",
   "deviceDetailAvgSpeed": "平均速度",
   "deviceDetailSignalTime": "信号时间",
-  "deviceDetailStatus": "放电状态",
+  "deviceDetailStatus": "状态",
   "deviceDetailLocation": "定位",
   "deviceDetailViewMap": "查看地图",
-  "deviceDetailToggleDischarge": "切换放电状态",
+  "deviceDetailToggleDischarge": "切换状态",
   "deviceDetailDischargeOn": "放电中",
   "deviceDetailDischargeOff": "已停止",
   "deviceDetailOnline": "在线",
@@ -950,9 +950,26 @@
   "rentBindSuccessTitle": "提交成功",
   "rentBindSuccessMessageOnline": "请在用户App中完成支付，支付时限",
   "rentBindSuccessMessageCash": "请进入订单记录并在时限内提交合同凭证",
+  "rentBindSuccessTimeout": "30分钟",
   "rentBindDocumentNumber": "单据编号",
   "rentBindCopied": "已复制",
   "rentBindReturnWorkbench": "返回工作台",
+  "rentBindTagVehicle": "车辆",
+  "rentBindTagBattery": "电池",
+  "rentBindLabelVin": "VIN",
+  "rentBindLabelPlateNumber": "车牌号",
+  "rentBindLabelSoc": "SOC",
+  "rentBindLabelSoh": "SOH",
+  "rentBindLabelCycle": "循环次数",
+  "rentBindPeriodMonthly": "整月",
+  "rentBindPeriodFixedDays": "固定周期 · {days}天",
+  "@rentBindPeriodFixedDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "swapBindTitle": "换电绑定",
   "swapBindUserSection": "用户信息",
   "swapBindCardNum": "卡号",

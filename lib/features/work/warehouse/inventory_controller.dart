@@ -6,7 +6,8 @@ import 'package:merchant_app/data/models/warehouse_info.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
-const _pageSize = 20;
+const _inventoryListPageSize = 20;
+const _inventoryDetailPageSize = 1000;
 
 class InventoryListState {
   final bool loading;
@@ -79,7 +80,7 @@ class InventoryListNotifier extends Notifier<InventoryListState> {
       ApiPath.inventoryQueryDeviceInventoryPage,
       queryParameters: {
         'pageNum': 1,
-        'pageSize': _pageSize,
+        'pageSize': _inventoryListPageSize,
         if ((keyword ?? state.keyword).trim().isNotEmpty)
           'keyword': (keyword ?? state.keyword).trim(),
         if ((resetStatus ? null : (status ?? state.status)) != null)
@@ -108,7 +109,7 @@ class InventoryListNotifier extends Notifier<InventoryListState> {
       ApiPath.inventoryQueryDeviceInventoryPage,
       queryParameters: {
         'pageNum': nextPage,
-        'pageSize': _pageSize,
+        'pageSize': _inventoryListPageSize,
         if (state.keyword.trim().isNotEmpty) 'keyword': state.keyword.trim(),
         if (state.status != null) 'status': state.status,
       },
@@ -230,7 +231,7 @@ class InventoryDetailNotifier extends Notifier<InventoryDetailState> {
       queryParameters: {
         'inventoryNo': inventoryNo,
         'pageNum': 1,
-        'pageSize': _pageSize,
+        'pageSize': _inventoryDetailPageSize,
       },
       parser: (json) => DeviceInventoryDetail.fromJson(
         Map<String, dynamic>.from(json as Map),
@@ -271,7 +272,7 @@ class InventoryDetailNotifier extends Notifier<InventoryDetailState> {
       queryParameters: {
         'inventoryNo': state.inventoryNo,
         'pageNum': nextPage,
-        'pageSize': _pageSize,
+        'pageSize': _inventoryDetailPageSize,
       },
       parser: (json) => DeviceInventoryDetail.fromJson(
         Map<String, dynamic>.from(json as Map),

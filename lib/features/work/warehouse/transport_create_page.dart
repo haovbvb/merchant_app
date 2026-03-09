@@ -30,6 +30,7 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
   @override
   void initState() {
     super.initState();
+    ref.read(transportCreateProvider.notifier).resetCreateState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final notifier = ref.read(transportCreateProvider.notifier);
       notifier.setDeviceType(widget.deviceType);
@@ -42,6 +43,7 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
 
   @override
   void dispose() {
+    ref.read(transportCreateProvider.notifier).resetCreateState();
     _trackingController.dispose();
     super.dispose();
   }
@@ -80,7 +82,7 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(8),
                               child: Image.asset(
-                                'assets/android/mipmap-xxhdpi/icon_warehouse.png',
+                                'assets/android/mipmap-xxhdpi/icon_issue_warehouse.webp',
                                 width: 56,
                                 height: 56,
                                 fit: BoxFit.cover,
@@ -698,15 +700,36 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
     BuildContext context,
     TransportCreateNotifier notifier,
   ) async {
-    final result = await Navigator.of(context).push<String>(
+    await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) =>
-            QrScanPage(allowManualInput: true, parseDeviceSn: true, deviceType: widget.deviceType),
+        builder: (_) => QrScanPage(
+          allowManualInput: true,
+          parseDeviceSn: true,
+          continuousScan: true,
+          onContinuousScan: _handleContinuousTransportScan,
+        ),
       ),
     );
-    if (result != null && result.isNotEmpty) {
-      await notifier.addSn(result);
+  }
+
+  Future<String> _handleContinuousTransportScan(String value) async {
+    final sn = value.trim();
+    if (sn.isEmpty) {
+      return '无效二维码';
     }
+
+    final currentState = ref.read(transportCreateProvider);
+    if (currentState.sns.contains(sn)) {
+      return '已扫过';
+    }
+
+    final notifier = ref.read(transportCreateProvider.notifier);
+    await notifier.addSn(sn);
+    final updatedState = ref.read(transportCreateProvider);
+    if (updatedState.sns.contains(sn)) {
+      return context.l10n.scanSuccessEntry;
+    }
+    return '录入失败';
   }
 
   Future<void> _submit(
@@ -923,6 +946,15 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
   String _selectedCityName = '';
 
   @override
+  void initState() {
+    super.initState();
+    final state = widget.ref.read(transportCreateProvider);
+    _selectedCityCode = state.warehouseCityCode;
+    _selectedCityName = state.warehouseCityName;
+    _searchController.text = state.warehouseKeyword;
+  }
+
+  @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
@@ -1004,24 +1036,28 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
               onTap: () => _showCitySheet(cities),
-              child: Row(
-                children: [
-                  Text(
-                    _selectedCityName.isEmpty
-                        ? widget.l10n.deviceIssueAllCity
-                        : _selectedCityName,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.black06Text,
+              child: SizedBox(
+                height: 32,
+                child: Row(
+                  children: [
+                    Text(
+                      _selectedCityName.isEmpty
+                          ? widget.l10n.deviceIssueAllCity
+                          : _selectedCityName,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.black06Text,
+                      ),
                     ),
-                  ),
-                  const Icon(
-                    Icons.keyboard_arrow_down,
-                    size: 20,
-                    color: Color(0xFF666666),
-                  ),
-                ],
+                    const Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 20,
+                      color: Color(0xFF666666),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -1072,7 +1108,7 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
   }
 
   Future<void> _showCitySheet(List<City> cities) async {
-    final selected = await showModalBottomSheet<City?>(
+    final selected = await showModalBottomSheet<_CityPickerResult>(
       context: context,
       backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
@@ -1091,7 +1127,7 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
                         color: Theme.of(context).colorScheme.primary,
                       )
                     : null,
-                onTap: () => Navigator.of(ctx).pop(null),
+                onTap: () => Navigator.of(ctx).pop(const _CityPickerResult.all()),
               ),
               const Divider(height: 1),
               Flexible(
@@ -1110,7 +1146,7 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
                               color: Theme.of(context).colorScheme.primary,
                             )
                           : null,
-                      onTap: () => Navigator.of(ctx).pop(city),
+                      onTap: () => Navigator.of(ctx).pop(_CityPickerResult.city(city)),
                     );
                   },
                 ),
@@ -1122,18 +1158,32 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
     );
 
     if (!mounted) return;
+    if (selected == null) return;
     setState(() {
-      if (selected == null) {
+      if (selected.isAll) {
         _selectedCityCode = '';
         _selectedCityName = '';
       } else {
-        _selectedCityCode = selected.code;
-        _selectedCityName = selected.name;
+        _selectedCityCode = selected.city!.code;
+        _selectedCityName = selected.city!.name;
       }
     });
     await widget.notifier.loadInWarehouseList(
       keyword: _searchController.text.trim(),
       cityCode: _selectedCityCode,
+      cityName: _selectedCityName,
     );
   }
+}
+
+class _CityPickerResult {
+  const _CityPickerResult._({required this.isAll, this.city});
+
+  const _CityPickerResult.all() : this._(isAll: true);
+
+  const _CityPickerResult.city(City city)
+    : this._(isAll: false, city: city);
+
+  final bool isAll;
+  final City? city;
 }

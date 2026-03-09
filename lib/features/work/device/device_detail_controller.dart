@@ -213,16 +213,16 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
     await loadFixRecords(sn: sn, deviceType: 3);
   }
 
-  Future<void> searchBattery(String sn) async {
-    await searchDevice(sn: sn, deviceType: 1);
+  Future<bool> searchBattery(String sn) async {
+    return searchDevice(sn: sn, deviceType: 1);
   }
 
-  Future<void> searchDevice({
+  Future<bool> searchDevice({
     required String sn,
     required int deviceType,
   }) async {
     final value = sn.trim();
-    if (value.isEmpty) return;
+    if (value.isEmpty) return false;
     state = state.copyWith(
       loading: true,
       sn: value,
@@ -240,7 +240,7 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
     if (deviceType == 2) {
       await _loadVehicleDetailFromSearch(value, state.searchResult?.deviceInfo);
       state = state.copyWith(loading: false);
-      return;
+      return state.vehicleDetail != null;
     }
 
     if (deviceType == 3) {
@@ -256,7 +256,7 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
       state = state.copyWith(loading: false, cabinetDetail: response.result);
       await loadCabinPorts(sn: value);
       await loadFixRecords(sn: value, deviceType: deviceType);
-      return;
+      return response.result != null;
     }
 
     final response = await _api.get<BatteryDetail?>(
@@ -269,6 +269,7 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
     state = state.copyWith(loading: false, batteryDetail: response.result);
     await loadChargeHistory(sn: value);
     await loadFixRecords(sn: value, deviceType: deviceType);
+    return response.result != null;
   }
 
   Future<void> loadChargeHistory({String? sn}) async {

@@ -104,14 +104,19 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
                               color: Color(0xFF666666),
                             ),
                           ),
-                          const Spacer(),
-                          Text(
-                            (detail?.trackingNumber.isNotEmpty ?? false)
-                                ? detail!.trackingNumber
-                                : '',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Color(0xFF1A1A1A),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              (detail?.trackingNumber.isNotEmpty ?? false)
+                                  ? detail!.trackingNumber
+                                  : '',
+                              textAlign: TextAlign.end,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Color(0xFF1A1A1A),
+                              ),
                             ),
                           ),
                         ],
@@ -159,7 +164,9 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
         .read(receiveDetailProvider.notifier)
         .receiveDevice(deviceSn);
     if (mounted && context.mounted) {
-      _hasChanged = true;
+      if (result.success) {
+        _hasChanged = true;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(result.message),
@@ -183,7 +190,9 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
         .read(receiveDetailProvider.notifier)
         .withdrawDevice(deviceSn);
     if (mounted && context.mounted) {
-      _hasChanged = true;
+      if (success) {
+        _hasChanged = true;
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(success ? 'Withdrawn successfully' : 'Withdraw failed'),

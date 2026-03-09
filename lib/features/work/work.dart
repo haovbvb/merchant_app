@@ -657,6 +657,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
   ) {
     final isSelected = _currentRole == role;
     final iconPath = _getRoleIconPath(role);
+    final iconSize = _getRoleIconSize(role);
     final displayName = _getRoleDisplayName(role, l10n);
 
     return GestureDetector(
@@ -682,7 +683,12 @@ class _WorkTabState extends ConsumerState<WorkTab> {
         ),
         child: Column(
           children: [
-            Image.asset(iconPath, width: 54, height: 54),
+            Image.asset(
+              iconPath,
+              width: iconSize,
+              height: iconSize,
+              fit: BoxFit.contain,
+            ),
             const SizedBox(height: 12),
             Text(
               displayName,
@@ -702,11 +708,22 @@ class _WorkTabState extends ConsumerState<WorkTab> {
   String _getRoleIconPath(WorkRole role) {
     switch (role) {
       case WorkRole.sale:
-        return 'assets/android/mipmap-xxhdpi/img_sales_summary.png';
+        return 'assets/android/mipmap-xxhdpi/icon_role_sale.png';
       case WorkRole.operations:
         return 'assets/android/mipmap-xxhdpi/icon_onm.png';
       case WorkRole.warehouseKeeper:
-        return 'assets/android/mipmap-xxhdpi/icon_warehouse.png';
+        return 'assets/android/mipmap-xxhdpi/img_sales_summary.png';
+    }
+  }
+
+  double _getRoleIconSize(WorkRole role) {
+    switch (role) {
+      // icon_role_sale视觉主体偏大，按安卓效果缩小到与其他角色一致。
+      case WorkRole.sale:
+        return 48;
+      case WorkRole.operations:
+      case WorkRole.warehouseKeeper:
+        return 54;
     }
   }
 
@@ -797,7 +814,19 @@ class _WorkTabState extends ConsumerState<WorkTab> {
           break;
       }
     }
-    return roles.isEmpty ? WorkRole.values : roles;
+    if (roles.isEmpty) {
+      return WorkRole.values;
+    }
+
+    const roleOrder = <WorkRole, int>{
+      WorkRole.sale: 0,
+      WorkRole.operations: 1,
+      WorkRole.warehouseKeeper: 2,
+    };
+    roles.sort(
+      (a, b) => (roleOrder[a] ?? 999).compareTo(roleOrder[b] ?? 999),
+    );
+    return roles;
   }
 
   WorkRole _resolveActiveRole(List<WorkRole> roles) {

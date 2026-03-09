@@ -250,7 +250,7 @@ class ReceiveDetailNotifier extends Notifier<ReceiveDetailState> {
       return ReceiveResult(success: false, message: 'Transfer number is empty');
     }
     try {
-      await _api.post<Object>(
+      final response = await _api.post<Object>(
         ApiPath.transportReceive,
         data: {
           'deviceSn': deviceSn,
@@ -258,8 +258,16 @@ class ReceiveDetailNotifier extends Notifier<ReceiveDetailState> {
         },
         parser: (json) => json ?? Object(),
       );
-      await loadDetail(state.transferNo);
-      return ReceiveResult(success: true, message: 'Received successfully');
+      if (response.isSuccess) {
+        await loadDetail(state.transferNo);
+      }
+
+      return ReceiveResult(
+        success: response.isSuccess,
+        message: response.message.isNotEmpty
+            ? response.message
+            : (response.isSuccess ? 'Received successfully' : 'Operation failed'),
+      );
     } catch (e) {
       return ReceiveResult(
         success: false,

@@ -87,8 +87,8 @@ class RentBindNotifier extends Notifier<RentBindState> {
   @override
   RentBindState build() => const RentBindState();
 
-  Future<void> queryUser(String cardNum) async {
-    if (cardNum.isEmpty) return;
+  Future<PurchasingUser?> queryUser(String cardNum) async {
+    if (cardNum.isEmpty) return null;
     state = state.copyWith(loadingUser: true);
     try {
       final response = await _api.get<PurchasingUser>(
@@ -102,8 +102,10 @@ class RentBindNotifier extends Notifier<RentBindState> {
         loadingUser: false,
         user: response.result,
       );
+      return response.result;
     } catch (_) {
       state = state.copyWith(loadingUser: false, user: null);
+      return null;
     }
   }
 

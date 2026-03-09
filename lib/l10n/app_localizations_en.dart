@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -2674,7 +2673,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rentBindEmailHint => 'Fill in your email address';
 
   @override
-  String get rentBindAddressHint => 'Fill in your email address';
+  String get rentBindAddressHint => 'Fill in your address';
 
   @override
   String get rentBindSelectPayment => 'Select Payment';
@@ -2704,6 +2703,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rentBindSuccessMessageCash => 'Please enter the order record and submit the contract voucher within';
 
   @override
+  String get rentBindSuccessTimeout => '30 minutes';
+
+  @override
   String get rentBindDocumentNumber => 'Document Number';
 
   @override
@@ -2711,6 +2713,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rentBindReturnWorkbench => 'Return to Workbench';
+
+  @override
+  String get rentBindTagVehicle => 'Vehicle';
+
+  @override
+  String get rentBindTagBattery => 'Battery';
+
+  @override
+  String get rentBindLabelVin => 'VIN';
+
+  @override
+  String get rentBindLabelPlateNumber => 'Plate Number';
+
+  @override
+  String get rentBindLabelSoc => 'SOC';
+
+  @override
+  String get rentBindLabelSoh => 'SOH';
+
+  @override
+  String get rentBindLabelCycle => 'Cycle';
+
+  @override
+  String get rentBindPeriodMonthly => 'Monthly';
+
+  @override
+  String rentBindPeriodFixedDays(int days) {
+    return 'Fixed period · $days days';
+  }
 
   @override
   String get swapBindTitle => 'Swap Binding';
@@ -3175,7 +3206,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saleSummaryOrderSigningRate => 'Order signing rate';
 
   @override
-  String get saleSummaryAverageOrderPrice => 'Average order price';
+  String get saleSummaryAverageOrderPrice => 'Average order amount';
 
   @override
   String get saleSummarySalesAmount => 'Sales Amount';

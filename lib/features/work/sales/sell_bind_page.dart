@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
@@ -12,8 +11,10 @@ import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/sell_bind_controller.dart';
 import 'package:merchant_app/features/work/sales/widgets/applicant_sheet.dart';
+import 'package:merchant_app/features/work/sales/widgets/bind_success_page.dart';
 import 'package:merchant_app/features/work/sales/widgets/package_sheet.dart';
 import 'package:merchant_app/features/work/sales/widgets/payment_sheet.dart';
+import 'package:merchant_app/features/work/sales/widgets/select_applicant_sheet.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
 class SellBindPage extends ConsumerStatefulWidget {
@@ -352,7 +353,7 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
 
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: true, parseDeviceSn: true)),
+      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: false, parseDeviceSn: true)),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
@@ -405,10 +406,28 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
     // Step 2: Select Applicant
     final useAdvancedApplicant =
         !(paymentResult.paySource == 2 && paymentResult.payType == 1);
+
+    // Step 2.1: Search applicant in lightweight selector first.
+    final selectedCardNum = await SelectApplicantSheet.show(
+      pageContext,
+      title: pageContext.l10n.sellBindSelectApplicant,
+      hintText: pageContext.l10n.sellBindUserIdHint,
+      submitText: pageContext.l10n.sellBindSubmit,
+      onQueryUser: (cardNum) async {
+        await notifier.queryUser(cardNum);
+        if (!mounted) return false;
+        final user = ref.read(sellBindProvider).user;
+        return user?.cardNum == cardNum;
+      },
+    );
+    if (selectedCardNum == null || !mounted || !pageContext.mounted) return;
+
+    // Step 2.2: Open applicant detail page when user exists.
     final applicantResult = await ApplicantSheet.show(
       pageContext,
       notifier,
       useAdvancedApplicant,
+      initialCardNum: selectedCardNum,
     );
     if (applicantResult == null || !mounted || !pageContext.mounted) return;
 
@@ -446,9 +465,10 @@ class _PackageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final price = plan.packageAmount?.toStringAsFixed(2) ?? '0.00';
-    final typeValue = _valueOrDash(_resolveTypeValue(plan));
+    final applicableModel = _resolveApplicableModelValue(plan);
 
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFF1E3A5F), Color(0xFF2D4A6F)],
@@ -479,12 +499,10 @@ class _PackageCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Wrap(
-            spacing: 8,
-            runSpacing: 6,
-            children: [
-              _buildInfoTag(typeValue),
-            ],
+          _buildInfoRow(
+            context,
+            label: _applicableModelLabel(context),
+            value: applicableModel,
           ),
         ],
       ),
@@ -510,18 +528,57 @@ class _PackageCard extends StatelessWidget {
     return null;
   }
 
-  Widget _buildInfoTag(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 12, color: Colors.white),
-      ),
+  String _resolveApplicableModelValue(ServicePlanBean plan) {
+    final typeValue = _valueOrDash(_resolveTypeValue(plan));
+    final hasCarType =
+        plan.carType != null &&
+        plan.carType!.trim().isNotEmpty &&
+        plan.carType!.trim() != '-';
+    final hasBatteryType =
+        plan.batteryType != null &&
+        plan.batteryType!.trim().isNotEmpty &&
+        plan.batteryType!.trim() != '-';
+
+    final category =
+        hasCarType && hasBatteryType
+        ? '车辆/电池'
+        : hasCarType
+        ? '车辆'
+        : hasBatteryType
+        ? '电池'
+        : '车辆/电池';
+
+    return '$category · $typeValue';
+  }
+
+  Widget _buildInfoRow(
+    BuildContext context, {
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$label: ',
+          style: const TextStyle(fontSize: 12, color: Color(0xFFD0D7E2)),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 12, color: Colors.white),
+          ),
+        ),
+      ],
     );
+  }
+
+  String _applicableModelLabel(BuildContext context) {
+    final languageCode = Localizations.localeOf(context).languageCode;
+    if (languageCode.toLowerCase().startsWith('zh')) {
+      return '适用机型';
+    }
+    return 'Applicable Model';
   }
 }
 
@@ -1134,143 +1191,27 @@ class _SuccessPage extends StatelessWidget {
     final message = paySource == 2
         ? l10n.sellBindSuccessMessageOnline
         : l10n.sellBindSuccessMessageCash;
-
-    return Scaffold(
-      backgroundColor: AppColors.bgColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: onBack,
+    final messageParts = message.split('30');
+    return BindSuccessPage(
+      appBarTitle: l10n.sellBindTitle,
+      successTitle: l10n.sellBindSuccessTitle,
+      messageSpans: [
+        TextSpan(text: messageParts.isNotEmpty ? messageParts.first : message),
+        const TextSpan(
+          text: '30 minutes',
+          style: TextStyle(color: Color(0xFFFF9800)),
         ),
-        title: Text(
-          l10n.sellBindTitle,
-          style: const TextStyle(color: Colors.black),
-        ),
-        centerTitle: true,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Success icon
-              Container(
-                width: 64,
-                height: 64,
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryColor,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check, color: Colors.white, size: 40),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                l10n.sellBindSuccessTitle,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black06Text,
-                ),
-              ),
-              const SizedBox(height: 12),
-              RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF666666),
-                  ),
-                  children: [
-                    TextSpan(text: message.split('30')[0]),
-                    const TextSpan(
-                      text: '30 minutes',
-                      style: TextStyle(color: Color(0xFFFF9800)),
-                    ),
-                    if (message.split('30').length > 1)
-                      TextSpan(
-                        text: message
-                            .split('30')[1]
-                            .replaceFirst(' minutes', ''),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              // Document Number
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF8E1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      l10n.sellBindDocumentNumber,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF999999),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          documentNo,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.black06Text,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: () {
-                            Clipboard.setData(ClipboardData(text: documentNo));
-                            showToast(l10n.sellBindCopied);
-                          },
-                          child: const Icon(
-                            Icons.copy,
-                            size: 18,
-                            color: Color(0xFF999999),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              // Return button
-              OutlinedButton(
-                onPressed: onReturn,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primaryColor,
-                  side: const BorderSide(color: AppColors.primaryColor),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                ),
-                child: Text(l10n.sellBindReturnWorkbench),
-              ),
-            ],
-          ),
-        ),
-      ),
+        if (messageParts.length > 1)
+          TextSpan(text: messageParts[1].replaceFirst(' minutes', '')),
+      ],
+      documentNo: documentNo,
+      documentNoLabel: l10n.sellBindDocumentNumber,
+      copiedToast: l10n.sellBindCopied,
+      returnButtonText: l10n.sellBindReturnWorkbench,
+      onBack: onBack,
+      onReturn: onReturn,
+      successIconSize: 40,
+      successTitleSize: 20,
     );
   }
 }

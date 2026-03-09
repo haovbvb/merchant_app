@@ -32,7 +32,8 @@ class InventoryDetailPageNew extends ConsumerStatefulWidget {
 }
 
 class _InventoryDetailPageNewState
-    extends ConsumerState<InventoryDetailPageNew> {
+  extends ConsumerState<InventoryDetailPageNew>
+  with WidgetsBindingObserver {
   final RefreshController _refreshController = RefreshController(
     initialRefresh: false,
   );
@@ -41,6 +42,7 @@ class _InventoryDetailPageNewState
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _currentTimeText = DateFormatUtils.format(
       DateTime.now(),
       pattern: 'yyyy-MM-dd HH:mm',
@@ -61,7 +63,17 @@ class _InventoryDetailPageNewState
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed || !mounted) return;
+    final inventoryNo = ref.read(inventoryDetailProvider).inventoryNo;
+    if (inventoryNo.isNotEmpty) {
+      ref.read(inventoryDetailProvider.notifier).loadDetail(inventoryNo);
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _refreshController.dispose();
     super.dispose();
   }
@@ -561,43 +573,36 @@ class _InventoryDetailPageNewState
 
   Future<void> _scanDevice(BuildContext context) async {
     final state = ref.read(inventoryDetailProvider);
-    final notifier = ref.read(inventoryDetailProvider.notifier);
-
-    final result = await Navigator.of(context).push<String>(
+    await Navigator.of(context).push<void>(
       MaterialPageRoute(
         builder: (_) => QrScanPage(
           allowManualInput: true,
           parseDeviceSn: true,
           deviceType: state.detail?.deviceType ?? state.deviceType,
+          continuousScan: true,
+          onContinuousScan: _handleContinuousInventoryScan,
         ),
       ),
     );
-
-    if (result == null || result.trim().isEmpty) return;
-
-    final code = await notifier.scanInventory(result);
-    if (!mounted) return;
-
-    _showBatchScanResult(context,
-      success: code == 1 ? 1 : 0,
-      repeat: code == 2 ? 1 : 0,
-      failed: (code != 1 && code != 2) ? 1 : 0,
-    );
   }
 
-  void _showBatchScanResult(
-    BuildContext context, {
-    required int success,
-    required int repeat,
-    required int failed,
-  }) {
-    final l10n = context.l10n;
-    final parts = <String>[];
-    if (success > 0) parts.add('${l10n.warehouseInventoryScanSuccess} $success');
-    if (repeat > 0) parts.add('${l10n.warehouseInventoryScanRepeat} $repeat');
-    if (failed > 0) parts.add('${l10n.warehouseInventoryScanFailed} $failed');
-    final message = parts.isEmpty ? l10n.warehouseInventoryScanFailed : parts.join('，');
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  Future<String> _handleContinuousInventoryScan(String deviceSn) async {
+    final sn = deviceSn.trim();
+    if (sn.isEmpty) {
+      return context.l10n.warehouseInventoryScanFailed;
+    }
+
+    final notifier = ref.read(inventoryDetailProvider.notifier);
+    final code = await notifier.scanInventory(sn);
+    if (!mounted) return '';
+
+    if (code == 1) {
+      return context.l10n.scanSuccessEntry;
+    }
+    if (code == 2) {
+      return context.l10n.warehouseInventoryScanRepeat;
+    }
+    return context.l10n.warehouseInventoryScanFailed;
   }
 
   Future<void> _showRevokeConfirm(

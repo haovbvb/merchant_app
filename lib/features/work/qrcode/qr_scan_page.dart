@@ -16,6 +16,8 @@ class QrScanPage extends StatefulWidget {
     this.parseDeviceSn = false,
     this.deviceType,
     this.returnRaw = false,
+    this.continuousScan = false,
+    this.onContinuousScan,
   });
 
   final bool allowManualInput;
@@ -23,6 +25,10 @@ class QrScanPage extends StatefulWidget {
   final int? deviceType;
   /// When true, return the raw QR / manual-input value without parsing.
   final bool returnRaw;
+  /// When true, keep scanner page open and handle each result via callback.
+  final bool continuousScan;
+  /// Callback for continuous scan mode. Return a non-empty message to show feedback.
+  final FutureOr<String?> Function(String value)? onContinuousScan;
 
   @override
   State<QrScanPage> createState() => _QrScanPageState();
@@ -39,8 +45,11 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
   bool _checkingPermission = true;
   CameraPermissionResult? _permission;
   bool _torchOn = false;
+  bool _processingContinuousScan = false;
   bool _isInputMode = false;
   String? _successMessage;
+  String? _lastContinuousValue;
+  DateTime? _lastContinuousAt;
 
   late AnimationController _scanLineController;
 
@@ -106,6 +115,11 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
     final l10n = context.l10n;
     final size = MediaQuery.of(context).size;
     final scanAreaSize = size.width * 0.65;
+
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final torchBottom = widget.allowManualInput
+      ? bottomPadding + _manualInputAreaHeight() + 20
+      : 180.0;
 
     return Stack(
       children: [
@@ -198,7 +212,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
 
         // 手电筒按钮
         Positioned(
-          bottom: 180,
+          bottom: torchBottom,
           left: 0,
           right: 0,
           child: Center(
@@ -213,10 +227,14 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
                       : const Color(0x80808080),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(
-                  _torchOn ? Icons.flashlight_on : Icons.flashlight_off,
-                  color: Colors.white,
-                  size: 28,
+                child: Center(
+                  child: Image.asset(
+                    'assets/android/mipmap-xxhdpi/qr_light.webp',
+                    width: 28,
+                    height: 28,
+                    color: Colors.white,
+                    colorBlendMode: BlendMode.srcIn,
+                  ),
                 ),
               ),
             ),
@@ -233,6 +251,15 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
           ),
       ],
     );
+  }
+
+  double _manualInputAreaHeight() {
+    // 1 row input + confirm; vehicle adds VIN input row.
+    const singleInputAndConfirm = 52.0 + 12.0 + 52.0;
+    const vehicleExtraInput = 12.0 + 52.0;
+    const bottomMargin = 24.0;
+    final isVehicle = widget.deviceType == 2;
+    return singleInputAndConfirm + (isVehicle ? vehicleExtraInput : 0) + bottomMargin;
   }
 
   Widget _buildInputArea(dynamic l10n) {
@@ -310,6 +337,9 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
             child: TextField(
               controller: controller,
               focusNode: focusNode,
+              inputFormatters: [
+                LengthLimitingTextInputFormatter(50),
+              ],
               style: const TextStyle(color: Colors.white, fontSize: 16),
               decoration: InputDecoration(
                 hintText: hintText,
@@ -444,20 +474,59 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
   }
 
   void _onDetect(BarcodeCapture capture) {
-    if (_handled) return;
+    if (!widget.continuousScan && _handled) return;
+    if (widget.continuousScan && _processingContinuousScan) return;
     final barcodes = capture.barcodes;
     if (barcodes.isEmpty) return;
     final value = barcodes.first.rawValue;
     if (value == null || value.isEmpty) return;
+    final resolved = widget.returnRaw ? value.trim() : _parseResult(value);
+    if (resolved.isEmpty) return;
+
+    if (widget.continuousScan) {
+      final now = DateTime.now();
+      if (_lastContinuousValue == resolved &&
+          _lastContinuousAt != null &&
+          now.difference(_lastContinuousAt!) < const Duration(milliseconds: 1200)) {
+        return;
+      }
+      _lastContinuousValue = resolved;
+      _lastContinuousAt = now;
+      _handleContinuousScan(resolved);
+      return;
+    }
+
     if (widget.returnRaw) {
       _handled = true;
       Navigator.of(context).pop(value.trim());
       return;
     }
-    final parsed = _parseResult(value);
-    if (parsed.isEmpty) return;
     _handled = true;
-    Navigator.of(context).pop(parsed);
+    Navigator.of(context).pop(resolved);
+  }
+
+  Future<void> _handleContinuousScan(String resolved) async {
+    _processingContinuousScan = true;
+    try {
+      final message = await widget.onContinuousScan?.call(resolved);
+      if (!mounted) return;
+      final text = (message == null || message.trim().isEmpty)
+          ? context.l10n.scanSuccessEntry
+          : message.trim();
+      setState(() {
+        _successMessage = text;
+      });
+      Future.delayed(const Duration(milliseconds: 700), () {
+        if (!mounted) return;
+        if (_successMessage == text) {
+          setState(() {
+            _successMessage = null;
+          });
+        }
+      });
+    } finally {
+      _processingContinuousScan = false;
+    }
   }
 
   void _toggleTorch() {
@@ -469,9 +538,20 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
 
   void _confirmManualInput() {
     final text = _inputController.text.trim();
-    if (text.isEmpty) return;
-
     final isVehicle = widget.deviceType == 2;
+    final isEntryDevice =
+        widget.deviceType == 1 || widget.deviceType == 2 || widget.deviceType == 3;
+
+    if (isEntryDevice && text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(context.l10n.entrySnRequired)),
+      );
+      return;
+    }
+    if (!isEntryDevice && text.isEmpty) {
+      return;
+    }
+
     if (isVehicle) {
       final vin = _vinController.text.trim();
       if (vin.isEmpty) {
@@ -486,6 +566,10 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
       final raw = isVehicle
           ? _buildVehicleManualRaw(text, _vinController.text.trim())
           : text;
+      if (widget.continuousScan) {
+        _handleContinuousScan(raw);
+        return;
+      }
       setState(() {
         _successMessage = context.l10n.scanSuccessEntry;
       });
@@ -503,6 +587,11 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
           : text,
     );
     if (parsed.isEmpty) return;
+
+    if (widget.continuousScan) {
+      _handleContinuousScan(parsed);
+      return;
+    }
 
     // 显示成功提示
     setState(() {

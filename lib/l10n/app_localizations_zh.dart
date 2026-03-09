@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -1648,7 +1647,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceDetailSignalTime => '信号时间';
 
   @override
-  String get deviceDetailStatus => '放电状态';
+  String get deviceDetailStatus => '状态';
 
   @override
   String get deviceDetailLocation => '定位';
@@ -1657,7 +1656,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceDetailViewMap => '查看地图';
 
   @override
-  String get deviceDetailToggleDischarge => '切换放电状态';
+  String get deviceDetailToggleDischarge => '切换状态';
 
   @override
   String get deviceDetailDischargeOn => '放电中';
@@ -2704,6 +2703,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rentBindSuccessMessageCash => '请进入订单记录并在时限内提交合同凭证';
 
   @override
+  String get rentBindSuccessTimeout => '30分钟';
+
+  @override
   String get rentBindDocumentNumber => '单据编号';
 
   @override
@@ -2711,6 +2713,35 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get rentBindReturnWorkbench => '返回工作台';
+
+  @override
+  String get rentBindTagVehicle => '车辆';
+
+  @override
+  String get rentBindTagBattery => '电池';
+
+  @override
+  String get rentBindLabelVin => 'VIN';
+
+  @override
+  String get rentBindLabelPlateNumber => '车牌号';
+
+  @override
+  String get rentBindLabelSoc => 'SOC';
+
+  @override
+  String get rentBindLabelSoh => 'SOH';
+
+  @override
+  String get rentBindLabelCycle => '循环次数';
+
+  @override
+  String get rentBindPeriodMonthly => '整月';
+
+  @override
+  String rentBindPeriodFixedDays(int days) {
+    return '固定周期 · $days天';
+  }
 
   @override
   String get swapBindTitle => '换电绑定';
@@ -3169,13 +3200,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saleSummaryTransactionOrder => '成交订单';
 
   @override
-  String get saleSummarySigningRateTitle => '签约率&客单价';
+  String get saleSummarySigningRateTitle => '成交率 & 订单金额';
 
   @override
   String get saleSummaryOrderSigningRate => '订单签约率';
 
   @override
-  String get saleSummaryAverageOrderPrice => '平均客单价';
+  String get saleSummaryAverageOrderPrice => '平均订单金额';
 
   @override
   String get saleSummarySalesAmount => '销售金额';

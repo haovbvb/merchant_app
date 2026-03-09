@@ -181,7 +181,7 @@ class _PackageItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final price = plan.packageAmount?.toStringAsFixed(2) ?? '0.00';
-    final typeValue = _valueOrDash(_resolveTypeValue(plan));
+    final applicableModel = _resolveApplicableModelValue(plan);
 
     return GestureDetector(
       onTap: onTap,
@@ -222,12 +222,10 @@ class _PackageItem extends StatelessWidget {
                   const SizedBox(height: 8),
                   const Divider(height: 1),
                   const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 6,
-                    children: [
-                      _buildInfoTag(typeValue),
-                    ],
+                  _buildInfoRow(
+                    context,
+                    label: _applicableModelLabel(context),
+                    value: applicableModel,
                   ),
                 ],
               ),
@@ -267,17 +265,56 @@ class _PackageItem extends StatelessWidget {
     return null;
   }
 
-  Widget _buildInfoTag(String text) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 12, color: AppColors.black06Text),
-      ),
+  String _resolveApplicableModelValue(ServicePlanBean plan) {
+    final typeValue = _valueOrDash(_resolveTypeValue(plan));
+    final hasCarType =
+        plan.carType != null &&
+        plan.carType!.trim().isNotEmpty &&
+        plan.carType!.trim() != '-';
+    final hasBatteryType =
+        plan.batteryType != null &&
+        plan.batteryType!.trim().isNotEmpty &&
+        plan.batteryType!.trim() != '-';
+
+    final category =
+        hasCarType && hasBatteryType
+        ? '车辆/电池'
+        : hasCarType
+        ? '车辆'
+        : hasBatteryType
+        ? '电池'
+        : '车辆/电池';
+
+    return '$category · $typeValue';
+  }
+
+  Widget _buildInfoRow(
+    BuildContext context, {
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$label: ',
+          style: const TextStyle(fontSize: 12, color: Color(0xFF8A8F98)),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 12, color: AppColors.black06Text),
+          ),
+        ),
+      ],
     );
+  }
+
+  String _applicableModelLabel(BuildContext context) {
+    final languageCode = Localizations.localeOf(context).languageCode;
+    if (languageCode.toLowerCase().startsWith('zh')) {
+      return '适用机型';
+    }
+    return 'Applicable Model';
   }
 }

@@ -300,6 +300,9 @@ class TransportCreateState {
   final List<City> cities;
   final List<String> sns;
   final String trackingNumber;
+  final String warehouseKeyword;
+  final String warehouseCityCode;
+  final String warehouseCityName;
 
   const TransportCreateState({
     this.loading = false,
@@ -311,6 +314,9 @@ class TransportCreateState {
     this.cities = const [],
     this.sns = const [],
     this.trackingNumber = '',
+    this.warehouseKeyword = '',
+    this.warehouseCityCode = '',
+    this.warehouseCityName = '',
   });
 
   TransportCreateState copyWith({
@@ -323,6 +329,9 @@ class TransportCreateState {
     List<City>? cities,
     List<String>? sns,
     String? trackingNumber,
+    String? warehouseKeyword,
+    String? warehouseCityCode,
+    String? warehouseCityName,
   }) {
     return TransportCreateState(
       loading: loading ?? this.loading,
@@ -334,6 +343,9 @@ class TransportCreateState {
       cities: cities ?? this.cities,
       sns: sns ?? this.sns,
       trackingNumber: trackingNumber ?? this.trackingNumber,
+      warehouseKeyword: warehouseKeyword ?? this.warehouseKeyword,
+      warehouseCityCode: warehouseCityCode ?? this.warehouseCityCode,
+      warehouseCityName: warehouseCityName ?? this.warehouseCityName,
     );
   }
 }
@@ -345,9 +357,14 @@ final transportCreateProvider =
 
 class TransportCreateNotifier extends Notifier<TransportCreateState> {
   final ApiService _api = ApiService();
+  int _warehouseListRequestId = 0;
 
   @override
   TransportCreateState build() => const TransportCreateState();
+
+  void resetCreateState() {
+    state = const TransportCreateState();
+  }
 
   void setDeviceType(int deviceType) {
     state = state.copyWith(deviceType: deviceType);
@@ -369,13 +386,24 @@ class TransportCreateNotifier extends Notifier<TransportCreateState> {
   }
 
   Future<void> loadInWarehouseList({
-    String keyword = '',
-    String cityCode = '',
+    String? keyword,
+    String? cityCode,
+    String? cityName,
   }) async {
-    state = state.copyWith(loading: true);
+    final nextKeyword = keyword ?? state.warehouseKeyword;
+    final nextCityCode = cityCode ?? state.warehouseCityCode;
+    final nextCityName = cityName ?? state.warehouseCityName;
+    final requestId = ++_warehouseListRequestId;
+
+    state = state.copyWith(
+      loading: true,
+      warehouseKeyword: nextKeyword,
+      warehouseCityCode: nextCityCode,
+      warehouseCityName: nextCityName,
+    );
     final response = await _api.get<List<WarehouseInfo>>(
       ApiPath.transportQueryInWarehouseList,
-      queryParameters: {'cityCode': cityCode, 'name': keyword},
+      queryParameters: {'cityCode': nextCityCode, 'name': nextKeyword},
       parser: (json) =>
           (json as List<dynamic>?)
               ?.map(
@@ -386,9 +414,18 @@ class TransportCreateNotifier extends Notifier<TransportCreateState> {
               .toList() ??
           const <WarehouseInfo>[],
     );
+
+    // Ignore outdated response when newer filter request has been sent.
+    if (requestId != _warehouseListRequestId) {
+      return;
+    }
+
     state = state.copyWith(
       loading: false,
       inWarehouses: response.result ?? const [],
+      warehouseKeyword: nextKeyword,
+      warehouseCityCode: nextCityCode,
+      warehouseCityName: nextCityName,
     );
   }
 

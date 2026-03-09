@@ -125,8 +125,8 @@ class SellBindNotifier extends Notifier<SellBindState> {
   @override
   SellBindState build() => const SellBindState();
 
-  Future<void> queryUser(String cardNum) async {
-    if (cardNum.isEmpty) return;
+  Future<PurchasingUser?> queryUser(String cardNum) async {
+    if (cardNum.isEmpty) return null;
     state = state.copyWith(loadingUser: true);
     final response = await _api.get<PurchasingUser>(
       ApiPath.queryUserForSell,
@@ -135,6 +135,7 @@ class SellBindNotifier extends Notifier<SellBindState> {
           PurchasingUser.fromJson(Map<String, dynamic>.from(json as Map)),
     );
     state = state.copyWith(loadingUser: false, user: response.result);
+    return response.result;
   }
 
   Future<bool> queryDevice(String sn) async {

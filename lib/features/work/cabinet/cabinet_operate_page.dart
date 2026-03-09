@@ -55,7 +55,9 @@ class CabinetOperatePage extends StatelessWidget {
   /// Scan QR code and open offline operation detail page.
   Future<void> _scanAndOpenOfflineDetail(BuildContext context) async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
+      MaterialPageRoute(
+        builder: (_) => const QrScanPage(parseDeviceSn: true, deviceType: 3),
+      ),
     );
     if (!context.mounted || result == null || result.isEmpty) return;
     await Navigator.of(context).push(

@@ -51,6 +51,7 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
 
   @override
   void dispose() {
+    ref.read(cabinetUnshelveProvider.notifier).clearState();
     _snFocusNode.removeListener(_onSnFocusChanged);
     _snFocusNode.dispose();
     _snController.dispose();

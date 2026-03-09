@@ -4220,13 +4220,13 @@ abstract class AppLocalizations {
   /// No description provided for @roadsideTabWaiting.
   ///
   /// In en, this message translates to:
-  /// **'Pending'**
+  /// **'Waiting for rescue'**
   String get roadsideTabWaiting;
 
   /// No description provided for @roadsideTabProcessing.
   ///
   /// In en, this message translates to:
-  /// **'In Progress'**
+  /// **'In progress'**
   String get roadsideTabProcessing;
 
   /// No description provided for @roadsideTabCompleted.
@@ -4244,13 +4244,13 @@ abstract class AppLocalizations {
   /// No description provided for @roadsideStatusWaiting.
   ///
   /// In en, this message translates to:
-  /// **'Pending'**
+  /// **'Waiting for rescue'**
   String get roadsideStatusWaiting;
 
   /// No description provided for @roadsideStatusProcessing.
   ///
   /// In en, this message translates to:
-  /// **'In Progress'**
+  /// **'In progress'**
   String get roadsideStatusProcessing;
 
   /// No description provided for @roadsideStatusCompleted.
@@ -4262,13 +4262,13 @@ abstract class AppLocalizations {
   /// No description provided for @roadsideResultReturnFactory.
   ///
   /// In en, this message translates to:
-  /// **'Return to factory'**
+  /// **'Returned to factory'**
   String get roadsideResultReturnFactory;
 
   /// No description provided for @roadsideResultCompleted.
   ///
   /// In en, this message translates to:
-  /// **'Resolved'**
+  /// **'Completed'**
   String get roadsideResultCompleted;
 
   /// No description provided for @roadsideTimeLabel.
@@ -4286,7 +4286,7 @@ abstract class AppLocalizations {
   /// No description provided for @roadsideDetailTitle.
   ///
   /// In en, this message translates to:
-  /// **'Roadside Order Detail'**
+  /// **'Roadside Assistance Detail'**
   String get roadsideDetailTitle;
 
   /// No description provided for @roadsideDetailEmpty.
@@ -5426,7 +5426,7 @@ abstract class AppLocalizations {
   /// No description provided for @rentBindAddressHint.
   ///
   /// In en, this message translates to:
-  /// **'Fill in your email address'**
+  /// **'Fill in your address'**
   String get rentBindAddressHint;
 
   /// No description provided for @rentBindSelectPayment.
@@ -5483,6 +5483,12 @@ abstract class AppLocalizations {
   /// **'Please enter the order record and submit the contract voucher within'**
   String get rentBindSuccessMessageCash;
 
+  /// No description provided for @rentBindSuccessTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'30 minutes'**
+  String get rentBindSuccessTimeout;
+
   /// No description provided for @rentBindDocumentNumber.
   ///
   /// In en, this message translates to:
@@ -5500,6 +5506,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Return to Workbench'**
   String get rentBindReturnWorkbench;
+
+  /// No description provided for @rentBindTagVehicle.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle'**
+  String get rentBindTagVehicle;
+
+  /// No description provided for @rentBindTagBattery.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery'**
+  String get rentBindTagBattery;
+
+  /// No description provided for @rentBindLabelVin.
+  ///
+  /// In en, this message translates to:
+  /// **'VIN'**
+  String get rentBindLabelVin;
+
+  /// No description provided for @rentBindLabelPlateNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Plate Number'**
+  String get rentBindLabelPlateNumber;
+
+  /// No description provided for @rentBindLabelSoc.
+  ///
+  /// In en, this message translates to:
+  /// **'SOC'**
+  String get rentBindLabelSoc;
+
+  /// No description provided for @rentBindLabelSoh.
+  ///
+  /// In en, this message translates to:
+  /// **'SOH'**
+  String get rentBindLabelSoh;
+
+  /// No description provided for @rentBindLabelCycle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cycle'**
+  String get rentBindLabelCycle;
+
+  /// No description provided for @rentBindPeriodMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get rentBindPeriodMonthly;
+
+  /// No description provided for @rentBindPeriodFixedDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed period · {days} days'**
+  String rentBindPeriodFixedDays(int days);
 
   /// No description provided for @swapBindTitle.
   ///
@@ -5846,7 +5906,7 @@ abstract class AppLocalizations {
   /// No description provided for @depositRefundOrderEmpty.
   ///
   /// In en, this message translates to:
-  /// **'No orders'**
+  /// **'No orders eligible for deposit refund'**
   String get depositRefundOrderEmpty;
 
   /// No description provided for @depositRefundAmount.
@@ -6428,7 +6488,7 @@ abstract class AppLocalizations {
   /// No description provided for @saleSummaryAverageOrderPrice.
   ///
   /// In en, this message translates to:
-  /// **'Average order price'**
+  /// **'Average order amount'**
   String get saleSummaryAverageOrderPrice;
 
   /// No description provided for @saleSummarySalesAmount.

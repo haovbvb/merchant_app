@@ -5,6 +5,7 @@ import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/data/models/payment_plan.dart';
 import 'package:merchant_app/data/models/shop_payment_method.dart';
 import 'package:merchant_app/features/work/sales/sell_bind_controller.dart';
+import 'package:merchant_app/features/work/sales/widgets/base_payment_sheet.dart';
 
 class PaymentResult {
   final int paySource;
@@ -135,256 +136,146 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final state = ref.watch(sellBindProvider);
-    final activePayTypes = _payTypesBySource(_paySource);
-
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.85,
-      ),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Header
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                const Spacer(),
-                Text(
-                  l10n.sellBindSelectPayment,
+    return BasePaymentSheet(
+      title: l10n.sellBindSelectPayment,
+      paymentMethodsTitle: l10n.sellBindPaymentMethods,
+      payCashText: l10n.sellBindPayCash,
+      payOnlineText: l10n.sellBindPayOnline,
+      paymentPeriodTitle: l10n.sellBindPaymentPeriod,
+      payFullText: l10n.sellBindPayFull,
+      payInstallmentText: l10n.sellBindPayInstallment,
+      confirmText: l10n.sellBindNext,
+      availablePaySources: _availablePaySources,
+      initialPaySource: _paySource,
+      initialPayType: _payType,
+      availablePayTypesBySource: _payTypesBySource,
+      canConfirm: (selection) =>
+          selection.payType == 1 || _selectedPlan != null,
+      onSelectionChanged: (selection) {
+        if (selection.payType == 2 && state.paymentPlans.isEmpty) {
+          widget.notifier.queryPaymentPlans(widget.packageAmount);
+        }
+      },
+      amountSectionBuilder: (context, selection, _) {
+        if (selection.payType == 2) {
+          return _buildSectionCard(
+            children: [
+              _buildFinancialRow(
+                label: l10n.sellBindFinancial,
+                trailing: GestureDetector(
+                  onTap: () => _showPeriodSheet(context, state),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                            _selectedPlan != null
+                                ? '${_selectedPlan!.period} Periods'
+                                : l10n.sellBindSelectPeriod,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: AppColors.black06Text,
+                            ),
+                          ),
+                          if (_selectedPlan != null)
+                            Text(
+                              '${_formatRatePercent(_selectedPlan!.rate)} ${l10n.sellBindAnnualRate}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF999999),
+                              ),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.chevron_right, color: Color(0xFF999999)),
+                    ],
+                  ),
+                ),
+              ),
+              const Divider(height: 1, color: Color(0xFFEEEEEE)),
+              _buildFinancialRow(
+                label: l10n.sellBindPrincipal,
+                trailing: Text(
+                  '\$ ${widget.packageAmount.toStringAsFixed(2)}',
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
                     color: AppColors.black06Text,
                   ),
                 ),
-                const Spacer(),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: const Icon(Icons.close, color: Color(0xFF999999)),
-                ),
-              ],
-            ),
-          ),
-
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Payment Methods
-                  _buildSectionCard(
-                    title: l10n.sellBindPaymentMethods,
-                    children: [
-                      if (_availablePaySources.contains(1))
-                        _buildRadioOption(
-                          title: l10n.sellBindPayCash,
-                          isSelected: _paySource == 1,
-                          onTap: () => setState(() {
-                            _paySource = 1;
-                            _normalizeSelection(state);
-                          }),
-                        ),
-                      if (_availablePaySources.contains(1) &&
-                          _availablePaySources.contains(2))
-                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
-                      if (_availablePaySources.contains(2))
-                        _buildRadioOption(
-                          title: l10n.sellBindPayOnline,
-                          isSelected: _paySource == 2,
-                          onTap: () => setState(() {
-                            _paySource = 2;
-                            _normalizeSelection(state);
-                          }),
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  // Payment Period
-                  if (activePayTypes.contains(1) ||
-                      activePayTypes.contains(2)) ...[
-                    _buildSectionCard(
-                      title: l10n.sellBindPaymentPeriod,
-                      children: [
-                        if (activePayTypes.contains(1))
-                          _buildRadioOption(
-                            title: l10n.sellBindPayFull,
-                            isSelected: _payType == 1,
-                            onTap: () => setState(() => _payType = 1),
-                          ),
-                        if (activePayTypes.contains(1) &&
-                            activePayTypes.contains(2))
-                          const Divider(height: 1, color: Color(0xFFEEEEEE)),
-                        if (activePayTypes.contains(2))
-                          _buildRadioOption(
-                            title: l10n.sellBindPayInstallment,
-                            isSelected: _payType == 2,
-                            onTap: () {
-                              setState(() => _payType = 2);
-                              if (state.paymentPlans.isEmpty) {
-                                widget.notifier.queryPaymentPlans(
-                                  widget.packageAmount,
-                                );
-                              }
-                            },
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // Installment options
-                  if (_payType == 2) ...[
-                    _buildSectionCard(
-                      children: [
-                        _buildFinancialRow(
-                          label: l10n.sellBindFinancial,
-                          trailing: GestureDetector(
-                            onTap: () => _showPeriodSheet(context, state),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      _selectedPlan != null
-                                          ? '${_selectedPlan!.period} Periods'
-                                          : l10n.sellBindSelectPeriod,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        color: AppColors.black06Text,
-                                      ),
-                                    ),
-                                    if (_selectedPlan != null)
-                                      Text(
-                                        '${_formatRatePercent(_selectedPlan!.rate)} ${l10n.sellBindAnnualRate}',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          color: Color(0xFF999999),
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                                const SizedBox(width: 8),
-                                const Icon(
-                                  Icons.chevron_right,
-                                  color: Color(0xFF999999),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
-                        _buildFinancialRow(
-                          label: l10n.sellBindPrincipal,
-                          trailing: Text(
-                            '\$ ${widget.packageAmount.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: AppColors.black06Text,
-                            ),
-                          ),
-                        ),
-                        const Divider(height: 1, color: Color(0xFFEEEEEE)),
-                        _buildFinancialRow(
-                          label: l10n.sellBindTotalInterest,
-                          trailing: Text(
-                            '\$ ${_calculateInterest().toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: AppColors.black06Text,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          height: 1,
-                          margin: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            border: Border(
-                              bottom: BorderSide(
-                                color: AppColors.borderColor,
-                                style: BorderStyle.solid,
-                              ),
-                            ),
-                          ),
-                        ),
-                        _buildFinancialRow(
-                          label: l10n.sellBindTotal,
-                          trailing: Text(
-                            '\$ ${_calculateTotal().toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFFF9800),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-
-                  // Total for Full Payment
-                  if (_payType == 1) ...[
-                    _buildSectionCard(
-                      children: [
-                        _buildFinancialRow(
-                          label: l10n.sellBindTotal,
-                          trailing: Text(
-                            '\$ ${widget.packageAmount.toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFFFF9800),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                ],
               ),
-            ),
-          ),
-
-          // Next button
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            child: SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _canProceed() ? _proceed : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
-                  disabledBackgroundColor: const Color(0xFFE8F5E9),
-                  foregroundColor: Colors.white,
-                  disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  l10n.sellBindNext,
+              const Divider(height: 1, color: Color(0xFFEEEEEE)),
+              _buildFinancialRow(
+                label: l10n.sellBindTotalInterest,
+                trailing: Text(
+                  '\$ ${_calculateInterest().toStringAsFixed(2)}',
                   style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 14,
+                    color: AppColors.black06Text,
                   ),
                 ),
               ),
+              Container(
+                height: 1,
+                margin: const EdgeInsets.symmetric(vertical: 8),
+                decoration: BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                      color: AppColors.borderColor,
+                      style: BorderStyle.solid,
+                    ),
+                  ),
+                ),
+              ),
+              _buildFinancialRow(
+                label: l10n.sellBindTotal,
+                trailing: Text(
+                  '\$ ${_calculateTotal().toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFFF9800),
+                  ),
+                ),
+              ),
+            ],
+          );
+        }
+
+        return _buildSectionCard(
+          children: [
+            _buildFinancialRow(
+              label: l10n.sellBindTotal,
+              trailing: Text(
+                '\$ ${widget.packageAmount.toStringAsFixed(2)}',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFFF9800),
+                ),
+              ),
             ),
+          ],
+        );
+      },
+      onConfirm: (context, selection) {
+        widget.notifier.updatePaySource(selection.paySource);
+        widget.notifier.updatePayType(selection.payType);
+        if (selection.payType == 2 && _selectedPlan != null) {
+          widget.notifier.selectPaymentPlan(_selectedPlan!);
+        } else {
+          widget.notifier.clearPaymentPlan();
+        }
+        Navigator.of(context).pop(
+          PaymentResult(
+            paySource: selection.paySource,
+            payType: selection.payType,
+            paymentPlan: _selectedPlan,
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -407,48 +298,6 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
             ),
           ...children,
         ],
-      ),
-    );
-  }
-
-  Widget _buildRadioOption({
-    required String title,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: Row(
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                color: AppColors.black06Text,
-              ),
-            ),
-            const Spacer(),
-            Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: isSelected
-                      ? AppColors.primaryColor
-                      : const Color(0xFFDDDDDD),
-                  width: 2,
-                ),
-                color: isSelected ? AppColors.primaryColor : Colors.white,
-              ),
-              child: isSelected
-                  ? const Icon(Icons.check, color: Colors.white, size: 16)
-                  : null,
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -484,29 +333,6 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
     return text.endsWith('00')
         ? value.toStringAsFixed(0)
         : (text.endsWith('0') ? value.toStringAsFixed(1) : text);
-  }
-
-  bool _canProceed() {
-    if (_payType == 1) return true; // Full payment ok
-    return _selectedPlan != null; // Installment needs plan selected
-  }
-
-  void _proceed() {
-    widget.notifier.updatePaySource(_paySource);
-    widget.notifier.updatePayType(_payType);
-    if (_payType == 2 && _selectedPlan != null) {
-      widget.notifier.selectPaymentPlan(_selectedPlan!);
-    } else {
-      widget.notifier.clearPaymentPlan();
-    }
-
-    Navigator.of(context).pop(
-      PaymentResult(
-        paySource: _paySource,
-        payType: _payType,
-        paymentPlan: _selectedPlan,
-      ),
-    );
   }
 
   Future<void> _showPeriodSheet(

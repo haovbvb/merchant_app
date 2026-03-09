@@ -39,6 +39,15 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
   @override
   void initState() {
     super.initState();
+    ref.read(cabinetPutawayProvider.notifier).clearState();
+    _snController.clear();
+    _nameController.clear();
+    _addressController.clear();
+    _swapTimeController.clear();
+    _latitude = null;
+    _longitude = null;
+    _localImages.clear();
+    _lastQueriedSn = '';
     _snFocusNode.addListener(_onSnFocusChanged);
     _nameController.addListener(_onFormChanged);
     _addressController.addListener(_onFormChanged);
@@ -70,6 +79,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
 
   @override
   void dispose() {
+    ref.read(cabinetPutawayProvider.notifier).clearState();
     _snFocusNode.removeListener(_onSnFocusChanged);
     _snFocusNode.dispose();
     _nameController.removeListener(_onFormChanged);
@@ -236,6 +246,9 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
                         label: l10n.cabinetPutawayName,
                         child: TextField(
                           controller: _nameController,
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(50),
+                          ],
                           decoration: InputDecoration(
                             hintText: l10n.cabinetPutawayNameHint,
                             hintStyle: const TextStyle(

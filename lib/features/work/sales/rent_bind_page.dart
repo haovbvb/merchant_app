@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
@@ -10,9 +9,11 @@ import 'package:merchant_app/data/models/pack.dart';
 import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/rent_bind_controller.dart';
+import 'package:merchant_app/features/work/sales/widgets/bind_success_page.dart';
 import 'package:merchant_app/features/work/sales/widgets/rent_applicant_sheet.dart';
 import 'package:merchant_app/features/work/sales/widgets/rent_package_sheet.dart';
 import 'package:merchant_app/features/work/sales/widgets/rent_payment_sheet.dart';
+import 'package:merchant_app/features/work/sales/widgets/select_applicant_sheet.dart';
 
 class RentBindPage extends ConsumerStatefulWidget {
   const RentBindPage({super.key});
@@ -22,6 +23,8 @@ class RentBindPage extends ConsumerStatefulWidget {
 }
 
 class _RentBindPageState extends ConsumerState<RentBindPage> {
+  static const Color _fieldTitleColor = Color(0xFF666666);
+
   final _snController = TextEditingController();
   final _snFocusNode = FocusNode();
   bool _didInit = false;
@@ -166,7 +169,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
         children: [
           Text(
             l10n.rentBindDeviceSn,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
+            style: const TextStyle(fontSize: 14, color: _fieldTitleColor),
           ),
           const SizedBox(height: 8),
           Row(
@@ -230,6 +233,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
   }
 
   Widget _buildDeviceCard(RentBindState state) {
+    final l10n = context.l10n;
     final device = state.deviceInfo!;
     final car = device.carVo;
     final battery = device.batteryVo;
@@ -288,7 +292,9 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
                       Wrap(
                         spacing: 8,
                         children: [
-                          _buildTag('Vehicle · ${_carModelText(car)}'),
+                          _buildTag(
+                            '${l10n.rentBindTagVehicle} · ${_carModelText(car)}',
+                          ),
                           _buildTag(_carSpecText(car)),
                         ],
                       ),
@@ -306,14 +312,19 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
               ),
               child: Row(
                 children: [
-                  Expanded(child: _buildInfoItem('VIN', car.vin ?? '-')),
+                  Expanded(
+                    child: _buildInfoItem(l10n.rentBindLabelVin, car.vin ?? '-'),
+                  ),
                   Container(
                     width: 1,
                     height: 32,
                     color: const Color(0xFFEEEEEE),
                   ),
                   Expanded(
-                    child: _buildInfoItem('Plate Number', car.carNumber ?? '-'),
+                    child: _buildInfoItem(
+                      l10n.rentBindLabelPlateNumber,
+                      car.carNumber ?? '-',
+                    ),
                   ),
                 ],
               ),
@@ -377,7 +388,9 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
                       Wrap(
                         spacing: 8,
                         children: [
-                          _buildTag('Battery · ${_batteryModelText(battery)}'),
+                          _buildTag(
+                            '${l10n.rentBindTagBattery} · ${_batteryModelText(battery)}',
+                          ),
                           _buildTag(_batterySpecText(battery)),
                         ],
                       ),
@@ -396,15 +409,10 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
               child: Row(
                 children: [
                   Expanded(
-                    child: _buildInfoItem('SOC', _numberOrDash(battery.soc)),
-                  ),
-                  Container(
-                    width: 1,
-                    height: 32,
-                    color: const Color(0xFFEEEEEE),
-                  ),
-                  Expanded(
-                    child: _buildInfoItem('SOH', _numberOrDash(battery.soh)),
+                    child: _buildInfoItem(
+                      l10n.rentBindLabelSoc,
+                      _numberOrDash(battery.soc),
+                    ),
                   ),
                   Container(
                     width: 1,
@@ -413,7 +421,18 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
                   ),
                   Expanded(
                     child: _buildInfoItem(
-                      'Cycle',
+                      l10n.rentBindLabelSoh,
+                      _numberOrDash(battery.soh),
+                    ),
+                  ),
+                  Container(
+                    width: 1,
+                    height: 32,
+                    color: const Color(0xFFEEEEEE),
+                  ),
+                  Expanded(
+                    child: _buildInfoItem(
+                      l10n.rentBindLabelCycle,
                       _numberOrDash(battery.cycle),
                     ),
                   ),
@@ -448,7 +467,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
+          style: const TextStyle(fontSize: 12, color: _fieldTitleColor),
         ),
         const SizedBox(height: 4),
         Text(
@@ -482,7 +501,7 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
         children: [
           Text(
             l10n.rentBindPackage,
-            style: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
+            style: const TextStyle(fontSize: 14, color: _fieldTitleColor),
           ),
           const SizedBox(height: 12),
           if (selectedPack != null) ...[
@@ -613,11 +632,13 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
   Future<void> _showApplicantSheet(
     RentBindNotifier notifier,
     bool advancedMode,
+    String initialCardNum,
   ) async {
     final result = await RentApplicantSheet.show(
       context,
       notifier,
       advancedMode: advancedMode,
+      initialCardNum: initialCardNum,
     );
     if (result == null || !mounted) return;
     final email = result.email.trim();
@@ -662,7 +683,20 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
     );
     if (paymentResult == null || !mounted) return;
     final useAdvancedApplicant = paymentResult.paySource != 2;
-    await _showApplicantSheet(notifier, useAdvancedApplicant);
+    final selectedCardNum = await SelectApplicantSheet.show(
+      context,
+      title: context.l10n.rentBindSelectApplicant,
+      hintText: context.l10n.rentBindUserIdHint,
+      submitText: context.l10n.rentBindSubmit,
+      onQueryUser: (cardNum) async {
+        await notifier.queryUser(cardNum);
+        if (!mounted) return false;
+        final user = ref.read(rentBindProvider).user;
+        return user?.cardNum == cardNum;
+      },
+    );
+    if (selectedCardNum == null || !mounted) return;
+    await _showApplicantSheet(notifier, useAdvancedApplicant, selectedCardNum);
   }
 
   String _carModelText(CarVo car) {
@@ -792,7 +826,7 @@ class _PackageCard extends StatelessWidget {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              _buildPeriodText(pack),
+                              _buildPeriodText(pack, l10n),
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: Colors.white,
@@ -834,13 +868,13 @@ class _PackageCard extends StatelessWidget {
     );
   }
 
-  String _buildPeriodText(Pack pack) {
+  String _buildPeriodText(Pack pack, dynamic l10n) {
     final periodValue = pack.duration ?? 30;
     final infoType = pack.infoType;
     if (infoType == 0 || (infoType == null && periodValue == 30)) {
-      return '整月';
+      return l10n.rentBindPeriodMonthly;
     }
-    return '固定周期 · $periodValue天';
+    return l10n.rentBindPeriodFixedDays(periodValue);
   }
 }
 
@@ -858,136 +892,31 @@ class _SuccessPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.rentBindTitle),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: onReturn,
+    return BindSuccessPage(
+      appBarTitle: l10n.rentBindTitle,
+      successTitle: l10n.rentBindSuccessTitle,
+      messageSpans: [
+        TextSpan(
+          text: paySource == 2
+              ? l10n.rentBindSuccessMessageOnline
+              : l10n.rentBindSuccessMessageCash,
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 64,
-                height: 64,
-                decoration: const BoxDecoration(
-                  color: AppColors.primaryColor,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.check, color: Colors.white, size: 32),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                l10n.rentBindSuccessTitle,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.black06Text,
-                ),
-              ),
-              const SizedBox(height: 12),
-              RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF666666),
-                    height: 1.5,
-                  ),
-                  children: [
-                    TextSpan(
-                      text: paySource == 2
-                          ? l10n.rentBindSuccessMessageOnline
-                          : l10n.rentBindSuccessMessageCash,
-                    ),
-                    const TextSpan(
-                      text: ' 30 minutes',
-                      style: TextStyle(
-                        color: Color(0xFFFF9800),
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF8E1),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      l10n.rentBindDocumentNumber,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF999999),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          documentNo,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.black06Text,
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: () {
-                            Clipboard.setData(ClipboardData(text: documentNo));
-                            showToast(l10n.rentBindCopied);
-                          },
-                          child: const Icon(
-                            Icons.copy,
-                            size: 18,
-                            color: Color(0xFF999999),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              OutlinedButton(
-                onPressed: onReturn,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primaryColor,
-                  side: const BorderSide(color: AppColors.primaryColor),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 32,
-                    vertical: 12,
-                  ),
-                ),
-                child: Text(l10n.rentBindReturnWorkbench),
-              ),
-            ],
+        TextSpan(
+          text: ' ${l10n.rentBindSuccessTimeout}',
+          style: TextStyle(
+            color: Color(0xFFFF9800),
+            fontWeight: FontWeight.w500,
           ),
         ),
-      ),
+      ],
+      documentNo: documentNo,
+      documentNoLabel: l10n.rentBindDocumentNumber,
+      copiedToast: l10n.rentBindCopied,
+      returnButtonText: l10n.rentBindReturnWorkbench,
+      onBack: onReturn,
+      onReturn: onReturn,
+      successIconSize: 32,
+      successTitleSize: 18,
     );
   }
 }

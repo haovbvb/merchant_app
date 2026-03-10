@@ -3685,10 +3685,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetOfflineOpenDoorConfirm => 'Are you sure you want to open the door? Please ensure Bluetooth is connected.';
 
   @override
-  String get cabinetOfflineSmokeAlarm => 'Smoke Alarm';
+  String get cabinetOfflineGsmSignal => 'GSM signal';
 
   @override
-  String get cabinetOfflineWaterAlarm => 'Water Leak Alarm';
+  String get cabinetOfflineCharger => 'Communication - Charger';
+
+  @override
+  String get cabinetOfflineCtrlSystem => 'Communication - Ctrl System';
+
+  @override
+  String get cabinetOfflineOMDoor => 'O&M door';
+
+  @override
+  String get cabinetOfflineTotalVoltage => 'Total voltage';
+
+  @override
+  String get cabinetOfflineTotalCurrent => 'Total current';
+
+  @override
+  String get cabinetOfflineTemperature => 'Temperature';
+
+  @override
+  String get cabinetOfflineElectricityMeter => 'Electricity meter';
+
+  @override
+  String get cabinetOfflineSmokeAlarm => 'Smoke detector alarm';
+
+  @override
+  String get cabinetOfflineWaterAlarm => 'Water leakage alarm';
+
+  @override
+  String get cabinetOfflineFanStatus => 'Fan status';
 
   @override
   String get cabinetOfflineChargerStatus => 'Charger Status';
@@ -3697,7 +3724,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetOfflineNoAlarm => 'No Alarm';
 
   @override
+  String get cabinetOfflineAlarm => 'Alarm';
+
+  @override
+  String get cabinetOfflineUnderAlert => 'Under Alert';
+
+  @override
   String get cabinetOfflineNormal => 'Normal';
+
+  @override
+  String get cabinetOfflineOpen => 'Open';
+
+  @override
+  String get cabinetOfflineClose => 'Close';
+
+  @override
+  String get cabinetOfflineRunning => 'Running';
+
+  @override
+  String get cabinetOfflineException => 'Exception';
+
+  @override
+  String get cabinetOfflineUnknown => 'Unknown';
+
+  @override
+  String get cabinetOfflineYes => 'Yes';
+
+  @override
+  String get cabinetOfflineNo => 'No';
 
   @override
   String get cabinetOfflineCabinEmpty => 'No cabin info';
@@ -3754,6 +3808,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cabinetOfflineFaultSiteLabel => 'Site';
+
+  @override
+  String get cabinetOfflineSoftwareVersion => 'Software version';
+
+  @override
+  String get cabinetOfflineBackupPowerStatus => 'Backup power status';
+
+  @override
+  String get cabinetOfflineSlotCount => 'Slot';
+
+  @override
+  String get cabinetOfflineBatteryInSlot => 'Battery in slot';
+
+  @override
+  String get cabinetOfflineEnterSwapThreshold => 'Please enter swap threshold';
+
+  @override
+  String cabinetOfflineSwapThresholdExceed(int max) {
+    return 'Swap threshold cannot exceed $max';
+  }
+
+  @override
+  String get cabinetOfflineEnterApn => 'Please enter APN';
+
+  @override
+  String get cabinetOfflineEnterPlatformUrl => 'Please enter platform URL';
+
+  @override
+  String cabinetOfflineMaxLenError(int max) {
+    return 'Cannot exceed $max characters';
+  }
+
+  @override
+  String get cabinetOfflinePleaseConnectBle => 'Please connect Bluetooth device';
+
+  @override
+  String get cabinetOfflineNoPermission => 'No operation permission';
+
+  @override
+  String get save => 'Save';
 
   @override
   String get vcuSearchTitle => 'VCU Search';

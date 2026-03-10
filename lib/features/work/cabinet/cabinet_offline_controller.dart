@@ -23,6 +23,28 @@ class CabinetOfflineState {
   /// 换电阈值
   final int swapThreshold;
 
+  /// 软件版本 (蓝牙获取)
+  final String? softwareVersion;
+
+  /// 备电状态 (蓝牙获取)
+  final String? backupPowerStatus;
+
+  /// 在仓电池数 (蓝牙获取)
+  final int? batteryInSlot;
+
+  /// 实时数据 (蓝牙获取)
+  final String? gsmSignal;
+  final String? chargerStatus;
+  final String? ctrlSystemStatus;
+  final String? omDoorStatus;
+  final String? totalVoltage;
+  final String? totalCurrent;
+  final String? temperature;
+  final String? electricityMeter;
+  final String? smokeAlarmStatus;
+  final String? waterAlarmStatus;
+  final String? fanStatus;
+
   const CabinetOfflineState({
     this.loading = false,
     this.baseInfo,
@@ -33,6 +55,20 @@ class CabinetOfflineState {
     this.bleConnected = false,
     this.cabins = const [],
     this.swapThreshold = 100,
+    this.softwareVersion,
+    this.backupPowerStatus,
+    this.batteryInSlot,
+    this.gsmSignal,
+    this.chargerStatus,
+    this.ctrlSystemStatus,
+    this.omDoorStatus,
+    this.totalVoltage,
+    this.totalCurrent,
+    this.temperature,
+    this.electricityMeter,
+    this.smokeAlarmStatus,
+    this.waterAlarmStatus,
+    this.fanStatus,
   });
 
   CabinetOfflineState copyWith({
@@ -45,6 +81,20 @@ class CabinetOfflineState {
     bool? bleConnected,
     List<CabinetCabin>? cabins,
     int? swapThreshold,
+    String? softwareVersion,
+    String? backupPowerStatus,
+    int? batteryInSlot,
+    String? gsmSignal,
+    String? chargerStatus,
+    String? ctrlSystemStatus,
+    String? omDoorStatus,
+    String? totalVoltage,
+    String? totalCurrent,
+    String? temperature,
+    String? electricityMeter,
+    String? smokeAlarmStatus,
+    String? waterAlarmStatus,
+    String? fanStatus,
   }) {
     return CabinetOfflineState(
       loading: loading ?? this.loading,
@@ -56,6 +106,20 @@ class CabinetOfflineState {
       bleConnected: bleConnected ?? this.bleConnected,
       cabins: cabins ?? this.cabins,
       swapThreshold: swapThreshold ?? this.swapThreshold,
+      softwareVersion: softwareVersion ?? this.softwareVersion,
+      backupPowerStatus: backupPowerStatus ?? this.backupPowerStatus,
+      batteryInSlot: batteryInSlot ?? this.batteryInSlot,
+      gsmSignal: gsmSignal ?? this.gsmSignal,
+      chargerStatus: chargerStatus ?? this.chargerStatus,
+      ctrlSystemStatus: ctrlSystemStatus ?? this.ctrlSystemStatus,
+      omDoorStatus: omDoorStatus ?? this.omDoorStatus,
+      totalVoltage: totalVoltage ?? this.totalVoltage,
+      totalCurrent: totalCurrent ?? this.totalCurrent,
+      temperature: temperature ?? this.temperature,
+      electricityMeter: electricityMeter ?? this.electricityMeter,
+      smokeAlarmStatus: smokeAlarmStatus ?? this.smokeAlarmStatus,
+      waterAlarmStatus: waterAlarmStatus ?? this.waterAlarmStatus,
+      fanStatus: fanStatus ?? this.fanStatus,
     );
   }
 }

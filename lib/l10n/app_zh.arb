@@ -1266,8 +1266,8 @@
   "cabinetOfflineEmpty": "暂无离线信息",
   "cabinetOfflineFaultEntry": "查看离线故障",
   "cabinetOfflineRealtimeTab": "实时信息",
-  "cabinetOfflineWarehouseTab": "仓库信息",
-  "cabinetOfflineWarehouseEmpty": "暂无仓库信息",
+  "cabinetOfflineWarehouseTab": "仓位详情",
+  "cabinetOfflineWarehouseEmpty": "暂无仓位详情",
   "cabinetOfflineWarehouseTotal": "总数",
   "cabinetOfflineWarehouseCityCodeLabel": "城市编码",
   "cabinetOfflineWarehouseLatLabel": "纬度",
@@ -1288,11 +1288,29 @@
   "cabinetOfflineRestartConfirm": "确定要重启电柜吗？",
   "cabinetOfflineOpenDoorTitle": "确认开门",
   "cabinetOfflineOpenDoorConfirm": "确定要打开柜门吗？请确保蓝牙已连接。",
-  "cabinetOfflineSmokeAlarm": "烟雾报警",
-  "cabinetOfflineWaterAlarm": "漏水报警",
+  "cabinetOfflineGsmSignal": "GSM信号",
+  "cabinetOfflineCharger": "通讯-充电机",
+  "cabinetOfflineCtrlSystem": "通讯-控制系统",
+  "cabinetOfflineOMDoor": "运维门",
+  "cabinetOfflineTotalVoltage": "总电压",
+  "cabinetOfflineTotalCurrent": "总电流",
+  "cabinetOfflineTemperature": "温度",
+  "cabinetOfflineElectricityMeter": "电表",
+  "cabinetOfflineSmokeAlarm": "烟感报警",
+  "cabinetOfflineWaterAlarm": "水浸报警",
+  "cabinetOfflineFanStatus": "风扇状态",
   "cabinetOfflineChargerStatus": "充电器状态",
   "cabinetOfflineNoAlarm": "无报警",
+  "cabinetOfflineAlarm": "报警",
+  "cabinetOfflineUnderAlert": "告警中",
   "cabinetOfflineNormal": "正常",
+  "cabinetOfflineOpen": "打开",
+  "cabinetOfflineClose": "关闭",
+  "cabinetOfflineRunning": "运行中",
+  "cabinetOfflineException": "异常",
+  "cabinetOfflineUnknown": "未知",
+  "cabinetOfflineYes": "是",
+  "cabinetOfflineNo": "否",
   "cabinetOfflineCabinEmpty": "暂无仓位信息",
   "cabinetOfflineCabinSlot": "仓位 {portNo}",
   "@cabinetOfflineCabinSlot": {
@@ -1318,6 +1336,32 @@
   "cabinetOfflineFaultPortLabel": "仓门",
   "cabinetOfflineFaultTimeLabel": "时间",
   "cabinetOfflineFaultSiteLabel": "地址",
+  "cabinetOfflineSoftwareVersion": "软件版本",
+  "cabinetOfflineBackupPowerStatus": "备电状态",
+  "cabinetOfflineSlotCount": "仓位数",
+  "cabinetOfflineBatteryInSlot": "在仓电池数",
+  "cabinetOfflineEnterSwapThreshold": "请输入换电阈值",
+  "cabinetOfflineSwapThresholdExceed": "换电阈值不能超过{max}",
+  "@cabinetOfflineSwapThresholdExceed": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "cabinetOfflineEnterApn": "请输入APN",
+  "cabinetOfflineEnterPlatformUrl": "请输入平台地址",
+  "cabinetOfflineMaxLenError": "不能超过{max}个字符",
+  "@cabinetOfflineMaxLenError": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "cabinetOfflinePleaseConnectBle": "请先连接蓝牙设备",
+  "cabinetOfflineNoPermission": "无操作权限",
+  "save": "保存",
   "vcuSearchTitle": "VCU 搜索",
   "vcuControlTitle": "VCU 控制",
   "vcuVinLabel": "VIN",

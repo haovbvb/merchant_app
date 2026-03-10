@@ -7439,17 +7439,71 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to open the door? Please ensure Bluetooth is connected.'**
   String get cabinetOfflineOpenDoorConfirm;
 
+  /// No description provided for @cabinetOfflineGsmSignal.
+  ///
+  /// In en, this message translates to:
+  /// **'GSM signal'**
+  String get cabinetOfflineGsmSignal;
+
+  /// No description provided for @cabinetOfflineCharger.
+  ///
+  /// In en, this message translates to:
+  /// **'Communication - Charger'**
+  String get cabinetOfflineCharger;
+
+  /// No description provided for @cabinetOfflineCtrlSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Communication - Ctrl System'**
+  String get cabinetOfflineCtrlSystem;
+
+  /// No description provided for @cabinetOfflineOMDoor.
+  ///
+  /// In en, this message translates to:
+  /// **'O&M door'**
+  String get cabinetOfflineOMDoor;
+
+  /// No description provided for @cabinetOfflineTotalVoltage.
+  ///
+  /// In en, this message translates to:
+  /// **'Total voltage'**
+  String get cabinetOfflineTotalVoltage;
+
+  /// No description provided for @cabinetOfflineTotalCurrent.
+  ///
+  /// In en, this message translates to:
+  /// **'Total current'**
+  String get cabinetOfflineTotalCurrent;
+
+  /// No description provided for @cabinetOfflineTemperature.
+  ///
+  /// In en, this message translates to:
+  /// **'Temperature'**
+  String get cabinetOfflineTemperature;
+
+  /// No description provided for @cabinetOfflineElectricityMeter.
+  ///
+  /// In en, this message translates to:
+  /// **'Electricity meter'**
+  String get cabinetOfflineElectricityMeter;
+
   /// No description provided for @cabinetOfflineSmokeAlarm.
   ///
   /// In en, this message translates to:
-  /// **'Smoke Alarm'**
+  /// **'Smoke detector alarm'**
   String get cabinetOfflineSmokeAlarm;
 
   /// No description provided for @cabinetOfflineWaterAlarm.
   ///
   /// In en, this message translates to:
-  /// **'Water Leak Alarm'**
+  /// **'Water leakage alarm'**
   String get cabinetOfflineWaterAlarm;
+
+  /// No description provided for @cabinetOfflineFanStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Fan status'**
+  String get cabinetOfflineFanStatus;
 
   /// No description provided for @cabinetOfflineChargerStatus.
   ///
@@ -7463,11 +7517,65 @@ abstract class AppLocalizations {
   /// **'No Alarm'**
   String get cabinetOfflineNoAlarm;
 
+  /// No description provided for @cabinetOfflineAlarm.
+  ///
+  /// In en, this message translates to:
+  /// **'Alarm'**
+  String get cabinetOfflineAlarm;
+
+  /// No description provided for @cabinetOfflineUnderAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Under Alert'**
+  String get cabinetOfflineUnderAlert;
+
   /// No description provided for @cabinetOfflineNormal.
   ///
   /// In en, this message translates to:
   /// **'Normal'**
   String get cabinetOfflineNormal;
+
+  /// No description provided for @cabinetOfflineOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get cabinetOfflineOpen;
+
+  /// No description provided for @cabinetOfflineClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get cabinetOfflineClose;
+
+  /// No description provided for @cabinetOfflineRunning.
+  ///
+  /// In en, this message translates to:
+  /// **'Running'**
+  String get cabinetOfflineRunning;
+
+  /// No description provided for @cabinetOfflineException.
+  ///
+  /// In en, this message translates to:
+  /// **'Exception'**
+  String get cabinetOfflineException;
+
+  /// No description provided for @cabinetOfflineUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get cabinetOfflineUnknown;
+
+  /// No description provided for @cabinetOfflineYes.
+  ///
+  /// In en, this message translates to:
+  /// **'Yes'**
+  String get cabinetOfflineYes;
+
+  /// No description provided for @cabinetOfflineNo.
+  ///
+  /// In en, this message translates to:
+  /// **'No'**
+  String get cabinetOfflineNo;
 
   /// No description provided for @cabinetOfflineCabinEmpty.
   ///
@@ -7576,6 +7684,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Site'**
   String get cabinetOfflineFaultSiteLabel;
+
+  /// No description provided for @cabinetOfflineSoftwareVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Software version'**
+  String get cabinetOfflineSoftwareVersion;
+
+  /// No description provided for @cabinetOfflineBackupPowerStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Backup power status'**
+  String get cabinetOfflineBackupPowerStatus;
+
+  /// No description provided for @cabinetOfflineSlotCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Slot'**
+  String get cabinetOfflineSlotCount;
+
+  /// No description provided for @cabinetOfflineBatteryInSlot.
+  ///
+  /// In en, this message translates to:
+  /// **'Battery in slot'**
+  String get cabinetOfflineBatteryInSlot;
+
+  /// No description provided for @cabinetOfflineEnterSwapThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter swap threshold'**
+  String get cabinetOfflineEnterSwapThreshold;
+
+  /// No description provided for @cabinetOfflineSwapThresholdExceed.
+  ///
+  /// In en, this message translates to:
+  /// **'Swap threshold cannot exceed {max}'**
+  String cabinetOfflineSwapThresholdExceed(int max);
+
+  /// No description provided for @cabinetOfflineEnterApn.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter APN'**
+  String get cabinetOfflineEnterApn;
+
+  /// No description provided for @cabinetOfflineEnterPlatformUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter platform URL'**
+  String get cabinetOfflineEnterPlatformUrl;
+
+  /// No description provided for @cabinetOfflineMaxLenError.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot exceed {max} characters'**
+  String cabinetOfflineMaxLenError(int max);
+
+  /// No description provided for @cabinetOfflinePleaseConnectBle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please connect Bluetooth device'**
+  String get cabinetOfflinePleaseConnectBle;
+
+  /// No description provided for @cabinetOfflineNoPermission.
+  ///
+  /// In en, this message translates to:
+  /// **'No operation permission'**
+  String get cabinetOfflineNoPermission;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
 
   /// No description provided for @vcuSearchTitle.
   ///

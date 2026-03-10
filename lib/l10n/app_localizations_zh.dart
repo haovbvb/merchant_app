@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -3620,10 +3619,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetOfflineRealtimeTab => '实时信息';
 
   @override
-  String get cabinetOfflineWarehouseTab => '仓库信息';
+  String get cabinetOfflineWarehouseTab => '仓位详情';
 
   @override
-  String get cabinetOfflineWarehouseEmpty => '暂无仓库信息';
+  String get cabinetOfflineWarehouseEmpty => '暂无仓位详情';
 
   @override
   String get cabinetOfflineWarehouseTotal => '总数';
@@ -3686,10 +3685,37 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetOfflineOpenDoorConfirm => '确定要打开柜门吗？请确保蓝牙已连接。';
 
   @override
-  String get cabinetOfflineSmokeAlarm => '烟雾报警';
+  String get cabinetOfflineGsmSignal => 'GSM信号';
 
   @override
-  String get cabinetOfflineWaterAlarm => '漏水报警';
+  String get cabinetOfflineCharger => '通讯-充电机';
+
+  @override
+  String get cabinetOfflineCtrlSystem => '通讯-控制系统';
+
+  @override
+  String get cabinetOfflineOMDoor => '运维门';
+
+  @override
+  String get cabinetOfflineTotalVoltage => '总电压';
+
+  @override
+  String get cabinetOfflineTotalCurrent => '总电流';
+
+  @override
+  String get cabinetOfflineTemperature => '温度';
+
+  @override
+  String get cabinetOfflineElectricityMeter => '电表';
+
+  @override
+  String get cabinetOfflineSmokeAlarm => '烟感报警';
+
+  @override
+  String get cabinetOfflineWaterAlarm => '水浸报警';
+
+  @override
+  String get cabinetOfflineFanStatus => '风扇状态';
 
   @override
   String get cabinetOfflineChargerStatus => '充电器状态';
@@ -3698,7 +3724,34 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetOfflineNoAlarm => '无报警';
 
   @override
+  String get cabinetOfflineAlarm => '报警';
+
+  @override
+  String get cabinetOfflineUnderAlert => '告警中';
+
+  @override
   String get cabinetOfflineNormal => '正常';
+
+  @override
+  String get cabinetOfflineOpen => '打开';
+
+  @override
+  String get cabinetOfflineClose => '关闭';
+
+  @override
+  String get cabinetOfflineRunning => '运行中';
+
+  @override
+  String get cabinetOfflineException => '异常';
+
+  @override
+  String get cabinetOfflineUnknown => '未知';
+
+  @override
+  String get cabinetOfflineYes => '是';
+
+  @override
+  String get cabinetOfflineNo => '否';
 
   @override
   String get cabinetOfflineCabinEmpty => '暂无仓位信息';
@@ -3755,6 +3808,46 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cabinetOfflineFaultSiteLabel => '地址';
+
+  @override
+  String get cabinetOfflineSoftwareVersion => '软件版本';
+
+  @override
+  String get cabinetOfflineBackupPowerStatus => '备电状态';
+
+  @override
+  String get cabinetOfflineSlotCount => '仓位数';
+
+  @override
+  String get cabinetOfflineBatteryInSlot => '在仓电池数';
+
+  @override
+  String get cabinetOfflineEnterSwapThreshold => '请输入换电阈值';
+
+  @override
+  String cabinetOfflineSwapThresholdExceed(int max) {
+    return '换电阈值不能超过$max';
+  }
+
+  @override
+  String get cabinetOfflineEnterApn => '请输入APN';
+
+  @override
+  String get cabinetOfflineEnterPlatformUrl => '请输入平台地址';
+
+  @override
+  String cabinetOfflineMaxLenError(int max) {
+    return '不能超过$max个字符';
+  }
+
+  @override
+  String get cabinetOfflinePleaseConnectBle => '请先连接蓝牙设备';
+
+  @override
+  String get cabinetOfflineNoPermission => '无操作权限';
+
+  @override
+  String get save => '保存';
 
   @override
   String get vcuSearchTitle => 'VCU 搜索';

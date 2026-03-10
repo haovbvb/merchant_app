@@ -1290,11 +1290,29 @@
   "cabinetOfflineRestartConfirm": "Are you sure you want to restart the cabinet?",
   "cabinetOfflineOpenDoorTitle": "Confirm Open Door",
   "cabinetOfflineOpenDoorConfirm": "Are you sure you want to open the door? Please ensure Bluetooth is connected.",
-  "cabinetOfflineSmokeAlarm": "Smoke Alarm",
-  "cabinetOfflineWaterAlarm": "Water Leak Alarm",
+  "cabinetOfflineGsmSignal": "GSM signal",
+  "cabinetOfflineCharger": "Communication - Charger",
+  "cabinetOfflineCtrlSystem": "Communication - Ctrl System",
+  "cabinetOfflineOMDoor": "O&M door",
+  "cabinetOfflineTotalVoltage": "Total voltage",
+  "cabinetOfflineTotalCurrent": "Total current",
+  "cabinetOfflineTemperature": "Temperature",
+  "cabinetOfflineElectricityMeter": "Electricity meter",
+  "cabinetOfflineSmokeAlarm": "Smoke detector alarm",
+  "cabinetOfflineWaterAlarm": "Water leakage alarm",
+  "cabinetOfflineFanStatus": "Fan status",
   "cabinetOfflineChargerStatus": "Charger Status",
   "cabinetOfflineNoAlarm": "No Alarm",
+  "cabinetOfflineAlarm": "Alarm",
+  "cabinetOfflineUnderAlert": "Under Alert",
   "cabinetOfflineNormal": "Normal",
+  "cabinetOfflineOpen": "Open",
+  "cabinetOfflineClose": "Close",
+  "cabinetOfflineRunning": "Running",
+  "cabinetOfflineException": "Exception",
+  "cabinetOfflineUnknown": "Unknown",
+  "cabinetOfflineYes": "Yes",
+  "cabinetOfflineNo": "No",
   "cabinetOfflineCabinEmpty": "No cabin info",
   "cabinetOfflineCabinSlot": "Slot {portNo}",
   "@cabinetOfflineCabinSlot": {
@@ -1320,6 +1338,32 @@
   "cabinetOfflineFaultPortLabel": "Port",
   "cabinetOfflineFaultTimeLabel": "Time",
   "cabinetOfflineFaultSiteLabel": "Site",
+  "cabinetOfflineSoftwareVersion": "Software version",
+  "cabinetOfflineBackupPowerStatus": "Backup power status",
+  "cabinetOfflineSlotCount": "Slot",
+  "cabinetOfflineBatteryInSlot": "Battery in slot",
+  "cabinetOfflineEnterSwapThreshold": "Please enter swap threshold",
+  "cabinetOfflineSwapThresholdExceed": "Swap threshold cannot exceed {max}",
+  "@cabinetOfflineSwapThresholdExceed": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "cabinetOfflineEnterApn": "Please enter APN",
+  "cabinetOfflineEnterPlatformUrl": "Please enter platform URL",
+  "cabinetOfflineMaxLenError": "Cannot exceed {max} characters",
+  "@cabinetOfflineMaxLenError": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "cabinetOfflinePleaseConnectBle": "Please connect Bluetooth device",
+  "cabinetOfflineNoPermission": "No operation permission",
+  "save": "Save",
   "vcuSearchTitle": "VCU Search",
   "vcuControlTitle": "VCU Control",
   "vcuVinLabel": "VIN",

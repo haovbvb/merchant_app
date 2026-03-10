@@ -702,6 +702,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get orderVoucherPickCancel => '取消';
 
   @override
+  String get orderVoucherConfirm => '确认';
+
+  @override
   String get maintenanceBookTitle => '维修预约';
 
   @override
@@ -2229,13 +2232,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get roadsideCostsTitle => '救援费用';
 
   @override
-  String get roadsideTotalLabel => '总计';
+  String get roadsideTotalLabel => '总计 (\$)';
 
   @override
   String get roadsidePaymentMethodLabel => '付款方式';
 
   @override
   String get roadsideUploadVoucherLabel => '上传凭证';
+
+  @override
+  String get roadsideSelectMapApp => '选择导航应用';
+
+  @override
+  String get roadsideAppleMap => 'Apple 地图';
+
+  @override
+  String get roadsideGoogleMap => 'Google 地图';
 
   @override
   String get roadsideNotPayingYet => '暂不付款';
@@ -2855,6 +2867,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get swapBindRemainingDays => '剩余租赁天数';
 
   @override
+  String get swapBindPackUnit => '个';
+
+  @override
+  String swapBindFixedPeriodDays(Object days) {
+    return '固定周期 · $days天';
+  }
+
+  @override
+  String get swapBindPeriodMonthly => '整月';
+
+  @override
+  String get swapBindVehicleBatteryRequired => '请先选择车辆和电池';
+
+  @override
+  String get swapBindTotal => '总计';
+
+  @override
   String get swapBindSuccessTitle => '提交成功';
 
   @override
@@ -2862,6 +2891,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get swapBindSuccessCashHint => '请在以下时间内进入订单记录并提交合同凭证';
+
+  @override
+  String get swapBindSuccessTimeout => '24小时内';
 
   @override
   String get swapBindDocumentNumber => '单据编号';
@@ -3194,7 +3226,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saleSummaryPayWay => '支付方式';
 
   @override
-  String get saleSummaryTotalSalesAmount => '总销售金额(\$)';
+  String get saleSummaryTotalSalesAmount => '总销售金额';
 
   @override
   String get saleSummaryTransactionOrder => '成交订单';

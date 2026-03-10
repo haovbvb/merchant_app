@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:intl/intl.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
@@ -22,6 +24,9 @@ class RoadSideDetailPage extends ConsumerStatefulWidget {
 }
 
 class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
+  String _addressCoordKey = '';
+  String _resolvedAddress = '-';
+
   @override
   void initState() {
     super.initState();
@@ -38,6 +43,7 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
     final state = ref.watch(roadSideDetailProvider);
     final notifier = ref.read(roadSideDetailProvider.notifier);
     final detail = state.detail;
+    _syncAddressFromDetail(detail);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6F7),
@@ -71,6 +77,7 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
                             _StatusHeader(l10n: l10n, detail: detail),
                             _ContactCard(
                               detail: detail,
+                              addressText: _resolvedAddress,
                               onCallPhone: () => _callPhone(detail.riderPhone),
                               onNavigate: () => _openNavigation(detail),
                             ),
@@ -139,18 +146,174 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
     final lng = detail.longitude;
     if (lat == null || lng == null || (lat == 0 && lng == 0)) return;
 
-    final googleNav = Uri.parse('google.navigation:q=$lat,$lng');
-    final mapUrl = Uri.parse(
+    final l10n = context.l10n;
+    final appleMap = Uri.parse('maps://?daddr=$lat,$lng');
+    final googleMapScheme = Uri.parse(
+      'comgooglemaps://?daddr=$lat,$lng&directionsmode=driving',
+    );
+    final googleNavigation = Uri.parse('google.navigation:q=$lat,$lng');
+    final googleWeb = Uri.parse(
       'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng',
     );
 
-    if (await canLaunchUrl(googleNav)) {
-      await launchUrl(googleNav);
+    final appleAvailable = await canLaunchUrl(appleMap);
+    final googleMapSchemeAvailable = await canLaunchUrl(googleMapScheme);
+    final googleNavigationAvailable = await canLaunchUrl(googleNavigation);
+
+    if (!mounted) return;
+
+    final canApple = defaultTargetPlatform == TargetPlatform.iOS && appleAvailable;
+    final canGoogle = googleMapSchemeAvailable || googleNavigationAvailable;
+
+    if (!canApple && !canGoogle) {
+      if (await canLaunchUrl(googleWeb)) {
+        await launchUrl(googleWeb, mode: LaunchMode.externalApplication);
+      }
       return;
     }
-    if (await canLaunchUrl(mapUrl)) {
-      await launchUrl(mapUrl, mode: LaunchMode.externalApplication);
+
+    await showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: SafeArea(
+            top: false,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 8),
+                Container(
+                  width: 36,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0E0E0),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Text(
+                    l10n.roadsideSelectMapApp,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black06Text,
+                    ),
+                  ),
+                ),
+                if (canApple)
+                  ListTile(
+                    title: Text(l10n.roadsideAppleMap),
+                    onTap: () async {
+                      Navigator.of(sheetContext).pop();
+                      await launchUrl(
+                        appleMap,
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                  ),
+                if (canGoogle)
+                  ListTile(
+                    title: Text(l10n.roadsideGoogleMap),
+                    onTap: () async {
+                      Navigator.of(sheetContext).pop();
+                      final target = googleMapSchemeAvailable
+                          ? googleMapScheme
+                          : googleNavigation;
+                      await launchUrl(target, mode: LaunchMode.externalApplication);
+                    },
+                  ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 44,
+                    child: OutlinedButton(
+                      onPressed: () => Navigator.of(sheetContext).pop(),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.black06Text,
+                        side: const BorderSide(color: Color(0xFFDDDDDD)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: Text(l10n.cancel),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _syncAddressFromDetail(RoadSideOrderDetail? detail) {
+    final lat = detail?.latitude;
+    final lng = detail?.longitude;
+    if (lat == null || lng == null || (lat == 0 && lng == 0)) {
+      if (_addressCoordKey.isNotEmpty || _resolvedAddress != '-') {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          setState(() {
+            _addressCoordKey = '';
+            _resolvedAddress = '-';
+          });
+        });
+      }
+      return;
     }
+
+    final key = '$lat,$lng';
+    if (key == _addressCoordKey) return;
+    _addressCoordKey = key;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() {
+        _resolvedAddress = _resolvingAddressText(context);
+      });
+      _resolveAddress(lat: lat, lng: lng, key: key);
+    });
+  }
+
+  Future<void> _resolveAddress({
+    required double lat,
+    required double lng,
+    required String key,
+  }) async {
+    String text = _formatLatLng(lat, lng);
+    try {
+      final placemarks = await placemarkFromCoordinates(lat, lng);
+      if (placemarks.isNotEmpty) {
+        final item = placemarks.first;
+        final parts = <String>[
+          item.street ?? '',
+          item.subLocality ?? '',
+          item.locality ?? '',
+          item.administrativeArea ?? '',
+          item.country ?? '',
+        ].where((e) => e.trim().isNotEmpty).toList();
+        if (parts.isNotEmpty) {
+          text = parts.join(', ');
+        }
+      }
+    } catch (_) {
+      // Fall back to coordinates if reverse geocoding fails.
+    }
+    if (!mounted || key != _addressCoordKey) return;
+    setState(() {
+      _resolvedAddress = text;
+    });
+  }
+
+  String _formatLatLng(double lat, double lng) {
+    return '${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}';
   }
 
   Future<void> _showPaymentSheet(
@@ -174,6 +337,8 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
       uploadVoucherText: l10n.roadsideUploadVoucherLabel,
       confirmButtonText: l10n.roadsideConfirmPayment,
       initialPayType: 1,
+      maxAttachments: 5,
+      showUploadCount: true,
       closeOnFailure: true,
       successMessage: l10n.roadsidePaySuccess,
       failureMessage: l10n.roadsidePayFailed,
@@ -274,11 +439,13 @@ class _StatusHeader extends StatelessWidget {
 class _ContactCard extends StatelessWidget {
   const _ContactCard({
     required this.detail,
+    required this.addressText,
     required this.onCallPhone,
     required this.onNavigate,
   });
 
   final RoadSideOrderDetail detail;
+  final String addressText;
   final VoidCallback onCallPhone;
   final VoidCallback onNavigate;
 
@@ -286,7 +453,7 @@ class _ContactCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final fullName = '${detail.firstName ?? ''} ${detail.lastName ?? ''}'.trim();
     final displayName = fullName.isNotEmpty ? fullName : (detail.rider ?? '-');
-    final address = _formatLocation(detail);
+    final address = addressText.trim().isNotEmpty ? addressText : '-';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 15),
@@ -301,7 +468,7 @@ class _ContactCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(20),
-                child: _AvatarImage(url: detail.img),
+                child: _AvatarImage(url: detail.avatar),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -395,13 +562,6 @@ class _ContactCard extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  String _formatLocation(RoadSideOrderDetail detail) {
-    final lat = detail.latitude;
-    final lng = detail.longitude;
-    if (lat == null || lng == null) return '-';
-    return '${lat.toStringAsFixed(6)}, ${lng.toStringAsFixed(6)}';
   }
 
   String _formatOccurrenceTime(int? millis) {
@@ -634,6 +794,17 @@ class _ProcessingResultCard extends StatelessWidget {
                     color: Color(0xE6000000),
                   ),
                 ),
+                if ((detail.attachment ?? '').trim().isNotEmpty)
+                  const Padding(
+                    padding: EdgeInsets.only(left: 6),
+                    child: Text(
+                      '|',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Color(0x99000000),
+                      ),
+                    ),
+                  ),
                 if ((detail.attachment ?? '').trim().isNotEmpty)
                   GestureDetector(
                     onTap: () => PhotoGalleryViewer.show(
@@ -928,4 +1099,11 @@ String _occurrenceText(BuildContext context) {
       .toLowerCase()
       .startsWith('zh');
   return isZh ? '发生' : 'occurrence';
+}
+
+String _resolvingAddressText(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode
+      .toLowerCase()
+      .startsWith('zh');
+  return isZh ? '地址解析中...' : 'Resolving address...';
 }

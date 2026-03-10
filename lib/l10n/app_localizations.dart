@@ -1481,6 +1481,12 @@ abstract class AppLocalizations {
   /// **'Cancel'**
   String get orderVoucherPickCancel;
 
+  /// No description provided for @orderVoucherConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get orderVoucherConfirm;
+
   /// No description provided for @maintenanceBookTitle.
   ///
   /// In en, this message translates to:
@@ -4538,7 +4544,7 @@ abstract class AppLocalizations {
   /// No description provided for @roadsideTotalLabel.
   ///
   /// In en, this message translates to:
-  /// **'Total'**
+  /// **'Total (\$)'**
   String get roadsideTotalLabel;
 
   /// No description provided for @roadsidePaymentMethodLabel.
@@ -4552,6 +4558,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Upload Voucher'**
   String get roadsideUploadVoucherLabel;
+
+  /// No description provided for @roadsideSelectMapApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Map App'**
+  String get roadsideSelectMapApp;
+
+  /// No description provided for @roadsideAppleMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Apple Maps'**
+  String get roadsideAppleMap;
+
+  /// No description provided for @roadsideGoogleMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Google Maps'**
+  String get roadsideGoogleMap;
 
   /// No description provided for @roadsideNotPayingYet.
   ///
@@ -5783,6 +5807,36 @@ abstract class AppLocalizations {
   /// **'Remaining Rental days'**
   String get swapBindRemainingDays;
 
+  /// No description provided for @swapBindPackUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'pcs'**
+  String get swapBindPackUnit;
+
+  /// No description provided for @swapBindFixedPeriodDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed period · {days} days'**
+  String swapBindFixedPeriodDays(Object days);
+
+  /// No description provided for @swapBindPeriodMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get swapBindPeriodMonthly;
+
+  /// No description provided for @swapBindVehicleBatteryRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select vehicle and battery first'**
+  String get swapBindVehicleBatteryRequired;
+
+  /// No description provided for @swapBindTotal.
+  ///
+  /// In en, this message translates to:
+  /// **'Total'**
+  String get swapBindTotal;
+
   /// No description provided for @swapBindSuccessTitle.
   ///
   /// In en, this message translates to:
@@ -5800,6 +5854,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please enter the order record and submit the contract voucher within'**
   String get swapBindSuccessCashHint;
+
+  /// No description provided for @swapBindSuccessTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'24 hours'**
+  String get swapBindSuccessTimeout;
 
   /// No description provided for @swapBindDocumentNumber.
   ///
@@ -6464,7 +6524,7 @@ abstract class AppLocalizations {
   /// No description provided for @saleSummaryTotalSalesAmount.
   ///
   /// In en, this message translates to:
-  /// **'Total sales amount(\$)'**
+  /// **'Total sales amount'**
   String get saleSummaryTotalSalesAmount;
 
   /// No description provided for @saleSummaryTransactionOrder.

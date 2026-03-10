@@ -16,6 +16,7 @@ class RoadSideOrderDetail {
   final String? reportTime;
   final int? result;
   final String? rider;
+  final String? avatar;
   final String? cardNum;
   final String? riderPhone;
   final int? source;
@@ -42,6 +43,7 @@ class RoadSideOrderDetail {
     required this.reportTime,
     required this.result,
     required this.rider,
+    required this.avatar,
     required this.cardNum,
     required this.riderPhone,
     required this.source,
@@ -70,6 +72,11 @@ class RoadSideOrderDetail {
       reportTime: json['reportTime']?.toString(),
       result: (json['result'] as num?)?.toInt(),
       rider: json['rider']?.toString(),
+        avatar: json['avatar']?.toString() ??
+          json['riderAvatar']?.toString() ??
+          json['userAvatar']?.toString() ??
+          json['headImg']?.toString() ??
+          json['headUrl']?.toString(),
       cardNum: json['cardNum']?.toString(),
       riderPhone: json['riderPhone']?.toString(),
       source: (json['source'] as num?)?.toInt(),
@@ -98,6 +105,7 @@ class RoadSideOrderDetail {
         'reportTime': reportTime,
         'result': result,
         'rider': rider,
+        'avatar': avatar,
         'cardNum': cardNum,
         'riderPhone': riderPhone,
         'source': source,

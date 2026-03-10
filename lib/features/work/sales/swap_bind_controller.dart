@@ -136,14 +136,12 @@ class SwapBindNotifier extends Notifier<SwapBindState> {
         .where((e) => e.isNotEmpty)
         .toList();
     final carType = car.model;
-    final minDay = _minRentDay([car.rentDay, ...state.selectedBatteries.map((e) => e.rentDay)]);
     state = state.copyWith(loadingPack: true);
     final response = await _api.get<List<Pack>>(
       ApiPath.querySwapPackList,
       queryParameters: {
         'batteryType': batteryTypes.join(','),
         'carType': carType,
-        if (minDay != null) 'minDay': minDay,
       },
       parser: (json) => (json as List<dynamic>?)
               ?.map((item) => Pack.fromJson(
@@ -194,12 +192,5 @@ class SwapBindNotifier extends Notifier<SwapBindState> {
 
   void reset() {
     state = const SwapBindState();
-  }
-
-  int? _minRentDay(List<int?> values) {
-    final valid = values.whereType<int>().toList();
-    if (valid.isEmpty) return null;
-    valid.sort();
-    return valid.first;
   }
 }

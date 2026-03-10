@@ -12,9 +12,9 @@ import 'package:merchant_app/data/models/swap_bind_info.dart';
 import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/swap_bind_controller.dart';
+import 'package:merchant_app/features/work/sales/widgets/payment_sheet.dart';
 import 'package:merchant_app/features/work/sales/widgets/swap_battery_sheet.dart';
 import 'package:merchant_app/features/work/sales/widgets/swap_package_sheet.dart';
-import 'package:merchant_app/features/work/sales/widgets/swap_payment_sheet.dart';
 import 'package:merchant_app/features/work/sales/widgets/swap_vehicle_sheet.dart';
 
 class SwapBindPage extends ConsumerStatefulWidget {
@@ -261,10 +261,10 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
   }
 
   Widget _buildUserInfoCard(SwapBindInfo info) {
-    final fullName = '${info.firstName ?? ''} ${info.lastName ?? ''}'.trim();
-    final name = fullName.isNotEmpty
-        ? fullName
-        : ((info.username ?? '').trim().isNotEmpty ? info.username!.trim() : '-');
+    final l10n = context.l10n;
+    final name = (info.username ?? '').trim().isNotEmpty
+      ? info.username!.trim()
+      : '-';
     final phone = _formatPhoneWithAreaCode(info.phone);
     return Container(
       padding: const EdgeInsets.all(12),
@@ -307,7 +307,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Phone: $phone',
+                  '${l10n.userBasicPhone}: $phone',
                   style: const TextStyle(
                     fontSize: 13,
                     color: Color(0xFF999999),
@@ -389,6 +389,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
     List<CarVo> vehicles,
     SwapBindNotifier notifier,
   ) {
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: () => _selectVehicle(context, vehicles, notifier),
       child: Container(
@@ -430,7 +431,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'SN: ${car.sn ?? '-'}',
+                    '${l10n.orderLabelDeviceSn}: ${car.sn ?? '-'}',
                     style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xFF999999),
@@ -441,15 +442,15 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                     Text.rich(
                       TextSpan(
                         children: [
-                          const TextSpan(
-                            text: 'Remaining Rental days: ',
-                            style: TextStyle(
+                          TextSpan(
+                            text: '${l10n.swapBindRemainingDays}: ',
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF999999),
                             ),
                           ),
                           TextSpan(
-                            text: '${car.rentDay} days',
+                            text: '${car.rentDay}${l10n.orderUnitDays}',
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.primaryColor,
@@ -540,6 +541,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
     List<BatteryVo> batteries,
     SwapBindNotifier notifier,
   ) {
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: () => _selectBattery(context, batteries, notifier),
       child: Container(
@@ -581,7 +583,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'SN: ${battery.sn ?? '-'}',
+                    '${l10n.orderLabelDeviceSn}: ${battery.sn ?? '-'}',
                     style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xFF999999),
@@ -592,15 +594,15 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
                     Text.rich(
                       TextSpan(
                         children: [
-                          const TextSpan(
-                            text: 'Remaining Rental days: ',
-                            style: TextStyle(
+                          TextSpan(
+                            text: '${l10n.swapBindRemainingDays}: ',
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF999999),
                             ),
                           ),
                           TextSpan(
-                            text: '${battery.rentDay} days',
+                            text: '${battery.rentDay}${l10n.orderUnitDays}',
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.primaryColor,
@@ -691,134 +693,150 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
         // 套餐卡片
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.primaryColor, AppColors.primaryColor],
-            ),
             borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: const Color(0xFFEEEEEE)),
           ),
+          clipBehavior: Clip.antiAlias,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                pack.infoName ?? '-',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+              // 绿色顶部 - 套餐名 + 价格
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: const BoxDecoration(
+                  color: AppColors.primaryColor,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      pack.infoName ?? '-',
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '\$${(pack.packageAmount ?? 0).toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                '\$${(pack.packageAmount ?? 0).toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
+              // 白色底部 - 详情
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                color: Colors.white,
+                child: Column(
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.swapBindAvailableBattery,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF999999),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${pack.batteryType ?? '-'} · ${pack.batteryNum ?? 0} ${l10n.swapBindPackUnit}',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.black06Text,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.swapBindAvailableVehicles,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF999999),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                pack.carType ?? '-',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.black06Text,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.swapBindServicePeriod,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF999999),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _buildPeriodText(pack, l10n),
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.black06Text,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                l10n.swapBindSwapTime,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF999999),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                '${pack.times ?? 0}',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.black06Text,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 12),
-              const Divider(color: Colors.white24),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.swapBindAvailableBattery,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.white70,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${pack.batteryType ?? '-'} · ${pack.batteryNum ?? 0} pac',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.swapBindAvailableVehicles,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.white70,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          pack.carType ?? '-',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.swapBindServicePeriod,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.white70,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Fixed period · ${pack.duration ?? 30}days',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.swapBindSwapTime,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.white70,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${pack.times ?? 0}',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
               ),
             ],
           ),
@@ -837,6 +855,15 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
         ),
       ],
     );
+  }
+
+  String _buildPeriodText(Pack pack, dynamic l10n) {
+    final periodValue = pack.duration ?? 30;
+    final infoType = pack.infoType;
+    if (infoType == 0 || (infoType == null && periodValue == 30)) {
+      return l10n.swapBindPeriodMonthly;
+    }
+    return l10n.swapBindFixedPeriodDays('$periodValue');
   }
 
   Widget _buildSubmitButton(BuildContext context) {
@@ -971,14 +998,7 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
     final state = ref.read(swapBindProvider);
 
     if (state.selectedCar == null || state.selectedBatteries.isEmpty) {
-      final isZh = Localizations.localeOf(context).languageCode
-          .toLowerCase()
-          .startsWith('zh');
-      showToast(
-        isZh
-            ? '请先选择车辆和电池'
-            : 'Please select vehicle and battery first',
-      );
+      showToast(context.l10n.swapBindVehicleBatteryRequired);
       return;
     }
 
@@ -1008,15 +1028,14 @@ class _SwapBindPageState extends ConsumerState<SwapBindPage> {
     final pack = ref.read(swapBindProvider).selectedPack;
     if (pack == null) return;
 
-    final result = await SwapPaymentSheet.show(
+    final result = await PaymentSheet.showForSwap(
       context,
       pack.packageAmount ?? 0,
+      initialPaySource: ref.read(swapBindProvider).paySource,
     );
     if (result == null || !mounted) return;
 
-    // 根据支付方式设置 paySource：Cash=1, Online=2
-    final paySource = result['paymentMethod'] == 'Cash' ? 1 : 2;
-    notifier.updatePaySource(paySource);
+    notifier.updatePaySource(result.paySource);
 
     // 提交
     final l10n = context.l10n;
@@ -1121,9 +1140,9 @@ class _SuccessPage extends StatelessWidget {
                         color: Color(0xFF999999),
                       ),
                     ),
-                    const TextSpan(
-                      text: ' 30 minutes',
-                      style: TextStyle(
+                    TextSpan(
+                      text: l10n.swapBindSuccessTimeout,
+                      style: const TextStyle(
                         fontSize: 14,
                         color: Color(0xFFFF9800),
                         fontWeight: FontWeight.w500,

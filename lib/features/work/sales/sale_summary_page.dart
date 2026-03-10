@@ -901,12 +901,7 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
   }
 
   String _formatAmount(double amount) {
-    if (amount >= 1000000) {
-      return '${(amount / 1000000).toStringAsFixed(1)}M';
-    } else if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(1)}K';
-    }
-    return amount.toStringAsFixed(0);
+    return '\$${amount.toStringAsFixed(2)}';
   }
 
   List<String> _splitAttachmentUrls(String? raw) {

@@ -129,6 +129,7 @@ class _SwapBatterySheetState extends State<SwapBatterySheet> {
   }
 
   Widget _buildBatteryItem(BatteryVo battery, bool isSelected) {
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -176,7 +177,7 @@ class _SwapBatterySheetState extends State<SwapBatterySheet> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'SN: ${battery.sn ?? '-'}',
+                    '${l10n.orderLabelDeviceSn}: ${battery.sn ?? '-'}',
                     style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xFF999999),
@@ -187,15 +188,15 @@ class _SwapBatterySheetState extends State<SwapBatterySheet> {
                     Text.rich(
                       TextSpan(
                         children: [
-                          const TextSpan(
-                            text: 'Remaining Rental days: ',
-                            style: TextStyle(
+                          TextSpan(
+                            text: '${l10n.swapBindRemainingDays}: ',
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF999999),
                             ),
                           ),
                           TextSpan(
-                            text: '${battery.rentDay} days',
+                            text: '${battery.rentDay}${l10n.orderUnitDays}',
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.primaryColor,

@@ -19,6 +19,12 @@ class PaymentResult {
   });
 }
 
+class SwapPaymentResult {
+  final int paySource;
+
+  const SwapPaymentResult({required this.paySource});
+}
+
 class PaymentSheet extends ConsumerStatefulWidget {
   const PaymentSheet({
     super.key,
@@ -49,8 +55,94 @@ class PaymentSheet extends ConsumerStatefulWidget {
     );
   }
 
+  static Future<SwapPaymentResult?> showForSwap(
+    BuildContext context,
+    double totalAmount, {
+    int initialPaySource = 2,
+  }) {
+    return showModalBottomSheet<SwapPaymentResult>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _SwapPaymentSheet(
+        totalAmount: totalAmount,
+        initialPaySource: initialPaySource,
+      ),
+    );
+  }
+
   @override
   ConsumerState<PaymentSheet> createState() => _PaymentSheetState();
+}
+
+class _SwapPaymentSheet extends StatefulWidget {
+  const _SwapPaymentSheet({
+    required this.totalAmount,
+    required this.initialPaySource,
+  });
+
+  final double totalAmount;
+  final int initialPaySource;
+
+  @override
+  State<_SwapPaymentSheet> createState() => _SwapPaymentSheetState();
+}
+
+class _SwapPaymentSheetState extends State<_SwapPaymentSheet> {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return BasePaymentSheet(
+      title: l10n.swapBindSelectPayment,
+      paymentMethodsTitle: l10n.swapBindPaymentMethods,
+      payCashText: l10n.swapBindPayCash,
+      payOnlineText: l10n.swapBindPayOnline,
+      paymentPeriodTitle: l10n.swapBindPaymentPeriod,
+      payFullText: l10n.orderStatusFullPayment,
+      confirmText: l10n.confirm,
+      availablePaySources: const {1, 2},
+      initialPaySource: widget.initialPaySource,
+      initialPayType: 1,
+      availablePayTypesBySource: (_) => const {1},
+      amountSectionBuilder: (context, _, __) {
+        return _buildSwapAmountCard(l10n);
+      },
+      onConfirm: (context, selection) {
+        Navigator.of(context).pop(
+          SwapPaymentResult(paySource: selection.paySource),
+        );
+      },
+    );
+  }
+
+  Widget _buildSwapAmountCard(dynamic l10n) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8F8F8),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Text(
+              l10n.swapBindTotal,
+              style: const TextStyle(fontSize: 14, color: Color(0xFF666666)),
+            ),
+            const Spacer(),
+            Text(
+              '\$ ${widget.totalAmount.toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFFF9800),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 class _PaymentSheetState extends ConsumerState<PaymentSheet> {

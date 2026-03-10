@@ -30,6 +30,7 @@ class _OfflineUserRegisterPageState
   final _birthdayController = TextEditingController();
   final _emailController = TextEditingController();
   final _referrerController = TextEditingController();
+  String? _birthdayValue;
 
   bool _obscurePassword = true;
 
@@ -625,7 +626,7 @@ class _OfflineUserRegisterPageState
     final firstName = _firstNameController.text.trim();
     final lastName = _lastNameController.text.trim();
     final username = _usernameController.text.trim();
-    final birthday = _birthdayController.text.trim();
+    final birthday = _resolveBirthdaySubmitValue();
     final email = _emailController.text.trim();
     final referId = _referrerController.text.trim();
 
@@ -665,7 +666,7 @@ class _OfflineUserRegisterPageState
       firstName: firstName,
       lastName: lastName,
       username: username,
-      birthday: birthday.isEmpty ? null : birthday,
+      birthday: birthday,
       email: email.isEmpty ? null : email,
       referId: referId.isEmpty ? null : referId,
     );
@@ -680,7 +681,7 @@ class _OfflineUserRegisterPageState
   Future<void> _pickBirthday(BuildContext context) async {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
-    final parsed = DateTime.tryParse(_birthdayController.text.trim());
+    final parsed = _tryParseBirthday(_birthdayValue);
     final initial = (parsed != null && !parsed.isAfter(today))
         ? DateTime(parsed.year, parsed.month, parsed.day)
         : today;
@@ -689,14 +690,34 @@ class _OfflineUserRegisterPageState
       initialDate: initial,
       firstDate: DateTime(now.year - 100),
       lastDate: today,
+      locale: const Locale(DateFormatUtils.defaultLocale),
     );
     if (picked == null || !mounted) return;
     setState(() {
-      _birthdayController.text = DateFormatUtils.format(
+      _birthdayValue = DateFormatUtils.format(
         picked,
         pattern: 'yyyy-MM-dd',
       );
+      _birthdayController.text = DateFormatUtils.format(
+        picked,
+        pattern: DateFormatUtils.datePattern,
+      );
     });
+  }
+
+  String? _resolveBirthdaySubmitValue() {
+    if (_birthdayValue != null && _birthdayValue!.trim().isNotEmpty) {
+      return _birthdayValue;
+    }
+    final parsed = _tryParseBirthday(_birthdayController.text.trim());
+    if (parsed == null) return null;
+    return DateFormatUtils.format(parsed, pattern: 'yyyy-MM-dd');
+  }
+
+  DateTime? _tryParseBirthday(String? value) {
+    final raw = (value ?? '').trim();
+    if (raw.isEmpty) return null;
+    return DateFormatUtils.parse(raw);
   }
 
   Future<void> _scanReferrer() async {

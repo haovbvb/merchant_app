@@ -150,28 +150,36 @@ class _SwapPackageSheetState extends State<SwapPackageSheet> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  pack.infoName ?? '-',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.black06Text,
+                Expanded(
+                  child: Text(
+                    pack.infoName ?? '-',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.black06Text,
+                    ),
                   ),
                 ),
-                if (isSelected)
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: AppColors.primaryColor,
-                    ),
-                    child: const Icon(
-                      Icons.check,
-                      size: 16,
-                      color: Colors.white,
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isSelected ? AppColors.primaryColor : Colors.white,
+                    border: Border.all(
+                      color: isSelected
+                          ? AppColors.primaryColor
+                          : const Color(0xFFCCCCCC),
                     ),
                   ),
+                  child: isSelected
+                      ? const Icon(
+                          Icons.check,
+                          size: 14,
+                          color: Colors.white,
+                        )
+                      : null,
+                ),
               ],
             ),
             const SizedBox(height: 4),
@@ -203,7 +211,7 @@ class _SwapPackageSheetState extends State<SwapPackageSheet> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${pack.batteryType ?? '-'} · ${pack.batteryNum ?? 0} pac',
+                        '${pack.batteryType ?? '-'} · ${pack.batteryNum ?? 0} ${l10n.swapBindPackUnit}',
                         style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.black06Text,
@@ -253,7 +261,7 @@ class _SwapPackageSheetState extends State<SwapPackageSheet> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Fixed period · ${pack.duration ?? 30}days',
+                        _buildPeriodText(pack, l10n),
                         style: const TextStyle(
                           fontSize: 13,
                           color: AppColors.black06Text,
@@ -290,5 +298,14 @@ class _SwapPackageSheetState extends State<SwapPackageSheet> {
         ),
       ),
     );
+  }
+
+  String _buildPeriodText(Pack pack, dynamic l10n) {
+    final periodValue = pack.duration ?? 30;
+    final infoType = pack.infoType;
+    if (infoType == 0 || (infoType == null && periodValue == 30)) {
+      return l10n.swapBindPeriodMonthly;
+    }
+    return l10n.swapBindFixedPeriodDays('$periodValue');
   }
 }

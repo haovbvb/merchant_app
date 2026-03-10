@@ -1181,8 +1181,12 @@ class _OrderRecordsTab extends ConsumerStatefulWidget {
 
 class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
   int _selectedIndex = 0;
-  final RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  final RefreshController _saleRefreshController =
+    RefreshController(initialRefresh: false);
+  final RefreshController _rentRefreshController =
+    RefreshController(initialRefresh: false);
+  final RefreshController _swapRefreshController =
+    RefreshController(initialRefresh: false);
 
   @override
   void initState() {
@@ -1201,8 +1205,21 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
 
   @override
   void dispose() {
-    _refreshController.dispose();
+    _saleRefreshController.dispose();
+    _rentRefreshController.dispose();
+    _swapRefreshController.dispose();
     super.dispose();
+  }
+
+  RefreshController get _currentRefreshController {
+    switch (_selectedIndex) {
+      case 1:
+        return _rentRefreshController;
+      case 2:
+        return _swapRefreshController;
+      default:
+        return _saleRefreshController;
+    }
   }
 
   int get _currentOrderType {
@@ -1213,6 +1230,17 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
         return 3;
       default:
         return 1;
+    }
+  }
+
+  void _syncControllerNoDataState({
+    required RefreshController controller,
+    required bool hasMore,
+  }) {
+    if (hasMore) {
+      controller.resetNoData();
+    } else {
+      controller.loadNoData();
     }
   }
 
@@ -1260,7 +1288,7 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
                   child: GestureDetector(
                     onTap: () async {
                       setState(() => _selectedIndex = index);
-                      _refreshController.resetNoData();
+                      _currentRefreshController.resetNoData();
                       final nextType = _currentOrderType;
                       final hasData = nextType == 1
                           ? state.saleOrders.isNotEmpty
@@ -1270,6 +1298,17 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
                       if (!hasData) {
                         await notifier.loadOrders(orderType: nextType, page: 1);
                       }
+                      if (!mounted) return;
+                      final refreshed = ref.read(userDetailProvider);
+                      final refreshedHasMore = nextType == 1
+                          ? refreshed.saleOrdersHasMore
+                          : nextType == 2
+                              ? refreshed.rentOrdersHasMore
+                              : refreshed.swapOrdersHasMore;
+                      _syncControllerNoDataState(
+                        controller: _currentRefreshController,
+                        hasMore: refreshedHasMore,
+                      );
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1300,25 +1339,26 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
         ),
         Expanded(
           child: SmartRefresher(
-            controller: _refreshController,
+            controller: _currentRefreshController,
             enablePullDown: true,
             enablePullUp: hasMore,
             onRefresh: () async {
+              final controller = _currentRefreshController;
               await notifier.loadOrders(orderType: _currentOrderType, page: 1);
-              _refreshController.refreshCompleted();
+              controller.refreshCompleted();
               final refreshed = ref.read(userDetailProvider);
               final refreshedHasMore = _currentOrderType == 1
                   ? refreshed.saleOrdersHasMore
                   : _currentOrderType == 2
                       ? refreshed.rentOrdersHasMore
                       : refreshed.swapOrdersHasMore;
-              if (refreshedHasMore) {
-                _refreshController.resetNoData();
-              } else {
-                _refreshController.loadNoData();
-              }
+              _syncControllerNoDataState(
+                controller: controller,
+                hasMore: refreshedHasMore,
+              );
             },
             onLoading: () async {
+              final controller = _currentRefreshController;
               await notifier.loadOrders(
                 orderType: _currentOrderType,
                 page: page + 1,
@@ -1330,9 +1370,9 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
                       ? refreshed.rentOrdersHasMore
                       : refreshed.swapOrdersHasMore;
               if (refreshedHasMore) {
-                _refreshController.loadComplete();
+                controller.loadComplete();
               } else {
-                _refreshController.loadNoData();
+                controller.loadNoData();
               }
             },
             child: _OrderList(
@@ -2350,14 +2390,12 @@ class _PickedXFileThumb extends StatelessWidget {
         if (snapshot.hasData) {
           return Image.memory(
             snapshot.data!,
-            width: 64,
-            height: 64,
+            width: double.infinity,
+            height: double.infinity,
             fit: BoxFit.cover,
           );
         }
         return Container(
-          width: 64,
-          height: 64,
           color: const Color(0xFFF5F5F5),
           child: const Icon(Icons.image_outlined, color: Color(0xFF999999)),
         );
@@ -2469,10 +2507,27 @@ class _PaymentRecordCard extends StatelessWidget {
           ),
           if (hasVoucher) ...[
             const SizedBox(height: 12),
-            _VoucherButton(
-              iconPath: 'assets/android/mipmap-xxhdpi/icon_view_voucher.png',
-              label: l10n.orderVoucherView,
-              onPressed: () => _showVoucherDialog(context, l10n, attachment),
+            Align(
+              alignment: Alignment.centerRight,
+              child: GestureDetector(
+                onTap: () => _showVoucherDialog(context, l10n, attachment),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: const Color(0xFFD0D4DA)),
+                  ),
+                  child: Text(
+                    l10n.orderVoucherView,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF333333),
+                    ),
+                  ),
+                ),
+              ),
             ),
           ],
         ],
@@ -2897,138 +2952,245 @@ Future<List<XFile>?> _showUploadVoucherDialog(
 ) async {
   final picker = ImagePicker();
   final selected = <XFile>[];
-  var showRequiredError = false;
 
-  return showDialog<List<XFile>>(
+  return showModalBottomSheet<List<XFile>>(
     context: context,
-    barrierDismissible: false,
-    builder: (dialogContext) {
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent,
+    builder: (sheetContext) {
       return StatefulBuilder(
         builder: (context, setState) {
-          Future<void> addImages() async {
-            if (selected.length >= 5) {
-              _showSnack(dialogContext, l10n.orderVoucherMaxCount);
+          Future<void> pickFromSource(ImageSource source) async {
+            final remain = 5 - selected.length;
+            if (remain <= 0) {
+              _showSnack(sheetContext, l10n.orderVoucherMaxCount);
               return;
             }
-            final picked = await _pickVoucherImages(context, l10n, picker);
-            if (picked.isEmpty) return;
-
-            final remain = 5 - selected.length;
-            if (picked.length > remain) {
-              _showSnack(dialogContext, l10n.orderVoucherMaxCount);
-            }
-            selected.addAll(picked.take(remain));
-            setState(() {
-              if (selected.isNotEmpty) {
-                showRequiredError = false;
+            if (source == ImageSource.camera) {
+              final file = await picker.pickImage(source: ImageSource.camera);
+              if (file != null) {
+                selected.add(file);
+                setState(() {});
               }
-            });
+            } else {
+              final files = await picker.pickMultiImage();
+              if (files.isNotEmpty) {
+                if (files.length > remain) {
+                  _showSnack(sheetContext, l10n.orderVoucherMaxCount);
+                }
+                selected.addAll(files.take(remain));
+                setState(() {});
+              }
+            }
           }
 
-          return AlertDialog(
-            title: Text(l10n.orderVoucherUpload),
-            content: SizedBox(
-              width: 320,
+          Future<void> addImages() async {
+            if (selected.length >= 5) {
+              _showSnack(sheetContext, l10n.orderVoucherMaxCount);
+              return;
+            }
+            final source = await showModalBottomSheet<ImageSource>(
+              context: context,
+              builder: (_) => SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.camera_alt_outlined),
+                      title: Text(l10n.orderVoucherPickCamera),
+                      onTap: () =>
+                          Navigator.of(context).pop(ImageSource.camera),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.photo_outlined),
+                      title: Text(l10n.orderVoucherPickGallery),
+                      onTap: () =>
+                          Navigator.of(context).pop(ImageSource.gallery),
+                    ),
+                    ListTile(
+                      title: Text(l10n.orderVoucherPickCancel),
+                      onTap: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+            );
+            if (source != null) {
+              await pickFromSource(source);
+            }
+          }
+
+          final thumbSize =
+              (MediaQuery.of(context).size.width - 24 * 2 - 12 * 2) / 3;
+
+          return Container(
+            decoration: const BoxDecoration(
+              color: Color(0xFFF3F4F5),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+            ),
+            child: SafeArea(
+              top: false,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '${l10n.orderVoucherUploadHint} (0/5)'.replaceFirst('0', selected.length.toString()),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.black06Text,
+                  // Title
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: Text(
+                      l10n.orderVoucherUpload,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF333333),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      ...selected.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final file = entry.value;
-                        return Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: _PickedXFileThumb(file: file),
-                            ),
-                            Positioned(
-                              top: -6,
-                              right: -6,
-                              child: GestureDetector(
-                                onTap: () {
-                                  selected.removeAt(index);
-                                  setState(() {});
-                                },
-                                child: Container(
-                                  width: 18,
-                                  height: 18,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.black54,
-                                    shape: BoxShape.circle,
+                  // Image grid
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFEEF0F3),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          ...selected.asMap().entries.map((entry) {
+                            final index = entry.key;
+                            final file = entry.value;
+                            return SizedBox(
+                              width: thumbSize,
+                              height: thumbSize,
+                              child: Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: SizedBox(
+                                      width: thumbSize,
+                                      height: thumbSize,
+                                      child: _PickedXFileThumb(file: file),
+                                    ),
                                   ),
-                                  child: const Icon(
-                                    Icons.close,
-                                    size: 12,
-                                    color: Colors.white,
+                                  Positioned(
+                                    top: -6,
+                                    right: -6,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        selected.removeAt(index);
+                                        setState(() {});
+                                      },
+                                      child: Container(
+                                        width: 20,
+                                        height: 20,
+                                        decoration: const BoxDecoration(
+                                          color: Colors.black54,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.close,
+                                          size: 12,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
                                   ),
+                                ],
+                              ),
+                            );
+                          }),
+                          if (selected.length < 5)
+                            GestureDetector(
+                              onTap: addImages,
+                              child: Container(
+                                width: thumbSize,
+                                height: thumbSize,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFE0E2E6),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.camera_alt,
+                                  size: 32,
+                                  color: Color(0xFF999999),
                                 ),
                               ),
                             ),
-                          ],
-                        );
-                      }),
-                      if (selected.length < 5)
-                        GestureDetector(
-                          onTap: addImages,
-                          child: Container(
-                            width: 64,
-                            height: 64,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF5F6F8),
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: const Color(0xFFD9D9D9)),
-                            ),
-                            child: const Icon(
-                              Icons.add,
-                              color: Color(0xFF999999),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  // Buttons
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 48,
+                            child: OutlinedButton(
+                              onPressed: () =>
+                                  Navigator.of(sheetContext).pop(),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(
+                                  color: Color(0xFFD9D9D9),
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              ),
+                              child: Text(
+                                l10n.orderVoucherPickCancel,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF333333),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                    ],
-                  ),
-                  if (showRequiredError) ...[
-                    const SizedBox(height: 10),
-                    Text(
-                      l10n.orderVoucherSelectEmpty,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFFFA4332),
-                      ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: SizedBox(
+                            height: 48,
+                            child: ElevatedButton(
+                              onPressed: selected.isEmpty
+                                  ? null
+                                  : () => Navigator.of(sheetContext)
+                                      .pop(List<XFile>.from(selected)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primaryColor,
+                                disabledBackgroundColor:
+                                    AppColors.primaryColor.withOpacity(0.5),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: Text(
+                                l10n.orderVoucherConfirm,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(dialogContext).pop(),
-                child: Text(l10n.orderVoucherPickCancel),
-              ),
-              TextButton(
-                onPressed: () {
-                  if (selected.isEmpty) {
-                    setState(() => showRequiredError = true);
-                    return;
-                  }
-                  Navigator.of(dialogContext).pop(List<XFile>.from(selected));
-                },
-                child: Text(l10n.orderVoucherUpload),
-              ),
-            ],
           );
         },
       );
@@ -3091,46 +3253,6 @@ void _showUploadProgressDialog(
       ),
     ),
   );
-}
-
-Future<List<XFile>> _pickVoucherImages(
-  BuildContext context,
-  AppLocalizations l10n,
-  ImagePicker picker,
-) async {
-  final source = await showModalBottomSheet(
-    context: context,
-    builder: (_) => SafeArea(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.camera_alt_outlined),
-            title: Text(l10n.orderVoucherPickCamera),
-            onTap: () => Navigator.of(context).pop(ImageSource.camera),
-          ),
-          ListTile(
-            leading: const Icon(Icons.photo_outlined),
-            title: Text(l10n.orderVoucherPickGallery),
-            onTap: () => Navigator.of(context).pop(ImageSource.gallery),
-          ),
-          ListTile(
-            title: Text(l10n.orderVoucherPickCancel),
-            onTap: () => Navigator.of(context).pop(),
-          ),
-        ],
-      ),
-    ),
-  );
-
-  if (source == ImageSource.camera) {
-    final file = await picker.pickImage(source: ImageSource.camera);
-    return file == null ? [] : [file];
-  }
-  if (source == ImageSource.gallery) {
-    return picker.pickMultiImage();
-  }
-  return [];
 }
 
 void _showVoucherDialog(

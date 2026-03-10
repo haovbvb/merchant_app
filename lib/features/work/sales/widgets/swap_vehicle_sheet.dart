@@ -129,6 +129,7 @@ class _SwapVehicleSheetState extends State<SwapVehicleSheet> {
   }
 
   Widget _buildVehicleItem(CarVo vehicle, bool isSelected) {
+    final l10n = context.l10n;
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -176,7 +177,7 @@ class _SwapVehicleSheetState extends State<SwapVehicleSheet> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'SN: ${vehicle.sn ?? '-'}',
+                    '${l10n.orderLabelDeviceSn}: ${vehicle.sn ?? '-'}',
                     style: const TextStyle(
                       fontSize: 12,
                       color: Color(0xFF999999),
@@ -187,15 +188,15 @@ class _SwapVehicleSheetState extends State<SwapVehicleSheet> {
                     Text.rich(
                       TextSpan(
                         children: [
-                          const TextSpan(
-                            text: 'Remaining Rental days: ',
-                            style: TextStyle(
+                          TextSpan(
+                            text: '${l10n.swapBindRemainingDays}: ',
+                            style: const TextStyle(
                               fontSize: 12,
                               color: Color(0xFF999999),
                             ),
                           ),
                           TextSpan(
-                            text: '${vehicle.rentDay} days',
+                            text: '${vehicle.rentDay}${l10n.orderUnitDays}',
                             style: const TextStyle(
                               fontSize: 12,
                               color: AppColors.primaryColor,

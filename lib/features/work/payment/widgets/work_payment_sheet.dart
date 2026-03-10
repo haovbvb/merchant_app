@@ -31,6 +31,7 @@ Future<bool?> showWorkPaymentSheet({
   required Future<bool> Function(WorkPaymentSubmit submit) onConfirmPayment,
   int initialPayType = 2,
   int maxAttachments = 5,
+  bool showUploadCount = false,
   bool closeOnFailure = false,
   bool requireAttachmentsForCash = true,
   String? successMessage,
@@ -196,7 +197,9 @@ Future<bool?> showWorkPaymentSheet({
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              uploadVoucherText,
+                              showUploadCount
+                                  ? '$uploadVoucherText (${attachmentUrls.length}/$maxAttachments)'
+                                  : uploadVoucherText,
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: Color(0x99000000),

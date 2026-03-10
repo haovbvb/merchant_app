@@ -702,6 +702,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderVoucherPickCancel => 'Cancel';
 
   @override
+  String get orderVoucherConfirm => 'Confirm';
+
+  @override
   String get maintenanceBookTitle => 'Schedule Maintenance';
 
   @override
@@ -2229,13 +2232,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get roadsideCostsTitle => 'Maintenance Costs';
 
   @override
-  String get roadsideTotalLabel => 'Total';
+  String get roadsideTotalLabel => 'Total (\$)';
 
   @override
   String get roadsidePaymentMethodLabel => 'Payment Methods';
 
   @override
   String get roadsideUploadVoucherLabel => 'Upload Voucher';
+
+  @override
+  String get roadsideSelectMapApp => 'Select Map App';
+
+  @override
+  String get roadsideAppleMap => 'Apple Maps';
+
+  @override
+  String get roadsideGoogleMap => 'Google Maps';
 
   @override
   String get roadsideNotPayingYet => 'Not Paying Yet';
@@ -2855,6 +2867,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get swapBindRemainingDays => 'Remaining Rental days';
 
   @override
+  String get swapBindPackUnit => 'pcs';
+
+  @override
+  String swapBindFixedPeriodDays(Object days) {
+    return 'Fixed period · $days days';
+  }
+
+  @override
+  String get swapBindPeriodMonthly => 'Monthly';
+
+  @override
+  String get swapBindVehicleBatteryRequired => 'Please select vehicle and battery first';
+
+  @override
+  String get swapBindTotal => 'Total';
+
+  @override
   String get swapBindSuccessTitle => 'Submit successfully';
 
   @override
@@ -2862,6 +2891,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get swapBindSuccessCashHint => 'Please enter the order record and submit the contract voucher within';
+
+  @override
+  String get swapBindSuccessTimeout => '24 hours';
 
   @override
   String get swapBindDocumentNumber => 'Document Number';
@@ -3194,7 +3226,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saleSummaryPayWay => 'Pay Way';
 
   @override
-  String get saleSummaryTotalSalesAmount => 'Total sales amount(\$)';
+  String get saleSummaryTotalSalesAmount => 'Total sales amount';
 
   @override
   String get saleSummaryTransactionOrder => 'Transaction order';

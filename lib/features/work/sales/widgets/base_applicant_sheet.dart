@@ -8,6 +8,7 @@ import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/core/widgets/image_source_action_sheet.dart';
 import 'package:merchant_app/data/models/purchasing_user.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 
@@ -645,31 +646,7 @@ class _BaseApplicantSheetState extends State<BaseApplicantSheet> {
   }
 
   Future<void> _pickImageWithSourceChooser(bool isCardImage) async {
-    final l10n = context.l10n;
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      backgroundColor: Colors.white,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: Text(l10n.imageSourceCamera, textAlign: TextAlign.center),
-              onTap: () => Navigator.of(context).pop(ImageSource.camera),
-            ),
-            const Divider(height: 1),
-            ListTile(
-              title: Text(
-                l10n.imageSourceGallery,
-                textAlign: TextAlign.center,
-              ),
-              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
+    final source = await ImageSourceActionSheet.show(context);
     if (!mounted || source == null) return;
     await _pickImage(isCardImage, source: source);
   }

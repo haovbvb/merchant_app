@@ -295,6 +295,7 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
       ApiPath.userQueryOrderList,
       queryParameters: {
         'cardNum': num,
+        'orderType': orderType,
         'pageNum': page,
         'pageSize': _orderPageSize,
       },

@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/app/ui.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/core/widgets/confirm_dialog.dart';
+import 'package:merchant_app/core/widgets/image_source_action_sheet.dart';
 import 'package:merchant_app/features/debug/network/network_debug_store.dart';
 import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/login/providers/auth_controller.dart';
@@ -242,109 +243,8 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
   }
 
   Future<void> _showAvatarSheet(BuildContext context) async {
-    final l10n = context.l10n;
     if (ref.read(profileProvider).updating) return;
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Title and options card
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Title
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        child: Text(
-                          l10n.profileAvatar,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF999999),
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ),
-                      const Divider(height: 1, color: Color(0xFFE5E5E5)),
-                      // Photograph option
-                      InkWell(
-                        onTap: () => Navigator.of(ctx).pop(ImageSource.camera),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: Text(
-                            l10n.orderVoucherPickCamera,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFF333333),
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                      ),
-                      const Divider(height: 1, color: Color(0xFFE5E5E5)),
-                      // Select from album option
-                      InkWell(
-                        onTap: () => Navigator.of(ctx).pop(ImageSource.gallery),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          child: Text(
-                            l10n.orderVoucherPickGallery,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFF333333),
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                // Cancel button
-                Container(
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: InkWell(
-                    onTap: () => Navigator.of(ctx).pop(),
-                    borderRadius: BorderRadius.circular(12),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      child: Text(
-                        l10n.cancel,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: Color(0xFF333333),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    final source = await ImageSourceActionSheet.show(context);
     if (source == null) return;
     final image = await _imagePicker.pickImage(
       source: source,

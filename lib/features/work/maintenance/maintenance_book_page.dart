@@ -6,6 +6,7 @@ import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/core/widgets/image_source_action_sheet.dart';
 import 'package:merchant_app/data/models/maintenance.dart';
 import 'package:merchant_app/features/work/device/device_search_page.dart';
 import 'package:merchant_app/features/work/maintenance/maintenance_controller.dart';
@@ -40,7 +41,14 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
     if (_snFocusNode.hasFocus) return;
     final text = _snController.text.trim();
     if (text.isEmpty) return;
-    ref.read(maintenanceBookProvider.notifier).fetchAppointment();
+    _fetchAppointmentAndResetInput();
+  }
+
+  Future<void> _fetchAppointmentAndResetInput() async {
+    final notifier = ref.read(maintenanceBookProvider.notifier);
+    await notifier.fetchAppointment();
+    if (!mounted) return;
+    _noteController.clear();
   }
 
   @override
@@ -241,7 +249,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
             label,
             style: const TextStyle(
               fontSize: 14,
-              color: Colors.grey,
+              color: Color(0xE6000000),
             ),
           ),
           const SizedBox(height: 8),
@@ -268,7 +276,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
                   ),
                   onChanged: onChanged,
                   onSubmitted: (_) {
-                    ref.read(maintenanceBookProvider.notifier).fetchAppointment();
+                    _fetchAppointmentAndResetInput();
                   },
                 ),
               ),
@@ -291,7 +299,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) => const QrScanPage(
-          allowManualInput: true,
+          allowManualInput: false,
           parseDeviceSn: true,
           // deviceType: 2,
         ),
@@ -301,9 +309,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
     _snController.text = result;
     final notifier = ref.read(maintenanceBookProvider.notifier);
     notifier.updateSn(result);
-    _noteController.clear();
-    notifier.updateNote('');
-    await notifier.fetchAppointment();
+    await _fetchAppointmentAndResetInput();
   }
 
   Future<void> _callPhone(String phone) async {
@@ -321,6 +327,8 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
         builder: (_) => DeviceSearchPage(
           readOnly: true,
           initialKeyword: sn,
+          deviceType: 2,
+          initialTabIndex: 2,
         ),
       ),
     );
@@ -344,6 +352,8 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
       uploadVoucherText: l10n.maintenanceUploadVoucher,
       confirmButtonText: l10n.maintenanceSubmit,
       initialPayType: 2,
+      maxAttachments: 5,
+      showUploadCount: true,
       requireAttachmentsForCash: false,
       onUploadImage: notifier.uploadVoucher,
       onConfirmPayment: (submit) async {
@@ -411,8 +421,11 @@ class _VehicleInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userName = '${appointment.firstName ?? ''} ${appointment.lastName ?? ''}'.trim();
-    final displayName = userName.isNotEmpty ? userName : (appointment.username ?? '-');
+    final username = (appointment.username ?? '').trim();
+    final fullName = '${appointment.firstName ?? ''} ${appointment.lastName ?? ''}'.trim();
+    final displayName = username.isNotEmpty
+        ? username
+        : (fullName.isNotEmpty ? fullName : '-');
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -987,31 +1000,7 @@ class _MaintenanceCostSheetState extends ConsumerState<_MaintenanceCostSheet> {
 
   Future<void> _pickImage() async {
     final notifier = ref.read(maintenanceBookProvider.notifier);
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      builder: (ctx) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt),
-              title: Text(context.l10n.orderVoucherPickCamera),
-              onTap: () => Navigator.pop(ctx, ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: Text(context.l10n.orderVoucherPickGallery),
-              onTap: () => Navigator.pop(ctx, ImageSource.gallery),
-            ),
-            ListTile(
-              leading: const Icon(Icons.close),
-              title: Text(context.l10n.orderVoucherPickCancel),
-              onTap: () => Navigator.pop(ctx),
-            ),
-          ],
-        ),
-      ),
-    );
+    final source = await ImageSourceActionSheet.show(context);
     if (source == null) return;
 
     final picked = await _picker.pickImage(source: source, imageQuality: 80);

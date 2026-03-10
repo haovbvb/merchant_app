@@ -421,10 +421,7 @@ class _PaymentSheetState extends ConsumerState<PaymentSheet> {
 
   String _formatRatePercent(double? rawRate) {
     final value = (rawRate ?? 0) * 100;
-    final text = value.toStringAsFixed(2);
-    return text.endsWith('00')
-        ? value.toStringAsFixed(0)
-        : (text.endsWith('0') ? value.toStringAsFixed(1) : text);
+    return value.toStringAsFixed(1);
   }
 
   Future<void> _showPeriodSheet(

@@ -566,11 +566,11 @@ class _ContactCard extends StatelessWidget {
 
   String _formatOccurrenceTime(int? millis) {
     if (millis == null || millis <= 0) return '-';
-    final locale = Intl.getCurrentLocale().toLowerCase();
-    final isZh = locale.startsWith('zh');
     final date = DateTime.fromMillisecondsSinceEpoch(millis);
-    final pattern = isZh ? 'M月dd日, yyyy HH:mm' : 'MMM dd, yyyy HH:mm';
-    return DateFormat(pattern).format(date);
+    return DateFormat(
+      'MMM dd, yyyy HH:mm',
+      DateFormatUtils.defaultLocale,
+    ).format(date);
   }
 }
 

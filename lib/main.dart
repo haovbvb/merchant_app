@@ -39,11 +39,21 @@ class MerchantApp extends ConsumerWidget {
       supportedLocales: AppLocalizations.supportedLocales,
       routerConfig: AppRouter.router,
       builder: (context, child) {
-        return Stack(
-          children: [
-            if (child != null) child,
-            const NetworkDebugFloatingEntry(),
-          ],
+        return GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onTap: () {
+            final currentFocus = FocusScope.of(context);
+            if (!currentFocus.hasPrimaryFocus &&
+                currentFocus.focusedChild != null) {
+              FocusManager.instance.primaryFocus?.unfocus();
+            }
+          },
+          child: Stack(
+            children: [
+              if (child != null) child,
+              const NetworkDebugFloatingEntry(),
+            ],
+          ),
         );
       },
     );

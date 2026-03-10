@@ -10,6 +10,7 @@ import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
+import 'package:merchant_app/core/widgets/image_source_action_sheet.dart';
 import 'package:merchant_app/data/models/bind_device.dart';
 import 'package:merchant_app/data/models/power_change.dart';
 import 'package:merchant_app/data/models/user_detail.dart';
@@ -1255,22 +1256,18 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
     ];
 
     List<OrderItem> current;
-    int page;
     bool hasMore;
     switch (_selectedIndex) {
       case 1:
         current = state.rentOrders;
-        page = state.rentOrdersPage;
         hasMore = state.rentOrdersHasMore;
         break;
       case 2:
         current = state.swapOrders;
-        page = state.swapOrdersPage;
         hasMore = state.swapOrdersHasMore;
         break;
       default:
         current = state.saleOrders;
-        page = state.saleOrdersPage;
         hasMore = state.saleOrdersHasMore;
     }
 
@@ -1344,35 +1341,50 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
             enablePullUp: hasMore,
             onRefresh: () async {
               final controller = _currentRefreshController;
-              await notifier.loadOrders(orderType: _currentOrderType, page: 1);
-              controller.refreshCompleted();
-              final refreshed = ref.read(userDetailProvider);
-              final refreshedHasMore = _currentOrderType == 1
-                  ? refreshed.saleOrdersHasMore
-                  : _currentOrderType == 2
-                      ? refreshed.rentOrdersHasMore
-                      : refreshed.swapOrdersHasMore;
-              _syncControllerNoDataState(
-                controller: controller,
-                hasMore: refreshedHasMore,
-              );
+              final orderType = _currentOrderType;
+              try {
+                await notifier.loadOrders(orderType: orderType, page: 1);
+                controller.refreshCompleted();
+                final refreshed = ref.read(userDetailProvider);
+                final refreshedHasMore = orderType == 1
+                    ? refreshed.saleOrdersHasMore
+                    : orderType == 2
+                        ? refreshed.rentOrdersHasMore
+                        : refreshed.swapOrdersHasMore;
+                _syncControllerNoDataState(
+                  controller: controller,
+                  hasMore: refreshedHasMore,
+                );
+              } catch (_) {
+                controller.refreshFailed();
+              }
             },
             onLoading: () async {
               final controller = _currentRefreshController;
-              await notifier.loadOrders(
-                orderType: _currentOrderType,
-                page: page + 1,
-              );
-              final refreshed = ref.read(userDetailProvider);
-              final refreshedHasMore = _currentOrderType == 1
-                  ? refreshed.saleOrdersHasMore
-                  : _currentOrderType == 2
-                      ? refreshed.rentOrdersHasMore
-                      : refreshed.swapOrdersHasMore;
-              if (refreshedHasMore) {
-                controller.loadComplete();
-              } else {
-                controller.loadNoData();
+              final orderType = _currentOrderType;
+              final currentPage = orderType == 1
+                  ? ref.read(userDetailProvider).saleOrdersPage
+                  : orderType == 2
+                      ? ref.read(userDetailProvider).rentOrdersPage
+                      : ref.read(userDetailProvider).swapOrdersPage;
+              try {
+                await notifier.loadOrders(
+                  orderType: orderType,
+                  page: currentPage + 1,
+                );
+                final refreshed = ref.read(userDetailProvider);
+                final refreshedHasMore = orderType == 1
+                    ? refreshed.saleOrdersHasMore
+                    : orderType == 2
+                        ? refreshed.rentOrdersHasMore
+                        : refreshed.swapOrdersHasMore;
+                if (refreshedHasMore) {
+                  controller.loadComplete();
+                } else {
+                  controller.loadNoData();
+                }
+              } catch (_) {
+                controller.loadFailed();
               }
             },
             child: _OrderList(
@@ -1895,20 +1907,29 @@ class _PaymentRecordsTabState extends ConsumerState<_PaymentRecordsTab> {
       enablePullDown: true,
       enablePullUp: state.paymentsHasMore,
       onRefresh: () async {
-        await notifier.loadPayments(page: 1);
-        _refreshController.refreshCompleted();
-        if (ref.read(userDetailProvider).paymentsHasMore) {
-          _refreshController.resetNoData();
-        } else {
-          _refreshController.loadNoData();
+        try {
+          await notifier.loadPayments(page: 1);
+          _refreshController.refreshCompleted();
+          if (ref.read(userDetailProvider).paymentsHasMore) {
+            _refreshController.resetNoData();
+          } else {
+            _refreshController.loadNoData();
+          }
+        } catch (_) {
+          _refreshController.refreshFailed();
         }
       },
       onLoading: () async {
-        await notifier.loadPayments(page: state.paymentsPage + 1);
-        if (ref.read(userDetailProvider).paymentsHasMore) {
-          _refreshController.loadComplete();
-        } else {
-          _refreshController.loadNoData();
+        try {
+          final currentPage = ref.read(userDetailProvider).paymentsPage;
+          await notifier.loadPayments(page: currentPage + 1);
+          if (ref.read(userDetailProvider).paymentsHasMore) {
+            _refreshController.loadComplete();
+          } else {
+            _refreshController.loadNoData();
+          }
+        } catch (_) {
+          _refreshController.loadFailed();
         }
       },
       child: items.isEmpty && !state.loadingPayments
@@ -1976,20 +1997,29 @@ class _SwapRecordsTabState extends ConsumerState<_SwapRecordsTab> {
       enablePullDown: true,
       enablePullUp: state.swapsHasMore,
       onRefresh: () async {
-        await notifier.loadSwaps(page: 1);
-        _refreshController.refreshCompleted();
-        if (ref.read(userDetailProvider).swapsHasMore) {
-          _refreshController.resetNoData();
-        } else {
-          _refreshController.loadNoData();
+        try {
+          await notifier.loadSwaps(page: 1);
+          _refreshController.refreshCompleted();
+          if (ref.read(userDetailProvider).swapsHasMore) {
+            _refreshController.resetNoData();
+          } else {
+            _refreshController.loadNoData();
+          }
+        } catch (_) {
+          _refreshController.refreshFailed();
         }
       },
       onLoading: () async {
-        await notifier.loadSwaps(page: state.swapsPage + 1);
-        if (ref.read(userDetailProvider).swapsHasMore) {
-          _refreshController.loadComplete();
-        } else {
-          _refreshController.loadNoData();
+        try {
+          final currentPage = ref.read(userDetailProvider).swapsPage;
+          await notifier.loadSwaps(page: currentPage + 1);
+          if (ref.read(userDetailProvider).swapsHasMore) {
+            _refreshController.loadComplete();
+          } else {
+            _refreshController.loadNoData();
+          }
+        } catch (_) {
+          _refreshController.loadFailed();
         }
       },
       child: items.isEmpty && !state.loadingSwaps
@@ -2989,32 +3019,7 @@ Future<List<XFile>?> _showUploadVoucherDialog(
               _showSnack(sheetContext, l10n.orderVoucherMaxCount);
               return;
             }
-            final source = await showModalBottomSheet<ImageSource>(
-              context: context,
-              builder: (_) => SafeArea(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.camera_alt_outlined),
-                      title: Text(l10n.orderVoucherPickCamera),
-                      onTap: () =>
-                          Navigator.of(context).pop(ImageSource.camera),
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.photo_outlined),
-                      title: Text(l10n.orderVoucherPickGallery),
-                      onTap: () =>
-                          Navigator.of(context).pop(ImageSource.gallery),
-                    ),
-                    ListTile(
-                      title: Text(l10n.orderVoucherPickCancel),
-                      onTap: () => Navigator.of(context).pop(),
-                    ),
-                  ],
-                ),
-              ),
-            );
+            final source = await ImageSourceActionSheet.show(context);
             if (source != null) {
               await pickFromSource(source);
             }

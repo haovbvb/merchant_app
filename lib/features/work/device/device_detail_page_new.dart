@@ -28,12 +28,14 @@ class DeviceDetailPageNew extends ConsumerStatefulWidget {
     this.readOnly = false,
     this.popToSearchOnClear = false,
     this.expectedDeviceType,
+    this.initialTabIndex,
   });
 
   final String? initialSn;
   final bool readOnly;
   final bool popToSearchOnClear;
   final int? expectedDeviceType;
+  final int? initialTabIndex;
 
   @override
   ConsumerState<DeviceDetailPageNew> createState() =>
@@ -45,6 +47,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   final TextEditingController _controller = TextEditingController();
   TabController? _tabController;
   bool _autoSearched = false;
+  bool _appliedInitialTab = false;
   String _portFilter = 'all';
   int _currentDeviceType = 0;
   bool _disposed = false;
@@ -88,6 +91,17 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     }
   }
 
+  void _applyInitialTabIfNeeded() {
+    if (_appliedInitialTab) return;
+    final controller = _tabController;
+    final requested = widget.initialTabIndex;
+    if (controller == null || requested == null) return;
+    _appliedInitialTab = true;
+    if (requested >= 0 && requested < controller.length) {
+      controller.index = requested;
+    }
+  }
+
   @override
   void dispose() {
     _disposed = true;
@@ -116,6 +130,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         deviceType,
         cabinetHasWarehouse: cabinetHasWarehouse,
       );
+      _applyInitialTabIfNeeded();
     }
 
     return PopScope(

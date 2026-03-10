@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/widgets/image_source_action_sheet.dart';
 import 'package:merchant_app/features/work/payment/widgets/work_payment_sheet.dart';
 import 'package:merchant_app/features/work/roadside/roadside_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
@@ -289,30 +290,8 @@ class _RoadSideDealPageState extends ConsumerState<RoadSideDealPage> {
     BuildContext context,
     RoadSideDealNotifier notifier,
   ) async {
-    final l10n = context.l10n;
     final picker = ImagePicker();
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      builder: (_) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: Text(l10n.orderVoucherPickCamera),
-                onTap: () => Navigator.of(context).pop(ImageSource.camera),
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: Text(l10n.orderVoucherPickGallery),
-                onTap: () => Navigator.of(context).pop(ImageSource.gallery),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+    final source = await ImageSourceActionSheet.show(context);
     if (source == null) return;
     final picked = await picker.pickImage(source: source);
     if (picked == null) return;

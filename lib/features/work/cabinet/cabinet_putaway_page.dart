@@ -8,6 +8,7 @@ import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/core/widgets/image_source_action_sheet.dart';
 import 'package:merchant_app/core/widgets/photo_gallery_viewer.dart';
 import 'package:merchant_app/data/models/new_cabinet_bean.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_putaway_controller.dart';
@@ -523,27 +524,7 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
       showToast(l10n.cabinetPutawayImageLimit);
       return;
     }
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      backgroundColor: Colors.white,
-      builder: (_) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              title: Text(l10n.imageSourceCamera, textAlign: TextAlign.center),
-              onTap: () => Navigator.of(context).pop(ImageSource.camera),
-            ),
-            const Divider(height: 1),
-            ListTile(
-              title: Text(l10n.imageSourceGallery, textAlign: TextAlign.center),
-              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
-            ),
-            const SizedBox(height: 8),
-          ],
-        ),
-      ),
-    );
+    final source = await ImageSourceActionSheet.show(context);
     if (!mounted || source == null) return;
     await _pickSingleImage(source, notifier);
   }

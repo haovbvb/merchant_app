@@ -14,7 +14,14 @@ class EntrySuccessPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = context.l10n;
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _goToWorkbenchHome(context);
+        }
+      },
+      child: Scaffold(
       backgroundColor: AppColors.bgColor,
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -87,6 +94,7 @@ class EntrySuccessPage extends StatelessWidget {
           ),
         ),
       ),
+    ),
     );
   }
 

@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -153,7 +154,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get workbenchOfflineUserRegistration => '线下用户注册';
 
   @override
-  String get workbenchInstallmentPayment => '分期支付';
+  String get workbenchInstallmentPayment => '分期缴纳';
 
   @override
   String get workbenchUserQuery => '用户查询';
@@ -705,7 +706,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get orderVoucherConfirm => '确认';
 
   @override
-  String get maintenanceBookTitle => '维修预约';
+  String get maintenanceBookTitle => '预约保养';
 
   @override
   String get maintenanceSnLabel => '车辆SN / VIN';
@@ -780,7 +781,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get maintenanceAvgSwapCount => '平均换电次数';
 
   @override
-  String get maintenanceCostsTitle => '维修费用';
+  String get maintenanceCostsTitle => '保养费用';
 
   @override
   String get maintenanceTotalLabel => '总计 (\$)';

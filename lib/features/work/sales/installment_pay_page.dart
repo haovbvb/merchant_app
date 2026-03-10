@@ -9,6 +9,7 @@ import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/core/widgets/image_source_action_sheet.dart';
 import 'package:merchant_app/data/models/installment_payment_response.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/installment_pay_controller.dart';
@@ -114,7 +115,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
           Image.asset(
             'assets/android/mipmap-xxhdpi/icon_installmentpage.png',
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 6),
           Text(
             context.l10n.installmentPayTitle,
             style: const TextStyle(
@@ -1018,28 +1019,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
       return;
     }
 
-    final source = await showModalBottomSheet<ImageSource>(
-      context: context,
-      builder: (_) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_camera),
-                title: Text(l10n.orderVoucherPickCamera),
-                onTap: () => Navigator.of(context).pop(ImageSource.camera),
-              ),
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: Text(l10n.orderVoucherPickGallery),
-                onTap: () => Navigator.of(context).pop(ImageSource.gallery),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+    final source = await ImageSourceActionSheet.show(context);
     if (!mounted || source == null) return;
 
     List<XFile> picks;
@@ -1048,7 +1028,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
       if (!mounted || cameraPick == null) return;
       picks = [cameraPick];
     } else {
-      final galleryPicks = await picker.pickMultiImage();
+      final galleryPicks = await picker.pickMultiImage(limit: remaining);
       if (!mounted || galleryPicks.isEmpty) return;
       if (galleryPicks.length > remaining) {
         showToast(l10n.installmentPayUploadLimit);

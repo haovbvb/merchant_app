@@ -948,10 +948,14 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
   @override
   void initState() {
     super.initState();
-    final state = widget.ref.read(transportCreateProvider);
-    _selectedCityCode = state.warehouseCityCode;
-    _selectedCityName = state.warehouseCityName;
-    _searchController.text = state.warehouseKeyword;
+    // Reset filters on each open to align with Android behavior.
+    _selectedCityCode = '';
+    _selectedCityName = '';
+    widget.notifier.loadInWarehouseList(
+      keyword: '',
+      cityCode: '',
+      cityName: '',
+    );
   }
 
   @override
@@ -1074,6 +1078,9 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
                 final isSelected =
                     selectedWarehouse?.inWarehouseNo == warehouse.inWarehouseNo;
                 return ListTile(
+                  tileColor: isSelected
+                      ? const Color(0xFFF5FCF2)
+                      : null,
                   title: Text(
                     warehouse.inWarehouseName ?? warehouse.warehouseName ?? '-',
                     style: const TextStyle(
@@ -1127,7 +1134,9 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
                         color: Theme.of(context).colorScheme.primary,
                       )
                     : null,
-                onTap: () => Navigator.of(ctx).pop(const _CityPickerResult.all()),
+                onTap: () => Navigator.of(ctx).pop(
+                  const _CityPickerResult(cityCode: '', cityName: ''),
+                ),
               ),
               const Divider(height: 1),
               Flexible(
@@ -1146,7 +1155,12 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
                               color: Theme.of(context).colorScheme.primary,
                             )
                           : null,
-                      onTap: () => Navigator.of(ctx).pop(_CityPickerResult.city(city)),
+                      onTap: () => Navigator.of(ctx).pop(
+                        _CityPickerResult(
+                          cityCode: city.code,
+                          cityName: city.name,
+                        ),
+                      ),
                     );
                   },
                 ),
@@ -1159,15 +1173,15 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
 
     if (!mounted) return;
     if (selected == null) return;
+    await _applyCityFilter(selected.cityCode, selected.cityName);
+  }
+
+  Future<void> _applyCityFilter(String cityCode, String cityName) async {
     setState(() {
-      if (selected.isAll) {
-        _selectedCityCode = '';
-        _selectedCityName = '';
-      } else {
-        _selectedCityCode = selected.city!.code;
-        _selectedCityName = selected.city!.name;
-      }
+      _selectedCityCode = cityCode;
+      _selectedCityName = cityName;
     });
+
     await widget.notifier.loadInWarehouseList(
       keyword: _searchController.text.trim(),
       cityCode: _selectedCityCode,
@@ -1177,13 +1191,8 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
 }
 
 class _CityPickerResult {
-  const _CityPickerResult._({required this.isAll, this.city});
+  const _CityPickerResult({required this.cityCode, required this.cityName});
 
-  const _CityPickerResult.all() : this._(isAll: true);
-
-  const _CityPickerResult.city(City city)
-    : this._(isAll: false, city: city);
-
-  final bool isAll;
-  final City? city;
+  final String cityCode;
+  final String cityName;
 }

@@ -453,12 +453,24 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                 onScan: () async {
                   final result = await Navigator.of(context).push<String>(
                     MaterialPageRoute(
-                      builder: (_) =>
-                          const QrScanPage(parseDeviceSn: true, deviceType: 2),
+                      builder: (_) => const QrScanPage(
+                        parseDeviceSn: false,
+                        deviceType: 2,
+                        returnRaw: true,
+                      ),
                     ),
                   );
                   if (result != null && result.isNotEmpty) {
-                    snController.text = result;
+                    final extracted = _extractVehicleQrField(result, 'sn');
+                    if (extracted.isNotEmpty) {
+                      snController.text = extracted;
+                    } else {
+                      final parsed = ScanUtils.parseVehicleQr(result, 0);
+                      final fallback = (parsed.sn ?? '').trim();
+                      snController.text = fallback.isNotEmpty
+                          ? fallback
+                          : result.trim();
+                    }
                   }
                 },
               ),
@@ -473,11 +485,21 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                 onScan: () async {
                   final result = await Navigator.of(context).push<String>(
                     MaterialPageRoute(
-                      builder: (_) => const QrScanPage(parseDeviceSn: false),
+                      builder: (_) =>
+                          const QrScanPage(parseDeviceSn: false, returnRaw: true),
                     ),
                   );
                   if (result != null && result.isNotEmpty) {
-                    vinController.text = result;
+                    final extracted = _extractVehicleQrField(result, 'vin');
+                    if (extracted.isNotEmpty) {
+                      vinController.text = extracted;
+                    } else {
+                      final parsed = ScanUtils.parseVehicleQr(result, 0);
+                      final fallback = (parsed.vin ?? '').trim();
+                      vinController.text = fallback.isNotEmpty
+                          ? fallback
+                          : result.trim();
+                    }
                   }
                 },
               ),
@@ -546,6 +568,26 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
         );
       },
     );
+  }
+
+  String _extractVehicleQrField(String raw, String key) {
+    final target = key.toLowerCase();
+    final tokens = raw
+        .replaceAll(RegExp(r'[\r\n;|]'), ',')
+        .replaceAll('&', ',')
+        .split(',')
+        .map((item) => item.trim())
+        .where((item) => item.isNotEmpty);
+
+    for (final token in tokens) {
+      final separatorIndex = token.indexOf(RegExp('[:=]'));
+      if (separatorIndex <= 0) continue;
+      final currentKey = token.substring(0, separatorIndex).trim().toLowerCase();
+      if (currentKey != target) continue;
+      final value = token.substring(separatorIndex + 1).trim();
+      if (value.isNotEmpty) return value;
+    }
+    return '';
   }
 
   Widget _buildInputField({

@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
-import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
-import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 
 class SelectApplicantSheet extends StatefulWidget {
@@ -72,10 +70,7 @@ class _SelectApplicantSheetState extends State<SelectApplicantSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final canSubmit =
-        !_searching &&
-        _matchedUserId != null &&
-        _matchedUserId == _userIdController.text.trim();
+    final canSubmit = !_searching && _userIdController.text.trim().isNotEmpty;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.32,
@@ -136,7 +131,7 @@ class _SelectApplicantSheetState extends State<SelectApplicantSheet> {
                             setState(() => _matchedUserId = null);
                           }
                         },
-                        onSubmitted: (_) => _searchUser(),
+                        onSubmitted: (_) => _searchUser(autoSubmitOnFound: true),
                       ),
                     ),
                     GestureDetector(
@@ -154,7 +149,7 @@ class _SelectApplicantSheetState extends State<SelectApplicantSheet> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: canSubmit ? _submit : null,
+                  onPressed: canSubmit ? _handleSubmitPressed : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
                     disabledBackgroundColor: const Color(0xFFE8F5E9),
@@ -192,7 +187,7 @@ class _SelectApplicantSheetState extends State<SelectApplicantSheet> {
     );
   }
 
-  Future<void> _searchUser() async {
+  Future<void> _searchUser({bool autoSubmitOnFound = false}) async {
     final cardNum = _userIdController.text.trim();
     if (cardNum.isEmpty) return;
 
@@ -201,7 +196,17 @@ class _SelectApplicantSheetState extends State<SelectApplicantSheet> {
       _matchedUserId = null;
     });
 
-    final found = await widget.onQueryUser(cardNum);
+    bool found = false;
+    try {
+      found = await widget.onQueryUser(cardNum);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _searching = false;
+        _matchedUserId = null;
+      });
+      return;
+    }
     if (!mounted) return;
 
     setState(() {
@@ -209,8 +214,8 @@ class _SelectApplicantSheetState extends State<SelectApplicantSheet> {
       _matchedUserId = found ? cardNum : null;
     });
 
-    if (_matchedUserId == null) {
-      showToast(context.l10n.userSearchEmpty);
+    if (found && autoSubmitOnFound) {
+      _submit();
     }
   }
 
@@ -223,7 +228,19 @@ class _SelectApplicantSheetState extends State<SelectApplicantSheet> {
     final cardNum = ScanUtils.getUserCarNum(result);
     if (cardNum.isEmpty) return;
     _userIdController.text = cardNum;
-    await _searchUser();
+    await _searchUser(autoSubmitOnFound: true);
+  }
+
+  Future<void> _handleSubmitPressed() async {
+    final cardNum = _userIdController.text.trim();
+    if (cardNum.isEmpty || _searching) return;
+
+    if (_matchedUserId == cardNum) {
+      _submit();
+      return;
+    }
+
+    await _searchUser(autoSubmitOnFound: true);
   }
 
   void _submit() {

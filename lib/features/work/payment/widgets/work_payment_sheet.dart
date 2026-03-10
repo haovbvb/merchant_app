@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:merchant_app/app/styles/colors.dart';
+import 'package:merchant_app/core/widgets/image_source_action_sheet.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
 class WorkPaymentSubmit {
@@ -57,6 +58,11 @@ Future<bool?> showWorkPaymentSheet({
           final canConfirm = !paying && meaningful && attachmentsOk;
 
           return Container(
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(sheetContext).size.height -
+                  MediaQuery.of(sheetContext).padding.top -
+                  8,
+            ),
             decoration: const BoxDecoration(
               color: Color(0xFFF3F4F5),
               borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
@@ -65,7 +71,8 @@ Future<bool?> showWorkPaymentSheet({
               bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
             ),
             child: SafeArea(
-              top: false,
+              top: true,
+              bottom: false,
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
                 child: Column(
@@ -318,28 +325,7 @@ Future<ImageSource?> _pickSource(
   BuildContext context,
   AppLocalizations l10n,
 ) async {
-  return showModalBottomSheet<ImageSource>(
-    context: context,
-    builder: (_) {
-      return SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.photo_camera),
-              title: Text(l10n.orderVoucherPickCamera),
-              onTap: () => Navigator.of(context).pop(ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library),
-              title: Text(l10n.orderVoucherPickGallery),
-              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
-            ),
-          ],
-        ),
-      );
-    },
-  );
+  return ImageSourceActionSheet.show(context);
 }
 
 class _PayMethodRow extends StatelessWidget {

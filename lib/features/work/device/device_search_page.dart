@@ -17,6 +17,7 @@ class DeviceSearchPage extends StatefulWidget {
     this.deviceType,
     this.readOnly = false,
     this.initialKeyword,
+    this.initialTabIndex,
   });
 
   final bool returnResult;
@@ -25,6 +26,7 @@ class DeviceSearchPage extends StatefulWidget {
   final int? deviceType;
   final bool readOnly;
   final String? initialKeyword;
+  final int? initialTabIndex;
 
   @override
   State<DeviceSearchPage> createState() => _DeviceSearchPageState();
@@ -316,6 +318,7 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
           readOnly: widget.readOnly,
           popToSearchOnClear: true,
           expectedDeviceType: widget.deviceType,
+          initialTabIndex: widget.initialTabIndex,
         ),
       ),
     );

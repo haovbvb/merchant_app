@@ -5,7 +5,6 @@ import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/batter_or_vehicle_info.dart';
-import 'package:merchant_app/data/models/purchasing_user.dart';
 import 'package:merchant_app/data/models/service_plan.dart';
 import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
@@ -441,18 +440,29 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
       return;
     }
 
-    // Step 4: Confirm and Submit
-    await Navigator.of(pageContext).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => _SellBindConfirmPage(
-          applicant: applicantResult,
-          payment: paymentResult,
-          plan: plan,
-          device: device,
-          user: latestState.user,
-        ),
-      ),
+    // Step 4: Submit directly from applicant flow and show success page on state change.
+    final email = applicantResult.email.trim();
+    if (email.isNotEmpty && !email.contains('@')) {
+      showToast(l10n.offlineRegisterEmailInvalid);
+      return;
+    }
+
+    final ok = await notifier.submit(
+      address: applicantResult.address,
+      birthday: applicantResult.birthday,
+      cardNum: applicantResult.cardNum,
+      email: applicantResult.email,
+      firstName: applicantResult.firstName,
+      lastName: applicantResult.lastName,
+      idNumber: applicantResult.idNumber,
+      phone: applicantResult.phone,
+      cardImgUrl: applicantResult.cardImgUrl,
+      personImgUrl: applicantResult.personImgUrl,
     );
+    if (!mounted) return;
+    if (!ok) {
+      showToast(l10n.sellBindFailed);
+    }
   }
 }
 
@@ -885,289 +895,6 @@ class _VehicleCard extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class _SellBindConfirmPage extends ConsumerStatefulWidget {
-  const _SellBindConfirmPage({
-    required this.applicant,
-    required this.payment,
-    required this.plan,
-    required this.device,
-    required this.user,
-  });
-
-  final ApplicantResult applicant;
-  final PaymentResult payment;
-  final ServicePlanBean plan;
-  final BatterOrVehicleInfo device;
-  final PurchasingUser? user;
-
-  @override
-  ConsumerState<_SellBindConfirmPage> createState() =>
-      _SellBindConfirmPageState();
-}
-
-class _SellBindConfirmPageState extends ConsumerState<_SellBindConfirmPage> {
-  bool _submitting = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    final user = widget.user;
-    final deviceSn =
-        widget.device.batteryVo?.sn ?? widget.device.carVo?.sn ?? '-';
-
-    return Scaffold(
-      backgroundColor: AppColors.bgColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: Text(
-          l10n.sellBindTitle,
-          style: const TextStyle(color: Colors.black),
-        ),
-        centerTitle: true,
-      ),
-      body: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  _buildSection(
-                    title: l10n.sellBindDeviceSection,
-                    children: [
-                      _buildInfoRow(l10n.sellBindDeviceSn, deviceSn),
-                      _buildInfoRow(
-                        l10n.sellBindPackage,
-                        widget.plan.infoName ?? '-',
-                      ),
-                      _buildInfoRow(
-                        l10n.sellBindPlanPrice,
-                        '\$${(widget.plan.packageAmount ?? 0).toStringAsFixed(2)}',
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _buildSection(
-                    title: l10n.sellBindPaymentSection,
-                    children: [
-                      _buildInfoRow(
-                        l10n.sellBindPaymentMethods,
-                        widget.payment.paySource == 1
-                            ? l10n.sellBindPayCash
-                            : l10n.sellBindPayOnline,
-                      ),
-                      _buildInfoRow(
-                        l10n.sellBindPaymentPeriod,
-                        widget.payment.paySource == 1
-                            ? l10n.sellBindPayFull
-                            : (widget.payment.payType == 1
-                                  ? l10n.sellBindPayFull
-                                  : l10n.sellBindPayInstallment),
-                      ),
-                      if (widget.payment.paymentPlan != null)
-                        _buildInfoRow(
-                          l10n.sellBindPlanPeriod,
-                          '${widget.payment.paymentPlan!.period ?? '-'} ${l10n.sellBindPeriods}',
-                        ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  _buildSection(
-                    title: l10n.sellBindUserSection,
-                    children: [
-                      _buildInfoRow(
-                        l10n.sellBindCardNum,
-                        _valueOrDash(user?.cardNum ?? widget.applicant.cardNum),
-                      ),
-                      _buildInfoRow(
-                        l10n.sellBindAccount,
-                        _valueOrDash(user?.username),
-                      ),
-                      _buildInfoRow(
-                        l10n.sellBindFirstName,
-                        _valueOrDash(
-                          user?.firstName ?? widget.applicant.firstName,
-                        ),
-                      ),
-                      _buildInfoRow(
-                        l10n.sellBindLastName,
-                        _valueOrDash(
-                          user?.lastName ?? widget.applicant.lastName,
-                        ),
-                      ),
-                      _buildInfoRow(
-                        l10n.sellBindPhone,
-                        _valueOrDash(user?.phone ?? widget.applicant.phone),
-                      ),
-                      _buildInfoRow(
-                        l10n.sellBindIdNumber,
-                        _valueOrDash(
-                          user?.idNumber ?? widget.applicant.idNumber,
-                        ),
-                      ),
-                      _buildInfoRow(
-                        l10n.sellBindBirthday,
-                        _valueOrDash(
-                          user?.birthday ?? widget.applicant.birthday,
-                        ),
-                      ),
-                      _buildInfoRow(
-                        l10n.sellBindEmail,
-                        _valueOrDash(user?.email ?? widget.applicant.email),
-                      ),
-                      _buildInfoRow(
-                        l10n.sellBindAddress,
-                        _valueOrDash(user?.address ?? widget.applicant.address),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            color: const Color(0xFFF5F5F5),
-            child: SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _submitting ? null : _submit,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
-                  disabledBackgroundColor: const Color(0xFFE8F5E9),
-                  foregroundColor: Colors.white,
-                  disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 0,
-                ),
-                child: _submitting
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Colors.white,
-                          ),
-                        ),
-                      )
-                    : Text(
-                        l10n.sellBindSubmit,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSection({
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppColors.black06Text,
-            ),
-          ),
-          const SizedBox(height: 12),
-          ...children,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 4,
-            child: Text(
-              label,
-              style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            flex: 7,
-            child: Text(
-              value,
-              textAlign: TextAlign.right,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.black06Text,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _valueOrDash(String? value) {
-    if (value == null || value.trim().isEmpty) return '-';
-    return value;
-  }
-
-  Future<void> _submit() async {
-    final email = widget.applicant.email.trim();
-    if (email.isNotEmpty && !email.contains('@')) {
-      showToast(context.l10n.offlineRegisterEmailInvalid);
-      return;
-    }
-    setState(() => _submitting = true);
-    final notifier = ref.read(sellBindProvider.notifier);
-    final ok = await notifier.submit(
-      address: widget.applicant.address,
-      birthday: widget.applicant.birthday,
-      cardNum: widget.applicant.cardNum,
-      email: widget.applicant.email,
-      firstName: widget.applicant.firstName,
-      lastName: widget.applicant.lastName,
-      idNumber: widget.applicant.idNumber,
-      phone: widget.applicant.phone,
-      cardImgUrl: widget.applicant.cardImgUrl,
-      personImgUrl: widget.applicant.personImgUrl,
-    );
-    if (!mounted) return;
-    setState(() => _submitting = false);
-    if (!ok) {
-      showToast(context.l10n.sellBindFailed);
-      return;
-    }
-    Navigator.of(context).pop(true);
   }
 }
 

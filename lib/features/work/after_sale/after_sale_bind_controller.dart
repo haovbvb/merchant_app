@@ -68,11 +68,6 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
     if (value == state.cardNum) return;
     state = state.copyWith(
       cardNum: value,
-      deviceSn: '',
-      userDetail: null,
-      orders: const [],
-      selectedOrder: null,
-      deviceInfo: null,
       errorMessage: null,
     );
   }
@@ -81,7 +76,6 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
     if (value == state.deviceSn) return;
     state = state.copyWith(
       deviceSn: value,
-      deviceInfo: null,
       errorMessage: null,
     );
   }
@@ -108,7 +102,15 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
       return false;
     }
 
-    state = state.copyWith(loading: true, errorMessage: null);
+    state = state.copyWith(
+      loading: true,
+      errorMessage: null,
+      userDetail: null,
+      orders: const [],
+      selectedOrder: null,
+      deviceSn: '',
+      deviceInfo: null,
+    );
     final response = await _apiService.get<UserDetail>(
       ApiPath.afterSaleQueryUserForBindOrder,
       queryParameters: {'cardNum': cardNum},
@@ -183,6 +185,7 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
     }
 
     final model = order.deviceType == 1 ? order.batteryType : order.carType;
+    state = state.copyWith(deviceInfo: null, errorMessage: null);
     final response = await _apiService.get<BatterOrVehicleInfo>(
       ApiPath.afterSaleQueryDeviceForBindOrder,
       queryParameters: {

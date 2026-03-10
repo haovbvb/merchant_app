@@ -139,7 +139,15 @@ class MaintenanceBookNotifier extends Notifier<MaintenanceBookState> {
           BookMaintenanceBean.fromJson(Map<String, dynamic>.from(json as Map)),
     );
 
-    state = state.copyWith(loading: false, appointment: response.result);
+    state = state.copyWith(
+      loading: false,
+      clearAppointment: response.result == null,
+      appointment: response.result,
+      note: '',
+      amount: '',
+      paySource: 2,
+      voucherImages: [],
+    );
   }
 
   Future<bool> submitMaintenance() async {

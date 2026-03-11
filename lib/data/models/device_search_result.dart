@@ -175,18 +175,21 @@ class DeviceInfo {
 class ManagerInfo {
   final String? accountNo;
   final String? showName;
+  final String? phone;
 
-  const ManagerInfo({this.accountNo, this.showName});
+  const ManagerInfo({this.accountNo, this.showName, this.phone});
 
   factory ManagerInfo.fromJson(Map<String, dynamic> json) {
     return ManagerInfo(
       accountNo: json['accountNo']?.toString() ?? json['id']?.toString(),
       showName: json['showName']?.toString() ?? json['name']?.toString(),
+      phone: json['phone']?.toString(),
     );
   }
 
   Map<String, dynamic> toJson() => {
     'accountNo': accountNo,
     'showName': showName,
+    'phone': phone,
   };
 }

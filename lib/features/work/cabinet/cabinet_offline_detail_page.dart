@@ -6,8 +6,10 @@ import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
+import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/data/models/cabinet_cabin.dart';
 import 'package:merchant_app/data/models/cabinet_detail_base_info_bean.dart';
+import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_ble_client.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_offline_controller.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_offline_fault_page.dart';
@@ -75,6 +77,127 @@ class _CabinetOfflineDetailPageState
         _queryWithSn(widget.initialSn!);
       });
     }
+  }
+
+  void _showNotManagerDialog(CabinetDetailBaseInfoBean info) {
+    final l10n = context.l10n;
+    String managerName = '';
+    String managerPhone = '';
+    final rawList = info.stationManagerList;
+    if (rawList.isNotEmpty) {
+      managerName = rawList.first['showName']?.toString() ?? '';
+      managerPhone = rawList.first['phone']?.toString() ?? '';
+    }
+    final areaCode = AuthSession.instance.current?.areaCode ?? '';
+    if (areaCode.isNotEmpty && managerPhone.isNotEmpty) {
+      managerPhone = '$areaCode $managerPhone';
+    }
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => PopScope(
+        canPop: false,
+        child: Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: SizedBox(
+            width: 310,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                  child: Text(
+                    l10n.cabinetNotManagerTips,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const Divider(height: 1),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.deviceDetailResponsibleLabel,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(
+                          managerName,
+                          style: const TextStyle(fontSize: 14),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.cabinetNotManagerPhone,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(
+                          managerPhone,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF0B61D9),
+                          ),
+                          textAlign: TextAlign.end,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                const SizedBox(height: 24),
+                const Divider(height: 1),
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.of(ctx).pop();
+                      final navigator = Navigator.of(context);
+                      if (navigator.canPop()) {
+                        navigator.pop();
+                      } else {
+                        AppRouter.goHome();
+                      }
+                    },
+                    child: Text(
+                      l10n.confirm,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   void _queryWithSn(String sn) {
@@ -456,13 +579,7 @@ class _CabinetOfflineDetailPageState
       _noPermissionHandled = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        showToast(l10n.cabinetOfflineNoPermission);
-        final navigator = Navigator.of(context);
-        if (navigator.canPop()) {
-          navigator.pop();
-        } else {
-          AppRouter.goHome();
-        }
+        _showNotManagerDialog(info);
       });
     }
 
@@ -739,50 +856,28 @@ class _CabinetOfflineDetailPageState
 
   void _showRestartDialog() {
     final l10n = context.l10n;
-    showDialog(
+    ConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.cabinetOfflineRestartTitle),
-        content: Text(l10n.cabinetOfflineRestartConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              await _restartCabinet();
-            },
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
-    );
+      message: l10n.cabinetOfflineRestartConfirm,
+      cancelText: l10n.cancel,
+      confirmText: l10n.confirm,
+    ).then((confirmed) async {
+      if (!confirmed) return;
+      await _restartCabinet();
+    });
   }
 
   void _showOpenDoorDialog() {
     final l10n = context.l10n;
-    showDialog(
+    ConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.cabinetOfflineOpenDoorTitle),
-        content: Text(l10n.cabinetOfflineOpenDoorConfirm),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () async {
-              Navigator.of(ctx).pop();
-              await _openBackDoor();
-            },
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
-    );
+      message: l10n.cabinetOfflineOpenDoorConfirm,
+      cancelText: l10n.cancel,
+      confirmText: l10n.confirm,
+    ).then((confirmed) async {
+      if (!confirmed) return;
+      await _openBackDoor();
+    });
   }
 
   void _showEditSwapThreshold(CabinetDetailBaseInfoBean info) {
@@ -1321,32 +1416,47 @@ class _WarehouseTab extends StatelessWidget {
             ),
             const Divider(height: 1),
             ListTile(
-              leading: const Icon(Icons.door_front_door),
-              title: Text(l10n.cabinetOfflineCabinOpenDoor),
+              title: Center(child: Text(l10n.deviceDetailPortOpenShort)),
               onTap: !canOperate || state.operating
                   ? null
                   : () async {
                       Navigator.pop(ctx);
+                      final confirmed = await ConfirmDialog.show(
+                        context: context,
+                        message: l10n.deviceDetailPortOpenConfirm(cabin.portNo),
+                        cancelText: l10n.cancel,
+                        confirmText: l10n.confirm,
+                      );
+                      if (!confirmed) return;
                       await onOpenDoor(cabin);
                     },
             ),
             ListTile(
-              leading: const Icon(Icons.power_settings_new),
-              title: Text(
+              title: Center(
+                child: Text(
                 cabin.isEnabled
-                    ? l10n.cabinetOfflineCabinDisable
+                    ? l10n.deviceDetailPortDisableShort
                     : l10n.cabinetOfflineCabinEnable,
+                ),
               ),
               onTap: !canOperate || state.operating
                   ? null
                   : () async {
                       Navigator.pop(ctx);
+                      final confirmed = await ConfirmDialog.show(
+                        context: context,
+                        message: cabin.isEnabled
+                            ? l10n.deviceDetailPortDisableConfirm
+                            : l10n.deviceDetailPortEnableConfirm,
+                        cancelText: l10n.cancel,
+                        confirmText: l10n.confirm,
+                      );
+                      if (!confirmed) return;
                       await onToggleEnable(cabin);
                     },
             ),
             ListTile(
-              leading: const Icon(Icons.warning_amber),
-              title: Text(l10n.cabinetOfflineCabinCheckFault),
+              title: Center(child: Text(l10n.cabinetOfflineCabinCheckFault)),
               onTap: () {
                 Navigator.pop(ctx);
                 Navigator.of(context).push(
@@ -1484,7 +1594,7 @@ class _EditTextSheetState extends State<_EditTextSheet> {
               child: Text(
                 widget.title,
                 style: const TextStyle(
-                  fontSize: 17,
+                  fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: Color(0xE60C0C0D),
                 ),
@@ -1497,6 +1607,7 @@ class _EditTextSheetState extends State<_EditTextSheet> {
               controller: _controller,
               keyboardType: widget.keyboardType,
               decoration: InputDecoration(
+                hintText: '',
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 12,
                   vertical: 10,

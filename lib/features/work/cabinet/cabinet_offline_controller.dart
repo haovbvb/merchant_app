@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/data/models/cabin_fault.dart';
 import 'package:merchant_app/data/models/cabinet_cabin.dart';
@@ -361,9 +362,9 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
     if (sn.isEmpty) return false;
     state = state.copyWith(operating: true);
     try {
-      final response = await _api.post<Object>(
+      final response = await _api.postForm<Object>(
         ApiPath.cabinetOpenBackDoor,
-        data: {'sn': sn},
+        data: FormData.fromMap({'devId': sn}),
         parser: (json) => json ?? Object(),
       );
       return response.isSuccess;

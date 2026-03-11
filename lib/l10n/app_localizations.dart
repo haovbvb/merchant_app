@@ -7025,6 +7025,18 @@ abstract class AppLocalizations {
   /// **'Swap standard'**
   String get cabinetAuthSwapStandard;
 
+  /// No description provided for @cabinetAuthAvg7DaySwapCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Average swaps in past 7 days'**
+  String get cabinetAuthAvg7DaySwapCount;
+
+  /// No description provided for @cabinetAuthNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get cabinetAuthNoData;
+
   /// No description provided for @cabinetAuthWorkAccount.
   ///
   /// In en, this message translates to:
@@ -8207,6 +8219,24 @@ abstract class AppLocalizations {
   /// **'Authorization failed'**
   String get bluetoothAuthFailed;
 
+  /// No description provided for @bluetoothAuthPleaseOpenBluetooth.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable Bluetooth in system settings'**
+  String get bluetoothAuthPleaseOpenBluetooth;
+
+  /// No description provided for @bluetoothAuthNoMatchLockId.
+  ///
+  /// In en, this message translates to:
+  /// **'No matched Lock ID for this station'**
+  String get bluetoothAuthNoMatchLockId;
+
+  /// No description provided for @bluetoothAuthRepeatAuthorization.
+  ///
+  /// In en, this message translates to:
+  /// **'Authorization already exists.'**
+  String get bluetoothAuthRepeatAuthorization;
+
   /// No description provided for @bluetoothAuthMissingInput.
   ///
   /// In en, this message translates to:
@@ -8441,6 +8471,12 @@ abstract class AppLocalizations {
   /// **'Open Door'**
   String get deviceDetailPortOpen;
 
+  /// No description provided for @deviceDetailPortOpenShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Slot'**
+  String get deviceDetailPortOpenShort;
+
   /// No description provided for @deviceDetailPortOpened.
   ///
   /// In en, this message translates to:
@@ -8458,6 +8494,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Disable'**
   String get deviceDetailPortDisable;
+
+  /// No description provided for @deviceDetailPortDisableShort.
+  ///
+  /// In en, this message translates to:
+  /// **'Disable Slot'**
+  String get deviceDetailPortDisableShort;
 
   /// No description provided for @deviceDetailPortOpenConfirm.
   ///
@@ -8560,6 +8602,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View More'**
   String get vehicleDetailViewMore;
+
+  /// No description provided for @cabinetNotManagerTips.
+  ///
+  /// In en, this message translates to:
+  /// **'You are not the manager of this cabinet. Please contact the manager to obtain operation permission.'**
+  String get cabinetNotManagerTips;
+
+  /// No description provided for @cabinetNotManagerPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Manager Phone'**
+  String get cabinetNotManagerPhone;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

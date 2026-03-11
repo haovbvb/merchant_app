@@ -5,27 +5,27 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000265">
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000842">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: flutter build ipa --release --build-number\=202603100928 --export-options-plist\=/Users/ping/Desktop/work/merchant_app/ios/fastlane/ExportOptions.generated.plist" time="152.001415">
+      <testcase classname="fastlane.lanes" name="1: flutter build ipa --release --build-number\=202603110951 --export-options-plist\=/Users/ping/Desktop/work/merchant_app/ios/fastlane/ExportOptions.generated.plist" time="163.0949">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: flutter build apk --release --build-number\=603100928" time="125.440893">
+      <testcase classname="fastlane.lanes" name="2: flutter build apk --release --build-number\=603110951" time="153.782145">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="3: curl -f -X POST https://www.pgyer.com/apiv2/app/upload -F _api_key\=630a6a4d973bda999b5ca54affaebc60 -F file\=@../../build/ios/ipa/OKLA\ CARE.ipa -F buildUpdateDescription\= -F buildInstallType\=1" time="9.009606">
+      <testcase classname="fastlane.lanes" name="3: curl -f -X POST https://www.pgyer.com/apiv2/app/upload -F _api_key\=630a6a4d973bda999b5ca54affaebc60 -F file\=@../../build/ios/ipa/OKLA\ CARE.ipa -F buildUpdateDescription\= -F buildInstallType\=1" time="9.338078">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="4: curl -f -X POST https://www.pgyer.com/apiv2/app/upload -F _api_key\=630a6a4d973bda999b5ca54affaebc60 -F file\=@../../build/app/outputs/flutter-apk/app-release.apk -F buildUpdateDescription\= -F buildInstallType\=1" time="54.580425">
+      <testcase classname="fastlane.lanes" name="4: curl -f -X POST https://www.pgyer.com/apiv2/app/upload -F _api_key\=630a6a4d973bda999b5ca54affaebc60 -F file\=@../../build/app/outputs/flutter-apk/app-release.apk -F buildUpdateDescription\= -F buildInstallType\=1" time="21.669789">
         
       </testcase>
     

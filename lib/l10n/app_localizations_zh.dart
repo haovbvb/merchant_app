@@ -3467,16 +3467,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetAuthCancelFailed => '取消授权失败';
 
   @override
-  String get cabinetAuthAllPort => '全部端口';
+  String get cabinetAuthAllPort => '仓位数';
 
   @override
-  String get cabinetAuthFaultPort => '故障端口';
+  String get cabinetAuthFaultPort => '故障仓数';
 
   @override
-  String get cabinetAuthDisablePort => '禁用端口';
+  String get cabinetAuthDisablePort => '失联仓数';
 
   @override
   String get cabinetAuthSwapStandard => '换电标准';
+
+  @override
+  String get cabinetAuthAvg7DaySwapCount => '近七日平均换电次数';
+
+  @override
+  String get cabinetAuthNoData => '暂无数据';
 
   @override
   String get cabinetAuthWorkAccount => '运维工作账号';
@@ -3677,13 +3683,13 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetOfflineRestartTitle => '确认重启';
 
   @override
-  String get cabinetOfflineRestartConfirm => '确定要重启电柜吗？';
+  String get cabinetOfflineRestartConfirm => '是否重启电柜？';
 
   @override
   String get cabinetOfflineOpenDoorTitle => '确认开门';
 
   @override
-  String get cabinetOfflineOpenDoorConfirm => '确定要打开柜门吗？请确保蓝牙已连接。';
+  String get cabinetOfflineOpenDoorConfirm => '是否打开柜门?';
 
   @override
   String get cabinetOfflineGsmSignal => 'GSM信号';
@@ -4076,6 +4082,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get bluetoothAuthFailed => '授权失败';
 
   @override
+  String get bluetoothAuthPleaseOpenBluetooth => '请在系统设置中打开蓝牙';
+
+  @override
+  String get bluetoothAuthNoMatchLockId => '电柜SN对应锁ID为空';
+
+  @override
+  String get bluetoothAuthRepeatAuthorization => '重复授权';
+
+  @override
   String get bluetoothAuthMissingInput => '请填写SN、手机号与钥匙ID';
 
   @override
@@ -4106,7 +4121,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceDetailInputTimeLabel => '入库时间';
 
   @override
-  String get deviceDetailBindingStateLabel => '绑定状态';
+  String get deviceDetailBindingStateLabel => '上架状态';
 
   @override
   String get deviceDetailOnboarded => '已上架';
@@ -4193,6 +4208,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceDetailPortOpen => '开仓门';
 
   @override
+  String get deviceDetailPortOpenShort => '开仓';
+
+  @override
   String get deviceDetailPortOpened => '已开门';
 
   @override
@@ -4202,15 +4220,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deviceDetailPortDisable => '禁用';
 
   @override
+  String get deviceDetailPortDisableShort => '禁仓';
+
+  @override
   String deviceDetailPortOpenConfirm(Object portNo) {
-    return '确认开启 $portNo 号仓门？';
+    return '确定要打开$portNo号仓吗？打开仓位后，只能线下关闭。';
   }
 
   @override
-  String get deviceDetailPortEnableConfirm => '确认启用该仓位？';
+  String get deviceDetailPortEnableConfirm => '确认启动该仓门？';
 
   @override
-  String get deviceDetailPortDisableConfirm => '确认禁用该仓位？';
+  String get deviceDetailPortDisableConfirm => '确认要禁用该仓门?';
 
   @override
   String get deviceDetailPortOpenSuccess => '开仓门成功';
@@ -4253,4 +4274,10 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vehicleDetailViewMore => '查看更多';
+
+  @override
+  String get cabinetNotManagerTips => '你不是该电柜负责人，请联系负责人获取操作权限';
+
+  @override
+  String get cabinetNotManagerPhone => '负责人电话';
 }

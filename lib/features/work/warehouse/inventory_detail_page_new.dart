@@ -31,9 +31,8 @@ class InventoryDetailPageNew extends ConsumerStatefulWidget {
       _InventoryDetailPageNewState();
 }
 
-class _InventoryDetailPageNewState
-  extends ConsumerState<InventoryDetailPageNew>
-  with WidgetsBindingObserver {
+class _InventoryDetailPageNewState extends ConsumerState<InventoryDetailPageNew>
+    with WidgetsBindingObserver {
   final RefreshController _refreshController = RefreshController(
     initialRefresh: false,
   );
@@ -53,8 +52,13 @@ class _InventoryDetailPageNewState
       await notifier.loadMyWarehouseInfo();
       if (widget.createMode && widget.deviceType != null) {
         final code = await notifier.startInventory(widget.deviceType!);
-        if (mounted && code == 5030) {
+        if (mounted && code != null && code != 1000) {
           Navigator.of(context).pop();
+          return;
+        }
+        final inventoryNo = ref.read(inventoryDetailProvider).inventoryNo;
+        if ((inventoryNo).isNotEmpty) {
+          await notifier.loadDetail(inventoryNo);
         }
       } else if ((widget.inventoryNo ?? '').isNotEmpty) {
         notifier.loadDetail(widget.inventoryNo ?? '');

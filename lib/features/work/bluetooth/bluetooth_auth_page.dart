@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -58,11 +59,20 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
 
     _adapterSubscription = FlutterBluePlus.adapterState.listen((state) {
       if (!mounted) return;
+      final wasOn = _bluetoothOn;
       setState(() {
         _bluetoothOn = state == BluetoothAdapterState.on;
       });
-      if (_bluetoothOn && _devices.isEmpty) {
+      if (_bluetoothOn && !wasOn) {
+        // 蓝牙刚开启，重新扫描
         _startScan();
+      }
+      if (!_bluetoothOn && wasOn) {
+        // 蓝牙被关闭（如从系统设置关闭），清空列表
+        setState(() {
+          _devices.clear();
+          _scanning = false;
+        });
       }
     });
 
@@ -77,8 +87,22 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
 
   Future<void> _toggleBluetooth(bool value) async {
     if (value) {
-      await FlutterBluePlus.turnOn();
+      if (Platform.isAndroid) {
+        await FlutterBluePlus.turnOn();
+      } else {
+        // iOS 不支持程序化开启蓝牙，提示用户去系统设置开启
+        if (mounted) {
+          showToast(context.l10n.bluetoothAuthPleaseOpenBluetooth);
+        }
+        return;
+      }
+      // 对齐安卓：打开蓝牙后延迟 2 秒重新搜索设备
+      await Future<void>.delayed(const Duration(seconds: 2));
+      if (mounted) {
+        _startScan();
+      }
     } else {
+      // 对齐安卓：关闭蓝牙时停止扫描并清空设备列表
       await FlutterBluePlus.stopScan();
       setState(() {
         _devices.clear();
@@ -313,25 +337,48 @@ class _BluetoothAuthorizationPageState
   Future<void> _prepareGatt() async {
     try {
       final services = await widget.device.discoverServices();
-      final service = services.firstWhere(
-        (s) => s.uuid == _serviceUuid,
-        orElse: () => services.first,
-      );
-      final writeChar = service.characteristics.firstWhere(
-        (c) => c.uuid == _writeUuid,
-        orElse: () => service.characteristics.first,
-      );
-      final notifyChar = service.characteristics.firstWhere(
-        (c) => c.uuid == _readUuid,
-        orElse: () => service.characteristics.first,
-      );
+      // 查找目标服务 serviceId=0000FFE0
+      BluetoothService? targetService;
+      for (final s in services) {
+        if (s.uuid == _serviceUuid) {
+          targetService = s;
+          break;
+        }
+      }
+      if (targetService == null) {
+        // 回退：遍历所有服务找含有 readUuid / writeUuid 特征的服务
+        for (final s in services) {
+          final hasRead = s.characteristics.any((c) => c.uuid == _readUuid);
+          final hasWrite = s.characteristics.any((c) => c.uuid == _writeUuid);
+          if (hasRead || hasWrite) {
+            targetService = s;
+            break;
+          }
+        }
+      }
+      if (targetService == null) {
+        if (mounted) showToast(context.l10n.bluetoothAuthFailed);
+        return;
+      }
+      BluetoothCharacteristic? writeChar;
+      BluetoothCharacteristic? notifyChar;
+      for (final c in targetService.characteristics) {
+        if (c.uuid == _writeUuid) writeChar = c;
+        if (c.uuid == _readUuid) notifyChar = c;
+      }
+      if (writeChar == null || notifyChar == null) {
+        if (mounted) showToast(context.l10n.bluetoothAuthFailed);
+        return;
+      }
       await notifyChar.setNotifyValue(true);
       _notifySub?.cancel();
       _notifySub = notifyChar.onValueReceived.listen((data) {
         _handleNotify(_bytesToHex(data));
       });
       _writeChar = writeChar;
-    } catch (_) {
+      // 对齐安卓：GATT 准备好后立即读取钥匙 ID
+      _readKeyId();
+    } catch (e) {
       if (!mounted) return;
       showToast(context.l10n.bluetoothAuthFailed);
     }
@@ -370,18 +417,19 @@ class _BluetoothAuthorizationPageState
 
     try {
       final sn = _snController.text.trim();
+      // 对齐安卓新版：先查询锁信息
       final lockInfo = await _queryLockInfo(sn);
       if (lockInfo == null) {
         throw Exception('lock info missing');
       }
+      // 对齐安卓新版：检查 lockDevId 不能为空
+      if (lockInfo.lockDevId.isEmpty) {
+        if (mounted) showToast(l10n.bluetoothAuthNoMatchLockId);
+        return;
+      }
       final phone = AuthSession.instance.current?.phone ?? '';
-      if (phone.isEmpty) {
-        throw Exception('phone missing');
-      }
-      final uid = await _queryUid(phone);
-      if (uid == null || uid.isEmpty) {
-        throw Exception('uid missing');
-      }
+      // 对齐安卓新版（BluetoothOperateActivityNew）：userNum 硬编码为 "00000001"
+      const userNum = '00000001';
       final keyId = await _readKeyId();
       if (keyId == null || keyId.isEmpty) {
         throw Exception('key id missing');
@@ -395,7 +443,7 @@ class _BluetoothAuthorizationPageState
       final payload = BleCommandBuilder.buildAddAuthorizationData(
         keyId: keyId,
         lockId: lockInfo.lockDevId,
-        userNum: uid.padLeft(8, '0'),
+        userNum: userNum,
         days: days,
       );
       final ack = await _sendEncryptedCommand(signal: '000D', payload: payload);
@@ -482,17 +530,6 @@ class _BluetoothAuthorizationPageState
     return response.result;
   }
 
-  Future<String?> _queryUid(String phone) async {
-    final response = await _api.get<String>(
-      ApiPath.bluetoothGetUidByPhone,
-      queryParameters: {'phone': phone},
-      parser: (json) => json?.toString() ?? '',
-      showHud: false,
-    );
-    if (!response.isSuccess) return null;
-    return response.result;
-  }
-
   Future<String?> _readKeyId() async {
     if (_lastKeyId.length == 8) return _lastKeyId;
     final response = await _sendEncryptedCommand(
@@ -547,6 +584,10 @@ class _BluetoothAuthorizationPageState
       final unescaped = BleCommandBuilder.unescapeResponse(raw);
       final signal = BleCommandBuilder.extractSignal(unescaped).toLowerCase();
       if (_pendingSignal.isNotEmpty && signal != _pendingSignal) {
+        // 对齐安卓：如果收到 010d 表示重复授权
+        if (signal == '010d' && mounted) {
+          showToast(context.l10n.bluetoothAuthRepeatAuthorization);
+        }
         continue;
       }
       final decryptStr = BleCommandBuilder.extractDecryptStr(unescaped);

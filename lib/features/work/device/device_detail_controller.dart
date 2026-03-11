@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/core/utils/logger.dart';
 import 'package:merchant_app/data/models/battery_detail.dart';
@@ -62,9 +63,13 @@ class DeviceDetailState {
     String? sn,
     int? deviceType,
     DeviceSearchResult? searchResult,
+    bool clearSearchResult = false,
     BatteryDetail? batteryDetail,
+    bool clearBatteryDetail = false,
     VehicleDetail? vehicleDetail,
+    bool clearVehicleDetail = false,
     CabinetDetailBaseInfoBean? cabinetDetail,
+    bool clearCabinetDetail = false,
     List<ChargeHistory>? histories,
     List<DeviceFixRecord>? fixRecords,
     List<MaintenanceRecord>? maintenanceRecords,
@@ -80,10 +85,18 @@ class DeviceDetailState {
       portsLoading: portsLoading ?? this.portsLoading,
       sn: sn ?? this.sn,
       deviceType: deviceType ?? this.deviceType,
-      searchResult: searchResult ?? this.searchResult,
-      batteryDetail: batteryDetail ?? this.batteryDetail,
-      vehicleDetail: vehicleDetail ?? this.vehicleDetail,
-      cabinetDetail: cabinetDetail ?? this.cabinetDetail,
+        searchResult: clearSearchResult
+          ? null
+          : (searchResult ?? this.searchResult),
+        batteryDetail: clearBatteryDetail
+          ? null
+          : (batteryDetail ?? this.batteryDetail),
+        vehicleDetail: clearVehicleDetail
+          ? null
+          : (vehicleDetail ?? this.vehicleDetail),
+        cabinetDetail: clearCabinetDetail
+          ? null
+          : (cabinetDetail ?? this.cabinetDetail),
       histories: histories ?? this.histories,
       fixRecords: fixRecords ?? this.fixRecords,
       maintenanceRecords: maintenanceRecords ?? this.maintenanceRecords,
@@ -113,10 +126,10 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
     state = state.copyWith(
       loading: true,
       sn: value,
-      searchResult: null,
-      batteryDetail: null,
-      vehicleDetail: null,
-      cabinetDetail: null,
+      clearSearchResult: true,
+      clearBatteryDetail: true,
+      clearVehicleDetail: true,
+      clearCabinetDetail: true,
       histories: const [],
       fixRecords: const [],
       maintenanceRecords: const [],
@@ -227,9 +240,10 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
       loading: true,
       sn: value,
       deviceType: deviceType,
-      batteryDetail: null,
-      vehicleDetail: null,
-      cabinetDetail: null,
+      clearSearchResult: true,
+      clearBatteryDetail: true,
+      clearVehicleDetail: true,
+      clearCabinetDetail: true,
       histories: const [],
       fixRecords: const [],
       maintenanceRecords: const [],
@@ -423,11 +437,15 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
   }
 
   Future<bool> openCabinBackDoor() async {
-    final value = state.sn.trim();
+    final value =
+        (state.searchResult?.deviceInfo?.sn ??
+                state.cabinetDetail?.stationSn ??
+                state.sn)
+            .trim();
     if (value.isEmpty) return false;
-    final response = await _api.post<Object>(
+    final response = await _api.postForm<Object>(
       ApiPath.cabinetOpenBackDoor,
-      data: {'sn': value},
+      data: FormData.fromMap({'devId': value}),
       parser: (json) => json ?? Object(),
     );
     return response.isSuccess;

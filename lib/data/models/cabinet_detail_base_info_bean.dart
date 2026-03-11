@@ -46,6 +46,10 @@ class CabinetDetailBaseInfoBean {
   final String? platformUrl;
   final int? maxChargeSoc;
   final int? hasPermission;
+  final int? installStatus;
+  final String? installTime;
+  final int? onlineStatus;
+  final String? simNo;
   final List<Map<String, dynamic>> stationManagerList;
 
   const CabinetDetailBaseInfoBean({
@@ -93,6 +97,10 @@ class CabinetDetailBaseInfoBean {
     this.platformUrl,
     this.maxChargeSoc,
     this.hasPermission,
+    this.installStatus,
+    this.installTime,
+    this.onlineStatus,
+    this.simNo,
     this.stationManagerList = const [],
   });
 
@@ -146,6 +154,10 @@ class CabinetDetailBaseInfoBean {
       platformUrl: json['platformUrl']?.toString(),
       maxChargeSoc: (json['maxChargeSoc'] as num?)?.toInt(),
       hasPermission: (json['hasPermission'] as num?)?.toInt(),
+      installStatus: (json['installStatus'] as num?)?.toInt(),
+      installTime: json['installTime']?.toString(),
+      onlineStatus: (json['onlineStatus'] as num?)?.toInt(),
+      simNo: json['simNo']?.toString(),
       stationManagerList: managerList is List
           ? managerList
               .whereType<Map<String, dynamic>>()
@@ -200,6 +212,10 @@ class CabinetDetailBaseInfoBean {
         'platformUrl': platformUrl,
         'maxChargeSoc': maxChargeSoc,
         'hasPermission': hasPermission,
+        'installStatus': installStatus,
+        'installTime': installTime,
+        'onlineStatus': onlineStatus,
+        'simNo': simNo,
         'stationManagerList': stationManagerList,
       };
 }

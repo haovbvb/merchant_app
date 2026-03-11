@@ -209,6 +209,7 @@ class InventoryDetailNotifier extends Notifier<InventoryDetailState> {
     final detail = response.result;
     state = state.copyWith(
       loading: false,
+      page: 1,
       detail: detail,
       inventoryNo: detail?.inventoryNo ?? state.inventoryNo,
       items: detail?.detailPage?.list ?? const [],

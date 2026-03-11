@@ -31,7 +31,10 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(inventoryListProvider.notifier).refresh(keyword: '');
+      _selectedTabIndex = 0;
+      ref
+          .read(inventoryListProvider.notifier)
+          .refresh(status: null, resetStatus: true, keyword: '');
     });
   }
 

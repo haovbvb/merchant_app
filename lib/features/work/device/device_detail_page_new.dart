@@ -11,6 +11,7 @@ import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
+import 'package:merchant_app/core/widgets/confirm_dialog.dart';
 import 'package:merchant_app/data/models/battery_detail.dart';
 import 'package:merchant_app/data/models/cabin.dart';
 import 'package:merchant_app/data/models/cabinet_detail_base_info_bean.dart';
@@ -122,7 +123,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         state.vehicleDetail != null ||
         (state.deviceType == 3 && state.searchResult?.deviceInfo != null);
     final cabinetHasWarehouse = deviceType == 3
-      ? _cabinetHasWarehouse(state.searchResult?.deviceInfo)
+      ? _cabinetHasWarehouse(state.searchResult?.deviceInfo, state.cabinetDetail)
       : true;
 
     // 根据设备类型更新 TabController
@@ -389,6 +390,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     final isOnline =
         info?.onlineStatus == 1 ||
         info?.showOnlineStatus == 'Online' ||
+        detail?.onlineStatus == 1 ||
         detail?.online == '1' ||
         detail?.showOnlineStatus == 'Online';
     final headerImg = (info?.img?.trim().isNotEmpty == true)
@@ -400,12 +402,13 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                     ? detail!.installImgSet.first
                     : null)
         : null;
-    final stationName = info?.stationName?.trim();
+    final stationName = info?.stationName?.trim() ?? detail?.stationName?.trim();
     final sn = info?.sn ?? detail?.stationSn ?? '-';
     final title = (stationName != null && stationName.isNotEmpty)
         ? stationName
         : 'SN: $sn';
-    final showOperate = info?.hasPermission == 1 && !widget.readOnly;
+    final showOperate =
+        (info?.hasPermission ?? detail?.hasPermission) == 1 && !widget.readOnly;
 
     return Container(
       color: Colors.white,
@@ -582,6 +585,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                 const SizedBox(height: 8),
                 Row(
                   children: [
+                    if (sourceLabel != null && sourceColor != null) ...[
+                      _buildStatusBadge(sourceLabel, sourceColor),
+                      const SizedBox(width: 8),
+                    ],
                     _buildStatusBadge(
                       isBound
                           ? l10n.deviceDetailBound
@@ -590,10 +597,6 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                           ? AppColors.primaryColor
                           : const Color(0xFFFA4B51),
                     ),
-                    if (sourceLabel != null && sourceColor != null) ...[
-                      const SizedBox(width: 8),
-                      _buildStatusBadge(sourceLabel, sourceColor),
-                    ],
                   ],
                 ),
               ],
@@ -727,7 +730,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     DeviceInfo? info,
     CabinetDetailBaseInfoBean? detail,
   ) {
-    final installStatus = info?.installStatus;
+    final installStatus = info?.installStatus ?? detail?.installStatus;
     final isOnboarded = installStatus != null && installStatus != 0;
     final spec = info != null ? info.showDeviceModel : detail?.stationSpec;
     final model = info != null ? info.deviceModel : detail?.stationModel;
@@ -738,14 +741,18 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     final onboardTime = _formatTimeString(
       info != null
           ? info.installTime
-          : (detail?.putOnShelvesTime != null
+          : (detail?.installTime ?? (detail?.putOnShelvesTime != null
                 ? detail!.putOnShelvesTime.toString()
-                : null),
+                : null)),
       withSeconds: true,
     );
-    final managerName = info?.managerList?.isNotEmpty == true
-        ? info!.managerList!.first.showName
-        : null;
+    String? managerName;
+    if (info?.managerList?.isNotEmpty == true) {
+      managerName = info!.managerList!.first.showName;
+    } else if (detail?.stationManagerList.isNotEmpty == true) {
+      final m = detail!.stationManagerList.first;
+      managerName = m['showName']?.toString();
+    }
     final photos = <String>[
       if (info != null) ..._collectDevicePhotos(info),
       if (info == null && detail != null) ...detail.installImgSet,
@@ -1623,8 +1630,8 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     return '$areaCode $value';
   }
 
-  bool _cabinetHasWarehouse(DeviceInfo? info) {
-    final status = info?.installStatus;
+  bool _cabinetHasWarehouse(DeviceInfo? info, CabinetDetailBaseInfoBean? detail) {
+    final status = info?.installStatus ?? detail?.installStatus;
     // 搜索接口部分场景不返回 installStatus，按有仓位处理，避免误隐藏“仓位详情”Tab
     if (status == null) return true;
     return status != 0;
@@ -1714,7 +1721,9 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
       if (!mounted) return;
       if (!found) {
         _backToSource(false);
+        return;
       }
+      _checkCabinetPermission();
       return;
     }
 
@@ -1723,10 +1732,146 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     if (!mounted) return;
     if (result == null) {
       _backToSource(false);
+      return;
+    }
+    if (result.type == 3) {
+      _checkCabinetPermission();
     }
   }
 
+  void _checkCabinetPermission() {
+    if (widget.readOnly) return;
+    final state = ref.read(deviceDetailProvider);
+    final hasPermission =
+        state.searchResult?.deviceInfo?.hasPermission ??
+        state.cabinetDetail?.hasPermission;
+    if (hasPermission == 0) {
+      // Extract manager info from DeviceInfo.managerList or cabinetDetail.stationManagerList
+      String managerName = '';
+      String managerPhone = '';
+      final managerList = state.searchResult?.deviceInfo?.managerList;
+      if (managerList != null && managerList.isNotEmpty) {
+        managerName = managerList.first.showName ?? '';
+        managerPhone = managerList.first.phone ?? '';
+      } else {
+        final rawList = state.cabinetDetail?.stationManagerList;
+        if (rawList != null && rawList.isNotEmpty) {
+          managerName = rawList.first['showName']?.toString() ?? '';
+          managerPhone = rawList.first['phone']?.toString() ?? '';
+        }
+      }
+      final areaCode = AuthSession.instance.current?.areaCode ?? '';
+      if (areaCode.isNotEmpty && managerPhone.isNotEmpty) {
+        managerPhone = '$areaCode $managerPhone';
+      }
+      _showNotManagerDialog(managerName, managerPhone);
+    }
+  }
+
+  void _showNotManagerDialog(String managerName, String managerPhone) {
+    final l10n = context.l10n;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => PopScope(
+        canPop: false,
+        child: Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: SizedBox(
+            width: 310,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+                  child: Text(
+                    l10n.cabinetNotManagerTips,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const Divider(height: 1),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.deviceDetailResponsibleLabel,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(
+                          managerName,
+                          style: const TextStyle(fontSize: 14),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.end,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        l10n.cabinetNotManagerPhone,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.black.withOpacity(0.5),
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(
+                          managerPhone,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF0B61D9),
+                          ),
+                          textAlign: TextAlign.end,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Divider(height: 1),
+                const SizedBox(height: 24),
+                const Divider(height: 1),
+                SizedBox(
+                  width: double.infinity,
+                  height: 54,
+                  child: TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(),
+                    child: Text(
+                      l10n.confirm,
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _scanSn() async {
+    final l10n = context.l10n;
     final expectedType = widget.expectedDeviceType;
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
@@ -1738,6 +1883,21 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
       ),
     );
     if (!mounted || result == null || result.isEmpty) return;
+
+    // 运维角色仅允许电柜查询：先校验有效 SN，再回填输入框，避免无效值污染 UI。
+    if (expectedType == 3) {
+      final parsedSn = ScanUtils.parseSnByDeviceType(result, 3).trim();
+      if (parsedSn.isEmpty || !_isValidStationSnInput(result, parsedSn)) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.deviceSearchInvalidStationSn)),
+        );
+        return;
+      }
+      _controller.text = parsedSn;
+      _submit(parsedSn);
+      return;
+    }
+
     _controller.text = result;
     _submit(result);
   }
@@ -1794,12 +1954,13 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
               // 开仓门按钮
               ListTile(
-                leading: const Icon(Icons.door_front_door_outlined),
-                title: Text(
+                title: Center(
+                  child: Text(
                   isDoorOpen
                       ? l10n.deviceDetailPortOpened
-                      : l10n.deviceDetailPortOpen,
-                  style: TextStyle(color: isDoorOpen ? Colors.grey : null),
+                      : l10n.deviceDetailPortOpenShort,
+                    style: TextStyle(color: isDoorOpen ? Colors.grey : null),
+                  ),
                 ),
                 onTap: isDoorOpen
                     ? null
@@ -1811,16 +1972,14 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
               // 启用/禁用按钮
               ListTile(
-                leading: Icon(
-                  isDisabled ? Icons.check_circle_outline : Icons.block,
-                  color: isDisabled ? AppColors.primaryColor : Colors.red,
-                ),
-                title: Text(
+                title: Center(
+                  child: Text(
                   isDisabled
                       ? l10n.deviceDetailPortEnable
-                      : l10n.deviceDetailPortDisable,
-                  style: TextStyle(
-                    color: isDisabled ? AppColors.primaryColor : Colors.red,
+                      : l10n.deviceDetailPortDisableShort,
+                    style: TextStyle(
+                      color: isDisabled ? AppColors.primaryColor : Colors.red,
+                    ),
                   ),
                 ),
                 onTap: () {
@@ -1857,25 +2016,14 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
   Future<void> _confirmOpenDoor(Cabin port) async {
     final l10n = context.l10n;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await ConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.confirm),
-        content: Text(l10n.deviceDetailPortOpenConfirm(port.portNo ?? 0)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
+      message: l10n.deviceDetailPortOpenConfirm(port.portNo ?? 0),
+      cancelText: l10n.cancel,
+      confirmText: l10n.confirm,
     );
 
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     final success = await ref
         .read(deviceDetailProvider.notifier)
@@ -1895,25 +2043,14 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
   Future<void> _confirmOpenCabinetBackDoor() async {
     final l10n = context.l10n;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await ConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.cabinetOperateOpenDoorConfirmTitle),
-        content: Text(l10n.cabinetOperateOpenDoorConfirmContent),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.cabinetOfflineCabinOpenDoor),
-          ),
-        ],
-      ),
+      message: l10n.cabinetOperateOpenDoorConfirmContent,
+      cancelText: l10n.cancel,
+      confirmText: l10n.confirm,
     );
 
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     final success = await ref
         .read(deviceDetailProvider.notifier)
@@ -1933,29 +2070,16 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
   Future<void> _confirmTogglePort(Cabin port, bool enable) async {
     final l10n = context.l10n;
-    final confirmed = await showDialog<bool>(
+    final confirmed = await ConfirmDialog.show(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.confirm),
-        content: Text(
-          enable
-              ? l10n.deviceDetailPortEnableConfirm
-              : l10n.deviceDetailPortDisableConfirm,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(l10n.cancel),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text(l10n.confirm),
-          ),
-        ],
-      ),
+      message: enable
+          ? l10n.deviceDetailPortEnableConfirm
+          : l10n.deviceDetailPortDisableConfirm,
+      cancelText: l10n.cancel,
+      confirmText: l10n.confirm,
     );
 
-    if (confirmed != true || !mounted) return;
+    if (!confirmed || !mounted) return;
 
     final notifier = ref.read(deviceDetailProvider.notifier);
     final success = enable

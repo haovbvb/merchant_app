@@ -3505,16 +3505,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetAuthCancelFailed => 'Failed to cancel authorization';
 
   @override
-  String get cabinetAuthAllPort => 'All port';
+    String get cabinetAuthAllPort => 'Slot Count';
 
   @override
-  String get cabinetAuthFaultPort => 'Fault port';
+    String get cabinetAuthFaultPort => 'Fault Slot Count';
 
   @override
-  String get cabinetAuthDisablePort => 'Disable port';
+    String get cabinetAuthDisablePort => 'Offline Slot Count';
 
   @override
   String get cabinetAuthSwapStandard => 'Swap standard';
+
+    @override
+    String get cabinetAuthAvg7DaySwapCount =>
+            'Average swaps in past 7 days';
+
+    @override
+    String get cabinetAuthNoData => 'No data';
 
   @override
   String get cabinetAuthWorkAccount => 'Operation and maintenance work account';
@@ -3717,14 +3724,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get cabinetOfflineRestartConfirm =>
-      'Are you sure you want to restart the cabinet?';
+      'Are you sure to restart the station?';
 
   @override
   String get cabinetOfflineOpenDoorTitle => 'Confirm Open Door';
 
   @override
   String get cabinetOfflineOpenDoorConfirm =>
-      'Are you sure you want to open the door? Please ensure Bluetooth is connected.';
+      'Are you sure to open the station door?';
 
   @override
   String get cabinetOfflineGsmSignal => 'GSM signal';
@@ -4130,6 +4137,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bluetoothAuthFailed => 'Authorization failed';
 
   @override
+  String get bluetoothAuthPleaseOpenBluetooth => 'Please enable Bluetooth in system settings';
+
+  @override
+  String get bluetoothAuthNoMatchLockId => 'No matched Lock ID for this station';
+
+  @override
+  String get bluetoothAuthRepeatAuthorization => 'Authorization already exists.';
+
+  @override
   String get bluetoothAuthMissingInput => 'Please fill SN, phone, and key ID';
 
   @override
@@ -4248,6 +4264,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deviceDetailPortOpen => 'Open Door';
 
+    @override
+    String get deviceDetailPortOpenShort => 'Open Slot';
+
   @override
   String get deviceDetailPortOpened => 'Door Opened';
 
@@ -4257,16 +4276,20 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get deviceDetailPortDisable => 'Disable';
 
+    @override
+    String get deviceDetailPortDisableShort => 'Disable Slot';
+
   @override
   String deviceDetailPortOpenConfirm(Object portNo) {
-    return 'Confirm to open port $portNo door?';
+        return 'Confirm opening slot $portNo? It can only be closed offline.';
   }
 
   @override
-  String get deviceDetailPortEnableConfirm => 'Confirm to enable this port?';
+    String get deviceDetailPortEnableConfirm => 'Confirm enable the slot?';
 
   @override
-  String get deviceDetailPortDisableConfirm => 'Confirm to disable this port?';
+  String get deviceDetailPortDisableConfirm =>
+      'Confirm to disable the warehouse door?';
 
   @override
   String get deviceDetailPortOpenSuccess => 'Door opened successfully';
@@ -4309,4 +4332,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vehicleDetailViewMore => 'View More';
+
+  @override
+  String get cabinetNotManagerTips => 'You are not the manager of this cabinet. Please contact the manager to obtain operation permission.';
+
+  @override
+  String get cabinetNotManagerPhone => 'Manager Phone';
 }

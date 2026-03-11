@@ -22,6 +22,11 @@ class ScanUtils {
     if (!ensureNoChinese(value)) return '';
     var result = value.trim();
 
+    final snFromUrl = _extractSnFromUrl(result);
+    if (snFromUrl.isNotEmpty) {
+      return snFromUrl;
+    }
+
     if (result.toUpperCase().startsWith('B:')) {
       result = result
           .substring(2)
@@ -84,6 +89,24 @@ class ScanUtils {
     }
 
     return result;
+  }
+
+  static String _extractSnFromUrl(String value) {
+    Uri? uri;
+    try {
+      uri = Uri.tryParse(value);
+    } catch (_) {
+      uri = null;
+    }
+    if (uri == null) return '';
+    final params = uri.queryParameters;
+    if (params.isEmpty) return '';
+    for (final entry in params.entries) {
+      if (entry.key.toLowerCase() == 'sn') {
+        return entry.value.trim();
+      }
+    }
+    return '';
   }
 
   static QrCodeBattery parseBatteryQr(String qr, int clickType) {

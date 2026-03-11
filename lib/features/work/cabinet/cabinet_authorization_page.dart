@@ -26,10 +26,17 @@ class _CabinetAuthorizationPageState
   DateTime _beginTime = DateTime.now();
   DateTime _endTime = DateTime.now().add(const Duration(hours: 24));
 
-  String _formatDateTime(DateTime dt) {
+  String _formatDateTimeForSubmit(DateTime dt) {
     return DateFormatUtils.format(
       dt,
       pattern: 'yyyy-MM-dd HH:mm:ss',
+    );
+  }
+
+  String _formatDateTimeForDisplay(DateTime dt) {
+    return DateFormatUtils.format(
+      dt,
+      pattern: 'MMM dd,yyyy HH:mm:ss',
     );
   }
 
@@ -73,8 +80,8 @@ class _CabinetAuthorizationPageState
     final ok = await notifier.authorize(
       sn: _selectedStation!.stationSn ?? '',
       accountNo: _selectedPerson!.accountNo ?? '',
-      beginTime: _formatDateTime(_beginTime),
-      endTime: _formatDateTime(_endTime),
+      beginTime: _formatDateTimeForSubmit(_beginTime),
+      endTime: _formatDateTimeForSubmit(_endTime),
     );
     if (!mounted) return;
     showToast(ok ? l10n.cabinetAuthSuccess : l10n.cabinetAuthFailed);
@@ -195,7 +202,7 @@ class _CabinetAuthorizationPageState
                             children: [
                               Expanded(
                                 child: Text(
-                                  _formatDateTime(_beginTime),
+                                  _formatDateTimeForDisplay(_beginTime),
                                   style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w500,
@@ -223,7 +230,7 @@ class _CabinetAuthorizationPageState
                             children: [
                               Expanded(
                                 child: Text(
-                                  _formatDateTime(_endTime),
+                                  _formatDateTimeForDisplay(_endTime),
                                   style: const TextStyle(
                                     fontSize: 15,
                                     fontWeight: FontWeight.w500,
@@ -418,10 +425,31 @@ class _SelectStationPageState extends ConsumerState<_SelectStationPage> {
                 hintText: l10n.cabinetAuthStationSearchHint,
                 hintStyle: const TextStyle(color: Colors.black38),
                 prefixIcon: const Icon(Icons.search, color: Colors.black38),
-                suffixIcon: IconButton(
-                  onPressed: _scanQRCode,
-                  icon: AppIcons.scanIcon(),
+                suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _searchController,
+                  builder: (_, value, __) => Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (value.text.isNotEmpty)
+                        IconButton(
+                          onPressed: () {
+                            _searchController.clear();
+                            _search();
+                          },
+                          icon: const Icon(
+                            Icons.cancel,
+                            color: Colors.black38,
+                            size: 20,
+                          ),
+                        ),
+                      IconButton(
+                        onPressed: _scanQRCode,
+                        icon: AppIcons.scanIcon(),
+                      ),
+                    ],
+                  ),
                 ),
+                suffixIconConstraints: const BoxConstraints(minWidth: 0),
                 filled: true,
                 fillColor: const Color(0xFFF5F5F5),
                 border: OutlineInputBorder(
@@ -435,7 +463,17 @@ class _SelectStationPageState extends ConsumerState<_SelectStationPage> {
 
           // Station list
           Expanded(
-            child: ListView.builder(
+            child: items.isEmpty
+                ? Center(
+                    child: Text(
+                      l10n.cabinetAuthNoData,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black45,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: items.length,
                     itemBuilder: (context, index) {
@@ -523,7 +561,7 @@ class _StationCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          station.showOnlineStatus ?? 'Station',
+                          'SN: ${station.stationSn ?? '-'}',
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -571,22 +609,12 @@ class _StationCard extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            // SN badge
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                'SN: ${station.stationSn ?? '-'}',
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.black54,
-                                ),
+                            // 状态文案
+                            Text(
+                              station.showOnlineStatus ?? '-',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.black54,
                               ),
                             ),
                           ],
@@ -630,28 +658,34 @@ class _StationCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
 
-              // Port statistics
-              Row(
-                children: [
-                  _PortStat(
-                    label: l10n.cabinetAuthAllPort,
-                    value: '${station.storeNum ?? 0}',
-                  ),
-                  _PortStat(
-                    label: l10n.cabinetAuthFaultPort,
-                    value: '${station.damageNum ?? 0}',
-                    valueColor: Colors.red,
-                  ),
-                  _PortStat(
-                    label: l10n.cabinetAuthDisablePort,
-                    value: '${station.offlineNum ?? 0}',
-                  ),
-                  _PortStat(
-                    label: l10n.cabinetAuthSwapStandard,
-                    value: station.standardSwapTime ?? '-',
-                    suffix: 'times/day',
-                  ),
-                ],
+              // 地址下方统计 Tab 栏（支持左右滑动）
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _PortStat(
+                      label: l10n.cabinetAuthAllPort,
+                      value: '${station.storeNum ?? 0}',
+                    ),
+                    _PortStat(
+                      label: l10n.cabinetAuthFaultPort,
+                      value: '${station.damageNum ?? 0}',
+                      valueColor: Colors.red,
+                    ),
+                    _PortStat(
+                      label: l10n.cabinetAuthDisablePort,
+                      value: '${station.offlineNum ?? 0}',
+                    ),
+                    _PortStat(
+                      label: l10n.cabinetAuthSwapStandard,
+                      value: station.standardSwapTime ?? '-',
+                    ),
+                    _PortStat(
+                      label: l10n.cabinetAuthAvg7DaySwapCount,
+                      value: station.avg7DaySwapTime ?? '-',
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -667,51 +701,45 @@ class _PortStat extends StatelessWidget {
     required this.label,
     required this.value,
     this.valueColor,
-    this.suffix,
   });
 
   final String label;
   final String value;
   final Color? valueColor;
-  final String? suffix;
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        margin: const EdgeInsets.only(right: 8),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade50,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: Column(
-          children: [
-            Text(
-              label,
-              style: const TextStyle(fontSize: 11, color: Colors.black54),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: valueColor ?? Colors.black87,
-                  ),
+    return Container(
+      width: 108,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      margin: const EdgeInsets.only(right: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Column(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(fontSize: 11, color: Colors.black54),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: valueColor ?? Colors.black87,
                 ),
-                if (suffix != null)
-                  Text(
-                    ' $suffix',
-                    style: const TextStyle(fontSize: 10, color: Colors.black54),
-                  ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -775,6 +803,26 @@ class _SelectPersonPageState extends ConsumerState<_SelectPersonPage> {
                 hintText: l10n.cabinetAuthPersonSearchHint,
                 hintStyle: const TextStyle(color: Colors.black38),
                 prefixIcon: const Icon(Icons.search, color: Colors.black38),
+                suffixIcon: ValueListenableBuilder<TextEditingValue>(
+                  valueListenable: _searchController,
+                  builder: (_, value, __) {
+                    if (value.text.isEmpty) {
+                      return const SizedBox.shrink();
+                    }
+                    return IconButton(
+                      onPressed: () {
+                        _searchController.clear();
+                        _search();
+                      },
+                      icon: const Icon(
+                        Icons.cancel,
+                        color: Colors.black38,
+                        size: 20,
+                      ),
+                    );
+                  },
+                ),
+                suffixIconConstraints: const BoxConstraints(minWidth: 0),
                 filled: true,
                 fillColor: const Color(0xFFF5F5F5),
                 border: OutlineInputBorder(
@@ -847,8 +895,8 @@ class _PersonCard extends StatelessWidget {
                   // Avatar
                   ClipOval(
                     child: Container(
-                      width: 48,
-                      height: 48,
+                      width: 55,
+                      height: 55,
                       color: Colors.grey.shade200,
                       child: person.avatar != null && person.avatar!.isNotEmpty
                           ? Image.network(
@@ -878,7 +926,7 @@ class _PersonCard extends StatelessWidget {
                         Row(
                           children: [
                             const Icon(
-                              Icons.copy,
+                              Icons.phone,
                               size: 14,
                               color: Colors.black38,
                             ),
@@ -898,8 +946,8 @@ class _PersonCard extends StatelessWidget {
                   // Checkmark
                   if (isSelected)
                     Container(
-                      width: 24,
-                      height: 24,
+                      width: 22,
+                      height: 22,
                       decoration: BoxDecoration(
                         color: AppColors.primaryColor,
                         borderRadius: BorderRadius.circular(4),
@@ -907,7 +955,7 @@ class _PersonCard extends StatelessWidget {
                       child: const Icon(
                         Icons.check,
                         color: Colors.white,
-                        size: 16,
+                        size: 14,
                       ),
                     ),
                 ],
@@ -1029,23 +1077,26 @@ class _RecordCard extends StatelessWidget {
     final sn = record['stationSn']?.toString() ?? record['sn']?.toString() ?? '-';
     final actionTime = record['actionTime'];
     final authTime = actionTime != null
-        ? DateTime.fromMillisecondsSinceEpoch((actionTime as num).toInt())
-            .toString()
-            .substring(0, 19)
+      ? DateFormatUtils.format(
+        DateTime.fromMillisecondsSinceEpoch((actionTime as num).toInt()),
+        pattern: 'MMM dd,yyyy HH:mm:ss',
+        )
         : '-';
     final person = record['bePermissionName']?.toString() ?? 
         record['accountNo']?.toString() ?? '-';
     final beginTimeMs = record['beginTime'] as num?;
     final endTimeMs = record['expireTime'] ?? record['endTime'] as num?;
     final beginTime = beginTimeMs != null
-        ? DateTime.fromMillisecondsSinceEpoch(beginTimeMs.toInt())
-            .toString()
-            .substring(0, 16)
+      ? DateFormatUtils.format(
+        DateTime.fromMillisecondsSinceEpoch(beginTimeMs.toInt()),
+        pattern: 'MMM dd,yyyy HH:mm:ss',
+        )
         : '-';
     final endTime = endTimeMs != null
-        ? DateTime.fromMillisecondsSinceEpoch((endTimeMs as num).toInt())
-            .toString()
-            .substring(0, 16)
+      ? DateFormatUtils.format(
+        DateTime.fromMillisecondsSinceEpoch((endTimeMs as num).toInt()),
+        pattern: 'MMM dd,yyyy HH:mm:ss',
+        )
         : '-';
     final img = record['standardImg']?.toString();
 

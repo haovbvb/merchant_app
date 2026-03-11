@@ -374,7 +374,7 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
 
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: true, parseDeviceSn: true)),
+      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: false, parseDeviceSn: true)),
     );
     if (!mounted || result == null || result.isEmpty) return;
     setState(() {

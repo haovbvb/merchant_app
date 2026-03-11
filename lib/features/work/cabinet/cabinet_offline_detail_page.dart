@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/app_router.dart';
@@ -6,9 +8,11 @@ import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/cabinet_cabin.dart';
 import 'package:merchant_app/data/models/cabinet_detail_base_info_bean.dart';
+import 'package:merchant_app/features/work/cabinet/cabinet_ble_client.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_offline_controller.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_offline_fault_page.dart';
 import 'package:merchant_app/features/work/device/widgets/cabinet_port_detail_section.dart';
+import 'package:merchant_app/l10n/app_localizations.dart';
 
 class CabinetOfflineDetailPage extends ConsumerStatefulWidget {
   const CabinetOfflineDetailPage({super.key, this.initialSn});
@@ -24,12 +28,47 @@ class CabinetOfflineDetailPage extends ConsumerStatefulWidget {
 class _CabinetOfflineDetailPageState
     extends ConsumerState<CabinetOfflineDetailPage> {
   final TextEditingController _snController = TextEditingController();
+  late final CabinetBleClient _bleClient;
   bool _noPermissionHandled = false;
   String _warehousePortFilter = 'all';
+  String _bleBoundSn = '';
+  String _bleBoundSecret = '';
+  String? _pendingSuccessToast;
+  String? _pendingFailedToast;
+  VoidCallback? _pendingSuccessAction;
+  CabinetBleConnectionPhase _blePhase = CabinetBleConnectionPhase.idle;
 
   @override
   void initState() {
     super.initState();
+    _bleClient = CabinetBleClient(
+      onConnectionChanged: (connected) {
+        ref.read(cabinetOfflineProvider.notifier).setBleConnected(connected);
+      },
+      onPhaseChanged: (phase) {
+        if (!mounted || _blePhase == phase) return;
+        setState(() {
+          _blePhase = phase;
+        });
+      },
+      onAuthorized: () async {
+        final l10n = context.l10n;
+        ref
+            .read(cabinetOfflineProvider.notifier)
+            .updateRealtimeData(
+              smokeAlarmStatus: l10n.cabinetOfflineNoAlarm,
+              waterAlarmStatus: l10n.cabinetOfflineNoAlarm,
+              chargerStatus: l10n.cabinetOfflineYes,
+            );
+        ref
+            .read(cabinetOfflineProvider.notifier)
+            .updateBackupPowerStatus(l10n.cabinetOfflineNo);
+        await _bleClient.queryDeviceInfo();
+        await _bleClient.queryAllData();
+      },
+      onJsonData: _handleBleJsonData,
+      onError: _handleBleError,
+    );
     if (widget.initialSn != null && widget.initialSn!.isNotEmpty) {
       _snController.text = widget.initialSn!;
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -46,67 +85,360 @@ class _CabinetOfflineDetailPageState
 
   Future<void> _restartCabinet() async {
     final l10n = context.l10n;
-    final info = ref.read(cabinetOfflineProvider).baseInfo;
-    final pId = info?.stationPid?.trim() ?? '';
-    if (pId.isEmpty) return;
-    final ok = await ref
-        .read(cabinetOfflineProvider.notifier)
-        .restartCabinet(pId: pId);
-    if (!mounted) return;
-    showToast(
-      ok ? l10n.deviceDetailToggleSuccess : l10n.deviceDetailToggleFailed,
+    final state = ref.read(cabinetOfflineProvider);
+    if (!state.bleConnected) {
+      showToast(l10n.cabinetOfflinePleaseConnectBle);
+      return;
+    }
+    _setPendingControlToast(
+      success: l10n.deviceDetailToggleSuccess,
+      failed: l10n.deviceDetailToggleFailed,
     );
+    await _bleClient.sendRestart();
   }
 
   Future<void> _openBackDoor() async {
     final l10n = context.l10n;
-    final info = ref.read(cabinetOfflineProvider).baseInfo;
-    final sn = info?.stationSn?.trim() ?? '';
-    if (sn.isEmpty) return;
-    final ok = await ref
-        .read(cabinetOfflineProvider.notifier)
-        .openBackDoor(sn: sn);
-    if (!mounted) return;
-    showToast(
-      ok
-          ? l10n.cabinetOperateOpenDoorSuccess
-          : l10n.cabinetOperateOpenDoorFailed,
+    final state = ref.read(cabinetOfflineProvider);
+    if (!state.bleConnected) {
+      showToast(l10n.cabinetOfflinePleaseConnectBle);
+      return;
+    }
+    _setPendingControlToast(
+      success: l10n.cabinetOperateOpenDoorSuccess,
+      failed: l10n.cabinetOperateOpenDoorFailed,
     );
+    await _bleClient.sendOpenBackDoor();
   }
 
   Future<void> _openCabinDoor(CabinetCabin cabin) async {
     final l10n = context.l10n;
-    final info = ref.read(cabinetOfflineProvider).baseInfo;
-    final sn = info?.stationSn?.trim() ?? '';
-    if (sn.isEmpty) return;
-    final ok = await ref
-        .read(cabinetOfflineProvider.notifier)
-        .controlCabinPort(sn: sn, port: cabin.portNo, type: 1);
-    if (!mounted) return;
-    showToast(
-      ok
-          ? l10n.deviceDetailCabinOpenDoorSuccess
-          : l10n.deviceDetailCabinOpenDoorFailed,
+    final state = ref.read(cabinetOfflineProvider);
+    if (!state.bleConnected) {
+      showToast(l10n.cabinetOfflinePleaseConnectBle);
+      return;
+    }
+    _setPendingControlToast(
+      success: l10n.deviceDetailCabinOpenDoorSuccess,
+      failed: l10n.deviceDetailCabinOpenDoorFailed,
     );
+    await _bleClient.sendPortControl(port: cabin.portNo, type: 1);
   }
 
   Future<void> _toggleCabinEnable(CabinetCabin cabin) async {
     final l10n = context.l10n;
-    final info = ref.read(cabinetOfflineProvider).baseInfo;
-    final sn = info?.stationSn?.trim() ?? '';
-    if (sn.isEmpty) return;
     final type = cabin.isEnabled ? 2 : 3;
-    final ok = await ref
-        .read(cabinetOfflineProvider.notifier)
-        .controlCabinPort(sn: sn, port: cabin.portNo, type: type);
-    if (!mounted) return;
-    showToast(
-      ok ? l10n.deviceDetailToggleSuccess : l10n.deviceDetailToggleFailed,
+    final state = ref.read(cabinetOfflineProvider);
+    if (!state.bleConnected) {
+      showToast(l10n.cabinetOfflinePleaseConnectBle);
+      return;
+    }
+    _setPendingControlToast(
+      success: l10n.deviceDetailToggleSuccess,
+      failed: l10n.deviceDetailToggleFailed,
     );
+    _pendingSuccessAction = () {
+      final notifier = ref.read(cabinetOfflineProvider.notifier);
+      notifier.updateCabinDoorStatus(cabin.portNo, type == 3 ? 1 : 0);
+    };
+    await _bleClient.sendPortControl(port: cabin.portNo, type: type);
+  }
+
+  void _setPendingControlToast({
+    required String success,
+    required String failed,
+  }) {
+    _pendingSuccessToast = success;
+    _pendingFailedToast = failed;
+    _pendingSuccessAction = null;
+  }
+
+  void _handleBleError(String message) {
+    if (!mounted) return;
+    final l10n = context.l10n;
+    if (_pendingSuccessToast != null || _pendingFailedToast != null) {
+      showToast(_pendingFailedToast ?? l10n.deviceDetailToggleFailed);
+      _pendingSuccessToast = null;
+      _pendingFailedToast = null;
+      _pendingSuccessAction = null;
+      return;
+    }
+
+    switch (message) {
+      case 'permission-denied':
+        showToast(l10n.bluetoothPermissionDesc);
+        break;
+      case 'bluetooth-off':
+        showToast(l10n.cabinetOfflineBleTurnOnHint);
+        _tryStartBle(ref.read(cabinetOfflineProvider));
+        break;
+      case 'scan-timeout':
+        showToast(l10n.cabinetOfflineBleScanTimeout);
+        break;
+      case 'scan-failed':
+        showToast(l10n.cabinetOfflinePleaseConnectBle);
+        break;
+      case 'write-failed':
+        showToast(l10n.cabinetOfflineBleDisconnectedHint);
+        _tryStartBle(ref.read(cabinetOfflineProvider));
+        break;
+      case 'not-connected':
+        showToast(l10n.cabinetOfflineBleDisconnectedHint);
+        break;
+      case 'not-authorized':
+      case 'auth-failed':
+        showToast(l10n.cabinetOfflineBleAuthFailed);
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _handleBleJsonData(String jsonText) {
+    if (!mounted) return;
+    Map<String, dynamic> map;
+    try {
+      final decoded = jsonDecode(jsonText);
+      if (decoded is! Map<String, dynamic>) return;
+      map = decoded;
+    } catch (_) {
+      return;
+    }
+
+    final notifier = ref.read(cabinetOfflineProvider.notifier);
+    final l10n = context.l10n;
+    final msgType = (map['msgType'] as num?)?.toInt();
+    if (msgType == null) return;
+
+    if (msgType == CabinetDataType.controlResponse) {
+      final ok = ((map['result'] as num?)?.toInt() ?? 0) == 1;
+      showToast(
+        ok
+            ? (_pendingSuccessToast ?? l10n.deviceDetailToggleSuccess)
+            : (_pendingFailedToast ?? l10n.deviceDetailToggleFailed),
+      );
+      if (ok) {
+        _pendingSuccessAction?.call();
+        _bleClient.queryAllData();
+      }
+      _pendingSuccessToast = null;
+      _pendingFailedToast = null;
+      _pendingSuccessAction = null;
+      return;
+    }
+
+    final resultList = map['resultList'];
+    if (msgType == CabinetDataType.queryResponse && resultList is List) {
+      for (final item in resultList) {
+        if (item is! Map) continue;
+        final id = item['id']?.toString() ?? '';
+        final value = item['value']?.toString() ?? '';
+        if (id == CabinetParamName.softVersion) {
+          notifier.updateSoftwareVersion(value);
+        } else if (id == CabinetParamName.cabSoc) {
+          final threshold = int.tryParse(value);
+          if (threshold != null) {
+            notifier.patchBaseInfo(swapThreshold: threshold);
+          }
+        } else if (id == CabinetParamName.cabVolume) {
+          final volume = int.tryParse(value);
+          if (volume != null) {
+            notifier.patchBaseInfo(volume: volume);
+          }
+        } else if (id == CabinetParamName.apn) {
+          notifier.patchBaseInfo(apn: value);
+        } else if (id == CabinetParamName.cabTcpPort) {
+          notifier.patchBaseInfo(platformUrl: value.replaceAll(',', ':'));
+        }
+      }
+    }
+
+    final alarmList = map['alarmList'];
+    if (msgType == CabinetDataType.alarmRequest && alarmList is List) {
+      var chargerAlarm = false;
+      for (final item in alarmList) {
+        if (item is! Map) continue;
+        final id = item['id']?.toString() ?? '';
+        final alarmFlag = (item['alarmFlag'] as num?)?.toInt();
+        if (id == CabinetBleSignal.alarmSmoke) {
+          notifier.updateRealtimeData(
+            smokeAlarmStatus: alarmFlag == 1
+                ? l10n.cabinetOfflineAlarm
+                : alarmFlag == 0
+                ? l10n.cabinetOfflineNoAlarm
+                : l10n.cabinetOfflineUnknown,
+          );
+        } else if (id == CabinetBleSignal.alarmWater) {
+          notifier.updateRealtimeData(
+            waterAlarmStatus: alarmFlag == 1
+                ? l10n.cabinetOfflineAlarm
+                : alarmFlag == 0
+                ? l10n.cabinetOfflineNoAlarm
+                : l10n.cabinetOfflineUnknown,
+          );
+        } else if (id.contains(CabinetBleSignal.ctrlChargerPrefix)) {
+          if (alarmFlag == 1) {
+            chargerAlarm = true;
+          }
+        } else if (id == CabinetBleSignal.backupBatteryStatus) {
+          notifier.updateBackupPowerStatus(
+            alarmFlag == 1
+                ? l10n.cabinetOfflineYes
+                : alarmFlag == 0
+                ? l10n.cabinetOfflineNo
+                : l10n.cabinetOfflineUnknown,
+          );
+        }
+      }
+      notifier.updateRealtimeData(
+        chargerStatus: chargerAlarm
+            ? l10n.cabinetOfflineNo
+            : l10n.cabinetOfflineYes,
+      );
+    }
+
+    if (msgType == CabinetDataType.attributeRequest) {
+      final attrList = map['attrList'];
+      var batteryInSlot = 0;
+      var ctrlSystemStatus = l10n.cabinetOfflineYes;
+      if (attrList is List) {
+        for (final item in attrList) {
+          if (item is! Map) continue;
+          final id = item['id']?.toString() ?? '';
+          final value = item['value']?.toString() ?? '';
+          final doorId = int.tryParse(item['doorId']?.toString() ?? '');
+
+          if (id == CabinetBleSignal.gsm) {
+            notifier.updateRealtimeData(gsmSignal: '$value dbm');
+          } else if (id == CabinetBleSignal.cabinetMaintenanceDoor) {
+            final intVal = int.tryParse(value);
+            notifier.updateRealtimeData(
+              omDoorStatus: intVal == 0
+                  ? l10n.cabinetOfflineClose
+                  : intVal == 1
+                  ? l10n.cabinetOfflineOpen
+                  : l10n.cabinetOfflineUnknown,
+            );
+          } else if (id == CabinetBleSignal.cabinetVoltage) {
+            notifier.updateRealtimeData(totalVoltage: '$value V');
+          } else if (id == CabinetBleSignal.cabinetCurrent) {
+            notifier.updateRealtimeData(totalCurrent: '$value A');
+          } else if (id == CabinetBleSignal.cabinetTemperature) {
+            notifier.updateRealtimeData(temperature: '$value ℃');
+          } else if (id == CabinetBleSignal.electricMeter) {
+            notifier.updateRealtimeData(electricityMeter: '$value kWh');
+          } else if (id == CabinetBleSignal.ctrlSystem) {
+            final intVal = int.tryParse(value);
+            if (intVal == 0) {
+              ctrlSystemStatus = l10n.cabinetOfflineException;
+            } else if (intVal == 1) {
+              ctrlSystemStatus = l10n.cabinetOfflineYes;
+            } else {
+              ctrlSystemStatus = l10n.cabinetOfflineUnknown;
+            }
+          } else if (id == CabinetBleSignal.cabinetFanStatus) {
+            final intVal = int.tryParse(value);
+            notifier.updateRealtimeData(
+              fanStatus: intVal == 0
+                  ? l10n.cabinetOfflineClose
+                  : intVal == 1
+                  ? l10n.cabinetOfflineRunning
+                  : intVal == 2
+                  ? l10n.cabinetOfflineException
+                  : l10n.cabinetOfflineUnknown,
+            );
+          } else if (doorId != null && doorId > 0) {
+            if (id == CabinetBleSignal.batterySn) {
+              notifier.updateCabinBatterySn(doorId, value);
+            } else if (id == CabinetBleSignal.cabinetBatterySwapStatus) {
+              final intVal = int.tryParse(value) ?? 0;
+              notifier.updateCabinBatteryStatus(doorId, intVal);
+              if (intVal != 0) {
+                batteryInSlot++;
+              }
+            } else if (id == CabinetBleSignal.batterySoc) {
+              final soc = int.tryParse(value);
+              if (soc != null) {
+                notifier.updateCabinBatterySoc(doorId, soc);
+              }
+            } else if (id == CabinetBleSignal.cabinetDoorStatus) {
+              final intVal = int.tryParse(value);
+              if (intVal != null) {
+                notifier.updateCabinDoorStatus(doorId, intVal);
+              }
+            } else if (id == CabinetBleSignal.cabinetSwapStatus) {
+              final intVal = int.tryParse(value) ?? 0;
+              notifier.updateCabinSwapFlag(doorId, intVal > 0 ? 1 : 0);
+            }
+          }
+        }
+      }
+      notifier.updateBatteryInSlot(batteryInSlot);
+      notifier.updateRealtimeData(ctrlSystemStatus: ctrlSystemStatus);
+
+      final cabList = map['cabList'];
+      if (cabList is List && cabList.isNotEmpty && cabList.first is Map) {
+        final cabinet = cabList.first as Map;
+        final dbm = cabinet['dBM']?.toString();
+        final cabVol = cabinet['cabVol']?.toString();
+        final cabCur = cabinet['cabCur']?.toString();
+        final cabT = cabinet['cabT']?.toString();
+        final cabAlarm = cabinet['cabAlarm'];
+        if (dbm != null && dbm.isNotEmpty) {
+          notifier.updateRealtimeData(gsmSignal: '$dbm dbm');
+        }
+        if (cabVol != null && cabVol.isNotEmpty) {
+          notifier.updateRealtimeData(totalVoltage: '$cabVol V');
+        }
+        if (cabCur != null && cabCur.isNotEmpty) {
+          notifier.updateRealtimeData(totalCurrent: '$cabCur A');
+        }
+        if (cabT != null && cabT.isNotEmpty) {
+          notifier.updateRealtimeData(temperature: '$cabT ℃');
+        }
+        if (cabAlarm is List) {
+          var waterAlarm = false;
+          var smokeAlarm = false;
+          for (final item in cabAlarm) {
+            final code = item?.toString() ?? '';
+            if (code == '03') {
+              waterAlarm = true;
+            } else if (code == '04') {
+              smokeAlarm = true;
+            }
+          }
+          if (waterAlarm) {
+            notifier.updateRealtimeData(
+              waterAlarmStatus: l10n.cabinetOfflineAlarm,
+            );
+          }
+          if (smokeAlarm) {
+            notifier.updateRealtimeData(
+              smokeAlarmStatus: l10n.cabinetOfflineAlarm,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  void _tryStartBle(CabinetOfflineState state) {
+    final sn = state.baseInfo?.stationSn?.trim() ?? '';
+    final secret = state.secretKey?.trim() ?? '';
+    if (sn.isEmpty || secret.isEmpty) {
+      return;
+    }
+    if (sn == _bleBoundSn && secret == _bleBoundSecret) {
+      return;
+    }
+    _bleBoundSn = sn;
+    _bleBoundSecret = secret;
+    _bleClient.start(deviceSn: sn, secretKey: secret);
   }
 
   @override
   void dispose() {
+    _bleClient.stop();
     _snController.dispose();
     super.dispose();
   }
@@ -117,6 +449,8 @@ class _CabinetOfflineDetailPageState
     final state = ref.watch(cabinetOfflineProvider);
     final info = state.baseInfo;
     final canOperate = (info?.hasPermission ?? 0) == 1;
+
+    _tryStartBle(state);
 
     if (info != null && !canOperate && !_noPermissionHandled) {
       _noPermissionHandled = true;
@@ -174,8 +508,7 @@ class _CabinetOfflineDetailPageState
                 ? null
                 : () {
                     final sn = _snController.text.trim();
-                    final notifier =
-                        ref.read(cabinetOfflineProvider.notifier);
+                    final notifier = ref.read(cabinetOfflineProvider.notifier);
                     notifier.load(sn);
                     notifier.loadLayout(sn);
                   },
@@ -217,12 +550,10 @@ class _CabinetOfflineDetailPageState
                 _DeviceInfoTab(
                   info: info,
                   state: state,
-                  onEditSwapThreshold: () =>
-                      _showEditSwapThreshold(info),
+                  onEditSwapThreshold: () => _showEditSwapThreshold(info),
                   onEditApn: () => _showEditApn(info),
                   onEditVolume: () => _showEditVolume(info),
-                  onEditPlatformUrl: () =>
-                      _showEditPlatformUrl(info),
+                  onEditPlatformUrl: () => _showEditPlatformUrl(info),
                 ),
                 _WarehouseTab(
                   state: state,
@@ -265,8 +596,7 @@ class _CabinetOfflineDetailPageState
                   borderRadius: BorderRadius.circular(4),
                 ),
                 clipBehavior: Clip.antiAlias,
-                child: info.standardImg != null &&
-                        info.standardImg!.isNotEmpty
+                child: info.standardImg != null && info.standardImg!.isNotEmpty
                     ? Image.network(
                         info.standardImg!,
                         fit: BoxFit.cover,
@@ -288,9 +618,7 @@ class _CabinetOfflineDetailPageState
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      info.stationName ??
-                          info.stationModelName ??
-                          '-',
+                      info.stationName ?? info.stationModelName ?? '-',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -316,9 +644,7 @@ class _CabinetOfflineDetailPageState
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                isOnline
-                                    ? Icons.wifi
-                                    : Icons.wifi_off,
+                                isOnline ? Icons.wifi : Icons.wifi_off,
                                 size: 14,
                                 color: isOnline
                                     ? AppColors.primaryColor
@@ -345,19 +671,15 @@ class _CabinetOfflineDetailPageState
                           ),
                           decoration: BoxDecoration(
                             border: Border.all(
-                              color: const Color(0xFFD9D9D9),
+                              color: _bleStatusColor(state.bleConnected),
                             ),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
-                            state.bleConnected
-                                ? l10n.cabinetOfflineBleConnected
-                                : l10n.cabinetOfflineBleDisconnected,
+                            _bleStatusLabel(l10n, state.bleConnected),
                             style: TextStyle(
                               fontSize: 12,
-                              color: state.bleConnected
-                                  ? const Color(0xFF0B61D9)
-                                  : const Color(0xFF6C7180),
+                              color: _bleStatusColor(state.bleConnected),
                             ),
                           ),
                         ),
@@ -379,8 +701,7 @@ class _CabinetOfflineDetailPageState
                   icon: const Icon(Icons.restart_alt, size: 18),
                   label: Text(l10n.cabinetOfflineRestart),
                   style: OutlinedButton.styleFrom(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                     backgroundColor: const Color(0xFFF6F8FC),
                     side: BorderSide.none,
                     shape: RoundedRectangleBorder(
@@ -396,14 +717,10 @@ class _CabinetOfflineDetailPageState
                   onPressed: !canOperate || state.operating
                       ? null
                       : () => _showOpenDoorDialog(),
-                  icon: const Icon(
-                    Icons.door_front_door_outlined,
-                    size: 18,
-                  ),
+                  icon: const Icon(Icons.door_front_door_outlined, size: 18),
                   label: Text(l10n.cabinetOfflineOpenDoor),
                   style: OutlinedButton.styleFrom(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                     backgroundColor: const Color(0xFFF6F8FC),
                     side: BorderSide.none,
                     shape: RoundedRectangleBorder(
@@ -476,8 +793,7 @@ class _CabinetOfflineDetailPageState
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (ctx) => _EditTextSheet(
         title: l10n.cabinetOfflineSwapThreshold,
@@ -490,13 +806,25 @@ class _CabinetOfflineDetailPageState
           }
           final intVal = int.tryParse(value);
           if (intVal == null || intVal > maxChargeSoc) {
-            showToast(
-              l10n.cabinetOfflineSwapThresholdExceed(maxChargeSoc),
-            );
+            showToast(l10n.cabinetOfflineSwapThresholdExceed(maxChargeSoc));
+            return;
+          }
+          final state = ref.read(cabinetOfflineProvider);
+          if (!state.bleConnected) {
+            showToast(l10n.cabinetOfflinePleaseConnectBle);
             return;
           }
           Navigator.of(ctx).pop();
-          showToast(l10n.cabinetOfflinePleaseConnectBle);
+          _setPendingControlToast(
+            success: l10n.deviceDetailToggleSuccess,
+            failed: l10n.deviceDetailToggleFailed,
+          );
+          _pendingSuccessAction = () {
+            ref
+                .read(cabinetOfflineProvider.notifier)
+                .patchBaseInfo(swapThreshold: intVal);
+          };
+          _bleClient.sendSwapThreshold(intVal);
         },
       ),
     );
@@ -509,8 +837,7 @@ class _CabinetOfflineDetailPageState
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (ctx) => _EditTextSheet(
         title: l10n.cabinetOfflineApn,
@@ -525,8 +852,20 @@ class _CabinetOfflineDetailPageState
             showToast(l10n.cabinetOfflineMaxLenError(200));
             return;
           }
+          final state = ref.read(cabinetOfflineProvider);
+          if (!state.bleConnected) {
+            showToast(l10n.cabinetOfflinePleaseConnectBle);
+            return;
+          }
           Navigator.of(ctx).pop();
-          showToast(l10n.cabinetOfflinePleaseConnectBle);
+          _setPendingControlToast(
+            success: l10n.deviceDetailToggleSuccess,
+            failed: l10n.deviceDetailToggleFailed,
+          );
+          _pendingSuccessAction = () {
+            ref.read(cabinetOfflineProvider.notifier).patchBaseInfo(apn: value);
+          };
+          _bleClient.sendApn(value);
         },
       ),
     );
@@ -538,15 +877,28 @@ class _CabinetOfflineDetailPageState
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (ctx) => _EditVolumeSheet(
         title: l10n.cabinetOfflineVolume,
         currentValue: currentValue,
         onSave: (value) {
+          final state = ref.read(cabinetOfflineProvider);
+          if (!state.bleConnected) {
+            showToast(l10n.cabinetOfflinePleaseConnectBle);
+            return;
+          }
           Navigator.of(ctx).pop();
-          showToast(l10n.cabinetOfflinePleaseConnectBle);
+          _setPendingControlToast(
+            success: l10n.deviceDetailToggleSuccess,
+            failed: l10n.deviceDetailToggleFailed,
+          );
+          _pendingSuccessAction = () {
+            ref
+                .read(cabinetOfflineProvider.notifier)
+                .patchBaseInfo(volume: value);
+          };
+          _bleClient.sendVolume(value);
         },
       ),
     );
@@ -559,8 +911,7 @@ class _CabinetOfflineDetailPageState
       context: context,
       isScrollControlled: true,
       shape: const RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (ctx) => _EditTextSheet(
         title: l10n.cabinetOfflinePlatformUrl,
@@ -575,11 +926,59 @@ class _CabinetOfflineDetailPageState
             showToast(l10n.cabinetOfflineMaxLenError(200));
             return;
           }
+          final state = ref.read(cabinetOfflineProvider);
+          if (!state.bleConnected) {
+            showToast(l10n.cabinetOfflinePleaseConnectBle);
+            return;
+          }
           Navigator.of(ctx).pop();
-          showToast(l10n.cabinetOfflinePleaseConnectBle);
+          _setPendingControlToast(
+            success: l10n.deviceDetailToggleSuccess,
+            failed: l10n.deviceDetailToggleFailed,
+          );
+          _pendingSuccessAction = () {
+            ref
+                .read(cabinetOfflineProvider.notifier)
+                .patchBaseInfo(platformUrl: value);
+          };
+          _bleClient.sendPlatformUrl(value);
         },
       ),
     );
+  }
+
+  String _bleStatusLabel(AppLocalizations l10n, bool bleConnected) {
+    if (bleConnected || _blePhase == CabinetBleConnectionPhase.connected) {
+      return l10n.cabinetOfflineBleConnected;
+    }
+    switch (_blePhase) {
+      case CabinetBleConnectionPhase.scanning:
+        return l10n.cabinetOfflineBleScanning;
+      case CabinetBleConnectionPhase.connecting:
+        return l10n.cabinetOfflineBleConnecting;
+      case CabinetBleConnectionPhase.reconnecting:
+        return l10n.cabinetOfflineBleReconnecting;
+      case CabinetBleConnectionPhase.connected:
+        return l10n.cabinetOfflineBleConnected;
+      case CabinetBleConnectionPhase.idle:
+        return l10n.cabinetOfflineBleDisconnected;
+    }
+  }
+
+  Color _bleStatusColor(bool bleConnected) {
+    if (bleConnected || _blePhase == CabinetBleConnectionPhase.connected) {
+      return const Color(0xFF0B61D9);
+    }
+    switch (_blePhase) {
+      case CabinetBleConnectionPhase.scanning:
+      case CabinetBleConnectionPhase.connecting:
+      case CabinetBleConnectionPhase.reconnecting:
+        return const Color(0xFFFA8C16);
+      case CabinetBleConnectionPhase.connected:
+        return const Color(0xFF0B61D9);
+      case CabinetBleConnectionPhase.idle:
+        return const Color(0xFF6C7180);
+    }
   }
 }
 
@@ -901,6 +1300,7 @@ class _WarehouseTab extends StatelessWidget {
       ],
     );
   }
+
   void _showCabinOperateSheet(BuildContext context, CabinetCabin cabin) {
     final l10n = context.l10n;
     showModalBottomSheet(
@@ -1002,10 +1402,7 @@ class _InfoTile extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF333333),
-              ),
+              style: const TextStyle(fontSize: 14, color: Color(0xFF333333)),
             ),
           ),
           Text(
@@ -1021,11 +1418,7 @@ class _InfoTile extends StatelessWidget {
           ),
           if (showArrow) ...[
             const SizedBox(width: 4),
-            const Icon(
-              Icons.chevron_right,
-              size: 20,
-              color: Color(0xFF999999),
-            ),
+            const Icon(Icons.chevron_right, size: 20, color: Color(0xFF999999)),
           ],
         ],
       ),
@@ -1034,15 +1427,9 @@ class _InfoTile extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        onTap != null
-            ? InkWell(onTap: onTap, child: content)
-            : content,
+        onTap != null ? InkWell(onTap: onTap, child: content) : content,
         if (showDivider)
-          const Divider(
-            height: 1,
-            thickness: 0.5,
-            color: Color(0xFFF0F0F0),
-          ),
+          const Divider(height: 1, thickness: 0.5, color: Color(0xFFF0F0F0)),
       ],
     );
   }
@@ -1116,18 +1503,15 @@ class _EditTextSheetState extends State<_EditTextSheet> {
                 ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide:
-                      const BorderSide(color: Color(0xFFD9D9D9)),
+                  borderSide: const BorderSide(color: Color(0xFFD9D9D9)),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide:
-                      const BorderSide(color: Color(0xFFD9D9D9)),
+                  borderSide: const BorderSide(color: Color(0xFFD9D9D9)),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide:
-                      const BorderSide(color: Color(0xFFD9D9D9)),
+                  borderSide: const BorderSide(color: Color(0xFFD9D9D9)),
                 ),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear, size: 20),
@@ -1173,8 +1557,7 @@ class _EditTextSheetState extends State<_EditTextSheet> {
             child: SizedBox(
               height: 44,
               child: TextButton(
-                onPressed: () =>
-                    widget.onSave(_controller.text),
+                onPressed: () => widget.onSave(_controller.text),
                 style: TextButton.styleFrom(
                   backgroundColor: AppColors.primaryColor,
                   shape: RoundedRectangleBorder(
@@ -1183,10 +1566,7 @@ class _EditTextSheetState extends State<_EditTextSheet> {
                 ),
                 child: Text(
                   l10n.save,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 14),
                 ),
               ),
             ),
@@ -1255,15 +1635,13 @@ class _EditVolumeSheetState extends State<_EditVolumeSheet> {
                       enabledThumbRadius: 12,
                       elevation: 2,
                     ),
-                    overlayColor:
-                        AppColors.primaryColor.withValues(alpha: 0.1),
+                    overlayColor: AppColors.primaryColor.withValues(alpha: 0.1),
                   ),
                   child: Slider(
                     value: _volume.toDouble(),
                     min: 0,
                     max: 100,
-                    onChanged: (v) =>
-                        setState(() => _volume = v.round()),
+                    onChanged: (v) => setState(() => _volume = v.round()),
                   ),
                 ),
               ),
@@ -1274,9 +1652,7 @@ class _EditVolumeSheetState extends State<_EditVolumeSheet> {
                   vertical: 8,
                 ),
                 decoration: BoxDecoration(
-                  border: Border.all(
-                    color: const Color(0xFFD9D9D9),
-                  ),
+                  border: Border.all(color: const Color(0xFFD9D9D9)),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -1298,14 +1674,11 @@ class _EditVolumeSheetState extends State<_EditVolumeSheet> {
                 child: SizedBox(
                   height: 44,
                   child: TextButton(
-                    onPressed: () =>
-                        Navigator.of(context).pop(),
+                    onPressed: () => Navigator.of(context).pop(),
                     style: TextButton.styleFrom(
-                      backgroundColor:
-                          const Color(0xFFF5F8FB),
+                      backgroundColor: const Color(0xFFF5F8FB),
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     child: Text(
@@ -1323,22 +1696,16 @@ class _EditVolumeSheetState extends State<_EditVolumeSheet> {
                 child: SizedBox(
                   height: 44,
                   child: TextButton(
-                    onPressed: () =>
-                        widget.onSave(_volume),
+                    onPressed: () => widget.onSave(_volume),
                     style: TextButton.styleFrom(
-                      backgroundColor:
-                          AppColors.primaryColor,
+                      backgroundColor: AppColors.primaryColor,
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(8),
                       ),
                     ),
                     child: Text(
                       l10n.save,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 14,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 14),
                     ),
                   ),
                 ),

@@ -7655,6 +7655,24 @@ abstract class AppLocalizations {
   /// **'Bluetooth Disconnected'**
   String get cabinetOfflineBleDisconnected;
 
+  /// No description provided for @cabinetOfflineBleScanning.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Scanning'**
+  String get cabinetOfflineBleScanning;
+
+  /// No description provided for @cabinetOfflineBleConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Connecting'**
+  String get cabinetOfflineBleConnecting;
+
+  /// No description provided for @cabinetOfflineBleReconnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth Reconnecting'**
+  String get cabinetOfflineBleReconnecting;
+
   /// No description provided for @cabinetOfflineFaultEmpty.
   ///
   /// In en, this message translates to:
@@ -7744,6 +7762,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please connect Bluetooth device'**
   String get cabinetOfflinePleaseConnectBle;
+
+  /// No description provided for @cabinetOfflineBleTurnOnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please turn on Bluetooth and try again'**
+  String get cabinetOfflineBleTurnOnHint;
+
+  /// No description provided for @cabinetOfflineBleScanTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth scan timed out, retrying connection'**
+  String get cabinetOfflineBleScanTimeout;
+
+  /// No description provided for @cabinetOfflineBleAuthFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth authorization failed, please reconnect'**
+  String get cabinetOfflineBleAuthFailed;
+
+  /// No description provided for @cabinetOfflineBleDisconnectedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth disconnected, retrying connection'**
+  String get cabinetOfflineBleDisconnectedHint;
 
   /// No description provided for @cabinetOfflineNoPermission.
   ///

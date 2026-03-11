@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -276,7 +277,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get changePasswordIdPrefix => 'ID:';
 
   @override
-  String get changePasswordRuleHint => 'The length of the new password is 8~16 characters and must contain numbers, letters or special characters';
+  String get changePasswordRuleHint =>
+      'The length of the new password is 8~16 characters and must contain numbers, letters or special characters';
 
   @override
   String get changePasswordConfirmAction => 'Confirm';
@@ -768,7 +770,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get maintenanceRecords => 'Maintenance Records';
 
   @override
-  String get maintenanceRidingBehavior => 'Riding behavior over the past 30 day';
+  String get maintenanceRidingBehavior =>
+      'Riding behavior over the past 30 day';
 
   @override
   String get maintenanceAvgMileage => 'AVG Mileage /daily';
@@ -801,7 +804,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get maintenanceUploadVoucher => 'Upload Voucher';
 
   @override
-  String get maintenanceMileageNotReached => 'The vehicle mileage has not reached the maintenance mileage';
+  String get maintenanceMileageNotReached =>
+      'The vehicle mileage has not reached the maintenance mileage';
 
   @override
   String get repairRecordTitle => 'Repair Records';
@@ -975,7 +979,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get afterSaleBindSuccessTitle => 'Binding Success';
 
   @override
-  String get afterSaleBindSuccessMessage => 'The device has been bound successfully.';
+  String get afterSaleBindSuccessMessage =>
+      'The device has been bound successfully.';
 
   @override
   String get afterSaleBindUserIdLabel => 'ID';
@@ -1035,7 +1040,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get afterSaleBindUnableToSubmit => 'Unable to submit';
 
   @override
-  String get afterSaleBindDeviceMismatch => 'The device model does not match the device model used in the order, please modify it and try again';
+  String get afterSaleBindDeviceMismatch =>
+      'The device model does not match the device model used in the order, please modify it and try again';
 
   @override
   String get afterSaleBindOk => 'OK';
@@ -1089,7 +1095,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unbindDeviceUnfinishedTitle => 'Unfinished maintenance order';
 
   @override
-  String get unbindDeviceUnfinishedDesc => 'Unfinished maintenance order detected. Continue unbind?';
+  String get unbindDeviceUnfinishedDesc =>
+      'Unfinished maintenance order detected. Continue unbind?';
 
   @override
   String get unbindDeviceConfirm => 'Confirm unbind';
@@ -1194,13 +1201,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warehouseInventoryRevokeConfirmTitle => 'Revoke inventory';
 
   @override
-  String get warehouseInventoryRevokeConfirmDesc => 'Are you sure to revoke this inventory?';
+  String get warehouseInventoryRevokeConfirmDesc =>
+      'Are you sure to revoke this inventory?';
 
   @override
   String get warehouseInventoryCompleteConfirmTitle => 'Complete inventory';
 
   @override
-  String get warehouseInventoryCompleteConfirmDesc => 'Are you sure to complete this inventory?';
+  String get warehouseInventoryCompleteConfirmDesc =>
+      'Are you sure to complete this inventory?';
 
   @override
   String get warehouseTabAll => 'All';
@@ -1317,7 +1326,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warehouseTransportReceiveWarehouse => 'Receive Warehouse';
 
   @override
-  String get warehouseTransportSelectReceiveWarehouse => 'Select receive warehouse';
+  String get warehouseTransportSelectReceiveWarehouse =>
+      'Select receive warehouse';
 
   @override
   String get warehouseTransportAddDevice => 'Add';
@@ -1338,7 +1348,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get warehouseTransportEditTrackingNumber => 'Edit Tracking';
 
   @override
-  String get warehouseTransportBatchReceiveComplete => 'Batch receive completed';
+  String get warehouseTransportBatchReceiveComplete =>
+      'Batch receive completed';
 
   @override
   String get warehouseTransportSearchTitle => 'Transfer Search';
@@ -1410,7 +1421,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceIssueTrackingNumber => 'Tracking number';
 
   @override
-  String get deviceIssuePleaseEnterTracking => 'Please enter the tracking number';
+  String get deviceIssuePleaseEnterTracking =>
+      'Please enter the tracking number';
 
   @override
   String get deviceIssueEnterTracking => 'Enter Tracking Number';
@@ -1479,7 +1491,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deviceReceiveSuccess => 'Received successfully';
 
   @override
-  String get deviceReceiveNotBelong => 'The device does not belong to this document';
+  String get deviceReceiveNotBelong =>
+      'The device does not belong to this document';
 
   @override
   String get deviceReceiveAction => 'Receive';
@@ -1521,7 +1534,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get scanCameraPermissionTitle => 'Camera permission required';
 
   @override
-  String get scanCameraPermissionDesc => 'Please allow camera access in system settings to scan QR codes.';
+  String get scanCameraPermissionDesc =>
+      'Please allow camera access in system settings to scan QR codes.';
 
   @override
   String get scanPermissionRetry => 'Retry';
@@ -1533,7 +1547,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bluetoothPermissionTitle => 'Bluetooth permission required';
 
   @override
-  String get bluetoothPermissionDesc => 'Please allow Bluetooth permissions in system settings to connect devices.';
+  String get bluetoothPermissionDesc =>
+      'Please allow Bluetooth permissions in system settings to connect devices.';
 
   @override
   String get bluetoothPermissionRetry => 'Retry';
@@ -1554,7 +1569,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get qrcodeBatchScan => 'Batch Scan';
 
   @override
-  String get qrcodeListEmpty => 'No device SNs yet. Please scan or enter a device SN.';
+  String get qrcodeListEmpty =>
+      'No device SNs yet. Please scan or enter a device SN.';
 
   @override
   String get qrcodeSameAsPrevious => 'Same as the previous code.';
@@ -1950,7 +1966,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get entrySubmitDoneTitle => 'Submission complete';
 
   @override
-  String get entrySubmitDoneMessage => 'Registration succeeded. Go to transfer?';
+  String get entrySubmitDoneMessage =>
+      'Registration succeeded. Go to transfer?';
 
   @override
   String get entryGoToTransferAction => 'Go to Transfer';
@@ -1971,7 +1988,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get entryScanEntryButton => 'Scan Entry';
 
   @override
-  String get entryEmptyDeviceHint => 'There is no device letter yet,\nplease scan or receive the device SN to enter';
+  String get entryEmptyDeviceHint =>
+      'There is no device letter yet,\nplease scan or receive the device SN to enter';
 
   @override
   String get entryManualEntryTitle => 'Manual Entry';
@@ -2010,13 +2028,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get entryConfirmSubmitPrefix => 'A total of ';
 
   @override
-  String get entryConfirmSubmitSuffix => ' are being submitted for entry. Once submitted, it will be reflected in the system and cannot be revised.';
+  String get entryConfirmSubmitSuffix =>
+      ' are being submitted for entry. Once submitted, it will be reflected in the system and cannot be revised.';
 
   @override
   String get entrySubmissionCompleted => 'Submission Completed!';
 
   @override
-  String get entryShipPromptMessage => 'You need to ship the batteries entered this time to the agent?';
+  String get entryShipPromptMessage =>
+      'You need to ship the batteries entered this time to the agent?';
 
   @override
   String get entryCloseButton => 'Close';
@@ -2316,7 +2336,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get offlineRegisterReferrer => 'Referrer';
 
   @override
-  String get offlineRegisterReferrerHint => 'Enter the referrer id or scan code';
+  String get offlineRegisterReferrerHint =>
+      'Enter the referrer id or scan code';
 
   @override
   String get offlineRegisterSelectCountry => 'Select Country / Region';
@@ -2331,7 +2352,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get offlineRegisterCodeRequired => 'Please enter code';
 
   @override
-  String get offlineRegisterPasswordInvalid => 'Password must be 8-16 characters';
+  String get offlineRegisterPasswordInvalid =>
+      'Password must be 8-16 characters';
 
   @override
   String get offlineRegisterFirstNameRequired => 'Please enter first name';
@@ -2487,7 +2509,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sellBindUploadNidPhoto => 'Upload NID Photo';
 
   @override
-  String get sellBindNidPhotoHint => 'Please upload the front and back of your NID';
+  String get sellBindNidPhotoHint =>
+      'Please upload the front and back of your NID';
 
   @override
   String get sellBindPersonalPhoto => 'Personal Photo';
@@ -2496,10 +2519,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sellBindSuccessTitle => 'Submit successfully';
 
   @override
-  String get sellBindSuccessMessageOnline => 'The package has been successfully bound.\nPlease remind the user to pay the package fee in the app.\nThe package will take effect after payment.';
+  String get sellBindSuccessMessageOnline =>
+      'The package has been successfully bound.\nPlease remind the user to pay the package fee in the app.\nThe package will take effect after payment.';
 
   @override
-  String get sellBindSuccessMessageCash => 'The package has been successfully bound.\nPlease submit the contract voucher to the backend in time.';
+  String get sellBindSuccessMessageCash =>
+      'The package has been successfully bound.\nPlease submit the contract voucher to the backend in time.';
 
   @override
   String get sellBindDocumentNumber => 'Document Number';
@@ -2709,10 +2734,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rentBindSuccessTitle => 'Submit successfully';
 
   @override
-  String get rentBindSuccessMessageOnline => 'Please proceed to the User App for payment in';
+  String get rentBindSuccessMessageOnline =>
+      'Please proceed to the User App for payment in';
 
   @override
-  String get rentBindSuccessMessageCash => 'Please enter the order record and submit the contract voucher within';
+  String get rentBindSuccessMessageCash =>
+      'Please enter the order record and submit the contract voucher within';
 
   @override
   String get rentBindSuccessTimeout => '30 minutes';
@@ -2878,7 +2905,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get swapBindPeriodMonthly => 'Monthly';
 
   @override
-  String get swapBindVehicleBatteryRequired => 'Please select vehicle and battery first';
+  String get swapBindVehicleBatteryRequired =>
+      'Please select vehicle and battery first';
 
   @override
   String get swapBindTotal => 'Total';
@@ -2887,10 +2915,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get swapBindSuccessTitle => 'Submit successfully';
 
   @override
-  String get swapBindSuccessOnlineHint => 'Please proceed to the User App for payment in';
+  String get swapBindSuccessOnlineHint =>
+      'Please proceed to the User App for payment in';
 
   @override
-  String get swapBindSuccessCashHint => 'Please enter the order record and submit the contract voucher within';
+  String get swapBindSuccessCashHint =>
+      'Please enter the order record and submit the contract voucher within';
 
   @override
   String get swapBindSuccessTimeout => '24 hours';
@@ -2980,7 +3010,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get depositRefundViewVoucher => 'View Voucher';
 
   @override
-  String get depositRefundVoucherUnconfirmedTip => 'Voucher is not confirmed yet. Continue?';
+  String get depositRefundVoucherUnconfirmedTip =>
+      'Voucher is not confirmed yet. Continue?';
 
   @override
   String get depositRefundRemarkHint => 'Enter the remarks';
@@ -3073,7 +3104,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get installmentPayAssets => 'Assets';
 
   @override
-  String get installmentPayNoOverdue => 'Orders currently in installments have no overdue records';
+  String get installmentPayNoOverdue =>
+      'Orders currently in installments have no overdue records';
 
   @override
   String get installmentPayPaymentOrder => 'Payment Order';
@@ -3109,7 +3141,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get installmentPaySuccessTitle => 'Submit successfully';
 
   @override
-  String get installmentPaySuccessHint => 'Please enter the order record page to view';
+  String get installmentPaySuccessHint =>
+      'Please enter the order record page to view';
 
   @override
   String get installmentPayDocumentNumber => 'Document Number';
@@ -3322,7 +3355,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetPutawayConfirmTitle => 'Confirm Putaway?';
 
   @override
-  String get cabinetPutawayConfirmMessage => 'Please confirm the putaway information. The station will be put away after submission.';
+  String get cabinetPutawayConfirmMessage =>
+      'Please confirm the putaway information. The station will be put away after submission.';
 
   @override
   String get cabinetPutawayNameRequired => 'Please enter station name';
@@ -3337,7 +3371,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetPutawayCoordinateRequired => 'Please select coordinates';
 
   @override
-  String get cabinetPutawaySwapTimeRequired => 'Please enter battery exchange indicator';
+  String get cabinetPutawaySwapTimeRequired =>
+      'Please enter battery exchange indicator';
 
   @override
   String get cabinetPutawayImageRequired => 'Please upload at least 1 image';
@@ -3385,7 +3420,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetUnshelveCommonReasons => 'Common Reasons';
 
   @override
-  String get cabinetUnshelveReason1 => 'The point dealer does not renew the contract';
+  String get cabinetUnshelveReason1 =>
+      'The point dealer does not renew the contract';
 
   @override
   String get cabinetUnshelveReason2 => 'Efficiency is not up to standard';
@@ -3397,7 +3433,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetUnshelveConfirmTitle => 'Confirm Retire?';
 
   @override
-  String get cabinetUnshelveConfirmMessage => 'After deactivation, the operating hours of the station will be cleared. If relisted, please modify the operating hours in management portal.';
+  String get cabinetUnshelveConfirmMessage =>
+      'After deactivation, the operating hours of the station will be cleared. If relisted, please modify the operating hours in management portal.';
 
   @override
   String get cabinetUnshelveSubmit => 'Confirm';
@@ -3439,7 +3476,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetAuthPersonSearchHint => 'Enter user name or phone number';
 
   @override
-  String get cabinetAuthSelectPersonRequired => 'Please select authorized person';
+  String get cabinetAuthSelectPersonRequired =>
+      'Please select authorized person';
 
   @override
   String get cabinetAuthTimeLabel => 'Authorization time';
@@ -3457,7 +3495,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetAuthCancelTitle => 'Cancel Authorization';
 
   @override
-  String get cabinetAuthCancelConfirm => 'Are you sure you want to cancel this authorization?';
+  String get cabinetAuthCancelConfirm =>
+      'Are you sure you want to cancel this authorization?';
 
   @override
   String get cabinetAuthCancelSuccess => 'Authorization cancelled';
@@ -3556,7 +3595,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetOperateOpenDoorConfirmTitle => 'Confirm Open Door';
 
   @override
-  String get cabinetOperateOpenDoorConfirmContent => 'Are you sure you want to open the cabinet back door?';
+  String get cabinetOperateOpenDoorConfirmContent =>
+      'Are you sure you want to open the cabinet back door?';
 
   @override
   String get cabinetOperateOpenDoorSuccess => 'Door opened successfully';
@@ -3676,13 +3716,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetOfflineRestartTitle => 'Confirm Restart';
 
   @override
-  String get cabinetOfflineRestartConfirm => 'Are you sure you want to restart the cabinet?';
+  String get cabinetOfflineRestartConfirm =>
+      'Are you sure you want to restart the cabinet?';
 
   @override
   String get cabinetOfflineOpenDoorTitle => 'Confirm Open Door';
 
   @override
-  String get cabinetOfflineOpenDoorConfirm => 'Are you sure you want to open the door? Please ensure Bluetooth is connected.';
+  String get cabinetOfflineOpenDoorConfirm =>
+      'Are you sure you want to open the door? Please ensure Bluetooth is connected.';
 
   @override
   String get cabinetOfflineGsmSignal => 'GSM signal';
@@ -3795,6 +3837,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cabinetOfflineBleDisconnected => 'Bluetooth Disconnected';
 
   @override
+  String get cabinetOfflineBleScanning => 'Bluetooth Scanning';
+
+  @override
+  String get cabinetOfflineBleConnecting => 'Bluetooth Connecting';
+
+  @override
+  String get cabinetOfflineBleReconnecting => 'Bluetooth Reconnecting';
+
+  @override
   String get cabinetOfflineFaultEmpty => 'No fault records';
 
   @override
@@ -3841,7 +3892,24 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get cabinetOfflinePleaseConnectBle => 'Please connect Bluetooth device';
+  String get cabinetOfflinePleaseConnectBle =>
+      'Please connect Bluetooth device';
+
+  @override
+  String get cabinetOfflineBleTurnOnHint =>
+      'Please turn on Bluetooth and try again';
+
+  @override
+  String get cabinetOfflineBleScanTimeout =>
+      'Bluetooth scan timed out, retrying connection';
+
+  @override
+  String get cabinetOfflineBleAuthFailed =>
+      'Bluetooth authorization failed, please reconnect';
+
+  @override
+  String get cabinetOfflineBleDisconnectedHint =>
+      'Bluetooth disconnected, retrying connection';
 
   @override
   String get cabinetOfflineNoPermission => 'No operation permission';
@@ -3982,10 +4050,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bluetoothAuthClearButton => 'Clear Authorization';
 
   @override
-  String get bluetoothAuthConfirmOpen => 'The station door can be opened within 24 hours after authorization. Are you sure to authorized?';
+  String get bluetoothAuthConfirmOpen =>
+      'The station door can be opened within 24 hours after authorization. Are you sure to authorized?';
 
   @override
-  String get bluetoothAuthConfirmClear => 'Make sure to clear the bluetooth key authorization??';
+  String get bluetoothAuthConfirmClear =>
+      'Make sure to clear the bluetooth key authorization??';
 
   @override
   String get bluetoothAuthCancel => 'Cancle';
@@ -4003,22 +4073,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bluetoothAuthTipsTitle => 'Tips';
 
   @override
-  String get bluetoothAuthTip1 => 'Please make sure that the Bluetooth key is turned on and connected, and there is a Bluetooth logo on the key display;';
+  String get bluetoothAuthTip1 =>
+      'Please make sure that the Bluetooth key is turned on and connected, and there is a Bluetooth logo on the key display;';
 
   @override
-  String get bluetoothAuthTip2 => 'Before adding a new authorization, it is recommended to clear the authorization once and clear the records that are not needed;';
+  String get bluetoothAuthTip2 =>
+      'Before adding a new authorization, it is recommended to clear the authorization once and clear the records that are not needed;';
 
   @override
-  String get bluetoothAuthTip3 => 'After successful authorization, you can turn off the Bluetooth of the mobile phone;';
+  String get bluetoothAuthTip3 =>
+      'After successful authorization, you can turn off the Bluetooth of the mobile phone;';
 
   @override
-  String get bluetoothAuthTip4 => 'ress the key Bluetooth button, the indicator light enters the flash state to unlock the lock;';
+  String get bluetoothAuthTip4 =>
+      'ress the key Bluetooth button, the indicator light enters the flash state to unlock the lock;';
 
   @override
-  String get bluetoothAuthTip5 => 'Press the key Bluetooth button, the indicator light enters the flash state to unlock the lock;';
+  String get bluetoothAuthTip5 =>
+      'Press the key Bluetooth button, the indicator light enters the flash state to unlock the lock;';
 
   @override
-  String get bluetoothAuthTip6 => 'The validity period of the authorization is preset to 24 hours after the authorization is successful;';
+  String get bluetoothAuthTip6 =>
+      'The validity period of the authorization is preset to 24 hours after the authorization is successful;';
 
   @override
   String get bluetoothAuthSn => 'Station SN';
@@ -4060,10 +4136,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bluetoothOperateTitle => 'Bluetooth Operations';
 
   @override
-  String get bluetoothOperateTip => 'Supports BLE scan/connect and authorization commands. Please stay near the device and keep Bluetooth on.';
+  String get bluetoothOperateTip =>
+      'Supports BLE scan/connect and authorization commands. Please stay near the device and keep Bluetooth on.';
 
   @override
-  String get bluetoothOperateTodoList => '• Scan and connect a device\n• Read Key ID / authorize / clear / set validity\n• Send HEX commands and view logs';
+  String get bluetoothOperateTodoList =>
+      '• Scan and connect a device\n• Read Key ID / authorize / clear / set validity\n• Send HEX commands and view logs';
 
   @override
   String get deviceDetailTabBasicInfo => 'Basic Info';

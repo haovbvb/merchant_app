@@ -1,5 +1,6 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
+
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -3795,6 +3796,15 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cabinetOfflineBleDisconnected => '蓝牙未连接';
 
   @override
+  String get cabinetOfflineBleScanning => '蓝牙扫描中';
+
+  @override
+  String get cabinetOfflineBleConnecting => '蓝牙连接中';
+
+  @override
+  String get cabinetOfflineBleReconnecting => '蓝牙重连中';
+
+  @override
   String get cabinetOfflineFaultEmpty => '暂无故障记录';
 
   @override
@@ -3842,6 +3852,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get cabinetOfflinePleaseConnectBle => '请先连接蓝牙设备';
+
+  @override
+  String get cabinetOfflineBleTurnOnHint => '请先打开蓝牙后重试';
+
+  @override
+  String get cabinetOfflineBleScanTimeout => '蓝牙扫描超时，正在重试连接';
+
+  @override
+  String get cabinetOfflineBleAuthFailed => '蓝牙鉴权失败，请断开后重连';
+
+  @override
+  String get cabinetOfflineBleDisconnectedHint => '蓝牙连接已断开，正在重试连接';
 
   @override
   String get cabinetOfflineNoPermission => '无操作权限';

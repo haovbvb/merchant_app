@@ -265,6 +265,81 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
     state = state.copyWith(swapThreshold: threshold, cabins: cabins);
   }
 
+  void updateCabinSwapFlag(int portNo, int swapFlag) {
+    final cabins = state.cabins.map((c) {
+      if (c.portNo == portNo) {
+        return c.copyWith(swapFlag: swapFlag == 1 ? 1 : 0);
+      }
+      return c;
+    }).toList();
+    state = state.copyWith(cabins: cabins);
+  }
+
+  void updateSoftwareVersion(String? value) {
+    state = state.copyWith(softwareVersion: value);
+  }
+
+  void updateBackupPowerStatus(String? value) {
+    state = state.copyWith(backupPowerStatus: value);
+  }
+
+  void updateBatteryInSlot(int value) {
+    state = state.copyWith(batteryInSlot: value);
+  }
+
+  void updateRealtimeData({
+    String? gsmSignal,
+    String? chargerStatus,
+    String? ctrlSystemStatus,
+    String? omDoorStatus,
+    String? totalVoltage,
+    String? totalCurrent,
+    String? temperature,
+    String? electricityMeter,
+    String? smokeAlarmStatus,
+    String? waterAlarmStatus,
+    String? fanStatus,
+  }) {
+    state = state.copyWith(
+      gsmSignal: gsmSignal,
+      chargerStatus: chargerStatus,
+      ctrlSystemStatus: ctrlSystemStatus,
+      omDoorStatus: omDoorStatus,
+      totalVoltage: totalVoltage,
+      totalCurrent: totalCurrent,
+      temperature: temperature,
+      electricityMeter: electricityMeter,
+      smokeAlarmStatus: smokeAlarmStatus,
+      waterAlarmStatus: waterAlarmStatus,
+      fanStatus: fanStatus,
+    );
+  }
+
+  void patchBaseInfo({
+    int? swapThreshold,
+    String? apn,
+    int? volume,
+    String? platformUrl,
+  }) {
+    final current = state.baseInfo;
+    if (current == null) return;
+    final map = current.toJson();
+    if (swapThreshold != null) {
+      map['swapThreshold'] = swapThreshold;
+      updateSwapThreshold(swapThreshold);
+    }
+    if (apn != null) {
+      map['apn'] = apn;
+    }
+    if (volume != null) {
+      map['volume'] = volume;
+    }
+    if (platformUrl != null) {
+      map['platformUrl'] = platformUrl;
+    }
+    state = state.copyWith(baseInfo: CabinetDetailBaseInfoBean.fromJson(map));
+  }
+
   Future<bool> restartCabinet({required String pId}) async {
     if (pId.isEmpty) return false;
     state = state.copyWith(operating: true);

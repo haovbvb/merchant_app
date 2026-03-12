@@ -5,7 +5,6 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/data/models/roadside_list.dart';
 import 'package:merchant_app/data/models/roadside_order_detail.dart';
-import 'package:merchant_app/data/models/work_order_report.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
@@ -238,15 +237,15 @@ class RoadSideDealNotifier extends Notifier<RoadSideDealState> {
     required String desc,
   }) async {
     state = state.copyWith(submitting: true);
-    final report = WorkOrderReport(
-      imgList: state.imageUrls.join(','),
-      processDesc: desc,
-      result: result,
-      sheetNo: recordNo,
-    );
     final response = await _api.post<Object>(
       ApiPath.roadSaveDeal,
-      data: report.toJson(),
+      data: {
+        'imgList': state.imageUrls.join(','),
+        'opResponse': desc,
+        'result': result,
+        'recordNo': recordNo,
+        'payFlag': 0,
+      },
       parser: (json) => json ?? Object(),
     );
     state = state.copyWith(submitting: false);

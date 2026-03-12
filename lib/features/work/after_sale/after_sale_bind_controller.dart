@@ -28,27 +28,33 @@ class AfterSaleBindState {
     this.errorMessage,
   });
 
+  static const _unset = Object();
+
   AfterSaleBindState copyWith({
     bool? loading,
     bool? binding,
     String? cardNum,
     String? deviceSn,
-    UserDetail? userDetail,
+    Object? userDetail = _unset,
     List<AfterSaleCanBindOrderBean>? orders,
-    AfterSaleCanBindOrderBean? selectedOrder,
-    BatterOrVehicleInfo? deviceInfo,
-    String? errorMessage,
+    Object? selectedOrder = _unset,
+    Object? deviceInfo = _unset,
+    Object? errorMessage = _unset,
   }) {
     return AfterSaleBindState(
       loading: loading ?? this.loading,
       binding: binding ?? this.binding,
       cardNum: cardNum ?? this.cardNum,
       deviceSn: deviceSn ?? this.deviceSn,
-      userDetail: userDetail ?? this.userDetail,
+      userDetail: userDetail == _unset ? this.userDetail : userDetail as UserDetail?,
       orders: orders ?? this.orders,
-      selectedOrder: selectedOrder ?? this.selectedOrder,
-      deviceInfo: deviceInfo ?? this.deviceInfo,
-      errorMessage: errorMessage,
+      selectedOrder: selectedOrder == _unset
+          ? this.selectedOrder
+          : selectedOrder as AfterSaleCanBindOrderBean?,
+      deviceInfo: deviceInfo == _unset
+          ? this.deviceInfo
+          : deviceInfo as BatterOrVehicleInfo?,
+      errorMessage: errorMessage == _unset ? this.errorMessage : errorMessage as String?,
     );
   }
 }
@@ -68,6 +74,11 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
     if (value == state.cardNum) return;
     state = state.copyWith(
       cardNum: value,
+      userDetail: null,
+      orders: const [],
+      selectedOrder: null,
+      deviceSn: '',
+      deviceInfo: null,
       errorMessage: null,
     );
   }
@@ -76,6 +87,7 @@ class AfterSaleBindNotifier extends Notifier<AfterSaleBindState> {
     if (value == state.deviceSn) return;
     state = state.copyWith(
       deviceSn: value,
+      deviceInfo: null,
       errorMessage: null,
     );
   }

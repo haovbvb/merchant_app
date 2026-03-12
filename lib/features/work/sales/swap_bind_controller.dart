@@ -168,17 +168,17 @@ class SwapBindNotifier extends Notifier<SwapBindState> {
     final pack = state.selectedPack;
     if (pack == null) return false;
     state = state.copyWith(submitting: true);
-    final response = await _api.post<Map<String, dynamic>>(
+    final response = await _api.post<Object>(
       ApiPath.createSwapBindOrder,
       data: {
         'infoCode': pack.infoCode ?? '',
         'paySource': state.paySource,
         'cardNum': cardNum,
       },
-      parser: (json) => json is Map<String, dynamic> ? json : <String, dynamic>{},
+      parser: (json) => json,
     );
     if (response.isSuccess) {
-      final docNo = response.result?['documentNo'] as String?;
+      final docNo = _extractDocumentNo(response.result);
       state = state.copyWith(
         submitting: false,
         submitSuccess: true,
@@ -192,5 +192,30 @@ class SwapBindNotifier extends Notifier<SwapBindState> {
 
   void reset() {
     state = const SwapBindState();
+  }
+
+  String? _extractDocumentNo(Object? raw) {
+    if (raw == null) return null;
+    if (raw is String) {
+      final value = raw.trim();
+      return value.isEmpty ? null : value;
+    }
+    if (raw is Map) {
+      String? pick(String key) {
+        final value = raw[key];
+        if (value == null) return null;
+        final text = value.toString().trim();
+        return text.isEmpty ? null : text;
+      }
+
+      return pick('documentNo') ??
+          pick('documentNO') ??
+          pick('orderNo') ??
+          pick('orderNO') ??
+          pick('orderNum') ??
+          pick('orderId') ??
+          pick('tradeNo');
+    }
+    return null;
   }
 }

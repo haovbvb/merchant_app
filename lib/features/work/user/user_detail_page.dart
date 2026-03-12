@@ -1414,7 +1414,6 @@ class _OrderList extends StatelessWidget {
   Widget build(BuildContext context) {
     if (orders.isEmpty) {
       return ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
         children: [
           SizedBox(
             height: MediaQuery.of(context).size.height * 0.45,
@@ -1446,7 +1445,6 @@ class _OrderList extends StatelessWidget {
     }
 
     return ListView.separated(
-      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       itemCount: orders.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -2499,12 +2497,40 @@ class _PaymentRecordCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      timeText,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF999999),
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            timeText,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF999999),
+                            ),
+                          ),
+                        ),
+                        if (hasVoucher)
+                          GestureDetector(
+                            onTap: () => _showVoucherDialog(context, l10n, attachment),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(6),
+                                border: Border.all(color: const Color(0xFFD0D4DA)),
+                              ),
+                              child: Text(
+                                l10n.orderVoucherView,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF333333),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
@@ -2535,31 +2561,6 @@ class _PaymentRecordCard extends StatelessWidget {
               ),
             ],
           ),
-          if (hasVoucher) ...[
-            const SizedBox(height: 12),
-            Align(
-              alignment: Alignment.centerRight,
-              child: GestureDetector(
-                onTap: () => _showVoucherDialog(context, l10n, attachment),
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: const Color(0xFFD0D4DA)),
-                  ),
-                  child: Text(
-                    l10n.orderVoucherView,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );
@@ -3003,7 +3004,7 @@ Future<List<XFile>?> _showUploadVoucherDialog(
                 setState(() {});
               }
             } else {
-              final files = await picker.pickMultiImage();
+              final files = await picker.pickMultiImage(limit: remain);
               if (files.isNotEmpty) {
                 if (files.length > remain) {
                   _showSnack(sheetContext, l10n.orderVoucherMaxCount);
@@ -3025,8 +3026,66 @@ Future<List<XFile>?> _showUploadVoucherDialog(
             }
           }
 
-          final thumbSize =
-              (MediaQuery.of(context).size.width - 24 * 2 - 12 * 2) / 3;
+          const crossAxisCount = 3;
+          const thumbSpacing = 10.0;
+          final gridItems = <Widget>[
+            ...selected.asMap().entries.map((entry) {
+              final index = entry.key;
+              final file = entry.value;
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: SizedBox.expand(
+                      child: _PickedXFileThumb(file: file),
+                    ),
+                  ),
+                  Positioned(
+                    top: -6,
+                    right: -6,
+                    child: GestureDetector(
+                      onTap: () {
+                        selected.removeAt(index);
+                        setState(() {});
+                      },
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        decoration: const BoxDecoration(
+                          color: Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          size: 12,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ];
+          if (selected.length < 5) {
+            gridItems.add(
+              GestureDetector(
+                onTap: addImages,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0E2E6),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.camera_alt,
+                    size: 28,
+                    color: Color(0xFF999999),
+                  ),
+                ),
+              ),
+            );
+          }
 
           return Container(
             decoration: const BoxDecoration(
@@ -3060,71 +3119,30 @@ Future<List<XFile>?> _showUploadVoucherDialog(
                         color: const Color(0xFFEEF0F3),
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ...selected.asMap().entries.map((entry) {
-                            final index = entry.key;
-                            final file = entry.value;
-                            return SizedBox(
-                              width: thumbSize,
-                              height: thumbSize,
-                              child: Stack(
-                                clipBehavior: Clip.none,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: SizedBox(
-                                      width: thumbSize,
-                                      height: thumbSize,
-                                      child: _PickedXFileThumb(file: file),
-                                    ),
-                                  ),
-                                  Positioned(
-                                    top: -6,
-                                    right: -6,
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        selected.removeAt(index);
-                                        setState(() {});
-                                      },
-                                      child: Container(
-                                        width: 20,
-                                        height: 20,
-                                        decoration: const BoxDecoration(
-                                          color: Colors.black54,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.close,
-                                          size: 12,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
-                          if (selected.length < 5)
-                            GestureDetector(
-                              onTap: addImages,
-                              child: Container(
-                                width: thumbSize,
-                                height: thumbSize,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFE0E2E6),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(
-                                  Icons.camera_alt,
-                                  size: 32,
-                                  color: Color(0xFF999999),
-                                ),
-                              ),
+                          Text(
+                            '${l10n.orderVoucherUpload}(${selected.length}/5)',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF333333),
                             ),
+                          ),
+                          const SizedBox(height: 10),
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: gridItems.length,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: crossAxisCount,
+                                  crossAxisSpacing: thumbSpacing,
+                                  mainAxisSpacing: thumbSpacing,
+                                ),
+                            itemBuilder: (_, index) => gridItems[index],
+                          ),
                         ],
                       ),
                     ),

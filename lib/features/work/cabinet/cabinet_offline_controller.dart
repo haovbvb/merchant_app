@@ -132,27 +132,40 @@ final cabinetOfflineProvider =
 
 class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
   final ApiService _api = ApiService();
+  static const Duration _requestTimeout = Duration(seconds: 20);
 
   @override
   CabinetOfflineState build() => const CabinetOfflineState();
 
-  Future<void> load(String sn) async {
-    if (sn.isEmpty) return;
+  Future<void> load(String sn, {CabinetDetailBaseInfoBean? initialBaseInfo}) async {
+    final normalizedSn = sn.trim();
+    if (normalizedSn.isEmpty) {
+      state = state.copyWith(loading: false);
+      return;
+    }
     state = state.copyWith(loading: true);
     try {
-      final baseResponse = await _api.get<CabinetDetailBaseInfoBean>(
-        ApiPath.cabinetBaseInfo,
-        queryParameters: {'sn': sn},
-        parser: (json) => CabinetDetailBaseInfoBean.fromJson(
-          Map<String, dynamic>.from(json as Map),
-        ),
-      );
+      // 若调用方已经获取了 baseInfo（如权限预检），直接复用，避免重复请求。
+      final CabinetDetailBaseInfoBean? baseInfo;
+      if (initialBaseInfo != null) {
+        baseInfo = initialBaseInfo;
+      } else {
+        final baseResponse = await _api.get<CabinetDetailBaseInfoBean>(
+          ApiPath.cabinetBaseInfo,
+          queryParameters: {'sn': normalizedSn},
+          showHud: false,
+          parser: (json) => CabinetDetailBaseInfoBean.fromJson(
+            Map<String, dynamic>.from(json as Map),
+          ),
+        ).timeout(_requestTimeout);
+        baseInfo = baseResponse.result;
+      }
       final secretResponse = await _api.get<String>(
         ApiPath.cabinetSecretKey,
-        queryParameters: {'sn': sn},
+        queryParameters: {'sn': normalizedSn},
+        showHud: false,
         parser: (json) => json?.toString() ?? '',
-      );
-      final baseInfo = baseResponse.result;
+      ).timeout(_requestTimeout);
       final storeNum = baseInfo?.storeNum ?? 0;
       final cabins = storeNum > 0
           ? List.generate(
@@ -165,7 +178,6 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
             )
           : const <CabinetCabin>[];
       state = state.copyWith(
-        loading: false,
         baseInfo: baseInfo,
         secretKey: secretResponse.result,
         swapThreshold: baseInfo?.swapThreshold ?? 100,
@@ -173,11 +185,10 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
       );
     } catch (_) {
       state = state.copyWith(
-        loading: false,
-        baseInfo: null,
-        secretKey: null,
         cabins: const [],
       );
+    } finally {
+      state = state.copyWith(loading: false);
     }
   }
 
@@ -189,9 +200,10 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
       final response = await _api.get<LayoutCabinetInfo>(
         path,
         queryParameters: {'sn': sn},
+        showHud: false,
         parser: (json) =>
             LayoutCabinetInfo.fromJson(Map<String, dynamic>.from(json as Map)),
-      );
+      ).timeout(_requestTimeout);
       state = state.copyWith(layoutLoading: false, layoutInfo: response.result);
     } catch (_) {
       state = state.copyWith(layoutLoading: false, layoutInfo: null);

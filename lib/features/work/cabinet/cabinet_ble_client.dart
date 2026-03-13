@@ -74,6 +74,8 @@ class CabinetBleClient {
   static final Guid _serviceUuid = Guid('00008910-0000-1000-8000-00805f9b34fb');
   static final Guid _notifyUuid = Guid('00008911-0000-1000-8000-00805f9b34fb');
   static final Guid _writeUuid = Guid('00008912-0000-1000-8000-00805f9b34fb');
+  static const String _iosNotifyShortUuid = 'ffe4';
+  static const String _iosWriteShortUuid = 'ffe9';
 
   BluetoothDevice? _device;
   BluetoothCharacteristic? _writeChar;
@@ -84,11 +86,17 @@ class CabinetBleClient {
   bool _connecting = false;
   bool _authorized = false;
   bool _reconnectPending = false;
+  Timer? _reconnectTimer;
   String _deviceSn = '';
   String _secretKey = '';
   final List<int> _rxBuffer = <int>[];
   final List<String> _sendQueue = <String>[];
   bool _sending = false;
+
+  void _log(String message) {
+    if (!kDebugMode) return;
+    debugPrint('[CabinetBLE] $message');
+  }
 
   bool get isConnected => _device != null && _writeChar != null;
 
@@ -96,11 +104,13 @@ class CabinetBleClient {
     required String deviceSn,
     required String secretKey,
   }) async {
+    _log('start, deviceSn=$deviceSn');
     if (deviceSn.isEmpty || secretKey.isEmpty) return;
     final sameTarget = _deviceSn == deviceSn && _secretKey == secretKey;
     _deviceSn = deviceSn;
     _secretKey = secretKey;
     if (sameTarget && isConnected) {
+      _log('already connected to same target');
       onPhaseChanged(CabinetBleConnectionPhase.connected);
       return;
     }
@@ -116,6 +126,7 @@ class CabinetBleClient {
 
     if (Platform.isAndroid) {
       final adapterState = await FlutterBluePlus.adapterState.first;
+      _log('android adapterState=$adapterState');
       if (adapterState != BluetoothAdapterState.on) {
         try {
           await FlutterBluePlus.turnOn();
@@ -138,6 +149,13 @@ class CabinetBleClient {
     _sending = false;
     _scanning = false;
     _connecting = false;
+    _reconnectPending = false;
+    _reconnectTimer?.cancel();
+    _reconnectTimer = null;
+    _log('stop called: disconnect + stop scan + clear reconnect state');
+    try {
+      await FlutterBluePlus.stopScan();
+    } catch (_) {}
     await _scanSub?.cancel();
     _scanSub = null;
     await _notifySub?.cancel();
@@ -151,6 +169,8 @@ class CabinetBleClient {
     }
     _device = null;
     _writeChar = null;
+    _deviceSn = '';
+    _secretKey = '';
     onConnectionChanged(false);
     onPhaseChanged(CabinetBleConnectionPhase.idle);
   }
@@ -251,13 +271,23 @@ class CabinetBleClient {
 
   Future<void> _scanAndConnect() async {
     _scanning = true;
+    _log(
+      'scan start, expected serviceId=${_serviceUuid.str128}, '
+      'readUuid=${_notifyUuid.str128}, writeUuid=${_writeUuid.str128}',
+    );
     onPhaseChanged(CabinetBleConnectionPhase.scanning);
     await FlutterBluePlus.stopScan();
     await _scanSub?.cancel();
     _scanSub = FlutterBluePlus.scanResults.listen((results) {
       if (!_scanning) return;
       for (final result in results) {
-        if (result.device.platformName == _deviceSn) {
+        final platformName = result.device.platformName.trim();
+        final advName = result.advertisementData.advName.trim();
+        if (_isTargetName(platformName) || _isTargetName(advName)) {
+          _log(
+            'scan hit target, platformName=$platformName, advName=$advName, '
+            'remoteId=${result.device.remoteId.str}',
+          );
           _scanning = false;
           FlutterBluePlus.stopScan();
           _connect(result.device);
@@ -271,12 +301,14 @@ class CabinetBleClient {
         timeout: const Duration(seconds: 60),
         androidUsesFineLocation: true,
       );
+      _log('scan completed, stillScanning=$_scanning, target=$_deviceSn');
       if (_scanning) {
         _scanning = false;
         onError('scan-timeout');
         _scheduleReconnect();
       }
     } catch (_) {
+      _log('scan failed with exception');
       _scanning = false;
       onError('scan-failed');
       _scheduleReconnect();
@@ -286,10 +318,12 @@ class CabinetBleClient {
   Future<void> _connect(BluetoothDevice device) async {
     if (_connecting) return;
     _connecting = true;
+    _log('connect start, remoteId=${device.remoteId.str}, name=${device.platformName}');
     onPhaseChanged(CabinetBleConnectionPhase.connecting);
     try {
       await device.connect(timeout: const Duration(seconds: 12));
       final services = await device.discoverServices();
+      _log('discoverServices count=${services.length}');
       BluetoothService? service;
       for (final s in services) {
         final uuid = s.uuid.toString().toLowerCase();
@@ -304,16 +338,23 @@ class CabinetBleClient {
         throw StateError('ble-service-not-found');
       }
 
+      _log('serviceId=${service.uuid.str128}');
+
       BluetoothCharacteristic? write;
       BluetoothCharacteristic? notify;
       for (final c in service.characteristics) {
         final u = c.uuid.toString().toLowerCase();
-        if (u == _writeUuid.toString().toLowerCase() || u.contains('8912')) {
+        if (u == _writeUuid.toString().toLowerCase() ||
+            u.contains('8912') ||
+            u.contains(_iosWriteShortUuid)) {
           write = c;
         }
-        if (u == _notifyUuid.toString().toLowerCase() || u.contains('8911')) {
+        if (u == _notifyUuid.toString().toLowerCase() ||
+            u.contains('8911') ||
+            u.contains(_iosNotifyShortUuid)) {
           notify = c;
         }
+        _log('characteristic uuid=${c.uuid.str128}, properties=${c.properties}');
       }
       write ??= service.characteristics.isNotEmpty
           ? service.characteristics.first
@@ -325,6 +366,8 @@ class CabinetBleClient {
         throw StateError('ble-characteristic-not-found');
       }
 
+      _log('readUuid=${notify.uuid.str128}, writeUuid=${write.uuid.str128}');
+
       await notify.setNotifyValue(true);
       await _notifySub?.cancel();
       _notifySub = notify.onValueReceived.listen(_onNotifyData);
@@ -332,6 +375,7 @@ class CabinetBleClient {
       await _connectionSub?.cancel();
       _connectionSub = device.connectionState.listen((state) {
         final connected = state == BluetoothConnectionState.connected;
+        _log('connectionState=$state, connected=$connected');
         onConnectionChanged(connected);
         onPhaseChanged(
           connected
@@ -339,6 +383,7 @@ class CabinetBleClient {
               : CabinetBleConnectionPhase.reconnecting,
         );
         if (!connected) {
+          _log('connection dropped, schedule reconnect');
           _authorized = false;
           _writeChar = null;
           _device = null;
@@ -348,10 +393,12 @@ class CabinetBleClient {
 
       _device = device;
       _writeChar = write;
+      _log('connect success, waiting authorization');
       onConnectionChanged(true);
       onPhaseChanged(CabinetBleConnectionPhase.connected);
       await _sendAuthorization();
-    } catch (_) {
+    } catch (e) {
+      _log('connect failed: $e');
       onConnectionChanged(false);
       _scheduleReconnect();
     } finally {
@@ -362,10 +409,13 @@ class CabinetBleClient {
   void _scheduleReconnect() {
     if (_reconnectPending || _deviceSn.isEmpty || _secretKey.isEmpty) return;
     _reconnectPending = true;
+    _log('schedule reconnect in 10s');
     onPhaseChanged(CabinetBleConnectionPhase.reconnecting);
-    Future<void>.delayed(const Duration(seconds: 10), () async {
+    _reconnectTimer?.cancel();
+    _reconnectTimer = Timer(const Duration(seconds: 10), () async {
       _reconnectPending = false;
       if (isConnected || _connecting || _scanning) return;
+      _log('reconnect timer fired, restart scan/connect');
       await _scanAndConnect();
     });
   }
@@ -376,6 +426,7 @@ class CabinetBleClient {
     final sign = md5.convert(utf8.encode(signSource)).toString();
     final payload = '$timestamp$sign';
     final packet = _buildPacket(cmd: 0x01, payload: utf8.encode(payload));
+    _log('send authorization cmd=0x01, payloadLen=${payload.length}');
     await _write(packet);
   }
 
@@ -402,6 +453,7 @@ class CabinetBleClient {
     final sign = md5.convert(utf8.encode(signSource)).toString();
     final body = '$jsonText$sign';
     final packet = _buildPacket(cmd: 0x03, payload: utf8.encode(body));
+    _log('send business cmd=0x03, msgType=$msgType, paramCount=${params.length}');
     await _write(packet);
   }
 
@@ -414,6 +466,7 @@ class CabinetBleClient {
       while (_sendQueue.isNotEmpty && _writeChar != null) {
         final item = _sendQueue.removeAt(0);
         final data = _hexToBytes(item);
+        _log('write packet len=${data.length}, hex=${_shortHex(item)}');
         await _writeChar!.write(data, withoutResponse: false);
         await Future<void>.delayed(const Duration(milliseconds: 50));
       }
@@ -444,6 +497,7 @@ class CabinetBleClient {
   }
 
   void _onNotifyData(List<int> data) {
+    _log('notify len=${data.length}, hex=${_shortHex(_bytesToHex(data))}');
     _rxBuffer.addAll(data);
     _decodeBuffer();
   }
@@ -479,9 +533,11 @@ class CabinetBleClient {
 
       if (cmd == 0x02) {
         if (payload.isNotEmpty && payload.first == 1) {
+          _log('authorization success');
           _authorized = true;
           onAuthorized();
         } else {
+          _log('authorization failed');
           _authorized = false;
           onError('auth-failed');
         }
@@ -493,11 +549,25 @@ class CabinetBleClient {
         final jsonText = raw.length > 32
             ? raw.substring(0, raw.length - 32)
             : raw;
+        _log('recv business cmd=0x03, jsonLen=${jsonText.length}');
         if (jsonText.trim().isNotEmpty) {
           onJsonData(jsonText);
         }
       }
     }
+  }
+
+  String _shortHex(String hex) {
+    const keep = 96;
+    if (hex.length <= keep) return hex;
+    return '${hex.substring(0, keep)}...';
+  }
+
+  bool _isTargetName(String value) {
+    if (value.isEmpty || _deviceSn.isEmpty) return false;
+    final left = value.toLowerCase();
+    final right = _deviceSn.toLowerCase();
+    return left == right;
   }
 
   int _crc16(List<int> data) {

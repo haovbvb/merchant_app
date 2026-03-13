@@ -952,10 +952,16 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
-                    Icons.location_on_outlined,
-                    color: Color(0xFF999999),
-                    size: 20,
+                  Image.asset(
+                    'assets/images/map_station_loc.png',
+                    width: 20,
+                    height: 20,
+                    fit: BoxFit.contain,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.location_on_outlined,
+                      color: Color(0xFF999999),
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
@@ -1699,7 +1705,6 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   Future<void> _submit(String value) async {
-    final l10n = context.l10n;
     final input = value.trim();
     if (input.isEmpty) return;
     final isStationOnly = widget.expectedDeviceType == 3;
@@ -1708,9 +1713,6 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         : ScanUtils.getDeviceSn(input).trim();
     if (sn.isEmpty) return;
     if (isStationOnly && !_isValidStationSnInput(input, sn)) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.deviceSearchInvalidStationSn)));
       return;
     }
 
@@ -1741,31 +1743,44 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
   void _checkCabinetPermission() {
     if (widget.readOnly) return;
+    _ensureCabinetPermission(showDialog: true);
+  }
+
+  bool _ensureCabinetPermission({required bool showDialog}) {
     final state = ref.read(deviceDetailProvider);
     final hasPermission =
         state.searchResult?.deviceInfo?.hasPermission ??
         state.cabinetDetail?.hasPermission;
-    if (hasPermission == 0) {
-      // Extract manager info from DeviceInfo.managerList or cabinetDetail.stationManagerList
-      String managerName = '';
-      String managerPhone = '';
-      final managerList = state.searchResult?.deviceInfo?.managerList;
-      if (managerList != null && managerList.isNotEmpty) {
-        managerName = managerList.first.showName ?? '';
-        managerPhone = managerList.first.phone ?? '';
-      } else {
-        final rawList = state.cabinetDetail?.stationManagerList;
-        if (rawList != null && rawList.isNotEmpty) {
-          managerName = rawList.first['showName']?.toString() ?? '';
-          managerPhone = rawList.first['phone']?.toString() ?? '';
-        }
-      }
-      final areaCode = AuthSession.instance.current?.areaCode ?? '';
-      if (areaCode.isNotEmpty && managerPhone.isNotEmpty) {
-        managerPhone = '$areaCode $managerPhone';
-      }
+    if (hasPermission == 1) {
+      return true;
+    }
+
+    if (showDialog) {
+      final (managerName, managerPhone) = _resolveManagerContact(state);
       _showNotManagerDialog(managerName, managerPhone);
     }
+    return false;
+  }
+
+  (String, String) _resolveManagerContact(DeviceDetailState state) {
+    String managerName = '';
+    String managerPhone = '';
+    final managerList = state.searchResult?.deviceInfo?.managerList;
+    if (managerList != null && managerList.isNotEmpty) {
+      managerName = managerList.first.showName ?? '';
+      managerPhone = managerList.first.phone ?? '';
+    } else {
+      final rawList = state.cabinetDetail?.stationManagerList;
+      if (rawList != null && rawList.isNotEmpty) {
+        managerName = rawList.first['showName']?.toString() ?? '';
+        managerPhone = rawList.first['phone']?.toString() ?? '';
+      }
+    }
+    final areaCode = AuthSession.instance.current?.areaCode ?? '';
+    if (areaCode.isNotEmpty && managerPhone.isNotEmpty) {
+      managerPhone = '$areaCode $managerPhone';
+    }
+    return (managerName, managerPhone);
   }
 
   void _showNotManagerDialog(String managerName, String managerPhone) {
@@ -1871,7 +1886,6 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   Future<void> _scanSn() async {
-    final l10n = context.l10n;
     final expectedType = widget.expectedDeviceType;
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
@@ -1888,9 +1902,6 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     if (expectedType == 3) {
       final parsedSn = ScanUtils.parseSnByDeviceType(result, 3).trim();
       if (parsedSn.isEmpty || !_isValidStationSnInput(result, parsedSn)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.deviceSearchInvalidStationSn)),
-        );
         return;
       }
       _controller.text = parsedSn;
@@ -1924,6 +1935,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   void _setupPort(Cabin port) {
+    if (!_ensureCabinetPermission(showDialog: true)) {
+      return;
+    }
+
     final l10n = context.l10n;
     final isDisabled = port.status == 0;
     final isDoorOpen = port.doorStatus == 1;
@@ -2015,6 +2030,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   Future<void> _confirmOpenDoor(Cabin port) async {
+    if (!_ensureCabinetPermission(showDialog: true)) {
+      return;
+    }
+
     final l10n = context.l10n;
     final confirmed = await ConfirmDialog.show(
       context: context,
@@ -2025,23 +2044,18 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
     if (!confirmed || !mounted) return;
 
-    final success = await ref
-        .read(deviceDetailProvider.notifier)
-        .openCabinDoor(port: port.portNo ?? 0);
+    await ref.read(deviceDetailProvider.notifier).openCabinDoor(
+      port: port.portNo ?? 0,
+    );
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          success
-              ? l10n.deviceDetailPortOpenSuccess
-              : l10n.deviceDetailPortOpenFailed,
-        ),
-      ),
-    );
   }
 
   Future<void> _confirmOpenCabinetBackDoor() async {
+    if (!_ensureCabinetPermission(showDialog: true)) {
+      return;
+    }
+
     final l10n = context.l10n;
     final confirmed = await ConfirmDialog.show(
       context: context,
@@ -2052,23 +2066,16 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
     if (!confirmed || !mounted) return;
 
-    final success = await ref
-        .read(deviceDetailProvider.notifier)
-        .openCabinBackDoor();
+    await ref.read(deviceDetailProvider.notifier).openCabinBackDoor();
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          success
-              ? l10n.cabinetOperateOpenDoorSuccess
-              : l10n.cabinetOperateOpenDoorFailed,
-        ),
-      ),
-    );
   }
 
   Future<void> _confirmTogglePort(Cabin port, bool enable) async {
+    if (!_ensureCabinetPermission(showDialog: true)) {
+      return;
+    }
+
     final l10n = context.l10n;
     final confirmed = await ConfirmDialog.show(
       context: context,
@@ -2082,22 +2089,13 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     if (!confirmed || !mounted) return;
 
     final notifier = ref.read(deviceDetailProvider.notifier);
-    final success = enable
-        ? await notifier.enableCabinPort(port: port.portNo ?? 0)
-        : await notifier.disableCabinPort(port: port.portNo ?? 0);
+    if (enable) {
+      await notifier.enableCabinPort(port: port.portNo ?? 0);
+    } else {
+      await notifier.disableCabinPort(port: port.portNo ?? 0);
+    }
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          success
-              ? (enable
-                    ? l10n.deviceDetailPortEnableSuccess
-                    : l10n.deviceDetailPortDisableSuccess)
-              : l10n.deviceDetailToggleFailed,
-        ),
-      ),
-    );
   }
 
   Future<void> _openNavigation(double lat, double lng) async {
@@ -2114,14 +2112,6 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
       await launchUrl(uri, mode: LaunchMode.externalApplication);
       return;
     }
-
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('请用手机安装地图App 进行导航'),
-        duration: Duration(seconds: 2),
-      ),
-    );
   }
 
   void _openPhotoBrowser(List<String> photos, int initialIndex) {

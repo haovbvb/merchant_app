@@ -12,15 +12,18 @@ import 'package:merchant_app/data/models/cabinet_detail_base_info_bean.dart';
 import 'package:merchant_app/features/login/models/auth_session.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_ble_client.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_offline_controller.dart';
-import 'package:merchant_app/features/work/cabinet/cabinet_offline_fault_page.dart';
 import 'package:merchant_app/features/work/device/widgets/cabinet_port_detail_section.dart';
+import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
 class CabinetOfflineDetailPage extends ConsumerStatefulWidget {
-  const CabinetOfflineDetailPage({super.key, this.initialSn});
+  const CabinetOfflineDetailPage({super.key, this.initialSn, this.initialBaseInfo});
 
   /// Optional initial SN to load on page open.
   final String? initialSn;
+
+  /// Pre-fetched base info from the entry page (avoids duplicate API call).
+  final CabinetDetailBaseInfoBean? initialBaseInfo;
 
   @override
   ConsumerState<CabinetOfflineDetailPage> createState() =>
@@ -73,9 +76,7 @@ class _CabinetOfflineDetailPageState
     );
     if (widget.initialSn != null && widget.initialSn!.isNotEmpty) {
       _snController.text = widget.initialSn!;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _queryWithSn(widget.initialSn!);
-      });
+      _queryWithSn(widget.initialSn!, initialBaseInfo: widget.initialBaseInfo);
     }
   }
 
@@ -200,9 +201,9 @@ class _CabinetOfflineDetailPageState
     );
   }
 
-  void _queryWithSn(String sn) {
+  void _queryWithSn(String sn, {CabinetDetailBaseInfoBean? initialBaseInfo}) {
     final notifier = ref.read(cabinetOfflineProvider.notifier);
-    notifier.load(sn);
+    notifier.load(sn, initialBaseInfo: initialBaseInfo);
     notifier.loadLayout(sn);
   }
 
@@ -599,41 +600,54 @@ class _CabinetOfflineDetailPageState
         ],
       ),
       body: info == null
-          ? _buildInputView(state)
+          ? _buildEmptyOrLoadingView(state)
           : _buildDetailView(state, info, canOperate),
     );
   }
 
-  Widget _buildInputView(CabinetOfflineState state) {
+  Widget _buildEmptyOrLoadingView(CabinetOfflineState state) {
     final l10n = context.l10n;
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          TextField(
-            controller: _snController,
-            decoration: InputDecoration(
-              labelText: l10n.cabinetOfflineSnLabel,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+    if (state.loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.search_off, size: 56, color: Colors.black26),
+            const SizedBox(height: 12),
+            Text(
+              l10n.userSearchEmpty,
+              style: const TextStyle(fontSize: 14, color: Colors.black54),
+              textAlign: TextAlign.center,
             ),
-          ),
-          const SizedBox(height: 12),
-          FilledButton(
-            onPressed: state.loading
-                ? null
-                : () {
-                    final sn = _snController.text.trim();
-                    final notifier = ref.read(cabinetOfflineProvider.notifier);
-                    notifier.load(sn);
-                    notifier.loadLayout(sn);
-                  },
-            child: Text(l10n.cabinetOfflineQueryAction),
-          ),
-        ],
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: _queryOrScan,
+              child: Text(l10n.cabinetOfflineQueryAction),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Future<void> _queryOrScan() async {
+    final sn = _snController.text.trim();
+    if (sn.isNotEmpty) {
+      _queryWithSn(sn);
+      return;
+    }
+    final result = await Navigator.of(context).push<String>(
+      MaterialPageRoute(
+        builder: (_) => const QrScanPage(parseDeviceSn: true, deviceType: 3),
+      ),
+    );
+    if (!mounted || result == null || result.isEmpty) return;
+    _snController.text = result;
+    _queryWithSn(result);
   }
 
   Widget _buildDetailView(
@@ -697,7 +711,9 @@ class _CabinetOfflineDetailPageState
     bool canOperate,
   ) {
     final l10n = context.l10n;
-    final isOnline = info.online == '1';
+    final isOnline =
+        info.onlineStatus == 1 ||
+        (info.onlineStatus == null && info.online == '1');
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
@@ -769,7 +785,9 @@ class _CabinetOfflineDetailPageState
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                isOnline ? 'Online' : 'Offline',
+                                isOnline
+                                    ? l10n.deviceDetailOnline
+                                    : l10n.deviceDetailOffline,
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: isOnline
@@ -1067,8 +1085,9 @@ class _CabinetOfflineDetailPageState
     switch (_blePhase) {
       case CabinetBleConnectionPhase.scanning:
       case CabinetBleConnectionPhase.connecting:
-      case CabinetBleConnectionPhase.reconnecting:
         return const Color(0xFFFA8C16);
+      case CabinetBleConnectionPhase.reconnecting:
+        return const Color(0xFF6C7180);
       case CabinetBleConnectionPhase.connected:
         return const Color(0xFF0B61D9);
       case CabinetBleConnectionPhase.idle:
@@ -1434,9 +1453,14 @@ class _WarehouseTab extends StatelessWidget {
             ListTile(
               title: Center(
                 child: Text(
-                cabin.isEnabled
-                    ? l10n.deviceDetailPortDisableShort
-                    : l10n.cabinetOfflineCabinEnable,
+                  cabin.isEnabled
+                      ? l10n.deviceDetailPortDisableShort
+                      : l10n.cabinetOfflineCabinEnable,
+                  style: TextStyle(
+                    color: cabin.isEnabled
+                        ? const Color(0xFFFA4B51)
+                        : const Color(0xFF333333),
+                  ),
                 ),
               ),
               onTap: !canOperate || state.operating
@@ -1454,20 +1478,6 @@ class _WarehouseTab extends StatelessWidget {
                       if (!confirmed) return;
                       await onToggleEnable(cabin);
                     },
-            ),
-            ListTile(
-              title: Center(child: Text(l10n.cabinetOfflineCabinCheckFault)),
-              onTap: () {
-                Navigator.pop(ctx);
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => CabinetOfflineFaultPage(
-                      sn: state.baseInfo?.stationSn ?? '',
-                      port: cabin.portNo,
-                    ),
-                  ),
-                );
-              },
             ),
             const SizedBox(height: 8),
             Padding(

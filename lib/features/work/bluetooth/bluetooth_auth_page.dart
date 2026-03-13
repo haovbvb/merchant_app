@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +31,7 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
   StreamSubscription<BluetoothAdapterState>? _adapterSubscription;
   BluetoothDevice? _connectingDevice;
   bool _bluetoothOn = false;
+  bool _systemBluetoothOn = false;
   bool _scanning = false;
 
   @override
@@ -59,52 +59,40 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
 
     _adapterSubscription = FlutterBluePlus.adapterState.listen((state) {
       if (!mounted) return;
-      final wasOn = _bluetoothOn;
+      final isSystemOn = state == BluetoothAdapterState.on;
       setState(() {
-        _bluetoothOn = state == BluetoothAdapterState.on;
-      });
-      if (_bluetoothOn && !wasOn) {
-        // 蓝牙刚开启，重新扫描
-        _startScan();
-      }
-      if (!_bluetoothOn && wasOn) {
-        // 蓝牙被关闭（如从系统设置关闭），清空列表
-        setState(() {
+        _systemBluetoothOn = isSystemOn;
+        if (!isSystemOn) {
+          _bluetoothOn = false;
           _devices.clear();
           _scanning = false;
-        });
+        }
+      });
+      if (!isSystemOn) {
+        FlutterBluePlus.stopScan();
       }
     });
 
     final state = await FlutterBluePlus.adapterState.first;
     setState(() {
-      _bluetoothOn = state == BluetoothAdapterState.on;
+      _systemBluetoothOn = state == BluetoothAdapterState.on;
     });
-    if (_bluetoothOn) {
-      _startScan();
-    }
   }
 
   Future<void> _toggleBluetooth(bool value) async {
     if (value) {
-      if (Platform.isAndroid) {
-        await FlutterBluePlus.turnOn();
-      } else {
-        // iOS 不支持程序化开启蓝牙，提示用户去系统设置开启
+      if (!_systemBluetoothOn) {
         if (mounted) {
-          showToast(context.l10n.bluetoothAuthPleaseOpenBluetooth);
+          showToast('请打开手机蓝牙');
         }
         return;
       }
-      // 对齐安卓：打开蓝牙后延迟 2 秒重新搜索设备
-      await Future<void>.delayed(const Duration(seconds: 2));
-      if (mounted) {
-        _startScan();
-      }
+      setState(() => _bluetoothOn = true);
+      await _startScan();
     } else {
-      // 对齐安卓：关闭蓝牙时停止扫描并清空设备列表
       await FlutterBluePlus.stopScan();
       setState(() {
+        _bluetoothOn = false;
         _devices.clear();
         _scanning = false;
       });
@@ -386,7 +374,7 @@ class _BluetoothAuthorizationPageState
 
   Future<void> _scanQRCode() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: true, parseDeviceSn: true)),
+      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: false, parseDeviceSn: true)),
     );
     if (result != null && result.isNotEmpty) {
       _snController.text = result;
@@ -447,7 +435,7 @@ class _BluetoothAuthorizationPageState
         days: days,
       );
       final ack = await _sendEncryptedCommand(signal: '000D', payload: payload);
-      if (ack == null || ack.length < 8 || ack.substring(0, 8) != keyId) {
+      if (!_isValidAckForKeyId(ack, keyId)) {
         throw Exception('authorize ack invalid');
       }
       final uploaded = await ref
@@ -502,7 +490,7 @@ class _BluetoothAuthorizationPageState
       }
       final payload = BleCommandBuilder.buildClearAuthorizationData(keyId);
       final ack = await _sendEncryptedCommand(signal: '000c', payload: payload);
-      if (ack == null || ack.length < 8 || ack.substring(0, 8) != keyId) {
+      if (!_isValidAckForKeyId(ack, keyId)) {
         throw Exception('clear ack invalid');
       }
       if (mounted) {
@@ -537,8 +525,16 @@ class _BluetoothAuthorizationPageState
       payload: BleCommandBuilder.buildReadKeyIdData(),
     );
     if (response == null || response.length < 8) return null;
-    _lastKeyId = response.substring(0, 8);
+    _lastKeyId = response.substring(0, 8).toLowerCase();
     return _lastKeyId;
+  }
+
+  bool _isValidAckForKeyId(String? ack, String keyId) {
+    if (ack == null || ack.length < 8) return false;
+    final ackPrefix = ack.substring(0, 8).toLowerCase();
+    final key = keyId.trim().toLowerCase();
+    if (key.isEmpty) return false;
+    return ackPrefix == key;
   }
 
   Future<String?> _sendEncryptedCommand({
@@ -583,7 +579,11 @@ class _BluetoothAuthorizationPageState
       _notifyBuffer = _notifyBuffer.substring(index + endFlag.length);
       final unescaped = BleCommandBuilder.unescapeResponse(raw);
       final signal = BleCommandBuilder.extractSignal(unescaped).toLowerCase();
-      if (_pendingSignal.isNotEmpty && signal != _pendingSignal) {
+      final expectedSignal = _pendingSignal;
+      final matched = expectedSignal.isEmpty ||
+          signal == expectedSignal ||
+          signal == _toResponseSignal(expectedSignal);
+      if (!matched) {
         // 对齐安卓：如果收到 010d 表示重复授权
         if (signal == '010d' && mounted) {
           showToast(context.l10n.bluetoothAuthRepeatAuthorization);
@@ -627,6 +627,13 @@ class _BluetoothAuthorizationPageState
       buffer.write(b.toRadixString(16).padLeft(2, '0').toUpperCase());
     }
     return buffer.toString();
+  }
+
+  String _toResponseSignal(String requestSignal) {
+    if (requestSignal.length != 4) return requestSignal;
+    final value = int.tryParse(requestSignal, radix: 16);
+    if (value == null) return requestSignal;
+    return (value + 0x0100).toRadixString(16).padLeft(4, '0');
   }
 
   @override

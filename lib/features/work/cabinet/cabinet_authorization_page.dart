@@ -56,7 +56,12 @@ class _CabinetAuthorizationPageState
   }
 
   Future<void> _selectPerson() async {
+    final l10n = context.l10n;
     final sn = _selectedStation?.stationSn ?? '';
+    if (sn.isEmpty) {
+      showToast(l10n.cabinetAuthSelectStationRequired);
+      return;
+    }
     final result = await Navigator.of(context).push<UserAuthorizationBean>(
       MaterialPageRoute(builder: (_) => _SelectPersonPage(sn: sn)),
     );
@@ -597,24 +602,7 @@ class _StationCard extends StatelessWidget {
                                     size: 12,
                                     color: isOnline ? AppColors.primaryColor : Colors.red,
                                   ),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    isOnline ? 'Online' : 'Offline',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color:
-                                          isOnline ? AppColors.primaryColor : Colors.red,
-                                    ),
-                                  ),
                                 ],
-                              ),
-                            ),
-                            // 状态文案
-                            Text(
-                              station.showOnlineStatus ?? '-',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: Colors.black54,
                               ),
                             ),
                           ],

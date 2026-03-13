@@ -2496,42 +2496,6 @@ class _PaymentRecordCard extends StatelessWidget {
                         color: AppColors.black06Text,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            timeText,
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFF999999),
-                            ),
-                          ),
-                        ),
-                        if (hasVoucher)
-                          GestureDetector(
-                            onTap: () => _showVoucherDialog(context, l10n, attachment),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(6),
-                                border: Border.all(color: const Color(0xFFD0D4DA)),
-                              ),
-                              child: Text(
-                                l10n.orderVoucherView,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF333333),
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -2560,6 +2524,44 @@ class _PaymentRecordCard extends StatelessWidget {
                 ],
               ),
             ],
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.only(left: 44),
+            child: Row(
+              children: [
+                Text(
+                  timeText,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF999999),
+                  ),
+                ),
+                const Spacer(),
+                if (hasVoucher)
+                  GestureDetector(
+                    onTap: () => _showVoucherDialog(context, l10n, attachment),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(color: const Color(0xFFD0D4DA)),
+                      ),
+                      child: Text(
+                        l10n.orderVoucherView,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF333333),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ],
       ),

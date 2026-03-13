@@ -40,9 +40,11 @@ class EntrySuccessPage extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      body: Center(
+      body: Align(
+        alignment: Alignment.topCenter,
         child: Container(
-          margin: const EdgeInsets.all(16),
+          width: double.infinity,
+          margin: const EdgeInsets.only(top: 12, left: 12, right: 12),
           padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 24),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -99,6 +101,7 @@ class EntrySuccessPage extends StatelessWidget {
   }
 
   void _goToWorkbenchHome(BuildContext context) {
+    Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
     final container = ProviderScope.containerOf(context, listen: false);
     container.read(bottomNavIndexProvider.notifier).setIndex(1);
     AppRouter.goHome();

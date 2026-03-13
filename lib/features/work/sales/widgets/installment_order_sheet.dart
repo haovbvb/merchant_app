@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
@@ -44,10 +45,16 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
   }
 
   String _formatDate(int? timestamp) {
-    return DateFormatUtils.formatTimestamp(
-      timestamp,
-      pattern: 'yyyy/MM/dd',
-    );
+    if (timestamp == null || timestamp <= 0) return '-';
+    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    final isZh = Localizations.localeOf(context).languageCode.toLowerCase().startsWith('zh');
+    if (isZh) {
+      return DateFormatUtils.formatTimestamp(
+        timestamp,
+        pattern: 'yyyy/MM/dd',
+      );
+    }
+    return DateFormat('MMM dd, yyyy', 'en').format(date);
   }
 
   @override

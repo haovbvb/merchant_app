@@ -354,8 +354,7 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
-      builder: (_) =>
-          _WarehousePickerSheet(l10n: l10n, notifier: notifier, ref: ref),
+      builder: (_) => _WarehousePickerSheet(l10n: l10n, notifier: notifier),
     );
   }
 
@@ -925,22 +924,21 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
-class _WarehousePickerSheet extends StatefulWidget {
+class _WarehousePickerSheet extends ConsumerStatefulWidget {
   const _WarehousePickerSheet({
     required this.l10n,
     required this.notifier,
-    required this.ref,
   });
 
   final AppLocalizations l10n;
   final TransportCreateNotifier notifier;
-  final WidgetRef ref;
 
   @override
-  State<_WarehousePickerSheet> createState() => _WarehousePickerSheetState();
+  ConsumerState<_WarehousePickerSheet> createState() =>
+      _WarehousePickerSheetState();
 }
 
-class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
+class _WarehousePickerSheetState extends ConsumerState<_WarehousePickerSheet> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedCityCode = '';
   String _selectedCityName = '';
@@ -954,7 +952,6 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
     widget.notifier.loadInWarehouseList(
       keyword: '',
       cityCode: '',
-      cityName: '',
     );
   }
 
@@ -966,7 +963,7 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final state = widget.ref.watch(transportCreateProvider);
+    final state = ref.watch(transportCreateProvider);
     final warehouses = state.inWarehouses;
     final selectedWarehouse = state.selectedInWarehouse;
     final cities = state.cities;
@@ -1009,6 +1006,7 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
               ),
               child: TextField(
                 controller: _searchController,
+                textAlignVertical: TextAlignVertical.center,
                 onChanged: (value) {
                   widget.notifier.loadInWarehouseList(
                     keyword: value,
@@ -1026,10 +1024,15 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
                     color: Colors.grey.shade400,
                     size: 20,
                   ),
+                  prefixIconConstraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
+                  ),
+                  isDense: true,
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 12,
-                    vertical: 10,
+                    vertical: 8,
                   ),
                 ),
               ),
@@ -1185,7 +1188,6 @@ class _WarehousePickerSheetState extends State<_WarehousePickerSheet> {
     await widget.notifier.loadInWarehouseList(
       keyword: _searchController.text.trim(),
       cityCode: _selectedCityCode,
-      cityName: _selectedCityName,
     );
   }
 }

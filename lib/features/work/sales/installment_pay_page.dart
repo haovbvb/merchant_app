@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:merchant_app/app/ui.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
@@ -773,17 +774,31 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
   }
 
   String _formatDate(int? timestamp) {
-    return DateFormatUtils.formatTimestamp(
-      timestamp,
-      pattern: 'yyyy/MM/dd',
-    );
+    if (timestamp == null || timestamp <= 0) return '-';
+    if (_isZhLocale()) {
+      return DateFormatUtils.formatTimestamp(
+        timestamp,
+        pattern: 'yyyy/MM/dd',
+      );
+    }
+    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    return DateFormat('MMM dd, yyyy', 'en').format(date);
   }
 
   String _formatDateTime(int? timestamp) {
-    return DateFormatUtils.formatTimestamp(
-      timestamp,
-      pattern: 'yyyy/MM/dd HH:mm:ss',
-    );
+    if (timestamp == null || timestamp <= 0) return '-';
+    if (_isZhLocale()) {
+      return DateFormatUtils.formatTimestamp(
+        timestamp,
+        pattern: 'yyyy/MM/dd HH:mm:ss',
+      );
+    }
+    final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    return DateFormat('MMM dd, yyyy HH:mm:ss', 'en').format(date);
+  }
+
+  bool _isZhLocale() {
+    return Localizations.localeOf(context).languageCode.toLowerCase().startsWith('zh');
   }
 
   Widget _buildVoucherSection(BuildContext context) {
@@ -1028,12 +1043,18 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
       if (!mounted || cameraPick == null) return;
       picks = [cameraPick];
     } else {
-      final galleryPicks = await picker.pickMultiImage(limit: remaining);
-      if (!mounted || galleryPicks.isEmpty) return;
-      if (galleryPicks.length > remaining) {
-        showToast(l10n.installmentPayUploadLimit);
+      if (remaining == 1) {
+        final singlePick = await picker.pickImage(source: ImageSource.gallery);
+        if (!mounted || singlePick == null) return;
+        picks = [singlePick];
+      } else {
+        final galleryPicks = await picker.pickMultiImage();
+        if (!mounted || galleryPicks.isEmpty) return;
+        if (galleryPicks.length > remaining) {
+          showToast(l10n.installmentPayUploadLimit);
+        }
+        picks = galleryPicks.take(remaining).toList();
       }
-      picks = galleryPicks.take(remaining).toList();
     }
 
     var failed = 0;

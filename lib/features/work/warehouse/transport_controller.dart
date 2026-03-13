@@ -319,13 +319,15 @@ class TransportCreateState {
     this.warehouseCityName = '',
   });
 
+  static const Object _unset = Object();
+
   TransportCreateState copyWith({
     bool? loading,
     bool? submitting,
     int? deviceType,
-    WarehouseInfo? myWarehouse,
+    Object? myWarehouse = _unset,
     List<WarehouseInfo>? inWarehouses,
-    WarehouseInfo? selectedInWarehouse,
+    Object? selectedInWarehouse = _unset,
     List<City>? cities,
     List<String>? sns,
     String? trackingNumber,
@@ -337,9 +339,13 @@ class TransportCreateState {
       loading: loading ?? this.loading,
       submitting: submitting ?? this.submitting,
       deviceType: deviceType ?? this.deviceType,
-      myWarehouse: myWarehouse ?? this.myWarehouse,
+      myWarehouse: myWarehouse == _unset
+          ? this.myWarehouse
+          : myWarehouse as WarehouseInfo?,
       inWarehouses: inWarehouses ?? this.inWarehouses,
-      selectedInWarehouse: selectedInWarehouse ?? this.selectedInWarehouse,
+      selectedInWarehouse: selectedInWarehouse == _unset
+          ? this.selectedInWarehouse
+          : selectedInWarehouse as WarehouseInfo?,
       cities: cities ?? this.cities,
       sns: sns ?? this.sns,
       trackingNumber: trackingNumber ?? this.trackingNumber,
@@ -388,18 +394,18 @@ class TransportCreateNotifier extends Notifier<TransportCreateState> {
   Future<void> loadInWarehouseList({
     String? keyword,
     String? cityCode,
-    String? cityName,
   }) async {
-    final nextKeyword = keyword ?? state.warehouseKeyword;
-    final nextCityCode = cityCode ?? state.warehouseCityCode;
-    final nextCityName = cityName ?? state.warehouseCityName;
+    final nextKeyword = (keyword ?? state.warehouseKeyword).trim();
+    final nextCityCode = (cityCode ?? state.warehouseCityCode).trim();
     final requestId = ++_warehouseListRequestId;
 
+    // Clear stale list immediately so UI shows loading state on city switch.
     state = state.copyWith(
       loading: true,
+      inWarehouses: const <WarehouseInfo>[],
+      selectedInWarehouse: null,
       warehouseKeyword: nextKeyword,
       warehouseCityCode: nextCityCode,
-      warehouseCityName: nextCityName,
     );
     final response = await _api.get<List<WarehouseInfo>>(
       ApiPath.transportQueryInWarehouseList,
@@ -422,10 +428,9 @@ class TransportCreateNotifier extends Notifier<TransportCreateState> {
 
     state = state.copyWith(
       loading: false,
-      inWarehouses: response.result ?? const [],
+      inWarehouses: response.result ?? const <WarehouseInfo>[],
       warehouseKeyword: nextKeyword,
       warehouseCityCode: nextCityCode,
-      warehouseCityName: nextCityName,
     );
   }
 

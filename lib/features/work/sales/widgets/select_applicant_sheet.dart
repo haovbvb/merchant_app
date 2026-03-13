@@ -221,7 +221,7 @@ class _SelectApplicantSheetState extends State<SelectApplicantSheet> {
 
   Future<void> _scanUserId() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: true)),
+      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: false)),
     );
     if (!mounted || result == null || result.isEmpty) return;
 

@@ -461,16 +461,12 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                     ),
                   );
                   if (result != null && result.isNotEmpty) {
-                    final extracted = _extractVehicleQrField(result, 'sn');
-                    if (extracted.isNotEmpty) {
-                      snController.text = extracted;
-                    } else {
-                      final parsed = ScanUtils.parseVehicleQr(result, 0);
-                      final fallback = (parsed.sn ?? '').trim();
-                      snController.text = fallback.isNotEmpty
-                          ? fallback
-                          : result.trim();
-                    }
+                    _applyVehicleScanToControllers(
+                      raw: result,
+                      snController: snController,
+                      vinController: vinController,
+                      fallbackToRaw: true,
+                    );
                   }
                 },
               ),
@@ -490,16 +486,12 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
                     ),
                   );
                   if (result != null && result.isNotEmpty) {
-                    final extracted = _extractVehicleQrField(result, 'vin');
-                    if (extracted.isNotEmpty) {
-                      vinController.text = extracted;
-                    } else {
-                      final parsed = ScanUtils.parseVehicleQr(result, 0);
-                      final fallback = (parsed.vin ?? '').trim();
-                      vinController.text = fallback.isNotEmpty
-                          ? fallback
-                          : result.trim();
-                    }
+                    _applyVehicleScanToControllers(
+                      raw: result,
+                      snController: snController,
+                      vinController: vinController,
+                      fallbackToRaw: true,
+                    );
                   }
                 },
               ),
@@ -588,6 +580,44 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
       if (value.isNotEmpty) return value;
     }
     return '';
+  }
+
+  void _applyVehicleScanToControllers({
+    required String raw,
+    required TextEditingController snController,
+    required TextEditingController vinController,
+    bool fallbackToRaw = false,
+  }) {
+    final extractedSn = _extractVehicleQrField(raw, 'sn');
+    final extractedVin = _extractVehicleQrField(raw, 'vin');
+    final parsed = ScanUtils.parseVehicleQr(raw, 0);
+    final parsedSn = (parsed.sn ?? '').trim();
+    final parsedVin = (parsed.vin ?? '').trim();
+
+    final sn = extractedSn.isNotEmpty ? extractedSn : parsedSn;
+    final vin = extractedVin.isNotEmpty ? extractedVin : parsedVin;
+
+    if (sn.isNotEmpty) {
+      snController.text = sn;
+    }
+    if (vin.isNotEmpty) {
+      vinController.text = vin;
+    }
+
+    if (fallbackToRaw) {
+      if (sn.isEmpty) {
+        final rawTrimmed = raw.trim();
+        if (rawTrimmed.isNotEmpty) {
+          snController.text = rawTrimmed;
+        }
+      }
+      if (vin.isEmpty) {
+        final rawTrimmed = raw.trim();
+        if (rawTrimmed.isNotEmpty) {
+          vinController.text = rawTrimmed;
+        }
+      }
+    }
   }
 
   Widget _buildInputField({

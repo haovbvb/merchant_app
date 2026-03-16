@@ -30,9 +30,10 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
   @override
   void initState() {
     super.initState();
-    ref.read(transportCreateProvider.notifier).resetCreateState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       final notifier = ref.read(transportCreateProvider.notifier);
+      notifier.resetCreateState();
       notifier.setDeviceType(widget.deviceType);
       notifier.setInitialSns(widget.initialSns);
       notifier.loadMyWarehouse();
@@ -43,7 +44,6 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
 
   @override
   void dispose() {
-    ref.read(transportCreateProvider.notifier).resetCreateState();
     _trackingController.dispose();
     super.dispose();
   }
@@ -1072,48 +1072,91 @@ class _WarehousePickerSheetState extends ConsumerState<_WarehousePickerSheet> {
           const Divider(height: 1),
           // 仓库列表
           Expanded(
-            child: ListView.separated(
-              itemCount: warehouses.length,
-              separatorBuilder: (_, __) =>
-                  const Divider(height: 1, indent: 16, endIndent: 16),
-              itemBuilder: (context, index) {
-                final warehouse = warehouses[index];
-                final isSelected =
-                    selectedWarehouse?.inWarehouseNo == warehouse.inWarehouseNo;
-                return ListTile(
-                  tileColor: isSelected
-                      ? const Color(0xFFF5FCF2)
-                      : null,
-                  title: Text(
-                    warehouse.inWarehouseName ?? warehouse.warehouseName ?? '-',
-                    style: const TextStyle(
-                      fontSize: 15,
-                      color: Color(0xFF1A1A1A),
-                    ),
-                  ),
-                  subtitle: Text(
-                    warehouse.cityName ?? '',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF999999),
-                    ),
-                  ),
-                  trailing: isSelected
-                      ? Icon(
-                          Icons.check,
-                          color: Theme.of(context).colorScheme.primary,
-                        )
-                      : null,
-                  onTap: () {
-                    widget.notifier.selectInWarehouse(warehouse);
-                    Navigator.of(context).pop();
-                  },
-                );
-              },
+            child: _buildWarehouseContent(
+              warehouses: warehouses,
+              selectedWarehouse: selectedWarehouse,
+              loading: state.loading,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildWarehouseContent({
+    required List<WarehouseInfo> warehouses,
+    required WarehouseInfo? selectedWarehouse,
+    required bool loading,
+  }) {
+    if (loading) {
+      return const Center(
+        child: SizedBox(
+          width: 18,
+          height: 18,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        ),
+      );
+    }
+
+    if (warehouses.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Image.asset(
+              'assets/android/mipmap-xxhdpi/icon_empty_search.png',
+              width: 96,
+              height: 96,
+            ),
+            const SizedBox(height: 10),
+            Text(
+              widget.l10n.deviceIssueSearchEmpty,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color(0xFF999999),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      itemCount: warehouses.length,
+      separatorBuilder: (_, __) =>
+          const Divider(height: 1, indent: 16, endIndent: 16),
+      itemBuilder: (context, index) {
+        final warehouse = warehouses[index];
+        final isSelected =
+            selectedWarehouse?.inWarehouseNo == warehouse.inWarehouseNo;
+        return ListTile(
+          tileColor: isSelected ? const Color(0xFFF5FCF2) : null,
+          title: Text(
+            warehouse.inWarehouseName ?? warehouse.warehouseName ?? '-',
+            style: const TextStyle(
+              fontSize: 15,
+              color: Color(0xFF1A1A1A),
+            ),
+          ),
+          subtitle: Text(
+            warehouse.cityName ?? '',
+            style: const TextStyle(
+              fontSize: 13,
+              color: Color(0xFF999999),
+            ),
+          ),
+          trailing: isSelected
+              ? Icon(
+                  Icons.check,
+                  color: Theme.of(context).colorScheme.primary,
+                )
+              : null,
+          onTap: () {
+            widget.notifier.selectInWarehouse(warehouse);
+            Navigator.of(context).pop();
+          },
+        );
+      },
     );
   }
 

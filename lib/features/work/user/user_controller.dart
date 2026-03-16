@@ -13,7 +13,8 @@ import 'package:merchant_app/data/models/user_payment_record.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
 
-const _pageSize = 20;
+const _userListPageSize = 20;
+const _detailPageSize = 10;
 const _orderPageSize = 10;
 
 class UserListState {
@@ -84,7 +85,7 @@ class UserListNotifier extends Notifier<UserListState> {
       _endpointForKeyword(nextKeyword),
       queryParameters: {
         'pageNum': 1,
-        'pageSize': _pageSize,
+        'pageSize': _userListPageSize,
         if (nextKeyword.trim().isNotEmpty) 'keyword': nextKeyword.trim(),
         if (nextStatus != null) 'type': nextStatus,
       },
@@ -109,7 +110,7 @@ class UserListNotifier extends Notifier<UserListState> {
       _endpointForKeyword(state.keyword),
       queryParameters: {
         'pageNum': nextPage,
-        'pageSize': _pageSize,
+        'pageSize': _userListPageSize,
         if (state.keyword.trim().isNotEmpty) 'keyword': state.keyword.trim(),
         if (state.status != null) 'type': state.status,
       },
@@ -182,8 +183,19 @@ class UserDetailState {
     this.swapsPage = 1,
   });
 
-  bool get paymentsHasMore => payments.length < paymentsTotal;
-  bool get swapsHasMore => swaps.length < swapsTotal;
+  bool get paymentsHasMore {
+    if (paymentsTotal > 0) {
+      return payments.length < paymentsTotal;
+    }
+    return payments.isNotEmpty && payments.length % _detailPageSize == 0;
+  }
+
+  bool get swapsHasMore {
+    if (swapsTotal > 0) {
+      return swaps.length < swapsTotal;
+    }
+    return swaps.isNotEmpty && swaps.length % _detailPageSize == 0;
+  }
 
   UserDetailState copyWith({
     bool? loading,
@@ -243,6 +255,11 @@ final userDetailProvider =
 
 class UserDetailNotifier extends Notifier<UserDetailState> {
   final ApiService _api = ApiService();
+  bool _loadingSaleOrders = false;
+  bool _loadingRentOrders = false;
+  bool _loadingSwapOrders = false;
+  bool _loadingPayments = false;
+  bool _loadingSwaps = false;
 
   @override
   UserDetailState build() => const UserDetailState();
@@ -291,101 +308,221 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
     final num = state.cardNum;
     if (num.trim().isEmpty) return;
 
-    final response = await _api.get<UserOrderResponse>(
-      ApiPath.userQueryOrderList,
-      queryParameters: {
-        'cardNum': num,
-        'orderType': orderType,
-        'pageNum': page,
-        'pageSize': _orderPageSize,
-      },
-      parser: (json) =>
-          UserOrderResponse.fromJson(Map<String, dynamic>.from(json as Map)),
-      showHud: false,
-    );
+    if (_isOrderLoading(orderType)) {
+      return;
+    }
 
-    final incoming = (response.result?.list ?? const <OrderItem>[])
-        .where((item) => item.orderType == orderType)
-        .toList();
-    final hasMore = incoming.isNotEmpty;
+    if (page > 1) {
+      final hasMore = _orderHasMore(orderType);
+      final currentPage = _orderCurrentPage(orderType);
+      if (!hasMore || page <= currentPage) {
+        return;
+      }
+    }
 
+    _setOrderLoading(orderType, true);
+
+    try {
+      final response = await _api.get<UserOrderResponse>(
+        ApiPath.userQueryOrderList,
+        queryParameters: {
+          'cardNum': num,
+          'orderType': orderType,
+          'pageNum': page,
+          'pageSize': _orderPageSize,
+        },
+        parser: (json) =>
+            UserOrderResponse.fromJson(Map<String, dynamic>.from(json as Map)),
+        showHud: false,
+      );
+
+      final total = response.result?.total ?? 0;
+      final incoming = (response.result?.list ?? const <OrderItem>[])
+          .where((item) => item.orderType == orderType)
+          .toList();
+      final current = _orderCurrentList(orderType);
+      final merged = page == 1 ? incoming : [...current, ...incoming];
+        final hasMore = total > 0
+          ? merged.length < total
+          : incoming.length >= _orderPageSize;
+
+      switch (orderType) {
+        case 1:
+          state = state.copyWith(
+            saleOrdersPage: page,
+            saleOrders: merged,
+            saleOrdersHasMore: hasMore,
+          );
+          break;
+        case 2:
+          state = state.copyWith(
+            rentOrdersPage: page,
+            rentOrders: merged,
+            rentOrdersHasMore: hasMore,
+          );
+          break;
+        case 3:
+          state = state.copyWith(
+            swapOrdersPage: page,
+            swapOrders: merged,
+            swapOrdersHasMore: hasMore,
+          );
+          break;
+        default:
+          break;
+      }
+
+      state = state.copyWith(
+        orders: [...state.saleOrders, ...state.rentOrders, ...state.swapOrders],
+        total: state.saleOrders.length +
+            state.rentOrders.length +
+            state.swapOrders.length,
+      );
+    } finally {
+      _setOrderLoading(orderType, false);
+    }
+  }
+
+  bool _isOrderLoading(int orderType) {
     switch (orderType) {
       case 1:
-        state = state.copyWith(
-          saleOrdersPage: page,
-          saleOrders: page == 1 ? incoming : [...state.saleOrders, ...incoming],
-          saleOrdersHasMore: hasMore,
-        );
+        return _loadingSaleOrders;
+      case 2:
+        return _loadingRentOrders;
+      case 3:
+        return _loadingSwapOrders;
+      default:
+        return false;
+    }
+  }
+
+  void _setOrderLoading(int orderType, bool loading) {
+    switch (orderType) {
+      case 1:
+        _loadingSaleOrders = loading;
         break;
       case 2:
-        state = state.copyWith(
-          rentOrdersPage: page,
-          rentOrders: page == 1 ? incoming : [...state.rentOrders, ...incoming],
-          rentOrdersHasMore: hasMore,
-        );
+        _loadingRentOrders = loading;
         break;
       case 3:
-        state = state.copyWith(
-          swapOrdersPage: page,
-          swapOrders: page == 1 ? incoming : [...state.swapOrders, ...incoming],
-          swapOrdersHasMore: hasMore,
-        );
+        _loadingSwapOrders = loading;
         break;
       default:
         break;
     }
+  }
 
-    state = state.copyWith(
-      orders: [...state.saleOrders, ...state.rentOrders, ...state.swapOrders],
-      total: state.saleOrders.length + state.rentOrders.length + state.swapOrders.length,
-    );
+  bool _orderHasMore(int orderType) {
+    switch (orderType) {
+      case 1:
+        return state.saleOrdersHasMore;
+      case 2:
+        return state.rentOrdersHasMore;
+      case 3:
+        return state.swapOrdersHasMore;
+      default:
+        return false;
+    }
+  }
+
+  int _orderCurrentPage(int orderType) {
+    switch (orderType) {
+      case 1:
+        return state.saleOrdersPage;
+      case 2:
+        return state.rentOrdersPage;
+      case 3:
+        return state.swapOrdersPage;
+      default:
+        return 1;
+    }
+  }
+
+  List<OrderItem> _orderCurrentList(int orderType) {
+    switch (orderType) {
+      case 1:
+        return state.saleOrders;
+      case 2:
+        return state.rentOrders;
+      case 3:
+        return state.swapOrders;
+      default:
+        return const <OrderItem>[];
+    }
   }
 
   /// 加载用户付款记录
   Future<void> loadPayments({String? cardNum, int page = 1}) async {
     final num = cardNum ?? state.cardNum;
     if (num.trim().isEmpty) return;
+    if (_loadingPayments) return;
+    if (page > 1 && (!state.paymentsHasMore || page <= state.paymentsPage)) {
+      return;
+    }
+    _loadingPayments = true;
     state = state.copyWith(loadingPayments: true);
 
-    final response = await _api.get<UserPaymentRecordResponse>(
-      ApiPath.userQueryPayList,
-      queryParameters: {'cardNum': num, 'pageNum': page, 'pageSize': _pageSize},
-      parser: (json) => UserPaymentRecordResponse.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
-      showHud: false,
-    );
+    try {
+      final response = await _api.get<UserPaymentRecordResponse>(
+        ApiPath.userQueryPayList,
+        queryParameters: {
+          'cardNum': num,
+          'pageNum': page,
+          'pageSize': _detailPageSize,
+        },
+        parser: (json) => UserPaymentRecordResponse.fromJson(
+          Map<String, dynamic>.from(json as Map),
+        ),
+        showHud: false,
+      );
 
-    final list = response.result?.list ?? const [];
-    state = state.copyWith(
-      loadingPayments: false,
-      paymentsPage: page,
-      payments: page == 1 ? list : [...state.payments, ...list],
-      paymentsTotal: response.result?.total ?? state.paymentsTotal,
-    );
+      final list = response.result?.list ?? const [];
+      state = state.copyWith(
+        paymentsPage: page,
+        payments: page == 1 ? list : [...state.payments, ...list],
+        paymentsTotal: response.result?.total ?? state.paymentsTotal,
+      );
+    } finally {
+      _loadingPayments = false;
+      state = state.copyWith(loadingPayments: false);
+    }
   }
 
   /// 加载用户换电记录
   Future<void> loadSwaps({String? cardNum, int page = 1}) async {
     final num = cardNum ?? state.cardNum;
     if (num.trim().isEmpty) return;
+    if (_loadingSwaps) return;
+    if (page > 1 && (!state.swapsHasMore || page <= state.swapsPage)) {
+      return;
+    }
+    _loadingSwaps = true;
     state = state.copyWith(loadingSwaps: true);
 
-    final response = await _api.get<PowerChangeResponse>(
-      ApiPath.userQuerySwapPage,
-      queryParameters: {'cardNum': num, 'pageNum': page, 'pageSize': _pageSize},
-      parser: (json) =>
-          PowerChangeResponse.fromJson(Map<String, dynamic>.from(json as Map)),
-      showHud: false,
-    );
+    try {
+      final response = await _api.get<PowerChangeResponse>(
+        ApiPath.userQuerySwapPage,
+        queryParameters: {
+          'cardNum': num,
+          'pageNum': page,
+          'pageSize': _detailPageSize,
+        },
+        parser: (json) => PowerChangeResponse.fromJson(
+          Map<String, dynamic>.from(json as Map),
+        ),
+        showHud: false,
+      );
 
-    final list = response.result?.list ?? const [];
-    state = state.copyWith(
-      loadingSwaps: false,
-      swapsPage: page,
-      swaps: page == 1 ? list : [...state.swaps, ...list],
-      swapsTotal: response.result?.total ?? state.swapsTotal,
-    );
+      final list = response.result?.list ?? const [];
+      state = state.copyWith(
+        swapsPage: page,
+        swaps: page == 1 ? list : [...state.swaps, ...list],
+        swapsTotal: response.result?.total ?? state.swapsTotal,
+      );
+    } finally {
+      _loadingSwaps = false;
+      state = state.copyWith(loadingSwaps: false);
+    }
   }
 
   Future<_UploadResult> uploadOrderVouchers(

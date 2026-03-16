@@ -29,7 +29,10 @@ class _DepositRefundPageState extends ConsumerState<DepositRefundPage> {
   @override
   void initState() {
     super.initState();
-    ref.read(depositRefundProvider.notifier).reset();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(depositRefundProvider.notifier).reset();
+    });
     _userIdController.clear();
     _remarkController.clear();
     _lastQueriedUserId = '';

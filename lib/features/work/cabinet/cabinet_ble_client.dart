@@ -72,10 +72,10 @@ class CabinetBleClient {
   final void Function(String message) onError;
 
   static final Guid _serviceUuid = Guid('00008910-0000-1000-8000-00805f9b34fb');
-  static final Guid _notifyUuid = Guid('00008911-0000-1000-8000-00805f9b34fb');
-  static final Guid _writeUuid = Guid('00008912-0000-1000-8000-00805f9b34fb');
-  static const String _iosNotifyShortUuid = 'ffe4';
-  static const String _iosWriteShortUuid = 'ffe9';
+  static final Guid _notifyUuid = Guid('0000ffe4-0000-1000-8000-00805f9b34fb');
+  static final Guid _writeUuid = Guid('0000ffe9-0000-1000-8000-00805f9b34fb');
+  static const String _notifyShortUuid = 'ffe4';
+  static const String _writeShortUuid = 'ffe9';
   static const int _iosWriteChunkSize = 180;
   static const Duration _packetSendInterval = Duration(seconds: 5);
   static const String _authorizationFixedKey =
@@ -326,7 +326,9 @@ class CabinetBleClient {
   Future<void> _connect(BluetoothDevice device) async {
     if (_connecting) return;
     _connecting = true;
-    _log('connect start, remoteId=${device.remoteId.str}, name=${device.platformName}');
+    _log(
+      'connect start, remoteId=${device.remoteId.str}, name=${device.platformName}',
+    );
     onPhaseChanged(CabinetBleConnectionPhase.connecting);
     try {
       await device.connect(timeout: const Duration(seconds: 12));
@@ -352,16 +354,16 @@ class CabinetBleClient {
       for (final c in service.characteristics) {
         final u = c.uuid.toString().toLowerCase();
         if (u == _writeUuid.toString().toLowerCase() ||
-            u.contains('8912') ||
-            u.contains(_iosWriteShortUuid)) {
+            u.contains(_writeShortUuid)) {
           write = c;
         }
         if (u == _notifyUuid.toString().toLowerCase() ||
-            u.contains('8911') ||
-            u.contains(_iosNotifyShortUuid)) {
+            u.contains(_notifyShortUuid)) {
           notify = c;
         }
-        _log('characteristic uuid=${c.uuid.str128}, properties=${c.properties}');
+        _log(
+          'characteristic uuid=${c.uuid.str128}, properties=${c.properties}',
+        );
       }
       if (write == null || notify == null) {
         throw StateError('ble-characteristic-not-found');
@@ -454,7 +456,9 @@ class CabinetBleClient {
     final sign = md5.convert(utf8.encode(signSource)).toString().toUpperCase();
     final body = '$jsonText$sign';
     final packet = _buildPacket(cmd: 0x03, payload: utf8.encode(body));
-    _log('send business cmd=0x03, msgType=$msgType, paramCount=${params.length}');
+    _log(
+      'send business cmd=0x03, msgType=$msgType, paramCount=${params.length}',
+    );
     await _write(packet);
   }
 
@@ -468,17 +472,21 @@ class CabinetBleClient {
         final item = _sendQueue.removeAt(0);
         final data = _hexToBytes(item);
         _log('write packet len=${data.length}, hex=${_shortHex(item)}');
-        // iOS 原生实现使用 180 字节分片写入，避免长包写入失败或丢包。
-        var offset = 0;
-        while (offset < data.length) {
-          final end = (offset + _iosWriteChunkSize < data.length)
-              ? offset + _iosWriteChunkSize
-              : data.length;
-          final chunk = data.sublist(offset, end);
-          _log('write chunk offset=$offset, len=${chunk.length}');
-          await _writeChar!.write(chunk, withoutResponse: false);
-          offset = end;
-          await Future<void>.delayed(const Duration(milliseconds: 20));
+        if (Platform.isIOS) {
+          // iOS 使用分片写入，避免长包写入失败或丢包。
+          var offset = 0;
+          while (offset < data.length) {
+            final end = (offset + _iosWriteChunkSize < data.length)
+                ? offset + _iosWriteChunkSize
+                : data.length;
+            final chunk = data.sublist(offset, end);
+            _log('write chunk offset=$offset, len=${chunk.length}');
+            await _writeChar!.write(chunk, withoutResponse: false);
+            offset = end;
+            await Future<void>.delayed(const Duration(milliseconds: 20));
+          }
+        } else {
+          await _writeChar!.write(data, withoutResponse: false);
         }
         await Future<void>.delayed(_packetSendInterval);
       }
@@ -495,7 +503,7 @@ class CabinetBleClient {
     final dataLen = payload.length;
     final lenHigh = (dataLen >> 8) & 0xFF;
     final lenLow = dataLen & 0xFF;
-    final crc = _crc16(payload);
+    final crc = _crc16(<int>[0xBB, 0x66, cmd, lenHigh, lenLow, ...payload]);
     return <int>[
       0xBB,
       0x66,
@@ -552,6 +560,8 @@ class CabinetBleClient {
           _log('authorization failed');
           _authorized = false;
           onError('auth-failed');
+          // Native Android flow reconnects after auth failure via disconnect callback.
+          _device?.disconnect();
         }
         continue;
       }

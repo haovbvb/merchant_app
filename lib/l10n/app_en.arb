@@ -281,7 +281,7 @@
   "orderVoucherConfirmFailed": "Payment confirmation failed",
   "orderVoucherUploading": "Uploading vouchers",
   "orderVoucherUploadPartialFailed": "Some images failed to upload",
-  "orderVoucherMaxCount": "Only 5 images can be uploaded",
+  "orderVoucherMaxCount": "Maximum image selection limit reached",
   "orderVoucherPickCamera": "Take Photo",
   "orderVoucherPickGallery": "Choose from Gallery",
   "orderVoucherPickCancel": "Cancel",

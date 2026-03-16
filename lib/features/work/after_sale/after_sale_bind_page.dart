@@ -30,7 +30,10 @@ class _AfterSaleBindPageState extends ConsumerState<AfterSaleBindPage> {
   @override
   void initState() {
     super.initState();
-    ref.read(afterSaleBindProvider.notifier).reset();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(afterSaleBindProvider.notifier).reset();
+    });
     _cardController.clear();
     _deviceController.clear();
     _cardFocusNode.addListener(() {

@@ -10,6 +10,7 @@ import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
+import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/core/widgets/image_source_action_sheet.dart';
 import 'package:merchant_app/data/models/bind_device.dart';
 import 'package:merchant_app/data/models/power_change.dart';
@@ -83,9 +84,9 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage>
           ? const Center(child: SizedBox.shrink())
           : state.detail == null
           ? _RecordsEmptyView(
-            imagePath: 'assets/android/mipmap-xxhdpi/icon_empty_search.png',
-            text: l10n.userListEmpty,
-          )
+              imagePath: 'assets/android/mipmap-xxhdpi/icon_empty_search.png',
+              text: l10n.userListEmpty,
+            )
           : Column(
               children: [
                 // User header
@@ -141,8 +142,8 @@ class _UserHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayName =
-        '${detail?.firstName ?? ''} ${detail?.lastName ?? ''}'.trim();
+    final displayName = '${detail?.firstName ?? ''} ${detail?.lastName ?? ''}'
+        .trim();
 
     return Container(
       color: Colors.white,
@@ -167,9 +168,7 @@ class _UserHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  displayName.isEmpty
-                      ? (detail?.username ?? '-')
-                      : displayName,
+                  displayName.isEmpty ? (detail?.username ?? '-') : displayName,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
@@ -192,16 +191,18 @@ class _UserHeader extends StatelessWidget {
             GestureDetector(
               onTap: () => _callPhone(detail!.phone!),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.primaryColor,
-                  borderRadius: BorderRadius.circular(20),
+                  shape: BoxShape.circle,
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     const Icon(Icons.phone, color: Colors.white, size: 16),
-                    
                   ],
                 ),
               ),
@@ -280,11 +281,20 @@ class _BasicInfoTab extends StatelessWidget {
           ),
           child: Column(
             children: [
-              _InfoRow(label: l10n.userBasicRegisterTime, value: DateFormatUtils.formatString(detail?.createTime)),
+              _InfoRow(
+                label: l10n.userBasicRegisterTime,
+                value: DateFormatUtils.formatString(detail?.createTime),
+              ),
               Divider(height: 1, indent: 16, color: AppColors.borderColor),
-              _InfoRow(label: l10n.userBasicUserType, value: _getUserType(l10n, detail?.type)),
+              _InfoRow(
+                label: l10n.userBasicUserType,
+                value: _getUserType(l10n, detail?.type),
+              ),
               Divider(height: 1, indent: 16, color: AppColors.borderColor),
-              _InfoRow(label: l10n.userBasicBirthday, value: detail?.birthday ?? '-'),
+              _InfoRow(
+                label: l10n.userBasicBirthday,
+                value: detail?.birthday ?? '-',
+              ),
               Divider(height: 1, indent: 16, color: AppColors.borderColor),
               _InfoRow(
                 label: l10n.userBasicPhone,
@@ -539,9 +549,7 @@ class _DeviceSheetState extends State<_DeviceSheet>
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       color: AppColors.bgColor,
-      padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).padding.bottom,
-      ),
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
       child: Column(
         children: [
           Container(
@@ -651,19 +659,13 @@ class _DeviceListView extends StatelessWidget {
               'assets/android/mipmap-xxhdpi/empty_user_binddevice.png',
               width: 120,
               height: 120,
-              errorBuilder: (_, __, ___) => Icon(
-                Icons.link_off,
-                size: 64,
-                color: Colors.grey[400],
-              ),
+              errorBuilder: (_, __, ___) =>
+                  Icon(Icons.link_off, size: 64, color: Colors.grey[400]),
             ),
             const SizedBox(height: 12),
             Text(
               l10n.userDetailBindEmpty,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
             ),
           ],
         ),
@@ -894,10 +896,7 @@ class _VehicleInfoGrid extends StatelessWidget {
       children: [
         _InfoGridBox(
           children: [
-            _InfoCell(
-              label: l10n.orderLabelModel,
-              value: model ?? '-',
-            ),
+            _InfoCell(label: l10n.orderLabelModel, value: model ?? '-'),
             _InfoDivider(),
             _InfoCell(
               label: l10n.repairRecordDevicePlateNumber,
@@ -964,9 +963,7 @@ class _InfoGridBox extends StatelessWidget {
         color: const Color(0xFFF6F7F9),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Row(
-        children: children,
-      ),
+      child: Row(children: children),
     );
   }
 }
@@ -986,15 +983,13 @@ class _InfoCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Column(
-        crossAxisAlignment:
-            alignStart ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        crossAxisAlignment: alignStart
+            ? CrossAxisAlignment.start
+            : CrossAxisAlignment.center,
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Color(0xFF9B9B9B),
-            ),
+            style: const TextStyle(fontSize: 12, color: Color(0xFF9B9B9B)),
           ),
           const SizedBox(height: 4),
           Text(
@@ -1026,11 +1021,7 @@ class _InfoDivider extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({
-    required this.label,
-    required this.value,
-    this.valueColor,
-  });
+  const _InfoRow({required this.label, required this.value, this.valueColor});
 
   final String label;
   final String value;
@@ -1103,7 +1094,10 @@ class _PhotoGrid extends StatelessWidget {
                 width: 72,
                 height: 72,
                 color: const Color(0xFFF5F5F5),
-                child: const Icon(Icons.broken_image_outlined, color: Color(0xFF999999)),
+                child: const Icon(
+                  Icons.broken_image_outlined,
+                  color: Color(0xFF999999),
+                ),
               ),
             ),
           ),
@@ -1152,11 +1146,7 @@ class _PhotoGrid extends StatelessWidget {
                     color: Colors.black.withOpacity(0.4),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.close,
-                    size: 20,
-                    color: Colors.white,
-                  ),
+                  child: const Icon(Icons.close, size: 20, color: Colors.white),
                 ),
               ),
             ),
@@ -1181,13 +1171,18 @@ class _OrderRecordsTab extends ConsumerStatefulWidget {
 }
 
 class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
+  static const Duration _loadMoreMinDuration = Duration(milliseconds: 380);
+
   int _selectedIndex = 0;
-  final RefreshController _saleRefreshController =
-    RefreshController(initialRefresh: false);
-  final RefreshController _rentRefreshController =
-    RefreshController(initialRefresh: false);
-  final RefreshController _swapRefreshController =
-    RefreshController(initialRefresh: false);
+  final RefreshController _saleRefreshController = RefreshController(
+    initialRefresh: false,
+  );
+  final RefreshController _rentRefreshController = RefreshController(
+    initialRefresh: false,
+  );
+  final RefreshController _swapRefreshController = RefreshController(
+    initialRefresh: false,
+  );
 
   @override
   void initState() {
@@ -1196,10 +1191,9 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
       final state = ref.read(userDetailProvider);
       if (state.cardNum.trim().isEmpty) return;
       if (state.saleOrders.isEmpty) {
-        await ref.read(userDetailProvider.notifier).loadOrders(
-          orderType: _currentOrderType,
-          page: 1,
-        );
+        await ref
+            .read(userDetailProvider.notifier)
+            .loadOrders(orderType: _currentOrderType, page: 1);
       }
     });
   }
@@ -1256,19 +1250,15 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
     ];
 
     List<OrderItem> current;
-    bool hasMore;
     switch (_selectedIndex) {
       case 1:
         current = state.rentOrders;
-        hasMore = state.rentOrdersHasMore;
         break;
       case 2:
         current = state.swapOrders;
-        hasMore = state.swapOrdersHasMore;
         break;
       default:
         current = state.saleOrders;
-        hasMore = state.saleOrdersHasMore;
     }
 
     return Column(
@@ -1281,7 +1271,9 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
               final isSelected = _selectedIndex == index;
               return Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(right: index < tabs.length - 1 ? 10 : 0),
+                  padding: EdgeInsets.only(
+                    right: index < tabs.length - 1 ? 10 : 0,
+                  ),
                   child: GestureDetector(
                     onTap: () async {
                       setState(() => _selectedIndex = index);
@@ -1290,30 +1282,24 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
                       final hasData = nextType == 1
                           ? state.saleOrders.isNotEmpty
                           : nextType == 2
-                              ? state.rentOrders.isNotEmpty
-                              : state.swapOrders.isNotEmpty;
+                          ? state.rentOrders.isNotEmpty
+                          : state.swapOrders.isNotEmpty;
                       if (!hasData) {
                         await notifier.loadOrders(orderType: nextType, page: 1);
                       }
-                      if (!mounted) return;
-                      final refreshed = ref.read(userDetailProvider);
-                      final refreshedHasMore = nextType == 1
-                          ? refreshed.saleOrdersHasMore
-                          : nextType == 2
-                              ? refreshed.rentOrdersHasMore
-                              : refreshed.swapOrdersHasMore;
-                      _syncControllerNoDataState(
-                        controller: _currentRefreshController,
-                        hasMore: refreshedHasMore,
-                      );
+                      _currentRefreshController.resetNoData();
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       decoration: BoxDecoration(
-                        color: isSelected ? Colors.white : const Color(0xFFF5F6F8),
+                        color: isSelected
+                            ? Colors.white
+                            : const Color(0xFFF5F6F8),
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
-                          color: isSelected ? AppColors.primaryColor : Colors.transparent,
+                          color: isSelected
+                              ? AppColors.primaryColor
+                              : Colors.transparent,
                         ),
                       ),
                       alignment: Alignment.center,
@@ -1337,24 +1323,17 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
         Expanded(
           child: SmartRefresher(
             controller: _currentRefreshController,
+            header: _buildRefreshHeader(context),
+            footer: _buildRefreshFooter(context),
             enablePullDown: true,
-            enablePullUp: hasMore,
+            enablePullUp: true,
             onRefresh: () async {
               final controller = _currentRefreshController;
               final orderType = _currentOrderType;
               try {
                 await notifier.loadOrders(orderType: orderType, page: 1);
                 controller.refreshCompleted();
-                final refreshed = ref.read(userDetailProvider);
-                final refreshedHasMore = orderType == 1
-                    ? refreshed.saleOrdersHasMore
-                    : orderType == 2
-                        ? refreshed.rentOrdersHasMore
-                        : refreshed.swapOrdersHasMore;
-                _syncControllerNoDataState(
-                  controller: controller,
-                  hasMore: refreshedHasMore,
-                );
+                controller.resetNoData();
               } catch (_) {
                 controller.refreshFailed();
               }
@@ -1362,11 +1341,17 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
             onLoading: () async {
               final controller = _currentRefreshController;
               final orderType = _currentOrderType;
+              final start = DateTime.now();
+              final before = orderType == 1
+                  ? ref.read(userDetailProvider).saleOrders.length
+                  : orderType == 2
+                  ? ref.read(userDetailProvider).rentOrders.length
+                  : ref.read(userDetailProvider).swapOrders.length;
               final currentPage = orderType == 1
                   ? ref.read(userDetailProvider).saleOrdersPage
                   : orderType == 2
-                      ? ref.read(userDetailProvider).rentOrdersPage
-                      : ref.read(userDetailProvider).swapOrdersPage;
+                  ? ref.read(userDetailProvider).rentOrdersPage
+                  : ref.read(userDetailProvider).swapOrdersPage;
               try {
                 await notifier.loadOrders(
                   orderType: orderType,
@@ -1376,12 +1361,22 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
                 final refreshedHasMore = orderType == 1
                     ? refreshed.saleOrdersHasMore
                     : orderType == 2
-                        ? refreshed.rentOrdersHasMore
-                        : refreshed.swapOrdersHasMore;
-                if (refreshedHasMore) {
-                  controller.loadComplete();
-                } else {
+                    ? refreshed.rentOrdersHasMore
+                    : refreshed.swapOrdersHasMore;
+                final after = orderType == 1
+                    ? refreshed.saleOrders.length
+                    : orderType == 2
+                    ? refreshed.rentOrders.length
+                    : refreshed.swapOrders.length;
+                final elapsed = DateTime.now().difference(start);
+                if (elapsed < _loadMoreMinDuration) {
+                  await Future.delayed(_loadMoreMinDuration - elapsed);
+                }
+
+                if (!refreshedHasMore || after <= before) {
                   controller.loadNoData();
+                } else {
+                  controller.loadComplete();
                 }
               } catch (_) {
                 controller.loadFailed();
@@ -1492,8 +1487,9 @@ class _SaleOrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final sale = order.saleOrder;
     final orderNo = order.orderNo.isNotEmpty ? order.orderNo : '-';
-    final timeText =
-        _formatOrderTime(order.createTime ?? sale?.createTime ?? 0);
+    final timeText = _formatOrderTime(
+      order.createTime ?? sale?.createTime ?? 0,
+    );
     final payTypeLabel = _payTypeLabel(
       l10n,
       sale?.payWay ?? order.payWay,
@@ -1548,7 +1544,8 @@ class _SaleOrderCard extends StatelessWidget {
                             runSpacing: 8,
                             children: [
                               if (statusChip != null) statusChip,
-                              if (payTypeLabel != '-') _OrderTag(text: payTypeLabel),
+                              if (payTypeLabel != '-')
+                                _OrderTag(text: payTypeLabel),
                               if ((sale?.deviceModel ?? '').isNotEmpty)
                                 _OrderTag(text: sale?.deviceModel ?? '-'),
                             ],
@@ -1607,8 +1604,9 @@ class _RentOrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final rent = order.rentOrder;
     final orderNo = order.orderNo.isNotEmpty ? order.orderNo : '-';
-    final timeText =
-        _formatOrderTime(order.createTime ?? rent?.createTime ?? 0);
+    final timeText = _formatOrderTime(
+      order.createTime ?? rent?.createTime ?? 0,
+    );
     final payTypeLabel = _payTypeLabel(
       l10n,
       rent?.payWay ?? order.payWay,
@@ -1663,7 +1661,8 @@ class _RentOrderCard extends StatelessWidget {
                             runSpacing: 8,
                             children: [
                               if (statusChip != null) statusChip,
-                              if (payTypeLabel != '-') _OrderTag(text: payTypeLabel),
+                              if (payTypeLabel != '-')
+                                _OrderTag(text: payTypeLabel),
                               if ((rent?.deviceModel ?? '').isNotEmpty)
                                 _OrderTag(text: rent?.deviceModel ?? '-'),
                             ],
@@ -1676,7 +1675,9 @@ class _RentOrderCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 _OrderPackageHeader(
                   title: rent?.infoName ?? '-',
-                  amount: _formatAmount(rent?.serviceAmount ?? order.orderAmount),
+                  amount: _formatAmount(
+                    rent?.serviceAmount ?? order.orderAmount,
+                  ),
                 ),
                 _OrderInfoPanel(
                   children: [
@@ -1690,7 +1691,10 @@ class _RentOrderCard extends StatelessWidget {
                     ),
                     _InfoLine(
                       label: l10n.orderLabelRemainDays,
-                      value: _formatUnit(rent?.remainDuration, l10n.orderUnitDays),
+                      value: _formatUnit(
+                        rent?.remainDuration,
+                        l10n.orderUnitDays,
+                      ),
                     ),
                     _InfoLine(
                       label: l10n.orderLabelExpireDate,
@@ -1725,8 +1729,9 @@ class _SwapOrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final swap = order.otherOrder;
     final orderNo = order.orderNo.isNotEmpty ? order.orderNo : '-';
-    final timeText =
-        _formatOrderTime(order.createTime ?? swap?.createTime ?? 0);
+    final timeText = _formatOrderTime(
+      order.createTime ?? swap?.createTime ?? 0,
+    );
     final payTypeLabel = _payTypeLabel(
       l10n,
       swap?.payWay ?? order.payWay,
@@ -1767,7 +1772,8 @@ class _SwapOrderCard extends StatelessWidget {
                     _OrderImage(
                       url: null,
                       size: 50,
-                      placeholder: 'assets/android/mipmap-xxhdpi/icon_swap_bind.webp',
+                      placeholder:
+                          'assets/android/mipmap-xxhdpi/icon_swap_bind.webp',
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -1802,7 +1808,8 @@ class _SwapOrderCard extends StatelessWidget {
                             runSpacing: 8,
                             children: [
                               if (statusChip != null) statusChip,
-                              if (payTypeLabel != '-') _OrderTag(text: payTypeLabel),
+                              if (payTypeLabel != '-')
+                                _OrderTag(text: payTypeLabel),
                             ],
                           ),
                         ],
@@ -1832,7 +1839,10 @@ class _SwapOrderCard extends StatelessWidget {
                     const _InfoDashedDivider(),
                     _InfoLine(
                       label: l10n.orderLabelRemainDays,
-                      value: _formatUnit(swap?.remainDuration, l10n.orderUnitDays),
+                      value: _formatUnit(
+                        swap?.remainDuration,
+                        l10n.orderUnitDays,
+                      ),
                     ),
                     _InfoLine(
                       label: l10n.orderLabelRemainTimes,
@@ -1874,8 +1884,11 @@ class _PaymentRecordsTab extends ConsumerStatefulWidget {
 }
 
 class _PaymentRecordsTabState extends ConsumerState<_PaymentRecordsTab> {
-  final RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  static const Duration _loadMoreMinDuration = Duration(milliseconds: 380);
+
+  final RefreshController _refreshController = RefreshController(
+    initialRefresh: false,
+  );
 
   @override
   void initState() {
@@ -1902,29 +1915,35 @@ class _PaymentRecordsTabState extends ConsumerState<_PaymentRecordsTab> {
 
     return SmartRefresher(
       controller: _refreshController,
+      header: _buildRefreshHeader(context),
+      footer: _buildRefreshFooter(context),
       enablePullDown: true,
-      enablePullUp: state.paymentsHasMore,
+      enablePullUp: true,
       onRefresh: () async {
         try {
           await notifier.loadPayments(page: 1);
           _refreshController.refreshCompleted();
-          if (ref.read(userDetailProvider).paymentsHasMore) {
-            _refreshController.resetNoData();
-          } else {
-            _refreshController.loadNoData();
-          }
+          _refreshController.resetNoData();
         } catch (_) {
           _refreshController.refreshFailed();
         }
       },
       onLoading: () async {
         try {
+          final start = DateTime.now();
+          final before = ref.read(userDetailProvider).payments.length;
           final currentPage = ref.read(userDetailProvider).paymentsPage;
           await notifier.loadPayments(page: currentPage + 1);
-          if (ref.read(userDetailProvider).paymentsHasMore) {
-            _refreshController.loadComplete();
-          } else {
+          final refreshed = ref.read(userDetailProvider);
+          final elapsed = DateTime.now().difference(start);
+          if (elapsed < _loadMoreMinDuration) {
+            await Future.delayed(_loadMoreMinDuration - elapsed);
+          }
+
+          if (!refreshed.paymentsHasMore || refreshed.payments.length <= before) {
             _refreshController.loadNoData();
+          } else {
+            _refreshController.loadComplete();
           }
         } catch (_) {
           _refreshController.loadFailed();
@@ -1932,7 +1951,8 @@ class _PaymentRecordsTabState extends ConsumerState<_PaymentRecordsTab> {
       },
       child: items.isEmpty && !state.loadingPayments
           ? _RecordsEmptyView(
-              imagePath: 'assets/android/mipmap-xxhdpi/icon_empty_payrecord.png',
+              imagePath:
+                  'assets/android/mipmap-xxhdpi/icon_empty_payrecord.png',
               text: widget.l10n.userPaymentEmpty,
             )
           : ListView.separated(
@@ -1964,8 +1984,11 @@ class _SwapRecordsTab extends ConsumerStatefulWidget {
 }
 
 class _SwapRecordsTabState extends ConsumerState<_SwapRecordsTab> {
-  final RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+  static const Duration _loadMoreMinDuration = Duration(milliseconds: 380);
+
+  final RefreshController _refreshController = RefreshController(
+    initialRefresh: false,
+  );
 
   @override
   void initState() {
@@ -1992,29 +2015,35 @@ class _SwapRecordsTabState extends ConsumerState<_SwapRecordsTab> {
 
     return SmartRefresher(
       controller: _refreshController,
+      header: _buildRefreshHeader(context),
+      footer: _buildRefreshFooter(context),
       enablePullDown: true,
-      enablePullUp: state.swapsHasMore,
+      enablePullUp: true,
       onRefresh: () async {
         try {
           await notifier.loadSwaps(page: 1);
           _refreshController.refreshCompleted();
-          if (ref.read(userDetailProvider).swapsHasMore) {
-            _refreshController.resetNoData();
-          } else {
-            _refreshController.loadNoData();
-          }
+          _refreshController.resetNoData();
         } catch (_) {
           _refreshController.refreshFailed();
         }
       },
       onLoading: () async {
         try {
+          final start = DateTime.now();
+          final before = ref.read(userDetailProvider).swaps.length;
           final currentPage = ref.read(userDetailProvider).swapsPage;
           await notifier.loadSwaps(page: currentPage + 1);
-          if (ref.read(userDetailProvider).swapsHasMore) {
-            _refreshController.loadComplete();
-          } else {
+          final refreshed = ref.read(userDetailProvider);
+          final elapsed = DateTime.now().difference(start);
+          if (elapsed < _loadMoreMinDuration) {
+            await Future.delayed(_loadMoreMinDuration - elapsed);
+          }
+
+          if (!refreshed.swapsHasMore || refreshed.swaps.length <= before) {
             _refreshController.loadNoData();
+          } else {
+            _refreshController.loadComplete();
           }
         } catch (_) {
           _refreshController.loadFailed();
@@ -2022,7 +2051,8 @@ class _SwapRecordsTabState extends ConsumerState<_SwapRecordsTab> {
       },
       child: items.isEmpty && !state.loadingSwaps
           ? _RecordsEmptyView(
-              imagePath: 'assets/android/mipmap-xxhdpi/icon_empty_swaprecord.png',
+              imagePath:
+                  'assets/android/mipmap-xxhdpi/icon_empty_swaprecord.png',
               text: widget.l10n.userSwapEmpty,
             )
           : ListView.separated(
@@ -2030,10 +2060,7 @@ class _SwapRecordsTabState extends ConsumerState<_SwapRecordsTab> {
               itemCount: items.length,
               separatorBuilder: (_, __) => const SizedBox(height: 12),
               itemBuilder: (context, index) {
-                return _SwapRecordCard(
-                  record: items[index],
-                  l10n: widget.l10n,
-                );
+                return _SwapRecordCard(record: items[index], l10n: widget.l10n);
               },
             ),
     );
@@ -2045,11 +2072,7 @@ class _SwapRecordsTabState extends ConsumerState<_SwapRecordsTab> {
 // =============================================================================
 
 class _OrderImage extends StatelessWidget {
-  const _OrderImage({
-    required this.url,
-    this.size = 60,
-    this.placeholder,
-  });
+  const _OrderImage({required this.url, this.size = 60, this.placeholder});
 
   final String? url;
   final double size;
@@ -2070,7 +2093,11 @@ class _OrderImage extends StatelessWidget {
                 width: size,
                 height: size,
                 color: const Color(0xFFF5F5F5),
-                child: const Icon(Icons.broken_image_outlined, size: 28, color: Color(0xFF999999)),
+                child: const Icon(
+                  Icons.broken_image_outlined,
+                  size: 28,
+                  color: Color(0xFF999999),
+                ),
               ),
             ),
     );
@@ -2106,7 +2133,11 @@ class _OrderPlaceholder extends StatelessWidget {
       width: size,
       height: size,
       color: const Color(0xFFF5F5F5),
-      child: const Icon(Icons.image_outlined, size: 28, color: Color(0xFF999999)),
+      child: const Icon(
+        Icons.image_outlined,
+        size: 28,
+        color: Color(0xFF999999),
+      ),
     );
   }
 }
@@ -2149,10 +2180,7 @@ class _VoucherButton extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.black06Text,
-              ),
+              style: TextStyle(fontSize: 14, color: AppColors.black06Text),
             ),
           ],
         ),
@@ -2162,10 +2190,7 @@ class _VoucherButton extends StatelessWidget {
 }
 
 class _OrderHeaderRow extends StatelessWidget {
-  const _OrderHeaderRow({
-    required this.orderNo,
-    required this.timeText,
-  });
+  const _OrderHeaderRow({required this.orderNo, required this.timeText});
 
   final String orderNo;
   final String timeText;
@@ -2199,10 +2224,7 @@ class _OrderHeaderRow extends StatelessWidget {
           ),
           Text(
             timeText,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Color(0xFF999999),
-            ),
+            style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
           ),
         ],
       ),
@@ -2226,20 +2248,14 @@ class _OrderTag extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: const TextStyle(
-          fontSize: 12,
-          color: Color(0xFF666666),
-        ),
+        style: const TextStyle(fontSize: 12, color: Color(0xFF666666)),
       ),
     );
   }
 }
 
 class _OrderPackageHeader extends StatelessWidget {
-  const _OrderPackageHeader({
-    required this.title,
-    required this.amount,
-  });
+  const _OrderPackageHeader({required this.title, required this.amount});
 
   final String title;
   final String amount;
@@ -2298,9 +2314,7 @@ class _OrderInfoPanel extends StatelessWidget {
         color: const Color(0xFFF6F7F9),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Column(
-        children: children,
-      ),
+      child: Column(children: children),
     );
   }
 }
@@ -2325,10 +2339,7 @@ class _InfoLine extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFF8A8A8A),
-              ),
+              style: const TextStyle(fontSize: 13, color: Color(0xFF8A8A8A)),
             ),
           ),
           Text(
@@ -2367,10 +2378,7 @@ class _InfoDashedDivider extends StatelessWidget {
 }
 
 class _RecordsEmptyView extends StatelessWidget {
-  const _RecordsEmptyView({
-    required this.imagePath,
-    required this.text,
-  });
+  const _RecordsEmptyView({required this.imagePath, required this.text});
 
   final String imagePath;
   final String text;
@@ -2385,20 +2393,11 @@ class _RecordsEmptyView extends StatelessWidget {
             imagePath,
             width: 120,
             height: 120,
-            errorBuilder: (_, __, ___) => Icon(
-              Icons.inbox_outlined,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            errorBuilder: (_, __, ___) =>
+                Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[400]),
           ),
           const SizedBox(height: 16),
-          Text(
-            text,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 14,
-            ),
-          ),
+          Text(text, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
         ],
       ),
     );
@@ -2433,10 +2432,7 @@ class _PickedXFileThumb extends StatelessWidget {
 }
 
 class _PaymentRecordCard extends StatelessWidget {
-  const _PaymentRecordCard({
-    required this.record,
-    required this.l10n,
-  });
+  const _PaymentRecordCard({required this.record, required this.l10n});
 
   final UserPaymentRecord record;
   final AppLocalizations l10n;
@@ -2445,9 +2441,10 @@ class _PaymentRecordCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final payWayLabel = _paymentWayLabel(l10n, record.payWay);
     final payTypeLabel = _paymentTypeLabel(l10n, record.payType);
-    final title = [payWayLabel, payTypeLabel]
-        .where((item) => item.trim().isNotEmpty && item != '-')
-        .join(' ');
+    final title = [
+      payWayLabel,
+      payTypeLabel,
+    ].where((item) => item.trim().isNotEmpty && item != '-').join('');
     final amountText = _formatAmountOptional(record.amount);
     final timeText = DateFormatUtils.formatString(record.payTime);
     final attachment = _resolveAttachment(record.attachment, null);
@@ -2570,10 +2567,7 @@ class _PaymentRecordCard extends StatelessWidget {
 }
 
 class _SwapRecordCard extends StatelessWidget {
-  const _SwapRecordCard({
-    required this.record,
-    required this.l10n,
-  });
+  const _SwapRecordCard({required this.record, required this.l10n});
 
   final PowerChangeItem record;
   final AppLocalizations l10n;
@@ -2628,7 +2622,10 @@ class _SwapRecordCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.12),
                   borderRadius: BorderRadius.circular(12),
@@ -2663,11 +2660,52 @@ class _SwapRecordCard extends StatelessWidget {
 }
 
 class _SwapTypeInfo {
-
   const _SwapTypeInfo(this.label, this.iconPath);
 
   final String label;
   final String iconPath;
+}
+
+Widget _buildRefreshHeader(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode == 'zh';
+  return ClassicHeader(
+    spacing: 10,
+    idleText: isZh ? '下拉刷新' : 'Pull down to refresh',
+    releaseText: isZh ? '松开刷新' : 'Release to refresh',
+    refreshingText: isZh ? '正在刷新...' : 'Refreshing...',
+    completeText: isZh ? '刷新成功' : 'Refresh completed',
+    failedText: isZh ? '刷新失败' : 'Refresh failed',
+    textStyle: const TextStyle(fontSize: 12, color: AppColors.black06Text),
+    refreshingIcon: const SizedBox(
+      width: 16,
+      height: 16,
+      child: CircularProgressIndicator(
+        strokeWidth: 2,
+        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
+      ),
+    ),
+  );
+}
+
+Widget _buildRefreshFooter(BuildContext context) {
+  final isZh = Localizations.localeOf(context).languageCode == 'zh';
+  return ClassicFooter(
+    spacing: 10,
+    idleText: isZh ? '上拉加载更多' : 'Pull up to load more',
+    canLoadingText: isZh ? '松开加载' : 'Release to load',
+    loadingText: isZh ? '正在加载...' : 'Loading...',
+    noDataText: isZh ? '没有更多数据' : 'No more data',
+    failedText: isZh ? '加载失败，点击重试' : 'Load failed, tap to retry',
+    textStyle: const TextStyle(fontSize: 12, color: AppColors.black06Text),
+    loadingIcon: const SizedBox(
+      width: 16,
+      height: 16,
+      child: CircularProgressIndicator(
+        strokeWidth: 2,
+        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
+      ),
+    ),
+  );
 }
 
 // =============================================================================
@@ -2741,15 +2779,15 @@ String _payTypeLabel(AppLocalizations l10n, int? payWay, int? payType) {
   final wayLabel = payWay == 1
       ? l10n.orderPayCash
       : payWay == 2
-          ? l10n.orderPayOnline
-          : '-';
+      ? l10n.orderPayOnline
+      : '-';
   final typeLabel = payType == 1
       ? l10n.orderPayFull
       : payType == 2
-          ? l10n.orderPayInstallment
-          : '-';
+      ? l10n.orderPayInstallment
+      : '-';
   if (wayLabel == '-' || typeLabel == '-') return '-';
-  return '$wayLabel $typeLabel'.trim();
+  return '$wayLabel$typeLabel'.trim();
 }
 
 String _resolveAttachment(String? primary, String? fallback) {
@@ -2939,8 +2977,10 @@ Future<void> _uploadVoucherImages(
   final progress = ValueNotifier<double>(0);
   _showUploadProgressDialog(context, l10n, progress);
 
-  final notifier = ProviderScope.containerOf(context, listen: false)
-      .read(userDetailProvider.notifier);
+  final notifier = ProviderScope.containerOf(
+    context,
+    listen: false,
+  ).read(userDetailProvider.notifier);
   final paths = limited
       .map((file) => file.path)
       .where((path) => path.trim().isNotEmpty)
@@ -2993,36 +3033,69 @@ Future<List<XFile>?> _showUploadVoucherDialog(
     builder: (sheetContext) {
       return StatefulBuilder(
         builder: (context, setState) {
+          void appendPickedFiles(List<XFile> files) {
+            if (files.isEmpty) {
+              return;
+            }
+            final remain = 5 - selected.length;
+            if (remain <= 0) {
+              showToast(l10n.orderVoucherMaxCount);
+              return;
+            }
+            final toAppend = <XFile>[];
+            for (final file in files) {
+              if (file.path.trim().isEmpty) {
+                continue;
+              }
+              toAppend.add(file);
+              if (toAppend.length >= remain) {
+                break;
+              }
+            }
+
+            if (toAppend.isNotEmpty) {
+              selected.addAll(toAppend);
+              setState(() {});
+            }
+          }
+
           Future<void> pickFromSource(ImageSource source) async {
             final remain = 5 - selected.length;
             if (remain <= 0) {
-              _showSnack(sheetContext, l10n.orderVoucherMaxCount);
+              showToast(l10n.orderVoucherMaxCount);
               return;
             }
             if (source == ImageSource.camera) {
               final file = await picker.pickImage(source: ImageSource.camera);
               if (file != null) {
-                selected.add(file);
-                setState(() {});
+                appendPickedFiles(<XFile>[file]);
               }
             } else {
-              final files = await picker.pickMultiImage(limit: remain);
-              if (files.isNotEmpty) {
-                if (files.length > remain) {
-                  _showSnack(sheetContext, l10n.orderVoucherMaxCount);
+              // Cap album selection by remaining slots to match native behavior.
+              if (remain == 1) {
+                final file = await picker.pickImage(
+                  source: ImageSource.gallery,
+                );
+                if (file != null) {
+                  appendPickedFiles(<XFile>[file]);
                 }
-                selected.addAll(files.take(remain));
-                setState(() {});
+              } else {
+                // Prefer the platform media picker path for better limit support.
+                final files = await picker.pickMultipleMedia(limit: remain);
+                appendPickedFiles(files);
               }
             }
           }
 
           Future<void> addImages() async {
             if (selected.length >= 5) {
-              _showSnack(sheetContext, l10n.orderVoucherMaxCount);
+              showToast(l10n.orderVoucherMaxCount);
               return;
             }
-            final source = await ImageSourceActionSheet.show(context);
+            final source = await ImageSourceActionSheet.show(
+              context,
+              maxGallerySelection: 5 - selected.length,
+            );
             if (source != null) {
               await pickFromSource(source);
             }
@@ -3159,8 +3232,7 @@ Future<List<XFile>?> _showUploadVoucherDialog(
                           child: SizedBox(
                             height: 48,
                             child: OutlinedButton(
-                              onPressed: () =>
-                                  Navigator.of(sheetContext).pop(),
+                              onPressed: () => Navigator.of(sheetContext).pop(),
                               style: OutlinedButton.styleFrom(
                                 side: const BorderSide(
                                   color: Color(0xFFD9D9D9),
@@ -3187,12 +3259,13 @@ Future<List<XFile>?> _showUploadVoucherDialog(
                             child: ElevatedButton(
                               onPressed: selected.isEmpty
                                   ? null
-                                  : () => Navigator.of(sheetContext)
-                                      .pop(List<XFile>.from(selected)),
+                                  : () => Navigator.of(
+                                      sheetContext,
+                                    ).pop(List<XFile>.from(selected)),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: AppColors.primaryColor,
-                                disabledBackgroundColor:
-                                    AppColors.primaryColor.withOpacity(0.5),
+                                disabledBackgroundColor: AppColors.primaryColor
+                                    .withOpacity(0.5),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
@@ -3250,9 +3323,7 @@ int? _statusAfterUpload(int orderType, int? payType) {
 }
 
 void _showSnack(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message)),
-  );
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
 }
 
 void _showUploadProgressDialog(
@@ -3287,9 +3358,9 @@ void _showVoucherDialog(
 ) {
   final urls = _parseAttachmentUrls(attachment);
   if (urls.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(l10n.orderVoucherEmpty)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.orderVoucherEmpty)));
     return;
   }
   final controller = PageController();
@@ -3331,11 +3402,7 @@ void _showVoucherDialog(
                   color: Colors.black.withOpacity(0.4),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.close,
-                  size: 20,
-                  color: Colors.white,
-                ),
+                child: const Icon(Icons.close, size: 20, color: Colors.white),
               ),
             ),
           ),
@@ -3345,11 +3412,7 @@ void _showVoucherDialog(
   );
 }
 
-Widget _statusChip(
-  BuildContext context,
-  AppLocalizations l10n,
-  int? status,
-) {
+Widget _statusChip(BuildContext context, AppLocalizations l10n, int? status) {
   final label = _statusLabel(l10n, status);
   final colors = _statusColors(status);
   return Container(
@@ -3360,10 +3423,7 @@ Widget _statusChip(
       borderRadius: BorderRadius.circular(6),
       border: Border.all(color: colors.border),
     ),
-    child: Text(
-      label,
-      style: TextStyle(fontSize: 12, color: colors.text),
-    ),
+    child: Text(label, style: TextStyle(fontSize: 12, color: colors.text)),
   );
 }
 

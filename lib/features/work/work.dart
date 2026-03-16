@@ -246,6 +246,15 @@ class _WorkTabState extends ConsumerState<WorkTab> {
   @override
   void initState() {
     super.initState();
+    final roles = _resolveAvailableRoles();
+    _currentRole = _resolveActiveRole(roles);
+    if (_currentRole == WorkRole.sale) {
+      _didInitialRefresh = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        ref.read(workbenchProvider.notifier).refresh();
+      });
+    }
   }
 
   @override
@@ -258,9 +267,6 @@ class _WorkTabState extends ConsumerState<WorkTab> {
       AuthSession.instance.current?.serviceType,
     );
     final modules = _resolveModules(activeRole, warehouseRole, serviceTypes);
-
-    _syncRoleIfNeeded(activeRole);
-    _maybeInitialRefresh(activeRole);
 
     return Scaffold(
       backgroundColor: AppColors.bgColor,
@@ -769,23 +775,6 @@ class _WorkTabState extends ConsumerState<WorkTab> {
       onRefresh: () => ref.read(workbenchProvider.notifier).refresh(),
       child: content,
     );
-  }
-
-  void _maybeInitialRefresh(WorkRole activeRole) {
-    if (_didInitialRefresh || activeRole != WorkRole.sale) return;
-    _didInitialRefresh = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      ref.read(workbenchProvider.notifier).refresh();
-    });
-  }
-
-  void _syncRoleIfNeeded(WorkRole activeRole) {
-    if (_currentRole == activeRole) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      setState(() => _currentRole = activeRole);
-    });
   }
 
   List<WorkRole> _resolveAvailableRoles() {

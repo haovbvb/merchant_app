@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/date_format_utils.dart';
+import 'package:merchant_app/core/utils/hud.dart';
 import 'package:merchant_app/data/models/roadside_list.dart';
 import 'package:merchant_app/features/work/roadside/roadside_controller.dart';
 import 'package:merchant_app/features/work/roadside/roadside_detail_page.dart';
@@ -16,14 +17,17 @@ class RoadSideListPage extends ConsumerStatefulWidget {
   ConsumerState<RoadSideListPage> createState() => _RoadSideListPageState();
 }
 
-class _RoadSideListPageState extends ConsumerState<RoadSideListPage> {
-  final RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
+class _RoadSideListPageState extends ConsumerState<RoadSideListPage>
+    with WidgetsBindingObserver {
+  final RefreshController _refreshController = RefreshController(
+    initialRefresh: false,
+  );
   int _selectedTabIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(roadSideListProvider.notifier).refresh();
     });
@@ -31,8 +35,36 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _refreshController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed || !mounted) return;
+    _switchToAllAndRefreshWithHud();
+  }
+
+  Future<void> _switchToAllAndRefreshWithHud() async {
+    if (!mounted) return;
+    setState(() => _selectedTabIndex = 0);
+    _refreshController.resetNoData();
+    Hud.show();
+    try {
+      await ref
+          .read(roadSideListProvider.notifier)
+          .refresh(status: _statusForTab(0), showHud: false);
+    } finally {
+      Hud.dismiss();
+    }
+    if (!mounted) return;
+    final latest = ref.read(roadSideListProvider);
+    if (latest.hasMore) {
+      _refreshController.resetNoData();
+    } else {
+      _refreshController.loadNoData();
+    }
   }
 
   @override
@@ -80,38 +112,42 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: List.generate(tabs.length, (index) {
-                  final isSelected = _selectedTabIndex == index;
-                  return Padding(
-                    padding: EdgeInsets.only(right: index < tabs.length - 1 ? 12 : 0),
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() => _selectedTabIndex = index);
-                        notifier.refresh(status: _statusForTab(index));
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? Colors.white
-                              : const Color(0xFFF2F2F2),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Text(
-                          tabs[index],
-                          style: TextStyle(
-                            fontSize: 14,
+                    final isSelected = _selectedTabIndex == index;
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        right: index < tabs.length - 1 ? 12 : 0,
+                      ),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() => _selectedTabIndex = index);
+                          notifier.refresh(status: _statusForTab(index));
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
                             color: isSelected
-                                ? AppColors.primaryColor
-                                : const Color(0xFF666666),
-                            fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                                ? Colors.white
+                                : const Color(0xFFF2F2F2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            tabs[index],
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isSelected
+                                  ? AppColors.primaryColor
+                                  : const Color(0xFF666666),
+                              fontWeight: isSelected
+                                  ? FontWeight.w500
+                                  : FontWeight.normal,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
+                    );
                   }),
                 ),
               ),
@@ -141,28 +177,31 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage> {
               child: state.loading && state.items.isEmpty
                   ? const Center(child: SizedBox.shrink())
                   : state.items.isEmpty
-                      ? _EmptyView(text: l10n.roadsideEmpty)
-                      : ListView.separated(
-                          padding: const EdgeInsets.all(16),
-                          itemCount: state.items.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final item = state.items[index];
-                            return _RoadSideCard(
-                              l10n: l10n,
-                              item: item,
-                              onTap: () {
-                                final recordNo = item.recordNo;
-                                if (recordNo == null || recordNo.isEmpty) return;
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: (_) => RoadSideDetailPage(recordNo: recordNo),
-                                  ),
-                                );
-                              },
+                  ? _EmptyView(text: l10n.roadsideEmpty)
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: state.items.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final item = state.items[index];
+                        return _RoadSideCard(
+                          l10n: l10n,
+                          item: item,
+                          onTap: () async {
+                            final recordNo = item.recordNo;
+                            if (recordNo == null || recordNo.isEmpty) return;
+                            await Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    RoadSideDetailPage(recordNo: recordNo),
+                              ),
                             );
+                            if (!mounted) return;
+                            await _switchToAllAndRefreshWithHud();
                           },
-                        ),
+                        );
+                      },
+                    ),
             ),
           ),
         ],
@@ -185,11 +224,7 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage> {
 }
 
 class _RoadSideCard extends StatelessWidget {
-  const _RoadSideCard({
-    required this.l10n,
-    required this.item,
-    this.onTap,
-  });
+  const _RoadSideCard({required this.l10n, required this.item, this.onTap});
 
   final AppLocalizations l10n;
   final RoadSideInfo item;
@@ -315,7 +350,10 @@ class _RoadSideCard extends StatelessWidget {
                   color: const Color(0xFFF6F8FC),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Column(
                   children: [
                     Row(
@@ -490,9 +528,9 @@ Color _resultDotColor(int? result) {
 }
 
 String _completionTimeLabel(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
+  final isZh = Localizations.localeOf(
+    context,
+  ).languageCode.toLowerCase().startsWith('zh');
   return isZh ? '完成时间' : 'Completion time';
 }
 
@@ -509,19 +547,9 @@ class _EmptyView extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.inbox_outlined,
-              size: 64,
-              color: Colors.grey[400],
-            ),
+            Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
-            Text(
-              text,
-              style: TextStyle(
-                color: Colors.grey[600],
-                fontSize: 14,
-              ),
-            ),
+            Text(text, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
           ],
         ),
       ),

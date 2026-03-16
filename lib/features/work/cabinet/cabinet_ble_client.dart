@@ -76,6 +76,11 @@ class CabinetBleClient {
   static final Guid _writeUuid = Guid('00008912-0000-1000-8000-00805f9b34fb');
   static const String _iosNotifyShortUuid = 'ffe4';
   static const String _iosWriteShortUuid = 'ffe9';
+  static const int _iosWriteChunkSize = 180;
+  static const Duration _packetSendInterval = Duration(seconds: 5);
+  static const String _authorizationFixedKey =
+      'E9?t>MM21G7K2HWVM6FNgr81HI90XK=s==';
+  static const String _dataFixedKey = 'AG;B:;I`Mu3yNv3DIdB|C@4?D75>4Y9A==';
 
   BluetoothDevice? _device;
   BluetoothCharacteristic? _writeChar;
@@ -107,14 +112,14 @@ class CabinetBleClient {
     _log('start, deviceSn=$deviceSn');
     if (deviceSn.isEmpty || secretKey.isEmpty) return;
     final sameTarget = _deviceSn == deviceSn && _secretKey == secretKey;
-    _deviceSn = deviceSn;
-    _secretKey = secretKey;
     if (sameTarget && isConnected) {
       _log('already connected to same target');
       onPhaseChanged(CabinetBleConnectionPhase.connected);
       return;
     }
-    await stop();
+    await stop(clearTarget: false);
+    _deviceSn = deviceSn;
+    _secretKey = secretKey;
 
     final permission = await ensureBluetoothPermission();
     if (!permission.granted) {
@@ -142,7 +147,7 @@ class CabinetBleClient {
     await _scanAndConnect();
   }
 
-  Future<void> stop() async {
+  Future<void> stop({bool clearTarget = true}) async {
     _authorized = false;
     _rxBuffer.clear();
     _sendQueue.clear();
@@ -169,8 +174,10 @@ class CabinetBleClient {
     }
     _device = null;
     _writeChar = null;
-    _deviceSn = '';
-    _secretKey = '';
+    if (clearTarget) {
+      _deviceSn = '';
+      _secretKey = '';
+    }
     onConnectionChanged(false);
     onPhaseChanged(CabinetBleConnectionPhase.idle);
   }
@@ -298,6 +305,7 @@ class CabinetBleClient {
 
     try {
       await FlutterBluePlus.startScan(
+        withNames: <String>[_deviceSn],
         timeout: const Duration(seconds: 60),
         androidUsesFineLocation: true,
       );
@@ -333,7 +341,6 @@ class CabinetBleClient {
           break;
         }
       }
-      service ??= services.isNotEmpty ? services.first : null;
       if (service == null) {
         throw StateError('ble-service-not-found');
       }
@@ -356,12 +363,6 @@ class CabinetBleClient {
         }
         _log('characteristic uuid=${c.uuid.str128}, properties=${c.properties}');
       }
-      write ??= service.characteristics.isNotEmpty
-          ? service.characteristics.first
-          : null;
-      notify ??= service.characteristics.isNotEmpty
-          ? service.characteristics.first
-          : null;
       if (write == null || notify == null) {
         throw StateError('ble-characteristic-not-found');
       }
@@ -422,8 +423,8 @@ class CabinetBleClient {
 
   Future<void> _sendAuthorization() async {
     final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    final signSource = '$_deviceSn||key_authorization||$timestamp';
-    final sign = md5.convert(utf8.encode(signSource)).toString();
+    final signSource = '$_deviceSn$_authorizationFixedKey$timestamp';
+    final sign = md5.convert(utf8.encode(signSource)).toString().toUpperCase();
     final payload = '$timestamp$sign';
     final packet = _buildPacket(cmd: 0x01, payload: utf8.encode(payload));
     _log('send authorization cmd=0x01, payloadLen=${payload.length}');
@@ -449,8 +450,8 @@ class CabinetBleClient {
       'txnNo': '${DateTime.now().millisecondsSinceEpoch}',
     };
     final jsonText = jsonEncode(data);
-    final signSource = '$jsonText||key_data||$_secretKey';
-    final sign = md5.convert(utf8.encode(signSource)).toString();
+    final signSource = '$jsonText$_dataFixedKey$_secretKey';
+    final sign = md5.convert(utf8.encode(signSource)).toString().toUpperCase();
     final body = '$jsonText$sign';
     final packet = _buildPacket(cmd: 0x03, payload: utf8.encode(body));
     _log('send business cmd=0x03, msgType=$msgType, paramCount=${params.length}');
@@ -467,8 +468,19 @@ class CabinetBleClient {
         final item = _sendQueue.removeAt(0);
         final data = _hexToBytes(item);
         _log('write packet len=${data.length}, hex=${_shortHex(item)}');
-        await _writeChar!.write(data, withoutResponse: false);
-        await Future<void>.delayed(const Duration(milliseconds: 50));
+        // iOS 原生实现使用 180 字节分片写入，避免长包写入失败或丢包。
+        var offset = 0;
+        while (offset < data.length) {
+          final end = (offset + _iosWriteChunkSize < data.length)
+              ? offset + _iosWriteChunkSize
+              : data.length;
+          final chunk = data.sublist(offset, end);
+          _log('write chunk offset=$offset, len=${chunk.length}');
+          await _writeChar!.write(chunk, withoutResponse: false);
+          offset = end;
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        }
+        await Future<void>.delayed(_packetSendInterval);
       }
     } catch (_) {
       _sendQueue.clear();

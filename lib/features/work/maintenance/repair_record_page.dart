@@ -28,9 +28,9 @@ class _RepairRecordPageState extends ConsumerState<RepairRecordPage> {
     final sn = widget.initialSn.trim();
     _snController.text = sn;
     if (sn.isEmpty) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    Future<void>(() async {
       if (!mounted) return;
-      ref.read(repairRecordProvider.notifier).refresh(sn);
+      await ref.read(repairRecordProvider.notifier).refresh(sn);
     });
   }
 

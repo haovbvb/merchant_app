@@ -27,7 +27,10 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
   @override
   void initState() {
     super.initState();
-    ref.read(cabinetUnshelveProvider.notifier).clearState();
+    Future<void>(() async {
+      if (!mounted) return;
+      ref.read(cabinetUnshelveProvider.notifier).clearState();
+    });
     _snController.clear();
     _reasonController.clear();
     _selectedReason = null;
@@ -51,7 +54,6 @@ class _CabinetUnshelvePageState extends ConsumerState<CabinetUnshelvePage> {
 
   @override
   void dispose() {
-    ref.read(cabinetUnshelveProvider.notifier).clearState();
     _snFocusNode.removeListener(_onSnFocusChanged);
     _snFocusNode.dispose();
     _snController.dispose();

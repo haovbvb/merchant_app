@@ -31,7 +31,10 @@ class _RepairRecordCreatePageState
   @override
   void initState() {
     super.initState();
-    ref.read(repairRecordCreateProvider.notifier).resetForm();
+    Future<void>(() async {
+      if (!mounted) return;
+      ref.read(repairRecordCreateProvider.notifier).resetForm();
+    });
     _snController.clear();
     _remarkController.clear();
     _snFocusNode.addListener(_handleSnFocusChange);

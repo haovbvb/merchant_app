@@ -40,7 +40,10 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
   @override
   void initState() {
     super.initState();
-    ref.read(cabinetPutawayProvider.notifier).clearState();
+    Future<void>(() async {
+      if (!mounted) return;
+      ref.read(cabinetPutawayProvider.notifier).clearState();
+    });
     _snController.clear();
     _nameController.clear();
     _addressController.clear();
@@ -80,7 +83,6 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
 
   @override
   void dispose() {
-    ref.read(cabinetPutawayProvider.notifier).clearState();
     _snFocusNode.removeListener(_onSnFocusChanged);
     _snFocusNode.dispose();
     _nameController.removeListener(_onFormChanged);

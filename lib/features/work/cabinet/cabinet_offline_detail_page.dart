@@ -1,9 +1,9 @@
 import 'dart:convert';
 
-import 'package:merchant_app/app/styles/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/hud.dart';
 import 'package:merchant_app/core/utils/toast.dart';
@@ -1231,6 +1231,9 @@ class _DeviceInfoTab extends StatelessWidget {
                 label: l10n.cabinetOfflinePlatformUrl,
                 value: isPlaceholder ? '' : info.platformUrl,
                 showArrow: !isPlaceholder,
+                rowHeight: 40,
+                labelFlex: 2,
+                valueFlex: 3,
                 showDivider: false,
                 onTap: isPlaceholder ? null : onEditPlatformUrl,
               ),
@@ -1813,6 +1816,9 @@ class _InfoTile extends StatelessWidget {
     required this.label,
     this.value,
     this.showArrow = false,
+    this.rowHeight = 26,
+    this.labelFlex = 1,
+    this.valueFlex = 1,
     this.showDivider = true,
     this.onTap,
   });
@@ -1820,6 +1826,9 @@ class _InfoTile extends StatelessWidget {
   final String label;
   final String? value;
   final bool showArrow;
+  final double rowHeight;
+  final int labelFlex;
+  final int valueFlex;
   final bool showDivider;
   final VoidCallback? onTap;
 
@@ -1828,16 +1837,18 @@ class _InfoTile extends StatelessWidget {
     final content = Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: SizedBox(
-        height: 26,
+        height: rowHeight,
         child: Row(
           children: [
             Expanded(
+              flex: labelFlex,
               child: Text(
                 label,
                 style: const TextStyle(fontSize: 15, color: Color(0xE60C0C0D)),
               ),
             ),
             Expanded(
+              flex: valueFlex,
               child: Text(
                 value ?? '-',
                 style: const TextStyle(fontSize: 15, color: Color(0x800C0C0D)),

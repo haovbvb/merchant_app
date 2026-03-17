@@ -279,7 +279,7 @@
   "orderVoucherConfirmFailed": "确认缴费失败",
   "orderVoucherUploading": "正在上传凭证",
   "orderVoucherUploadPartialFailed": "部分图片上传失败",
-  "orderVoucherMaxCount": "最多上传5张图片",
+  "orderVoucherMaxCount": "图片选择个数已达到最大限制",
   "orderVoucherPickCamera": "拍照",
   "orderVoucherPickGallery": "从相册选择",
   "orderVoucherPickCancel": "取消",

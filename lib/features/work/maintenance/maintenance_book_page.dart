@@ -31,7 +31,10 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
   @override
   void initState() {
     super.initState();
-    ref.read(maintenanceBookProvider.notifier).clearAll();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(maintenanceBookProvider.notifier).clearAll();
+    });
     _snController.clear();
     _noteController.clear();
     _snFocusNode.addListener(_onSnFocusChanged);

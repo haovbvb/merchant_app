@@ -5,8 +5,15 @@ import 'package:merchant_app/core/utils/context_extensions.dart';
 class ImageSourceActionSheet {
   const ImageSourceActionSheet._();
 
-  static Future<ImageSource?> show(BuildContext context) {
+  static Future<ImageSource?> show(
+    BuildContext context, {
+    int? maxGallerySelection,
+  }) {
     final l10n = context.l10n;
+    final galleryLabel =
+        (maxGallerySelection != null && maxGallerySelection > 0)
+        ? '${l10n.orderVoucherPickGallery} ($maxGallerySelection)'
+        : l10n.orderVoucherPickGallery;
     return showModalBottomSheet<ImageSource>(
       context: context,
       backgroundColor: Colors.transparent,
@@ -48,7 +55,7 @@ class ImageSourceActionSheet {
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 16),
                           child: Text(
-                            l10n.orderVoucherPickGallery,
+                            galleryLabel,
                             textAlign: TextAlign.center,
                             style: const TextStyle(
                               fontSize: 16,

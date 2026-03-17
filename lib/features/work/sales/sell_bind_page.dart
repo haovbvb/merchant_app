@@ -30,12 +30,15 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
   @override
   void initState() {
     super.initState();
-    final notifier = ref.read(sellBindProvider.notifier);
-    notifier.reset();
-    final shopNo = AuthSession.instance.current?.shopNo ?? '';
-    if (shopNo.isNotEmpty) {
-      notifier.loadShopPayConfig(shopNo);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final notifier = ref.read(sellBindProvider.notifier);
+      notifier.reset();
+      final shopNo = AuthSession.instance.current?.shopNo ?? '';
+      if (shopNo.isNotEmpty) {
+        notifier.loadShopPayConfig(shopNo);
+      }
+    });
     _snController.clear();
     _snFocusNode.addListener(() {
       if (!_snFocusNode.hasFocus) {

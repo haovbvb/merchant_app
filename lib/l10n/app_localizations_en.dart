@@ -692,7 +692,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get orderVoucherUploadPartialFailed => 'Some images failed to upload';
 
   @override
-  String get orderVoucherMaxCount => 'Only 5 images can be uploaded';
+    String get orderVoucherMaxCount => 'Maximum image selection limit reached';
 
   @override
   String get orderVoucherPickCamera => 'Take Photo';

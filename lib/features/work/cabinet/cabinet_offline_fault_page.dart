@@ -80,7 +80,7 @@ class _CabinetOfflineFaultPageState
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: const SizedBox.shrink(),
+                    child: SizedBox.shrink(),
                   )
                 : Text(l10n.cabinetOfflineQueryAction),
           ),

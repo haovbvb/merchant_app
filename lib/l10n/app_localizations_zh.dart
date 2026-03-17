@@ -691,7 +691,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get orderVoucherUploadPartialFailed => '部分图片上传失败';
 
   @override
-  String get orderVoucherMaxCount => '最多上传5张图片';
+  String get orderVoucherMaxCount => '图片选择个数已达到最大限制';
 
   @override
   String get orderVoucherPickCamera => '拍照';
@@ -934,7 +934,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get afterSaleBindSelectableOrders => '售后订单';
 
   @override
-  String get afterSaleBindNoOrders => '选择售后订单进行绑定';
+  String get afterSaleBindNoOrders => '没有可绑定的订单';
 
   @override
   String get afterSaleBindSelectOrder => '选择售后订单';

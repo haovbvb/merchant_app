@@ -51,34 +51,37 @@ Future<bool?> showWorkPaymentSheet({
     builder: (sheetContext) {
       return StatefulBuilder(
         builder: (sheetContext, setState) {
+          final media = MediaQuery.of(sheetContext);
           final fee = feeController.text.trim();
           final meaningful = _isAmountMeaningful(fee);
           final attachmentsOk =
               !requireAttachmentsForCash || payType == 2 || attachmentUrls.isNotEmpty;
           final canConfirm = !paying && meaningful && attachmentsOk;
 
-          return Container(
-            constraints: BoxConstraints(
-              maxHeight: MediaQuery.of(sheetContext).size.height -
-                  MediaQuery.of(sheetContext).padding.top -
-                  8,
-            ),
-            decoration: const BoxDecoration(
-              color: Color(0xFFF3F4F5),
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-            ),
-            padding: EdgeInsets.only(
-              bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
-            ),
-            child: SafeArea(
-              top: true,
-              bottom: false,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+          return AnimatedPadding(
+            duration: const Duration(milliseconds: 180),
+            curve: Curves.easeOut,
+            padding: EdgeInsets.only(bottom: media.viewInsets.bottom),
+            child: Container(
+              constraints: BoxConstraints(
+                maxHeight: media.size.height - media.padding.top - 8,
+              ),
+              decoration: const BoxDecoration(
+                color: Color(0xFFF3F4F5),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+              ),
+              child: SafeArea(
+                top: false,
+                bottom: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 24),
+                  child: SingleChildScrollView(
+                    keyboardDismissBehavior:
+                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -251,56 +254,58 @@ Future<bool?> showWorkPaymentSheet({
                         ),
                       ),
                     ],
-                    const SizedBox(height: 22),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 44,
-                      child: ElevatedButton(
-                        onPressed: canConfirm
-                            ? () async {
-                                setState(() => paying = true);
-                                final ok = await onConfirmPayment(
-                                  WorkPaymentSubmit(
-                                    fee: fee,
-                                    payType: payType,
-                                    attachments: List.of(attachmentUrls),
-                                  ),
-                                );
-                                if (!sheetContext.mounted) return;
-                                setState(() => paying = false);
-                                if (ok) {
-                                  Navigator.of(sheetContext).pop(true);
-                                } else {
-                                  if (failureMessage != null &&
-                                      failureMessage.isNotEmpty) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(content: Text(failureMessage)),
+                        const SizedBox(height: 22),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 44,
+                          child: ElevatedButton(
+                            onPressed: canConfirm
+                                ? () async {
+                                    setState(() => paying = true);
+                                    final ok = await onConfirmPayment(
+                                      WorkPaymentSubmit(
+                                        fee: fee,
+                                        payType: payType,
+                                        attachments: List.of(attachmentUrls),
+                                      ),
                                     );
+                                    if (!sheetContext.mounted) return;
+                                    setState(() => paying = false);
+                                    if (ok) {
+                                      Navigator.of(sheetContext).pop(true);
+                                    } else {
+                                      if (failureMessage != null &&
+                                          failureMessage.isNotEmpty) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(content: Text(failureMessage)),
+                                        );
+                                      }
+                                      if (closeOnFailure) {
+                                        Navigator.of(sheetContext).pop(false);
+                                      }
+                                    }
                                   }
-                                  if (closeOnFailure) {
-                                    Navigator.of(sheetContext).pop(false);
-                                  }
-                                }
-                              }
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primaryColor,
-                          disabledBackgroundColor:
-                              AppColors.primaryColor.withValues(alpha: 0.45),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primaryColor,
+                              disabledBackgroundColor:
+                                  AppColors.primaryColor.withValues(alpha: 0.45),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              confirmButtonText,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
-                        child: Text(
-                          confirmButtonText,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),

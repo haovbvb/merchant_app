@@ -116,7 +116,6 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
           Image.asset(
             'assets/android/mipmap-xxhdpi/icon_installmentpage.png',
           ),
-          const SizedBox(height: 6),
           Text(
             context.l10n.installmentPayTitle,
             style: const TextStyle(

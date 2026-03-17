@@ -61,7 +61,7 @@ class RoadSideListNotifier extends Notifier<RoadSideListState> {
   @override
   RoadSideListState build() => const RoadSideListState();
 
-  Future<void> refresh({int? status}) async {
+  Future<void> refresh({int? status, bool showHud = true}) async {
     state = state.copyWith(loading: true, page: 1, status: status);
     final response = await _api.get<RoadSideListResp>(
       ApiPath.roadSaveQueryPage,
@@ -70,6 +70,7 @@ class RoadSideListNotifier extends Notifier<RoadSideListState> {
         'pageNum': 1,
         'pageSize': _pageSize,
       },
+      showHud: showHud,
       parser: (json) => RoadSideListResp.fromJson(
         Map<String, dynamic>.from(json as Map),
       ),

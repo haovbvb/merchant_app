@@ -24,10 +24,7 @@ class InstallmentOrderSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => InstallmentOrderSheet(
-        orders: orders,
-        selected: selected,
-      ),
+      builder: (_) => InstallmentOrderSheet(orders: orders, selected: selected),
     );
   }
 
@@ -47,14 +44,21 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
   String _formatDate(int? timestamp) {
     if (timestamp == null || timestamp <= 0) return '-';
     final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
-    final isZh = Localizations.localeOf(context).languageCode.toLowerCase().startsWith('zh');
+    final isZh = Localizations.localeOf(
+      context,
+    ).languageCode.toLowerCase().startsWith('zh');
+    // if (isZh) {
+    //   return DateFormatUtils.formatTimestamp(
+    //     timestamp,
+    //     pattern: 'yyyy/MM/dd',
+    //   );
+    // }
+    // return DateFormat('MMM dd, yyyy', 'en').format(date);
     if (isZh) {
-      return DateFormatUtils.formatTimestamp(
-        timestamp,
-        pattern: 'yyyy/MM/dd',
-      );
+      return DateFormat('M月d日,yyyy').format(date);
+    } else {
+      return DateFormat('MMMM d,yyyy', 'en').format(date);
     }
-    return DateFormat('MMM dd, yyyy', 'en').format(date);
   }
 
   @override
@@ -139,10 +143,16 @@ class _InstallmentOrderSheetState extends State<InstallmentOrderSheet> {
     );
   }
 
-  Widget _buildOrderCard(BuildContext context, PeriodOrder order, bool isSelected) {
+  Widget _buildOrderCard(
+    BuildContext context,
+    PeriodOrder order,
+    bool isSelected,
+  ) {
     final l10n = context.l10n;
     // Android: 1=Battery, 2=Vehicle
-    final deviceType = order.type == 1 ? l10n.deviceTypeBattery : l10n.deviceTypeVehicle;
+    final deviceType = order.type == 1
+        ? l10n.deviceTypeBattery
+        : l10n.deviceTypeVehicle;
     final deviceInfo = '$deviceType | ${order.sn ?? '-'}';
 
     return GestureDetector(

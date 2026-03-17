@@ -28,7 +28,10 @@ class _UnbindDevicePageState extends ConsumerState<UnbindDevicePage> {
   @override
   void initState() {
     super.initState();
-    ref.read(unbindDeviceProvider.notifier).clearForm();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      ref.read(unbindDeviceProvider.notifier).clearForm();
+    });
     _cardController.clear();
     _deviceController.clear();
     _checkRemarkController.clear();

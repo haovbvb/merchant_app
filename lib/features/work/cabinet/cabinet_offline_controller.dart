@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/data/models/cabin_fault.dart';
@@ -133,63 +135,101 @@ final cabinetOfflineProvider =
 class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
   final ApiService _api = ApiService();
   static const Duration _requestTimeout = Duration(seconds: 20);
+  int _loadVersion = 0;
 
   @override
   CabinetOfflineState build() => const CabinetOfflineState();
 
-  Future<void> load(String sn, {CabinetDetailBaseInfoBean? initialBaseInfo}) async {
+  Future<void> load(
+    String sn, {
+    CabinetDetailBaseInfoBean? initialBaseInfo,
+  }) async {
     final normalizedSn = sn.trim();
+    final currentLoadVersion = ++_loadVersion;
     if (normalizedSn.isEmpty) {
-      state = state.copyWith(loading: false);
+      state = const CabinetOfflineState();
       return;
     }
-    state = state.copyWith(loading: true);
-    try {
-      // 若调用方已经获取了 baseInfo（如权限预检），直接复用，避免重复请求。
-      final CabinetDetailBaseInfoBean? baseInfo;
-      if (initialBaseInfo != null) {
-        baseInfo = initialBaseInfo;
-      } else {
-        final baseResponse = await _api.get<CabinetDetailBaseInfoBean>(
-          ApiPath.cabinetBaseInfo,
-          queryParameters: {'sn': normalizedSn},
-          showHud: false,
-          parser: (json) => CabinetDetailBaseInfoBean.fromJson(
-            Map<String, dynamic>.from(json as Map),
-          ),
-        ).timeout(_requestTimeout);
-        baseInfo = baseResponse.result;
-      }
-      final secretResponse = await _api.get<String>(
-        ApiPath.cabinetSecretKey,
-        queryParameters: {'sn': normalizedSn},
-        showHud: false,
-        parser: (json) => json?.toString() ?? '',
-      ).timeout(_requestTimeout);
-      final storeNum = baseInfo?.storeNum ?? 0;
-      final cabins = storeNum > 0
-          ? List.generate(
-              storeNum,
-              (i) => CabinetCabin(
-                portNo: i + 1,
-                slotName: '仓位 ${i + 1}',
-                status: 1,
-              ),
-            )
-          : const <CabinetCabin>[];
+
+    // 每次新扫码都清空旧密钥，避免误连旧设备。
+    if (initialBaseInfo != null) {
+      state = state.copyWith(secretKey: '', bleConnected: false);
+    } else {
+      state = const CabinetOfflineState(loading: true);
+    }
+
+    // 详情接口：返回后立即渲染页面，不等待密钥接口。
+    if (initialBaseInfo != null) {
+      final cabins = _buildPlaceholderCabins(initialBaseInfo.storeNum ?? 0);
       state = state.copyWith(
+        loading: false,
+        baseInfo: initialBaseInfo,
+        swapThreshold: initialBaseInfo.swapThreshold ?? 100,
+        cabins: cabins,
+      );
+    } else {
+      unawaited(_loadBaseInfo(normalizedSn, currentLoadVersion));
+    }
+
+    // 密钥接口：并行请求，返回后触发 BLE 启动链路（由页面监听 secretKey 完成）。
+    unawaited(_loadSecretKey(normalizedSn, currentLoadVersion));
+  }
+
+  Future<void> _loadBaseInfo(String sn, int loadVersion) async {
+    try {
+      final baseResponse = await _api
+          .get<CabinetDetailBaseInfoBean>(
+            ApiPath.cabinetBaseInfo,
+            queryParameters: {'sn': sn},
+            showHud: false,
+            parser: (json) => CabinetDetailBaseInfoBean.fromJson(
+              Map<String, dynamic>.from(json as Map),
+            ),
+          )
+          .timeout(_requestTimeout);
+
+      if (loadVersion != _loadVersion) return;
+
+      final baseInfo = baseResponse.result;
+      final cabins = _buildPlaceholderCabins(baseInfo?.storeNum ?? 0);
+      state = state.copyWith(
+        loading: false,
         baseInfo: baseInfo,
-        secretKey: secretResponse.result,
         swapThreshold: baseInfo?.swapThreshold ?? 100,
         cabins: cabins,
       );
     } catch (_) {
-      state = state.copyWith(
-        cabins: const [],
-      );
-    } finally {
-      state = state.copyWith(loading: false);
+      if (loadVersion != _loadVersion) return;
+      state = state.copyWith(loading: false, cabins: const []);
     }
+  }
+
+  Future<void> _loadSecretKey(String sn, int loadVersion) async {
+    try {
+      final secretResponse = await _api
+          .get<String>(
+            ApiPath.cabinetSecretKey,
+            queryParameters: {'sn': sn},
+            showHud: false,
+            notifyOnError: false,
+            parser: (json) => json?.toString() ?? '',
+          )
+          .timeout(_requestTimeout);
+
+      if (loadVersion != _loadVersion) return;
+      state = state.copyWith(secretKey: secretResponse.result);
+    } catch (_) {
+      if (loadVersion != _loadVersion) return;
+      state = state.copyWith(secretKey: '');
+    }
+  }
+
+  List<CabinetCabin> _buildPlaceholderCabins(int storeNum) {
+    if (storeNum <= 0) return const <CabinetCabin>[];
+    return List.generate(
+      storeNum,
+      (i) => CabinetCabin(portNo: i + 1, slotName: 'Slot ${i + 1}', status: 0),
+    );
   }
 
   Future<void> loadLayout(String sn) async {
@@ -197,13 +237,16 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
     state = state.copyWith(layoutLoading: true);
     try {
       final path = ApiPath.cabinetLayoutHistory.replaceAll('{sn}', sn);
-      final response = await _api.get<LayoutCabinetInfo>(
-        path,
-        queryParameters: {'sn': sn},
-        showHud: false,
-        parser: (json) =>
-            LayoutCabinetInfo.fromJson(Map<String, dynamic>.from(json as Map)),
-      ).timeout(_requestTimeout);
+      final response = await _api
+          .get<LayoutCabinetInfo>(
+            path,
+            queryParameters: {'sn': sn},
+            showHud: false,
+            parser: (json) => LayoutCabinetInfo.fromJson(
+              Map<String, dynamic>.from(json as Map),
+            ),
+          )
+          .timeout(_requestTimeout);
       state = state.copyWith(layoutLoading: false, layoutInfo: response.result);
     } catch (_) {
       state = state.copyWith(layoutLoading: false, layoutInfo: null);
@@ -215,7 +258,7 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
     if (storeNum <= 0) return;
     final cabins = List.generate(
       storeNum,
-      (i) => CabinetCabin(portNo: i + 1, slotName: '仓位 ${i + 1}'),
+      (i) => CabinetCabin(portNo: i + 1, slotName: 'Slot ${i + 1}'),
     );
     state = state.copyWith(cabins: cabins);
   }

@@ -27,26 +27,21 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
 
   final _snController = TextEditingController();
   final _snFocusNode = FocusNode();
-  bool _didInit = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || _didInit) return;
-      _didInit = true;
+      if (!mounted) return;
       final notifier = ref.read(rentBindProvider.notifier);
       notifier.reset();
+      notifier.clearDeviceAndPack();
+      final shopNo = AuthSession.instance.current?.shopNo ?? '';
+      if (shopNo.isNotEmpty) {
+        notifier.loadShopPayConfig(shopNo);
+      }
       _snController.clear();
     });
-    final notifier = ref.read(rentBindProvider.notifier);
-    notifier.reset();
-    notifier.clearDeviceAndPack();
-    final shopNo = AuthSession.instance.current?.shopNo ?? '';
-    if (shopNo.isNotEmpty) {
-      notifier.loadShopPayConfig(shopNo);
-    }
-    _snController.clear();
     _snFocusNode.addListener(_onSnFocusChanged);
   }
 

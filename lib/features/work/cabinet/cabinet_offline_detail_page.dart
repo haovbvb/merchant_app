@@ -54,6 +54,7 @@ class _CabinetOfflineDetailPageState
   CabinetBleConnectionPhase _blePhase = CabinetBleConnectionPhase.idle;
   bool _waitingDeviceInfoResponse = false;
   bool _waitingAllDataResponse = false;
+  bool _waitingControlResponse = false;
   bool _waitingQueryLoadResponse = false;
   String _pendingQuerySn = '';
 
@@ -83,13 +84,8 @@ class _CabinetOfflineDetailPageState
             .read(cabinetOfflineProvider.notifier)
             .updateBackupPowerStatus(l10n.cabinetOfflineNo);
 
-        _waitingDeviceInfoResponse = true;
-        Hud.show();
-        await _bleClient.queryDeviceInfo();
-
-        _waitingAllDataResponse = true;
-        Hud.show();
-        await _bleClient.queryAllData();
+        await _queryDeviceInfoWithHud();
+        await _queryAllDataWithHud();
       },
       onJsonData: _handleBleJsonData,
       onError: _handleBleError,
@@ -155,6 +151,7 @@ class _CabinetOfflineDetailPageState
       success: l10n.deviceDetailToggleSuccess,
       failed: l10n.deviceDetailToggleFailed,
     );
+    _showControlHud();
     await _bleClient.sendRestart();
   }
 
@@ -169,6 +166,7 @@ class _CabinetOfflineDetailPageState
       success: l10n.cabinetOperateOpenDoorSuccess,
       failed: l10n.cabinetOperateOpenDoorFailed,
     );
+    _showControlHud();
     await _bleClient.sendOpenBackDoor();
   }
 
@@ -183,6 +181,7 @@ class _CabinetOfflineDetailPageState
       success: l10n.deviceDetailCabinOpenDoorSuccess,
       failed: l10n.deviceDetailCabinOpenDoorFailed,
     );
+    _showControlHud();
     await _bleClient.sendPortControl(port: cabin.portNo, type: 1);
   }
 
@@ -202,6 +201,7 @@ class _CabinetOfflineDetailPageState
       final notifier = ref.read(cabinetOfflineProvider.notifier);
       notifier.updateCabinDoorStatus(cabin.portNo, type == 3 ? 1 : 0);
     };
+    _showControlHud();
     await _bleClient.sendPortControl(port: cabin.portNo, type: type);
   }
 
@@ -216,6 +216,7 @@ class _CabinetOfflineDetailPageState
 
   void _handleBleError(String message) {
     if (!mounted) return;
+    _dismissPendingControlHud();
     _dismissPendingBleHud();
     final l10n = context.l10n;
     if (_pendingSuccessToast != null || _pendingFailedToast != null) {
@@ -304,6 +305,7 @@ class _CabinetOfflineDetailPageState
     }
 
     if (msgType == CabinetDataType.controlResponse) {
+      _dismissPendingControlHud();
       final ok = ((map['result'] as num?)?.toInt() ?? 0) == 1;
       showToast(
         ok
@@ -312,7 +314,7 @@ class _CabinetOfflineDetailPageState
       );
       if (ok) {
         _pendingSuccessAction?.call();
-        _bleClient.queryAllData();
+        _queryAllDataWithHud();
       }
       _pendingSuccessToast = null;
       _pendingFailedToast = null;
@@ -528,9 +530,38 @@ class _CabinetOfflineDetailPageState
     _bleClient.start(deviceSn: sn, secretKey: secret);
   }
 
+  Future<void> _queryDeviceInfoWithHud() async {
+    if (!_waitingDeviceInfoResponse) {
+      _waitingDeviceInfoResponse = true;
+      Hud.show();
+    }
+    await _bleClient.queryDeviceInfo();
+  }
+
+  Future<void> _queryAllDataWithHud() async {
+    if (!_waitingAllDataResponse) {
+      _waitingAllDataResponse = true;
+      Hud.show();
+    }
+    await _bleClient.queryAllData();
+  }
+
+  void _showControlHud() {
+    if (_waitingControlResponse) return;
+    _waitingControlResponse = true;
+    Hud.show();
+  }
+
+  void _dismissPendingControlHud() {
+    if (!_waitingControlResponse) return;
+    _waitingControlResponse = false;
+    Hud.dismiss();
+  }
+
   @override
   void dispose() {
     _dismissPendingQueryHud();
+    _dismissPendingControlHud();
     _dismissPendingBleHud();
     _bleClient.stop();
     _snController.dispose();
@@ -592,42 +623,13 @@ class _CabinetOfflineDetailPageState
               ),
               onPressed: () {
                 if (state.bleConnected) {
-                  _bleClient.queryAllData();
+                  _queryAllDataWithHud();
                 }
               },
             ),
         ],
       ),
       body: _buildDetailView(state, info, canOperate),
-    );
-  }
-
-  Widget _buildEmptyOrLoadingView(CabinetOfflineState state) {
-    final l10n = context.l10n;
-    if (state.loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.search_off, size: 56, color: Colors.black26),
-            const SizedBox(height: 12),
-            Text(
-              l10n.userSearchEmpty,
-              style: const TextStyle(fontSize: 14, color: Colors.black54),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 16),
-            FilledButton(
-              onPressed: _queryOrScan,
-              child: Text(l10n.cabinetOfflineQueryAction),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -984,6 +986,7 @@ class _CabinetOfflineDetailPageState
             success: l10n.deviceDetailToggleSuccess,
             failed: l10n.deviceDetailToggleFailed,
           );
+          _showControlHud();
           _pendingSuccessAction = () {
             ref
                 .read(cabinetOfflineProvider.notifier)
@@ -1031,6 +1034,7 @@ class _CabinetOfflineDetailPageState
             success: l10n.deviceDetailToggleSuccess,
             failed: l10n.deviceDetailToggleFailed,
           );
+          _showControlHud();
           _pendingSuccessAction = () {
             ref.read(cabinetOfflineProvider.notifier).patchBaseInfo(apn: value);
           };
@@ -1062,6 +1066,7 @@ class _CabinetOfflineDetailPageState
             success: l10n.deviceDetailToggleSuccess,
             failed: l10n.deviceDetailToggleFailed,
           );
+          _showControlHud();
           _pendingSuccessAction = () {
             ref
                 .read(cabinetOfflineProvider.notifier)
@@ -1118,6 +1123,7 @@ class _CabinetOfflineDetailPageState
             success: l10n.deviceDetailToggleSuccess,
             failed: l10n.deviceDetailToggleFailed,
           );
+          _showControlHud();
           _pendingSuccessAction = () {
             ref
                 .read(cabinetOfflineProvider.notifier)

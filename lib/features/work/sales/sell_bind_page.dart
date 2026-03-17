@@ -224,7 +224,10 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
           children: [
             Text(
               l10n.sellBindDeviceSn,
-              style: const TextStyle(fontSize: 14, color: AppColors.black06Text),
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.black06Text,
+              ),
             ),
             const SizedBox(height: 16),
             _buildEmptyCard(l10n.sellBindChoosePackage),
@@ -355,7 +358,10 @@ class _SellBindPageState extends ConsumerState<SellBindPage> {
 
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: false, parseDeviceSn: true)),
+      MaterialPageRoute(
+        builder: (_) =>
+            const QrScanPage(allowManualInput: false, parseDeviceSn: true),
+      ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _snController.text = result;
@@ -483,39 +489,65 @@ class _PackageCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1E3A5F), Color(0xFF2D4A6F)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
       ),
-      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            plan.infoName ?? '-',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-              color: Color(0xFFCCCCCC),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+              image: DecorationImage(
+                image: AssetImage(
+                  'assets/android/mipmap-xxhdpi/icon_bind_package_topbg.webp',
+                ),
+                fit: BoxFit.contain,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  plan.infoName ?? '-',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFFCCCCCC),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '\$$price',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            '\$$price',
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF6F8FC),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(12),
+                bottomRight: Radius.circular(12),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          _buildInfoRow(
-            context,
-            label: _applicableModelLabel(context),
-            value: applicableModel,
+            child: _buildInfoRow(
+              context,
+              label: _applicableModelLabel(context),
+              value: applicableModel,
+            ),
           ),
         ],
       ),
@@ -552,8 +584,7 @@ class _PackageCard extends StatelessWidget {
         plan.batteryType!.trim().isNotEmpty &&
         plan.batteryType!.trim() != '-';
 
-    final category =
-        hasCarType && hasBatteryType
+    final category = hasCarType && hasBatteryType
         ? '车辆/电池'
         : hasCarType
         ? '车辆'
@@ -574,12 +605,12 @@ class _PackageCard extends StatelessWidget {
       children: [
         Text(
           '$label: ',
-          style: const TextStyle(fontSize: 12, color: Color(0xFFD0D7E2)),
+          style: const TextStyle(fontSize: 12, color: Color(0xFF8B94A3)),
         ),
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(fontSize: 12, color: Colors.white),
+            style: const TextStyle(fontSize: 12, color: AppColors.black06Text),
           ),
         ),
       ],
@@ -921,18 +952,18 @@ class _SuccessPage extends StatelessWidget {
     final message = paySource == 2
         ? l10n.sellBindSuccessMessageOnline
         : l10n.sellBindSuccessMessageCash;
-    final messageParts = message.split('30');
+    final messageParts = message.split('24');
     return BindSuccessPage(
       appBarTitle: l10n.sellBindTitle,
       successTitle: l10n.sellBindSuccessTitle,
       messageSpans: [
         TextSpan(text: messageParts.isNotEmpty ? messageParts.first : message),
-        const TextSpan(
-          text: '30 minutes',
-          style: TextStyle(color: Color(0xFFFF9800)),
+        TextSpan(
+          text: l10n.swapBindSuccessTimeout,
+          style: const TextStyle(color: Color(0xFFFF9800)),
         ),
-        if (messageParts.length > 1)
-          TextSpan(text: messageParts[1].replaceFirst(' minutes', '')),
+        // if (messageParts.length > 1)
+        //   TextSpan(text: messageParts[1].replaceFirst(' minutes', '')),
       ],
       documentNo: documentNo,
       documentNoLabel: l10n.sellBindDocumentNumber,

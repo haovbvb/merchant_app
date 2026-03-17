@@ -308,7 +308,10 @@ class _RentBindPageState extends ConsumerState<RentBindPage> {
               child: Row(
                 children: [
                   Expanded(
-                    child: _buildInfoItem(l10n.rentBindLabelVin, car.vin ?? '-'),
+                    child: _buildInfoItem(
+                      l10n.rentBindLabelVin,
+                      car.vin ?? '-',
+                    ),
                   ),
                   Container(
                     width: 1,
@@ -755,30 +758,27 @@ class _PackageCard extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF1E3A5F), Color(0xFF2D4A6F)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Stack(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Background decoration
-          Positioned(
-            right: -20,
-            top: -20,
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withValues(alpha: 0.05),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+              image: DecorationImage(
+                image: AssetImage(
+                  'assets/android/mipmap-xxhdpi/icon_bind_package_topbg.webp',
+                ),
+                fit: BoxFit.cover,
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -799,57 +799,60 @@ class _PackageCard extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
+              ],
+            ),
+          ),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: const BoxDecoration(
+              color: Color(0xFFF6F8FC),
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(12),
+                bottomRight: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.rentBindServicePeriod,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.white54,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _buildPeriodText(pack, l10n),
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+                      Text(
+                        l10n.rentBindServicePeriod,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF8B94A3),
                         ),
                       ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.rentBindDeposit,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.white54,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '\$${(pack.depositAmount ?? 0).toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
+                      const SizedBox(height: 4),
+                      Text(
+                        _buildPeriodText(pack, l10n),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.black06Text,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.rentBindDeposit,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF8B94A3),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        '\$${(pack.depositAmount ?? 0).toStringAsFixed(2)}',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.black06Text,
                         ),
                       ),
                     ],

@@ -39,6 +39,7 @@ dependencies:
   package_info_plus: 8.3.1 # 应用版本信息
   path_provider: 2.1.5 # 获取缓存目录
   photo_view: 0.15.0 # 图片预览
+  video_player: 2.9.2 # 启动页视频播放
 
 dev_dependencies:
   flutter_test:
@@ -56,6 +57,7 @@ flutter:
     - assets/images/3.0x/
     - assets/android/mipmap-xxhdpi/3.0x/
     - assets/android/mipmap-xxhdpi/
+    - assets/okla-admin-splash.mp4
 
   # To add custom fonts to your application, add a fonts section here,
   # in this "flutter" section. Each entry in this list should have a

@@ -45,6 +45,8 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   bool _loading = false;
   bool _pendingCenterOnLocation = true;
   final bool _useMockData = false;
+  double? _currentLatitude;
+  double? _currentLongitude;
   double? _latitude;
   double? _longitude;
   int? _maintainFlag;
@@ -56,7 +58,6 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   amaps.BitmapDescriptor? _appleMarkerIcon;
   amaps.BitmapDescriptor? _appleMaintenanceMarkerIcon;
   amaps.BitmapDescriptor? _appleSelectedMarkerIcon;
-  gmaps.BitmapDescriptor? _locationMarkerIcon;
   bool _appleIconLoaded = false;
   bool _hasLocationPermission = false;
   gmaps.LatLng? _cameraTarget;
@@ -65,13 +66,18 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   int _routeRequestSeq = 0;
   double _refreshTurns = 0;
   double _locateTurns = 0;
+  bool _showFilterPanel = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _loadMarkerIcon();
-    _loadInitialData();
+    _bootstrap();
+  }
+
+  Future<void> _bootstrap() async {
+    await _loadMarkerIcon();
+    await _loadInitialData();
   }
 
   @override
@@ -107,50 +113,30 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   }
 
   Future<void> _loadMarkerIcon() async {
-    final configuration = createLocalImageConfiguration(
-      context,
-      size: const Size(108, 110),
-    );
-    // 加载正常车辆标记图标
-    final icon = await gmaps.BitmapDescriptor.fromAssetImage(
-      configuration,
+    // Google Maps marker 使用字节流加载，避免资源缩放/刷新时出现默认红标。
+    final icon = await _loadGoogleBitmapDescriptor(
       'assets/android/mipmap-xxhdpi/icon_marker_vehicle.png',
     );
-    if (mounted) {
-      setState(() {
-        _markerIcon = icon;
-      });
-    }
-    // 加载需要保养的标记图标
-    final maintenanceIcon = await gmaps.BitmapDescriptor.fromAssetImage(
-      configuration,
+    final maintenanceIcon = await _loadGoogleBitmapDescriptor(
       'assets/android/mipmap-xxhdpi/icon_marker_need_maintenance.png',
     );
-    if (mounted) {
-      setState(() {
-        _maintenanceMarkerIcon = maintenanceIcon;
-      });
-    }
-    // 加载位置标记图标
-    final locationIcon = await gmaps.BitmapDescriptor.fromAssetImage(
-      configuration,
-      'assets/android/mipmap-xxhdpi/icon_location.webp',
-    );
-    if (mounted) {
-      setState(() {
-        _locationMarkerIcon = locationIcon;
-      });
-    }
-    // 加载选中车辆标记图标
-    final selectedIcon = await gmaps.BitmapDescriptor.fromAssetImage(
-      configuration,
+    final selectedIcon = await _loadGoogleBitmapDescriptor(
       'assets/android/mipmap-xxhdpi/car_map_selected.png',
     );
     if (mounted) {
       setState(() {
+        _markerIcon = icon;
+        _maintenanceMarkerIcon = maintenanceIcon;
         _selectedMarkerIcon = selectedIcon;
       });
     }
+  }
+
+  Future<gmaps.BitmapDescriptor> _loadGoogleBitmapDescriptor(
+    String assetPath,
+  ) async {
+    final data = await rootBundle.load(assetPath);
+    return gmaps.BitmapDescriptor.fromBytes(data.buffer.asUint8List());
   }
 
   Future<void> _loadAppleMarkerIcon() async {
@@ -205,9 +191,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
     final byteData = await frameInfo.image.toByteData(
       format: ui.ImageByteFormat.png,
     );
-    return amaps.BitmapDescriptor.fromBytes(
-      byteData!.buffer.asUint8List(),
-    );
+    return amaps.BitmapDescriptor.fromBytes(byteData!.buffer.asUint8List());
   }
 
   Future<void> _loadInitialData() async {
@@ -223,6 +207,8 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
       _hasLocationPermission = permission.granted;
       if (!permission.granted) {
         setState(() {
+          _currentLatitude = _fallbackLatitude;
+          _currentLongitude = _fallbackLongitude;
           _latitude = _fallbackLatitude;
           _longitude = _fallbackLongitude;
         });
@@ -230,14 +216,20 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
         return;
       }
 
-      final position = await Geolocator.getCurrentPosition();
-      final latChanged = _latitude != position.latitude;
-      final lngChanged = _longitude != position.longitude;
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+      final latChanged = _currentLatitude != position.latitude;
+      final lngChanged = _currentLongitude != position.longitude;
       setState(() {
+        _currentLatitude = position.latitude;
+        _currentLongitude = position.longitude;
         _latitude = position.latitude;
         _longitude = position.longitude;
       });
-      
+
       // 如果位置发生变化，居中地图并刷新数据（非初始化时）
       if (!isInitial && (latChanged || lngChanged)) {
         _pendingCenterOnLocation = true;
@@ -248,6 +240,8 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
       }
     } catch (_) {
       setState(() {
+        _currentLatitude = _fallbackLatitude;
+        _currentLongitude = _fallbackLongitude;
         _latitude = _fallbackLatitude;
         _longitude = _fallbackLongitude;
       });
@@ -264,8 +258,9 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
       final centerLat = _latitude ?? _fallbackLatitude;
       final centerLng = _longitude ?? _fallbackLongitude;
       final mockList = _buildMockVehicles(centerLat, centerLng);
-      final selectedId =
-          _selectedVehicle == null ? null : _vehicleMarkerId(_selectedVehicle!);
+      final selectedId = _selectedVehicle == null
+          ? null
+          : _vehicleMarkerId(_selectedVehicle!);
       NearByVehicle? selected;
       if (selectedId != null) {
         for (final item in mockList) {
@@ -300,7 +295,8 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
         if (_vehicleSnFilter != null && _vehicleSnFilter!.isNotEmpty)
           'vehicleSn': _vehicleSnFilter,
       },
-      parser: (json) => (json as List<dynamic>?)
+      parser: (json) =>
+          (json as List<dynamic>?)
               ?.map(
                 (item) => NearByVehicle.fromJson(
                   Map<String, dynamic>.from(item as Map),
@@ -310,9 +306,12 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
           const <NearByVehicle>[],
     );
     if (!mounted) return;
-    final nextVehicles = response.result ?? const <NearByVehicle>[];
-    final selectedId =
-        _selectedVehicle == null ? null : _vehicleMarkerId(_selectedVehicle!);
+    final nextVehicles = _applyMaintenanceFilter(
+      response.result ?? const <NearByVehicle>[],
+    );
+    final selectedId = _selectedVehicle == null
+        ? null
+        : _vehicleMarkerId(_selectedVehicle!);
     NearByVehicle? selected;
     if (selectedId != null) {
       for (final item in nextVehicles) {
@@ -333,6 +332,49 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
     final requestId = ++_routeRequestSeq;
     unawaited(_refreshRoutePolylines(selected, requestId: requestId));
     await _prefetchAddresses();
+  }
+
+  List<NearByVehicle> _applyMaintenanceFilter(List<NearByVehicle> source) {
+    if (_maintainFlag == null) return source;
+    return source.where(_matchesMaintenanceFilter).toList();
+  }
+
+  bool _matchesMaintenanceFilter(NearByVehicle item) {
+    if (_maintainFlag == null) return true;
+    if (_maintainFlag == 1) {
+      return item.needMaintenance == true;
+    }
+    return item.needMaintenance != true;
+  }
+
+  bool _isValidCoordinate(double? lat, double? lng) {
+    if (lat == null || lng == null) return false;
+    if (lat == 0 || lng == 0) return false;
+    return lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+  }
+
+  double? _distanceMeters({
+    required double? fromLat,
+    required double? fromLng,
+    required double? toLat,
+    required double? toLng,
+  }) {
+    if (!_isValidCoordinate(fromLat, fromLng) ||
+        !_isValidCoordinate(toLat, toLng)) {
+      return null;
+    }
+    return Geolocator.distanceBetween(fromLat!, fromLng!, toLat!, toLng!);
+  }
+
+  bool _hasValidMapCoordinate(NearByVehicle item) {
+    return _isValidCoordinate(item.latitude, item.longitude);
+  }
+
+  List<NearByVehicle> _mapDisplayVehicles() {
+    return _vehicles
+        .where(_matchesMaintenanceFilter)
+        .where(_hasValidMapCoordinate)
+        .toList(growable: false);
   }
 
   List<NearByVehicle> _buildMockVehicles(double centerLat, double centerLng) {
@@ -414,19 +456,17 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   String _distanceLabel(NearByVehicle vehicle) {
     final lat = vehicle.latitude;
     final lng = vehicle.longitude;
-    final centerLat = _latitude;
-    final centerLng = _longitude;
-    final mile = vehicle.mile;
-    if (mile != null && mile > 0) {
-      if (mile < 1) {
-        return '${(mile * 1000).toStringAsFixed(0)}m';
-      }
-      return '${mile.toStringAsFixed(1)}km';
-    }
-    if (lat == null || lng == null || centerLat == null || centerLng == null) {
+    final originLat = _currentLatitude ?? _latitude;
+    final originLng = _currentLongitude ?? _longitude;
+    final meters = _distanceMeters(
+      fromLat: originLat,
+      fromLng: originLng,
+      toLat: lat,
+      toLng: lng,
+    );
+    if (meters == null) {
       return '-';
     }
-    final meters = Geolocator.distanceBetween(centerLat, centerLng, lat, lng);
     if (meters < 1000) {
       return '${meters.toStringAsFixed(0)}m';
     }
@@ -443,20 +483,18 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   }
 
   Future<void> _openSearch() async {
-    final lat = _latitude ?? _fallbackLatitude;
-    final lng = _longitude ?? _fallbackLongitude;
+    final lat = _currentLatitude ?? _latitude ?? _fallbackLatitude;
+    final lng = _currentLongitude ?? _longitude ?? _fallbackLongitude;
     await Navigator.of(context).push<void>(
       MaterialPageRoute(
-        builder: (_) => HomeSearchPage(
-          latitude: lat,
-          longitude: lng,
-        ),
+        builder: (_) => HomeSearchPage(latitude: lat, longitude: lng),
       ),
     );
   }
 
   void _selectVehicle(NearByVehicle? vehicle) {
     setState(() {
+      _showFilterPanel = false;
       _selectedVehicle = vehicle;
       _routePolylines = _buildRoutePolylines(vehicle);
     });
@@ -468,8 +506,8 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
   }
 
   Set<gmaps.Polyline> _buildRoutePolylines(NearByVehicle? vehicle) {
-    final fromLat = _latitude;
-    final fromLng = _longitude;
+    final fromLat = _currentLatitude ?? _latitude;
+    final fromLng = _currentLongitude ?? _longitude;
     final toLat = vehicle?.latitude;
     final toLng = vehicle?.longitude;
     if (fromLat == null || fromLng == null || toLat == null || toLng == null) {
@@ -493,7 +531,9 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
     required int requestId,
   }) async {
     if (!mounted || requestId != _routeRequestSeq) return;
-    if (vehicle == null || kIsWeb || defaultTargetPlatform != TargetPlatform.android) {
+    if (vehicle == null ||
+        kIsWeb ||
+        defaultTargetPlatform != TargetPlatform.android) {
       return;
     }
 
@@ -503,8 +543,8 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
     );
     if (directionApiKey.isEmpty) return;
 
-    final fromLat = _latitude;
-    final fromLng = _longitude;
+    final fromLat = _currentLatitude ?? _latitude;
+    final fromLng = _currentLongitude ?? _longitude;
     final toLat = vehicle.latitude;
     final toLng = vehicle.longitude;
     if (fromLat == null || fromLng == null || toLat == null || toLng == null) {
@@ -614,17 +654,18 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
     if (sn == null || sn.trim().isEmpty) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => DeviceDetailPageNew(
-          initialSn: sn,
-          readOnly: true,
-        ),
+        builder: (_) => DeviceDetailPageNew(initialSn: sn, readOnly: true),
       ),
     );
   }
 
-  Future<void> _centerMap() async {
-    final lat = _latitude ?? _fallbackLatitude;
-    final lng = _longitude ?? _fallbackLongitude;
+  Future<void> _centerMap({bool refreshCurrentLocation = false}) async {
+    if (refreshCurrentLocation) {
+      await _refreshCurrentLocationForCenter();
+      await _fetchVehicles();
+    }
+    final lat = _currentLatitude ?? _latitude ?? _fallbackLatitude;
+    final lng = _currentLongitude ?? _longitude ?? _fallbackLongitude;
     if (kIsWeb) return;
     _suppressNextCameraIdle = true;
     if (defaultTargetPlatform == TargetPlatform.android) {
@@ -639,6 +680,44 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
       await controller.animateCamera(
         amaps.CameraUpdate.newLatLng(amaps.LatLng(lat, lng)),
       );
+    }
+  }
+
+  Future<void> _refreshCurrentLocationForCenter() async {
+    final permission = await ensureLocationPermission();
+    _hasLocationPermission = permission.granted;
+    if (!permission.granted) {
+      if (!mounted) return;
+      setState(() {
+        _currentLatitude = _fallbackLatitude;
+        _currentLongitude = _fallbackLongitude;
+        _latitude = _fallbackLatitude;
+        _longitude = _fallbackLongitude;
+      });
+      return;
+    }
+
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+      if (!mounted) return;
+      setState(() {
+        _currentLatitude = position.latitude;
+        _currentLongitude = position.longitude;
+        _latitude = position.latitude;
+        _longitude = position.longitude;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _currentLatitude = _fallbackLatitude;
+        _currentLongitude = _fallbackLongitude;
+        _latitude = _fallbackLatitude;
+        _longitude = _fallbackLongitude;
+      });
     }
   }
 
@@ -670,16 +749,14 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
 
     final oldLat = _latitude;
     final oldLng = _longitude;
-    if (oldLat != null && oldLng != null) {
-      final moved = Geolocator.distanceBetween(
-        oldLat,
-        oldLng,
-        target.latitude,
-        target.longitude,
-      );
-      if (moved < 50) {
-        return;
-      }
+    final moved = _distanceMeters(
+      fromLat: oldLat,
+      fromLng: oldLng,
+      toLat: target.latitude,
+      toLng: target.longitude,
+    );
+    if (moved != null && moved < 50) {
+      return;
     }
 
     setState(() {
@@ -689,143 +766,133 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
     await _fetchVehicles();
   }
 
-  Future<void> _showFilterSheet() async {
-    final l10n = context.l10n;
-    final RenderBox overlay = Navigator.of(context).overlay!.context.findRenderObject() as RenderBox;
-    final topPadding = MediaQuery.of(context).padding.top;
-    
-    // 计算弹窗位置：右上角筛选按钮下方
-    final RelativeRect position = RelativeRect.fromLTRB(
-      overlay.size.width - 16 - 200, // 右边距16，弹窗宽度200
-      topPadding + 8 + 44 + 8, // 状态栏 + 顶部padding + 搜索栏高度 + 间距
-      16, // 右边距
-      0,
-    );
+  void _showFilterSheet() {
+    setState(() => _showFilterPanel = !_showFilterPanel);
+  }
 
-    final selected = await showMenu<int?>(
-      context: context,
-      position: position,
-      color: const Color(0xFF1E2A3A),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      items: [
-        PopupMenuItem<int?>(
-          value: null,
-          child: _FilterMenuItem(
-            label: l10n.homeFilterAll,
-            isSelected: _maintainFlag == null,
-          ),
-        ),
-        PopupMenuItem<int?>(
-          value: 0,
-          child: _FilterMenuItem(
-            label: l10n.homeFilterNormal,
-            dotColor: AppColors.primaryColor,
-            isSelected: _maintainFlag == 0,
-          ),
-        ),
-        PopupMenuItem<int?>(
-          value: 1,
-          child: _FilterMenuItem(
-            label: l10n.homeFilterNeedMaintenance,
-            dotColor: const Color(0xFFF44336),
-            isSelected: _maintainFlag == 1,
-          ),
-        ),
-      ],
-    );
+  Future<void> _applyFilter(int? selected) async {
     if (!mounted) return;
-    if (selected != _maintainFlag) {
-      setState(() => _maintainFlag = selected);
+    final changed = selected != _maintainFlag;
+    setState(() {
+      _showFilterPanel = false;
+      if (changed) {
+        _maintainFlag = selected;
+      }
+    });
+    if (changed) {
       await _fetchVehicles();
     }
   }
 
-  Set<gmaps.Marker> _buildGoogleMarkers() {
-    final markers = _vehicles
-        .where((item) =>
-            item.latitude != null &&
-            item.longitude != null &&
-            item.latitude != 0 &&
-            item.longitude != 0)
-        .map(
-          (item) {
-            // 根据是否需要保养选择不同的图标
-            final markerIcon = item.needMaintenance == true
-                ? (_maintenanceMarkerIcon ?? gmaps.BitmapDescriptor.defaultMarker)
-                : (_markerIcon ?? gmaps.BitmapDescriptor.defaultMarker);
-            final isSelected = _isSelectedVehicle(item);
-            final selectedIcon = _selectedMarkerIcon ?? markerIcon;
-            final baseMarkerId = _vehicleMarkerId(item);
-            final renderMarkerId = isSelected ? '${baseMarkerId}_selected' : baseMarkerId;
-            return gmaps.Marker(
-              markerId: gmaps.MarkerId(renderMarkerId),
-              position: gmaps.LatLng(item.latitude!, item.longitude!),
-              icon: isSelected ? selectedIcon : markerIcon,
-              zIndex: isSelected ? 1000 : 0,
-              onTap: () => _selectVehicle(item),
-            );
-          },
-        )
-        .toSet();
-    
-    // 添加用户当前位置标记
-    final lat = _latitude;
-    final lng = _longitude;
-    if (lat != null && lng != null) {
-      markers.add(
-        gmaps.Marker(
-          markerId: const gmaps.MarkerId('user_location'),
-          position: gmaps.LatLng(lat, lng),
-          icon: _locationMarkerIcon ?? gmaps.BitmapDescriptor.defaultMarkerWithHue(gmaps.BitmapDescriptor.hueAzure),
-          zIndex: 999,
-        ),
-      );
-    }
-    return markers;
+  Widget _buildFilterPanel() {
+    final l10n = context.l10n;
+    return Material(
+      color: Colors.transparent,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const _MenuArrow(),
+          Container(
+            width: 200,
+            decoration: BoxDecoration(
+              color: const Color(0xFF1E2A3A),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _FilterActionItem(
+                  onTap: () => unawaited(_applyFilter(null)),
+                  child: _FilterMenuItem(
+                    label: l10n.homeFilterAll,
+                    isSelected: _maintainFlag == null,
+                  ),
+                ),
+                _FilterActionItem(
+                  onTap: () => unawaited(_applyFilter(0)),
+                  child: _FilterMenuItem(
+                    label: l10n.homeFilterNormal,
+                    dotColor: AppColors.primaryColor,
+                    isSelected: _maintainFlag == 0,
+                  ),
+                ),
+                _FilterActionItem(
+                  onTap: () => unawaited(_applyFilter(1)),
+                  child: _FilterMenuItem(
+                    label: l10n.homeFilterNeedMaintenance,
+                    dotColor: const Color(0xFFF44336),
+                    isSelected: _maintainFlag == 1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  Set<amaps.Annotation> _buildAppleAnnotations() {
-    final annotations = _vehicles
-        .where((item) =>
-            item.latitude != null &&
-            item.longitude != null &&
-            item.latitude != 0 &&
-            item.longitude != 0)
-        .map(
-          (item) {
-            // 根据是否需要保养选择不同的图标
-            final markerIcon = item.needMaintenance == true
-                ? (_appleMaintenanceMarkerIcon ?? amaps.BitmapDescriptor.defaultAnnotation)
-                : (_appleMarkerIcon ?? amaps.BitmapDescriptor.defaultAnnotation);
-            final isSelected = _isSelectedVehicle(item);
-            final selectedIcon = _appleSelectedMarkerIcon ?? markerIcon;
-            final baseMarkerId = _vehicleMarkerId(item);
-            final renderMarkerId = isSelected ? '${baseMarkerId}_selected' : baseMarkerId;
-            return amaps.Annotation(
-              annotationId: amaps.AnnotationId(
-                renderMarkerId,
-              ),
-              position: amaps.LatLng(item.latitude!, item.longitude!),
-              icon: isSelected ? selectedIcon : markerIcon,
-              onTap: () => _selectVehicle(item),
-            );
-          },
-        )
-        .toSet();
-    
-    // iOS 系统已有蓝色位置标记，无需手动添加
-    return annotations;
+  Set<gmaps.Marker> _buildGoogleMarkers(List<NearByVehicle> vehicles) {
+    return vehicles.map((item) {
+      // 根据是否需要保养选择不同的图标
+      final markerIcon = item.needMaintenance == true
+          ? (_maintenanceMarkerIcon ?? gmaps.BitmapDescriptor.defaultMarker)
+          : (_markerIcon ?? gmaps.BitmapDescriptor.defaultMarker);
+      final isSelected = _isSelectedVehicle(item);
+      final selectedIcon = _selectedMarkerIcon ?? markerIcon;
+      final baseMarkerId = _vehicleMarkerId(item);
+      final renderMarkerId = isSelected
+          ? '${baseMarkerId}_selected'
+          : baseMarkerId;
+      return gmaps.Marker(
+        markerId: gmaps.MarkerId(renderMarkerId),
+        position: gmaps.LatLng(item.latitude!, item.longitude!),
+        icon: isSelected ? selectedIcon : markerIcon,
+        zIndex: isSelected ? 1000 : 0,
+        onTap: () => _selectVehicle(item),
+      );
+    }).toSet();
+  }
+
+  Set<amaps.Annotation> _buildAppleAnnotations(List<NearByVehicle> vehicles) {
+    return vehicles.map((item) {
+      // 根据是否需要保养选择不同的图标
+      final markerIcon = item.needMaintenance == true
+          ? (_appleMaintenanceMarkerIcon ??
+                amaps.BitmapDescriptor.defaultAnnotation)
+          : (_appleMarkerIcon ?? amaps.BitmapDescriptor.defaultAnnotation);
+      final isSelected = _isSelectedVehicle(item);
+      final selectedIcon = _appleSelectedMarkerIcon ?? markerIcon;
+      final baseMarkerId = _vehicleMarkerId(item);
+      final renderMarkerId = isSelected
+          ? '${baseMarkerId}_selected'
+          : baseMarkerId;
+      return amaps.Annotation(
+        annotationId: amaps.AnnotationId(renderMarkerId),
+        position: amaps.LatLng(item.latitude!, item.longitude!),
+        icon: isSelected ? selectedIcon : markerIcon,
+        onTap: () => _selectVehicle(item),
+      );
+    }).toSet();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final topPadding = MediaQuery.of(context).padding.top;
     final hasLocation = _latitude != null && _longitude != null;
     final centerLat = hasLocation ? _latitude! : _fallbackLatitude;
     final centerLng = hasLocation ? _longitude! : _fallbackLongitude;
     final areaCode = AuthSession.instance.current?.areaCode;
+    final displayVehicles = _mapDisplayVehicles();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -836,10 +903,13 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
                 ? VehicleMap(
                     latitude: centerLat,
                     longitude: centerLng,
-                    markers: _buildGoogleMarkers(),
+                    markers: _buildGoogleMarkers(displayVehicles),
                     polylines: _routePolylines,
-                    annotations: _buildAppleAnnotations(),
-                    onMapTap: () => _selectVehicle(null),
+                    annotations: _buildAppleAnnotations(displayVehicles),
+                    onMapTap: () {
+                      setState(() => _showFilterPanel = false);
+                      _selectVehicle(null);
+                    },
                     onGoogleCameraMove: (position) {
                       _cameraTarget = position.target;
                     },
@@ -858,13 +928,18 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
           _HomeOverlays(
             title: l10n.homeTitle,
             searchHint: l10n.homeSearchHint,
-            onSearch: _openSearch,
+            onSearch: () {
+              setState(() => _showFilterPanel = false);
+              _openSearch();
+            },
             onFilter: _showFilterSheet,
             onLocate: () {
+              setState(() => _showFilterPanel = false);
               setState(() => _locateTurns += 1);
-              _centerMap();
+              unawaited(_centerMap(refreshCurrentLocation: true));
             },
             onRefresh: () {
+              setState(() => _showFilterPanel = false);
               setState(() => _refreshTurns += 1);
               _fetchVehicles();
             },
@@ -873,8 +948,8 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
             maintenanceLabel: _maintainFlag == null
                 ? null
                 : _maintainFlag == 1
-                    ? l10n.homeFilterNeedMaintenance
-                    : l10n.homeFilterNormal,
+                ? l10n.homeFilterNeedMaintenance
+                : l10n.homeFilterNormal,
             onClearSnFilter: () async {
               setState(() => _vehicleSnFilter = null);
               await _fetchVehicles();
@@ -893,9 +968,23 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
             refreshTurns: _refreshTurns,
             locateTurns: _locateTurns,
           ),
-          if (_vehicles.isNotEmpty && _selectedVehicle == null)
+          if (_showFilterPanel)
+            Positioned.fill(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () => setState(() => _showFilterPanel = false),
+                child: const SizedBox.expand(),
+              ),
+            ),
+          if (_showFilterPanel)
+            Positioned(
+              top: topPadding + 66,
+              right: 16,
+              child: _buildFilterPanel(),
+            ),
+          if (displayVehicles.isNotEmpty && _selectedVehicle == null)
             _VehicleDraggableSheet(
-              vehicles: _vehicles,
+              vehicles: displayVehicles,
               loading: _loading,
               addressFor: _addressFor,
               distanceFor: _distanceLabel,
@@ -907,8 +996,8 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
               vehicle: _selectedVehicle!,
               address: _addressFor(_selectedVehicle!),
               distance: _distanceLabel(_selectedVehicle!),
-              originLat: _latitude,
-              originLng: _longitude,
+              originLat: _currentLatitude ?? _latitude,
+              originLng: _currentLongitude ?? _longitude,
               areaCode: areaCode,
               onClose: () => _selectVehicle(null),
               onViewMore: () async {
@@ -921,6 +1010,48 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
       ),
     );
   }
+}
+
+class _MenuArrow extends StatelessWidget {
+  const _MenuArrow();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 10,
+      child: Align(
+        alignment: Alignment.topRight,
+        child: Padding(
+          padding: const EdgeInsets.only(right: 12), // 控制离右边距离
+          child: CustomPaint(
+            size: const Size(16, 10),
+            painter: _TrianglePainter(),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _TrianglePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFF1E2A3A)
+      ..style = PaintingStyle.fill;
+
+    final path = Path();
+
+    path.moveTo(size.width / 2, 0); // 顶点
+    path.lineTo(0, size.height);
+    path.lineTo(size.width, size.height);
+    path.close();
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
 class _HomeOverlays extends StatelessWidget {
@@ -958,10 +1089,6 @@ class _HomeOverlays extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasSnFilter = (vehicleSnFilter ?? '').trim().isNotEmpty;
-    final hasMaintenance = (maintenanceLabel ?? '').trim().isNotEmpty;
-    final hasFilters = hasSnFilter || hasMaintenance;
-
     return Column(
       children: [
         // 白色导航条
@@ -1000,9 +1127,7 @@ class _HomeOverlays extends StatelessWidget {
                             const SizedBox(width: 8),
                             Text(
                               searchHint,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
+                              style: Theme.of(context).textTheme.bodyMedium
                                   ?.copyWith(
                                     color: AppColors.black05Text,
                                     fontSize: 14,
@@ -1024,37 +1149,37 @@ class _HomeOverlays extends StatelessWidget {
                   ),
                 ],
               ),
-              if (hasFilters) ...[
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    if (hasSnFilter)
-                      _FilterChip(
-                        label: 'SN: ${vehicleSnFilter!}',
-                        onClear: onClearSnFilter,
-                      ),
-                    if (hasMaintenance)
-                      _FilterChip(
-                        label: maintenanceLabel!,
-                        onClear: onClearMaintenance,
-                      ),
-                    if (onClearAllFilters != null)
-                      GestureDetector(
-                        onTap: onClearAllFilters,
-                        child: Text(
-                          context.l10n.deviceSearchHistoryClear,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.primaryColor,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ],
+              // if (hasFilters) ...[
+              //   const SizedBox(height: 8),
+              //   Wrap(
+              //     spacing: 8,
+              //     runSpacing: 8,
+              //     children: [
+              //       if (hasSnFilter)
+              //         _FilterChip(
+              //           label: 'SN: ${vehicleSnFilter!}',
+              //           onClear: onClearSnFilter,
+              //         ),
+              //       if (hasMaintenance)
+              //         _FilterChip(
+              //           label: maintenanceLabel!,
+              //           onClear: onClearMaintenance,
+              //         ),
+              //       if (onClearAllFilters != null)
+              //         GestureDetector(
+              //           onTap: onClearAllFilters,
+              //           child: Text(
+              //             context.l10n.deviceSearchHistoryClear,
+              //             style: const TextStyle(
+              //               fontSize: 12,
+              //               color: AppColors.primaryColor,
+              //               fontWeight: FontWeight.w500,
+              //             ),
+              //           ),
+              //         ),
+              //     ],
+              //   ),
+              // ],
             ],
           ),
         ),
@@ -1077,7 +1202,7 @@ class _HomeOverlays extends StatelessWidget {
                   ),
                   onPressed: onRefresh,
                 ),
-                const SizedBox(height: 10),
+                // const SizedBox(height: 10),
                 _CircleIconButton(
                   iconWidget: AnimatedRotation(
                     turns: locateTurns,
@@ -1154,35 +1279,32 @@ class _VehicleDraggableSheet extends StatelessWidget {
                 child: loading
                     ? const Center(child: SizedBox.shrink())
                     : vehicles.isEmpty
-                        ? Center(
-                            child: Text(
-                              emptyText,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(color: AppColors.black05Text),
-                            ),
-                          )
-                        : ListView.separated(
-                            controller: controller,
-                            physics: const ClampingScrollPhysics(),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            itemBuilder: (context, index) {
-                              final vehicle = vehicles[index];
-                              return _VehicleCard(
-                                info: vehicle,
-                                address: addressFor(vehicle),
-                                distance: distanceFor(vehicle),
-                                onSelected: () => onSelected(vehicle.sn),
-                              );
-                            },
-                            separatorBuilder: (_, __) =>
-                                const SizedBox(height: 10),
-                            itemCount: vehicles.length,
-                          ),
+                    ? Center(
+                        child: Text(
+                          emptyText,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(color: AppColors.black05Text),
+                        ),
+                      )
+                    : ListView.separated(
+                        controller: controller,
+                        physics: const ClampingScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        itemBuilder: (context, index) {
+                          final vehicle = vehicles[index];
+                          return _VehicleCard(
+                            info: vehicle,
+                            address: addressFor(vehicle),
+                            distance: distanceFor(vehicle),
+                            onSelected: () => onSelected(vehicle.sn),
+                          );
+                        },
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        itemCount: vehicles.length,
+                      ),
               ),
             ],
           ),
@@ -1251,7 +1373,7 @@ class _VehicleCard extends StatelessWidget {
                             ),
                           _StatusChip(
                             label:
-                                'ID: ${info.cardNum ?? '-'}',
+                                '${context.l10n.vehicleSearchBindIdLabel}: ${info.cardNum ?? '-'}',
                             borderColor: AppColors.black02Text,
                             textColor: AppColors.black06Text,
                             fontSize: 12,
@@ -1368,10 +1490,7 @@ class _CircleIconButton extends StatelessWidget {
               ]
             : null,
       ),
-      child: IconButton(
-        icon: iconWidget,
-        onPressed: onPressed,
-      ),
+      child: IconButton(icon: iconWidget, onPressed: onPressed),
     );
   }
 }
@@ -1429,73 +1548,37 @@ class _FilterMenuItem extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            decoration: BoxDecoration(
-              color: dotColor,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
           ),
           const SizedBox(width: 10),
         ],
         Expanded(
           child: Text(
             label,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 14),
           ),
         ),
         if (isSelected)
-          const Icon(
-            Icons.check,
-            color: AppColors.primaryColor,
-            size: 20,
-          ),
+          const Icon(Icons.check, color: AppColors.primaryColor, size: 20),
       ],
     );
   }
 }
 
-class _FilterChip extends StatelessWidget {
-  const _FilterChip({
-    required this.label,
-    this.onClear,
-  });
+class _FilterActionItem extends StatelessWidget {
+  const _FilterActionItem({required this.onTap, required this.child});
 
-  final String label;
-  final VoidCallback? onClear;
+  final VoidCallback onTap;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF5F6F8),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: const Color(0xFFE0E0E0)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Color(0xFF666666),
-            ),
-          ),
-          if (onClear != null) ...[
-            const SizedBox(width: 6),
-            GestureDetector(
-              onTap: onClear,
-              child: const Icon(
-                Icons.close,
-                size: 14,
-                color: Color(0xFF999999),
-              ),
-            ),
-          ],
-        ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(10),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: child,
       ),
     );
   }
@@ -1543,10 +1626,7 @@ class _VehicleDetailSheetState extends State<_VehicleDetailSheet>
     _slideAnimation = Tween<Offset>(
       begin: const Offset(0, 1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
     _controller.forward();
     _fetchPhone();
   }
@@ -1639,255 +1719,259 @@ class _VehicleDetailSheetState extends State<_VehicleDetailSheet>
             }
           },
           child: Container(
-            margin: EdgeInsets.fromLTRB(0, 0, 0,0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // 拖动指示条
-          Container(
-            margin: const EdgeInsets.only(top: 12),
-            width: 40,
-            height: 4,
+            margin: EdgeInsets.fromLTRB(0, 0, 0, 0),
             decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(2),
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, -4),
+                ),
+              ],
             ),
-          ),
-          // 车辆信息
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _VehicleImage(url: widget.vehicle.img),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
+                // 拖动指示条
+                Container(
+                  margin: const EdgeInsets.only(top: 12),
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                // 车辆信息
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'SN: ${widget.vehicle.sn ?? '-'}',
-                            style: theme.textTheme.titleMedium?.copyWith(
-                              color: AppColors.black09Text,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 6,
-                            children: [
-                              if (widget.vehicle.needMaintenance == true)
-                                _StatusChip(
-                                  label: l10n.homeFilterNeedMaintenance,
-                                  borderColor: AppColors.danger,
-                                  textColor: AppColors.danger,
-                                  fontSize: 12,
+                          _VehicleImage(url: widget.vehicle.img),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'SN: ${widget.vehicle.sn ?? '-'}',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: AppColors.black09Text,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
                                 ),
-                              _StatusChip(
-                                label: 'ID: ${widget.vehicle.cardNum ?? '-'}',
-                                borderColor: AppColors.borderColor,
-                                textColor: AppColors.black06Text,
-                                fontSize: 12,
-                              ),
-                            ],
+                                const SizedBox(height: 8),
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 6,
+                                  children: [
+                                    if (widget.vehicle.needMaintenance == true)
+                                      _StatusChip(
+                                        label: l10n.homeFilterNeedMaintenance,
+                                        borderColor: AppColors.danger,
+                                        textColor: AppColors.danger,
+                                        fontSize: 12,
+                                      ),
+                                    _StatusChip(
+                                      label:
+                                          '${context.l10n.vehicleSearchBindIdLabel}: ${widget.vehicle.cardNum ?? '-'}',
+                                      borderColor: AppColors.borderColor,
+                                      textColor: AppColors.black06Text,
+                                      fontSize: 12,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                // 用户手机
-                Row(
-                  children: [
-                    Image.asset(
-                      'assets/android/mipmap-xxhdpi/icon_grey_phone.png',
-                      width: 18,
-                      height: 18,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${l10n.vehicleDetailUserPhone}:',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.black06Text,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    GestureDetector(
-                      onTap: _phone != null && _phone!.isNotEmpty
-                          ? () => _callPhone(_phone!)
-                          : null,
-                      child: Text(
-                        _formatPhone(_phone),
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: _phone != null && _phone!.isNotEmpty
-                              ? Colors.blue
-                              : AppColors.black06Text,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                // 地址和距离
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Image.asset(
-                      'assets/android/mipmap-xxhdpi/icon_location_item.webp',
-                      width: 18,
-                      height: 18,
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        widget.address,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.black06Text,
-                          height: 1.4,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    InkWell(
-                      onTap: _openNavigation,
-                      child: Column(
+                      const SizedBox(height: 16),
+                      // 用户手机
+                      Row(
                         children: [
-                          Icon(
-                            Icons.navigation,
-                            size: 20,
-                            color: AppColors.primaryColor,
+                          Image.asset(
+                            'assets/android/mipmap-xxhdpi/icon_grey_phone.png',
+                            width: 18,
+                            height: 18,
                           ),
-                          const SizedBox(height: 2),
+                          const SizedBox(width: 6),
                           Text(
-                            widget.distance,
-                            style: theme.textTheme.bodySmall?.copyWith(
+                            '${l10n.vehicleDetailUserPhone}:',
+                            style: theme.textTheme.bodyMedium?.copyWith(
                               color: AppColors.black06Text,
-                              fontSize: 12,
+                              fontSize: 14,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          GestureDetector(
+                            onTap: _phone != null && _phone!.isNotEmpty
+                                ? () => _callPhone(_phone!)
+                                : null,
+                            child: Text(
+                              _formatPhone(_phone),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: _phone != null && _phone!.isNotEmpty
+                                    ? Colors.blue
+                                    : AppColors.black06Text,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                // 车牌和里程信息卡片
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                  decoration: BoxDecoration(
-                    image: const DecorationImage(
-                      image: AssetImage(
-                        'assets/android/mipmap-xxhdpi/car_map_info_bg.png',
-                      ),
-                      fit: BoxFit.cover,
-                    ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.vehicleDetailPlateNumber,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.white.withOpacity(0.7),
-                                fontSize: 12,
+                      const SizedBox(height: 12),
+                      // 地址和距离
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Image.asset(
+                            'assets/android/mipmap-xxhdpi/icon_location_item.webp',
+                            width: 18,
+                            height: 18,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              widget.address,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: AppColors.black06Text,
+                                height: 1.4,
+                                fontSize: 14,
                               ),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              widget.vehicle.carNumber?.isNotEmpty == true
-                                  ? widget.vehicle.carNumber!
-                                  : '-',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 22,
+                          ),
+                          const SizedBox(width: 12),
+                          InkWell(
+                            onTap: _openNavigation,
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.navigation,
+                                  size: 20,
+                                  color: AppColors.primaryColor,
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  widget.distance,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: AppColors.black06Text,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // 车牌和里程信息卡片
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          image: const DecorationImage(
+                            image: AssetImage(
+                              'assets/android/mipmap-xxhdpi/car_map_info_bg.png',
+                            ),
+                            fit: BoxFit.cover,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n.vehicleDetailPlateNumber,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.white.withOpacity(0.7),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    widget.vehicle.carNumber?.isNotEmpty == true
+                                        ? widget.vehicle.carNumber!
+                                        : '-',
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 22,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    l10n.vehicleDetailMileage,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: Colors.white.withOpacity(0.7),
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${widget.vehicle.mile?.toStringAsFixed(0) ?? '0'} km',
+                                    style: theme.textTheme.titleLarge?.copyWith(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 22,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
                         ),
                       ),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              l10n.vehicleDetailMileage,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.white.withOpacity(0.7),
-                                fontSize: 12,
-                              ),
+                      const SizedBox(height: 16),
+                      // View More 按钮
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            await _controller.reverse();
+                            widget.onViewMore();
+                          },
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: BorderSide(color: Colors.grey.shade300),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '${widget.vehicle.mile?.toStringAsFixed(0) ?? '0'} km',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 22,
-                              ),
+                          ),
+                          child: Text(
+                            l10n.vehicleDetailViewMore,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: AppColors.black07Text,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
                             ),
-                          ],
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 16),
-                // View More 按钮
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: () async {
-                      await _controller.reverse();
-                      widget.onViewMore();
-                    },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      side: BorderSide(color: Colors.grey.shade300),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: Text(
-                      l10n.vehicleDetailViewMore,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: AppColors.black07Text,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
-          ),
-        ],
-      ),
           ),
         ),
       ),

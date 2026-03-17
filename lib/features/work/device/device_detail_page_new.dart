@@ -29,6 +29,7 @@ class DeviceDetailPageNew extends ConsumerStatefulWidget {
     this.initialSn,
     this.readOnly = false,
     this.popToSearchOnClear = false,
+    this.showSearchBarInAppBar = true,
     this.expectedDeviceType,
     this.initialTabIndex,
   });
@@ -36,6 +37,7 @@ class DeviceDetailPageNew extends ConsumerStatefulWidget {
   final String? initialSn;
   final bool readOnly;
   final bool popToSearchOnClear;
+  final bool showSearchBarInAppBar;
   final int? expectedDeviceType;
   final int? initialTabIndex;
 
@@ -54,9 +56,13 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   int _currentDeviceType = 0;
   bool _disposed = false;
 
+  late gmaps.BitmapDescriptor _markerIconCabinet;
+  late amaps.BitmapDescriptor _markerIconCabinetApple;
+
   @override
   void initState() {
     super.initState();
+    _loadMarker();
     final initial = widget.initialSn?.trim() ?? '';
     if (initial.isNotEmpty) {
       _controller.text = initial;
@@ -123,8 +129,11 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
         state.vehicleDetail != null ||
         (state.deviceType == 3 && state.searchResult?.deviceInfo != null);
     final cabinetHasWarehouse = deviceType == 3
-      ? _cabinetHasWarehouse(state.searchResult?.deviceInfo, state.cabinetDetail)
-      : true;
+        ? _cabinetHasWarehouse(
+            state.searchResult?.deviceInfo,
+            state.cabinetDetail,
+          )
+        : true;
 
     // 根据设备类型更新 TabController
     if (hasData) {
@@ -150,8 +159,19 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
             icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
             onPressed: () => _backToSource(hasData),
           ),
-          titleSpacing: 0,
-          title: _buildSearchBar(l10n, deviceType),
+          titleSpacing: widget.showSearchBarInAppBar ? 0 : null,
+          title: widget.showSearchBarInAppBar
+              ? _buildSearchBar(l10n, deviceType)
+              : Text(
+                  Localizations.localeOf(context).languageCode == 'zh'
+                      ? '设备'
+                      : 'Device',
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
         ),
         body: Column(
           children: [
@@ -304,12 +324,12 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
       final detail = state.cabinetDetail;
       if (!cabinetHasWarehouse) {
         return [
-          _buildCabinetBasicInfoTab(l10n, info, detail),
+          _buildCabinetBasicInfoTab(l10n, info, detail, loading: state.loading),
           _buildRepairRecordsTab(l10n, state),
         ];
       }
       return [
-        _buildCabinetBasicInfoTab(l10n, info, detail),
+        _buildCabinetBasicInfoTab(l10n, info, detail, loading: state.loading),
         _buildPortDetailTab(l10n, state),
         _buildCabinetAddressTab(l10n, info, detail),
         _buildRepairRecordsTab(l10n, state),
@@ -402,7 +422,8 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                     ? detail!.installImgSet.first
                     : null)
         : null;
-    final stationName = info?.stationName?.trim() ?? detail?.stationName?.trim();
+    final stationName =
+        info?.stationName?.trim() ?? detail?.stationName?.trim();
     final sn = info?.sn ?? detail?.stationSn ?? '-';
     final title = (stationName != null && stationName.isNotEmpty)
         ? stationName
@@ -472,7 +493,9 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: isOnline ? AppColors.primaryColor : Colors.grey,
+                      color: isOnline
+                          ? AppColors.primaryColor
+                          : AppColors.secondaryColor,
                     ),
                   ),
                   child: Row(
@@ -481,7 +504,9 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                       Icon(
                         Icons.wifi,
                         size: 14,
-                        color: isOnline ? AppColors.primaryColor : Colors.grey,
+                        color: isOnline
+                            ? AppColors.primaryColor
+                            : AppColors.secondaryColor,
                       ),
                       const SizedBox(width: 4),
                       Text(
@@ -490,7 +515,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                           fontSize: 12,
                           color: isOnline
                               ? AppColors.primaryColor
-                              : Colors.grey,
+                              : AppColors.secondaryColor,
                         ),
                       ),
                     ],
@@ -728,9 +753,13 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   Widget _buildCabinetBasicInfoTab(
     dynamic l10n,
     DeviceInfo? info,
-    CabinetDetailBaseInfoBean? detail,
-  ) {
-    final installStatus = info?.installStatus ?? detail?.installStatus;
+    CabinetDetailBaseInfoBean? detail, {
+    required bool loading,
+  }) {
+    // Avoid showing onboard status before cabinet base-info callback finishes.
+    final installStatus =
+        detail?.installStatus ??
+        ((loading && detail == null) ? null : info?.installStatus);
     final isOnboarded = installStatus != null && installStatus != 0;
     final spec = info != null ? info.showDeviceModel : detail?.stationSpec;
     final model = info != null ? info.deviceModel : detail?.stationModel;
@@ -741,9 +770,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     final onboardTime = _formatTimeString(
       info != null
           ? info.installTime
-          : (detail?.installTime ?? (detail?.putOnShelvesTime != null
-                ? detail!.putOnShelvesTime.toString()
-                : null)),
+          : (detail?.installTime ??
+                (detail?.putOnShelvesTime != null
+                    ? detail!.putOnShelvesTime.toString()
+                    : null)),
       withSeconds: true,
     );
     String? managerName;
@@ -850,32 +880,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               ),
               const SizedBox(height: 12),
               if (photos.isNotEmpty)
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: photos.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final url = entry.value;
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: GestureDetector(
-                        onTap: () => _openPhotoBrowser(photos, index),
-                        child: Image.network(
-                          url,
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            width: 100,
-                            height: 100,
-                            color: const Color(0xFFEEEEEE),
-                            child: const Icon(Icons.image_not_supported),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                )
+                _buildPhotoGrid(photos)
               else
                 const Text(
                   '-',
@@ -934,6 +939,15 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     final lng = info?.longitude ?? detail?.longitude ?? 0.0;
     final address =
         info?.address ?? detail?.stationAddress ?? detail?.address ?? '-';
+    bool isValidLatLng(double? lat, double? lng) {
+      if (lat == null || lng == null) return false;
+      if (lat == 0 && lng == 0) return false;
+      if (lat < -90 || lat > 90) return false;
+      if (lng < -180 || lng > 180) return false;
+      return true;
+    }
+
+    final hasValidLocation = isValidLatLng(lat, lng);
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -953,7 +967,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Image.asset(
-                    'assets/images/map_station_loc.png',
+                    'assets/android/mipmap-xxhdpi/ic_lon_lat.png',
                     width: 20,
                     height: 20,
                     fit: BoxFit.contain,
@@ -966,7 +980,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      address,
+                      (address.trim().isEmpty) ? '-' : address,
                       style: const TextStyle(
                         fontSize: 14,
                         color: AppColors.black06Text,
@@ -988,7 +1002,9 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '${lng.toStringAsFixed(6)}    ${lat.toStringAsFixed(6)}',
+                    ((lat == 0 && lng == 0))
+                        ? '-'
+                        : '${lng.toStringAsFixed(6)}    ${lat.toStringAsFixed(6)}',
                     style: const TextStyle(
                       fontSize: 14,
                       color: AppColors.black06Text,
@@ -996,25 +1012,25 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-
-              // 导航按钮
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: OutlinedButton.icon(
-                  onPressed: () => _openNavigation(lat, lng),
-                  icon: const Icon(Icons.navigation),
-                  label: Text(l10n.deviceDetailNavigation),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.black06Text,
-                    side: const BorderSide(color: Color(0xFFEEEEEE)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+              if (hasValidLocation) ...[
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 44,
+                  child: OutlinedButton.icon(
+                    onPressed: () => _openNavigation(lat, lng),
+                    icon: const Icon(Icons.navigation),
+                    label: Text(l10n.deviceDetailNavigation),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.black06Text,
+                      side: const BorderSide(color: Color(0xFFEEEEEE)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ],
           ),
         ),
@@ -1084,10 +1100,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                     ),
                     child: Text(
                       status.label,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: status.textColor,
-                      ),
+                      style: TextStyle(fontSize: 13, color: status.textColor),
                     ),
                   ),
                 ],
@@ -1251,32 +1264,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               ),
               const SizedBox(height: 12),
               if (photos.isNotEmpty)
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: photos.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final url = entry.value;
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: GestureDetector(
-                        onTap: () => _openPhotoBrowser(photos, index),
-                        child: Image.network(
-                          url,
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            width: 100,
-                            height: 100,
-                            color: const Color(0xFFEEEEEE),
-                            child: const Icon(Icons.image_not_supported),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                )
+                _buildPhotoGrid(photos)
               else
                 const Text(
                   '-',
@@ -1460,32 +1448,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               ),
               const SizedBox(height: 12),
               if (photos.isNotEmpty)
-                Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: photos.asMap().entries.map((entry) {
-                    final index = entry.key;
-                    final url = entry.value;
-                    return ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: GestureDetector(
-                        onTap: () => _openPhotoBrowser(photos, index),
-                        child: Image.network(
-                          url,
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            width: 100,
-                            height: 100,
-                            color: const Color(0xFFEEEEEE),
-                            child: const Icon(Icons.image_not_supported),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                )
+                _buildPhotoGrid(photos)
               else
                 const Text(
                   '-',
@@ -1636,7 +1599,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     return '$areaCode $value';
   }
 
-  bool _cabinetHasWarehouse(DeviceInfo? info, CabinetDetailBaseInfoBean? detail) {
+  bool _cabinetHasWarehouse(
+    DeviceInfo? info,
+    CabinetDetailBaseInfoBean? detail,
+  ) {
     final status = info?.installStatus ?? detail?.installStatus;
     // 搜索接口部分场景不返回 installStatus，按有仓位处理，避免误隐藏“仓位详情”Tab
     if (status == null) return true;
@@ -1651,6 +1617,41 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     return photos.toSet().toList();
   }
 
+  Widget _buildPhotoGrid(List<String> photos) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const spacing = 12.0;
+        final itemSize = (constraints.maxWidth - spacing * 2) / 3;
+        return Wrap(
+          spacing: spacing,
+          runSpacing: spacing,
+          children: photos.asMap().entries.map((entry) {
+            final index = entry.key;
+            final url = entry.value;
+            return SizedBox(
+              width: itemSize,
+              height: itemSize,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: GestureDetector(
+                  onTap: () => _openPhotoBrowser(photos, index),
+                  child: Image.network(
+                    url,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      color: const Color(0xFFEEEEEE),
+                      child: const Icon(Icons.image_not_supported),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
   Widget _buildMap(double lat, double lng) {
     if (kIsWeb || (lat == 0 && lng == 0)) {
       return Container(
@@ -1662,6 +1663,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     }
 
     final platform = defaultTargetPlatform;
+
     if (platform == TargetPlatform.android) {
       return gmaps.GoogleMap(
         initialCameraPosition: gmaps.CameraPosition(
@@ -1672,6 +1674,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
           gmaps.Marker(
             markerId: const gmaps.MarkerId('device'),
             position: gmaps.LatLng(lat, lng),
+            icon: _markerIconCabinet, // 自定义图片
           ),
         },
         zoomControlsEnabled: false,
@@ -1692,6 +1695,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
           amaps.Annotation(
             annotationId: amaps.AnnotationId('device'),
             position: amaps.LatLng(lat, lng),
+            icon: _markerIconCabinetApple, // 自定义图片
           ),
         },
         myLocationButtonEnabled: false,
@@ -1730,7 +1734,9 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     }
 
     // 默认场景下仍使用 commonSearch 自动识别设备类型
-    final result = await ref.read(deviceDetailProvider.notifier).commonSearch(sn);
+    final result = await ref
+        .read(deviceDetailProvider.notifier)
+        .commonSearch(sn);
     if (!mounted) return;
     if (result == null) {
       _backToSource(false);
@@ -1743,19 +1749,31 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
   void _checkCabinetPermission() {
     if (widget.readOnly) return;
-    _ensureCabinetPermission(showDialog: true);
+    _ensureCabinetPermission(showDialog: true, isOptDevice: true);
   }
 
-  bool _ensureCabinetPermission({required bool showDialog}) {
+  bool _ensureCabinetPermission({
+    required bool showDialog,
+    required bool isOptDevice,
+  }) {
     final state = ref.read(deviceDetailProvider);
-    final hasPermission =
-        state.searchResult?.deviceInfo?.hasPermission ??
-        state.cabinetDetail?.hasPermission;
+    final hasPermission = state.searchResult?.deviceInfo?.hasPermission;
+    final managerList = state.searchResult?.deviceInfo?.managerList;
+
+    if (hasPermission == null) {
+      return false;
+    }
     if (hasPermission == 1) {
       return true;
     }
 
-    if (showDialog) {
+    final shouldShowDialog =
+        showDialog &&
+        isOptDevice &&
+        hasPermission == 0 &&
+        managerList != null &&
+        managerList.isNotEmpty;
+    if (shouldShowDialog) {
       final (managerName, managerPhone) = _resolveManagerContact(state);
       _showNotManagerDialog(managerName, managerPhone);
     }
@@ -1769,12 +1787,6 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     if (managerList != null && managerList.isNotEmpty) {
       managerName = managerList.first.showName ?? '';
       managerPhone = managerList.first.phone ?? '';
-    } else {
-      final rawList = state.cabinetDetail?.stationManagerList;
-      if (rawList != null && rawList.isNotEmpty) {
-        managerName = rawList.first['showName']?.toString() ?? '';
-        managerPhone = rawList.first['phone']?.toString() ?? '';
-      }
     }
     final areaCode = AuthSession.instance.current?.areaCode ?? '';
     if (areaCode.isNotEmpty && managerPhone.isNotEmpty) {
@@ -1812,8 +1824,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                 ),
                 const Divider(height: 1),
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -1838,8 +1852,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                 ),
                 const Divider(height: 1),
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -1863,9 +1879,8 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                     ],
                   ),
                 ),
-                const Divider(height: 1),
+                const Divider(height: 0.5),
                 const SizedBox(height: 24),
-                const Divider(height: 1),
                 SizedBox(
                   width: double.infinity,
                   height: 54,
@@ -1935,7 +1950,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   void _setupPort(Cabin port) {
-    if (!_ensureCabinetPermission(showDialog: true)) {
+    if (!_ensureCabinetPermission(showDialog: true, isOptDevice: false)) {
       return;
     }
 
@@ -1971,9 +1986,9 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               ListTile(
                 title: Center(
                   child: Text(
-                  isDoorOpen
-                      ? l10n.deviceDetailPortOpened
-                      : l10n.deviceDetailPortOpenShort,
+                    isDoorOpen
+                        ? l10n.deviceDetailPortOpened
+                        : l10n.deviceDetailPortOpenShort,
                     style: TextStyle(color: isDoorOpen ? Colors.grey : null),
                   ),
                 ),
@@ -1989,9 +2004,9 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
               ListTile(
                 title: Center(
                   child: Text(
-                  isDisabled
-                      ? l10n.deviceDetailPortEnable
-                      : l10n.deviceDetailPortDisableShort,
+                    isDisabled
+                        ? l10n.deviceDetailPortEnable
+                        : l10n.deviceDetailPortDisableShort,
                     style: TextStyle(
                       color: isDisabled ? AppColors.primaryColor : Colors.red,
                     ),
@@ -2030,7 +2045,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   Future<void> _confirmOpenDoor(Cabin port) async {
-    if (!_ensureCabinetPermission(showDialog: true)) {
+    if (!_ensureCabinetPermission(showDialog: true, isOptDevice: false)) {
       return;
     }
 
@@ -2044,15 +2059,15 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
 
     if (!confirmed || !mounted) return;
 
-    await ref.read(deviceDetailProvider.notifier).openCabinDoor(
-      port: port.portNo ?? 0,
-    );
+    await ref
+        .read(deviceDetailProvider.notifier)
+        .openCabinDoor(port: port.portNo ?? 0);
 
     if (!mounted) return;
   }
 
   Future<void> _confirmOpenCabinetBackDoor() async {
-    if (!_ensureCabinetPermission(showDialog: true)) {
+    if (!_ensureCabinetPermission(showDialog: true, isOptDevice: false)) {
       return;
     }
 
@@ -2072,7 +2087,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
   }
 
   Future<void> _confirmTogglePort(Cabin port, bool enable) async {
-    if (!_ensureCabinetPermission(showDialog: true)) {
+    if (!_ensureCabinetPermission(showDialog: true, isOptDevice: false)) {
       return;
     }
 
@@ -2118,12 +2133,25 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     if (photos.isEmpty) return;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => _PhotoGalleryPage(
-          photos: photos,
-          initialIndex: initialIndex,
-        ),
+        builder: (_) =>
+            _PhotoGalleryPage(photos: photos, initialIndex: initialIndex),
       ),
     );
+  }
+
+  Future<void> _loadMarker() async {
+    _markerIconCabinet = await gmaps.BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(size: Size(25, 25)),
+      'assets/android/mipmap-xxhdpi/icon_station_loc.png',
+    );
+    _markerIconCabinetApple = await amaps.BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(size: Size(25, 25)),
+      'assets/android/mipmap-xxhdpi/icon_station_loc.png',
+    );
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 }
 
@@ -2309,4 +2337,3 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
-

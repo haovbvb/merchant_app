@@ -71,117 +71,130 @@ class _SelectApplicantSheetState extends State<SelectApplicantSheet> {
   @override
   Widget build(BuildContext context) {
     final canSubmit = !_searching && _userIdController.text.trim().isNotEmpty;
+    final mediaQuery = MediaQuery.of(context);
+    final keyboardInset = mediaQuery.viewInsets.bottom;
+    final sheetHeight = mediaQuery.size.height * 0.32;
 
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.32,
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(Icons.arrow_back_ios, size: 20),
-                  ),
-                  const Spacer(),
-                  Text(
-                    widget.title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.black06Text,
-                    ),
-                  ),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: const Icon(Icons.close, color: Color(0xFF999999)),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1F3F7),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 12),
+    return AnimatedPadding(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
+      padding: EdgeInsets.only(bottom: keyboardInset),
+      child: Container(
+        height: sheetHeight,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Row(
                   children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _userIdController,
-                        focusNode: _focusNode,
-                        decoration: InputDecoration(
-                          hintText: widget.hintText,
-                          hintStyle: const TextStyle(color: Color(0xFF999999)),
-                          border: InputBorder.none,
-                        ),
-                        onChanged: (_) {
-                          if (_matchedUserId != null) {
-                            setState(() => _matchedUserId = null);
-                          }
-                        },
-                        onSubmitted: (_) => _searchUser(autoSubmitOnFound: true),
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: const Icon(Icons.arrow_back_ios, size: 20),
+                    ),
+                    const Spacer(),
+                    Text(
+                      widget.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.black06Text,
                       ),
                     ),
+                    const Spacer(),
                     GestureDetector(
-                      onTap: _scanUserId,
-                      child: AppIcons.scanIcon(color: AppColors.black06Text),
+                      onTap: () => Navigator.of(context).pop(),
+                      child: const Icon(Icons.close, color: Color(0xFF999999)),
                     ),
                   ],
                 ),
               ),
-            ),
-            const Spacer(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-              child: SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: canSubmit ? _handleSubmitPressed : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryColor,
-                    disabledBackgroundColor: const Color(0xFFE8F5E9),
-                    foregroundColor: Colors.white,
-                    disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    elevation: 0,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF1F3F7),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  child: _searching
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _userIdController,
+                          focusNode: _focusNode,
+                          decoration: InputDecoration(
+                            hintText: widget.hintText,
+                            hintStyle: const TextStyle(
+                              color: Color(0xFF999999),
                             ),
+                            border: InputBorder.none,
                           ),
-                        )
-                      : Text(
-                          widget.submitText,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          onChanged: (_) {
+                            if (_matchedUserId != null) {
+                              setState(() => _matchedUserId = null);
+                            }
+                          },
+                          onSubmitted: (_) =>
+                              _searchUser(autoSubmitOnFound: true),
                         ),
+                      ),
+                      GestureDetector(
+                        onTap: _scanUserId,
+                        child: AppIcons.scanIcon(color: AppColors.black06Text),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+              const Spacer(),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: canSubmit ? _handleSubmitPressed : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primaryColor,
+                      disabledBackgroundColor: const Color(0xFFE8F5E9),
+                      foregroundColor: Colors.white,
+                      disabledForegroundColor: Colors.white.withValues(
+                        alpha: 0.6,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: _searching
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            widget.submitText,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -221,7 +234,9 @@ class _SelectApplicantSheetState extends State<SelectApplicantSheet> {
 
   Future<void> _scanUserId() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: false)),
+      MaterialPageRoute(
+        builder: (_) => const QrScanPage(allowManualInput: false),
+      ),
     );
     if (!mounted || result == null || result.isEmpty) return;
 

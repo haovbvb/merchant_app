@@ -368,11 +368,11 @@ class _VehicleEntryPageNewState extends State<VehicleEntryPageNew> {
     final parsed = ScanUtils.parseVehicleQr(rawValue, 0);
     final sn = (parsed.sn ?? '').trim();
     if (sn.isEmpty) {
-      return '无效二维码';
+      return context.l10n.scanInvalidQr;
     }
 
     if (_items.any((item) => item.sn == sn)) {
-      return '已扫过';
+      return context.l10n.scanAlreadyScanned;
     }
 
     final vin = (parsed.vin ?? '').trim();

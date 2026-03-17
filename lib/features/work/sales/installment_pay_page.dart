@@ -101,7 +101,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
   Widget _buildHeader(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      
+
       child: Column(
         children: [
           // 返回按钮
@@ -115,6 +115,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
           // 绿色钱包图标
           Image.asset(
             'assets/android/mipmap-xxhdpi/icon_installmentpage.png',
+            height: 120,
           ),
           Text(
             context.l10n.installmentPayTitle,
@@ -148,10 +149,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
         children: [
           Text(
             l10n.installmentPayUserId,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF999999),
-            ),
+            style: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
           ),
           const SizedBox(height: 8),
           Row(
@@ -218,10 +216,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
               child: Text(
                 l10n.installmentPayUserEmpty,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF999999),
-                ),
+                style: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
               ),
             ),
         ],
@@ -229,7 +224,10 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
     );
   }
 
-  Widget _buildUserInfoCard(BuildContext context, InstallmentPaymentResponse info) {
+  Widget _buildUserInfoCard(
+    BuildContext context,
+    InstallmentPaymentResponse info,
+  ) {
     final l10n = context.l10n;
     final fullName = '${info.firstName ?? ''} ${info.lastName ?? ''}'.trim();
     final account = (info.username ?? '').trim();
@@ -313,10 +311,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                     ],
                   ),
                 ),
-                const Icon(
-                  Icons.chevron_right,
-                  color: Color(0xFFCCCCCC),
-                ),
+                const Icon(Icons.chevron_right, color: Color(0xFFCCCCCC)),
               ],
             ),
           ),
@@ -325,21 +320,16 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
           Row(
             children: [
               _buildStatItem(l10n.installmentPayOrder, '${info.orderNum ?? 0}'),
-              Container(
-                width: 1,
-                height: 32,
-                color: const Color(0xFFEEEEEE),
-              ),
+              Container(width: 1, height: 32, color: const Color(0xFFEEEEEE)),
               _buildStatItem(
                 l10n.installmentPayTotalConsumption,
                 '\$ ${(info.totalAmount ?? 0).toStringAsFixed(2)}',
               ),
-              Container(
-                width: 1,
-                height: 32,
-                color: const Color(0xFFEEEEEE),
+              Container(width: 1, height: 32, color: const Color(0xFFEEEEEE)),
+              _buildStatItem(
+                l10n.installmentPayAssets,
+                '${info.deviceNum ?? 0}',
               ),
-              _buildStatItem(l10n.installmentPayAssets, '${info.deviceNum ?? 0}'),
             ],
           ),
           const SizedBox(height: 12),
@@ -375,10 +365,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Color(0xFF999999),
-            ),
+            style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
           ),
           const SizedBox(height: 4),
           Text(
@@ -394,7 +381,10 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
     );
   }
 
-  _StatusPresentation? _resolveStatusPresentation(BuildContext context, int? status) {
+  _StatusPresentation? _resolveStatusPresentation(
+    BuildContext context,
+    int? status,
+  ) {
     final l10n = context.l10n;
     switch (status) {
       case 1:
@@ -550,10 +540,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
             ),
             Text(
               orderDate,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF999999),
-              ),
+              style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
             ),
           ],
         ),
@@ -611,7 +598,11 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                           spacing: 6,
                           runSpacing: 4,
                           children: [
-                            if (_resolveStatusPresentation(context, order.status) case final status?)
+                            if (_resolveStatusPresentation(
+                                  context,
+                                  order.status,
+                                )
+                                case final status?)
                               _buildTag(
                                 status.label,
                                 status.textColor,
@@ -731,10 +722,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
           onTap: () => _selectOrder(context, orders, notifier),
           child: Text(
             l10n.installmentPayReselect,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFF2196F3),
-            ),
+            style: const TextStyle(fontSize: 14, color: Color(0xFF2196F3)),
           ),
         ),
       ],
@@ -743,7 +731,9 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
 
   String _resolvePaySourceText(BuildContext context, int? paySource) {
     final l10n = context.l10n;
-    final paySourceText = paySource == 2 ? l10n.orderPayOnline : l10n.orderPayCash;
+    final paySourceText = paySource == 2
+        ? l10n.orderPayOnline
+        : l10n.orderPayCash;
     return '$paySourceText ${l10n.orderPayInstallment}';
   }
 
@@ -754,7 +744,8 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
     Color? backgroundColor,
   }) {
     final effectiveBorderColor = borderColor ?? color.withValues(alpha: 0.5);
-    final effectiveBackgroundColor = backgroundColor ?? color.withValues(alpha: 0.1);
+    final effectiveBackgroundColor =
+        backgroundColor ?? color.withValues(alpha: 0.1);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
@@ -762,23 +753,14 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
         borderRadius: BorderRadius.circular(4),
         border: Border.all(color: effectiveBorderColor),
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontSize: 10,
-          color: color,
-        ),
-      ),
+      child: Text(text, style: TextStyle(fontSize: 10, color: color)),
     );
   }
 
   String _formatDate(int? timestamp) {
     if (timestamp == null || timestamp <= 0) return '-';
     if (_isZhLocale()) {
-      return DateFormatUtils.formatTimestamp(
-        timestamp,
-        pattern: 'yyyy/MM/dd',
-      );
+      return DateFormatUtils.formatTimestamp(timestamp, pattern: 'yyyy/MM/dd');
     }
     final date = DateTime.fromMillisecondsSinceEpoch(timestamp);
     return DateFormat('MMM dd, yyyy', 'en').format(date);
@@ -797,7 +779,9 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
   }
 
   bool _isZhLocale() {
-    return Localizations.localeOf(context).languageCode.toLowerCase().startsWith('zh');
+    return Localizations.localeOf(
+      context,
+    ).languageCode.toLowerCase().startsWith('zh');
   }
 
   Widget _buildVoucherSection(BuildContext context) {
@@ -831,10 +815,16 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
               runSpacing: 8,
               children: [
                 ...state.attachments.map(
-                  (url) => _buildImagePreview(url, () => notifier.removeAttachment(url)),
+                  (url) => _buildImagePreview(
+                    url,
+                    () => notifier.removeAttachment(url),
+                  ),
                 ),
                 if (state.attachments.length < 5)
-                  _buildAddButton(state.uploading, () => _pickAttachments(context, notifier, state)),
+                  _buildAddButton(
+                    state.uploading,
+                    () => _pickAttachments(context, notifier, state),
+                  ),
               ],
             ),
           ),
@@ -871,11 +861,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                 shape: BoxShape.circle,
                 color: Colors.black54,
               ),
-              child: const Icon(
-                Icons.close,
-                size: 14,
-                color: Colors.white,
-              ),
+              child: const Icon(Icons.close, size: 14, color: Colors.white),
             ),
           ),
         ),
@@ -915,7 +901,8 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
     final l10n = context.l10n;
     final state = ref.watch(installmentPayProvider);
     final notifier = ref.read(installmentPayProvider.notifier);
-    final canSubmit = state.selectedOrder != null &&
+    final canSubmit =
+        state.selectedOrder != null &&
         state.attachments.isNotEmpty &&
         !state.submitting;
 
@@ -923,9 +910,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(
-          top: BorderSide(color: Color(0xFFEEEEEE)),
-        ),
+        border: Border(top: BorderSide(color: Color(0xFFEEEEEE))),
       ),
       child: SafeArea(
         top: false,
@@ -1087,10 +1072,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
 }
 
 class _SuccessPage extends StatelessWidget {
-  const _SuccessPage({
-    required this.documentNo,
-    required this.onReturn,
-  });
+  const _SuccessPage({required this.documentNo, required this.onReturn});
 
   final String documentNo;
   final VoidCallback onReturn;
@@ -1138,11 +1120,7 @@ class _SuccessPage extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: AppColors.primaryColor,
                 ),
-                child: const Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 36,
-                ),
+                child: const Icon(Icons.check, color: Colors.white, size: 36),
               ),
               const SizedBox(height: 20),
               Text(
@@ -1157,10 +1135,7 @@ class _SuccessPage extends StatelessWidget {
               Text(
                 l10n.installmentPaySuccessHint,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF999999),
-                ),
+                style: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
               ),
               const SizedBox(height: 24),
               // Document Number
@@ -1196,7 +1171,9 @@ class _SuccessPage extends StatelessWidget {
                         GestureDetector(
                           onTap: () {
                             if (documentNo.isNotEmpty) {
-                              Clipboard.setData(ClipboardData(text: documentNo));
+                              Clipboard.setData(
+                                ClipboardData(text: documentNo),
+                              );
                               showToast(l10n.installmentPayCopied);
                             }
                           },

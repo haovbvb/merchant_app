@@ -18,6 +18,7 @@ import 'package:merchant_app/data/models/vcu_version.dart';
 import 'package:merchant_app/features/work/vcu/vcu_ble_command.dart';
 import 'package:merchant_app/features/work/vcu/vcu_controller.dart';
 import 'package:merchant_app/features/work/vcu/vcu_ota_util.dart';
+import 'package:merchant_app/l10n/app_localizations.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -27,17 +28,20 @@ class VcuControlPage extends ConsumerStatefulWidget {
     this.initialVin,
     this.initialCtrlId,
     this.initialSn,
+    this.initialOnline = false,
   });
 
   final String? initialVin;
   final String? initialCtrlId;
   final String? initialSn;
+  final bool initialOnline;
 
   @override
   ConsumerState<VcuControlPage> createState() => _VcuControlPageState();
 }
 
-class _VcuControlPageState extends ConsumerState<VcuControlPage> {
+class _VcuControlPageState extends ConsumerState<VcuControlPage>
+    with WidgetsBindingObserver {
   final TextEditingController _vinController = TextEditingController();
   final TextEditingController _ctrlIdController = TextEditingController();
   final TextEditingController _snController = TextEditingController();
@@ -76,6 +80,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   String? _otaVersionName;
   String? _mcuVersion;
   String? _platformLabel;
+  late bool _isOnline4g;
   String? _apnValue;
   String? _gpsValue;
   String? _dataValue;
@@ -88,7 +93,8 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   @override
   void initState() {
     super.initState();
-    _restoreBleSwitch();
+    WidgetsBinding.instance.addObserver(this);
+    _isOnline4g = widget.initialOnline;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       ref.read(vcuProvider.notifier).loadVersions();
@@ -102,6 +108,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
     if (widget.initialSn != null && widget.initialSn!.isNotEmpty) {
       _snController.text = widget.initialSn!;
     }
+    _restoreBleSwitch();
     _scanSub = FlutterBluePlus.scanResults.listen(_handleScanResults);
     _isScanningSub = FlutterBluePlus.isScanning.listen((value) {
       if (!mounted) return;
@@ -115,6 +122,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _vinController.dispose();
     _ctrlIdController.dispose();
     _snController.dispose();
@@ -133,6 +141,13 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _restoreBleSwitch();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
     final state = ref.watch(vcuProvider);
@@ -142,21 +157,140 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
       length: 2,
       child: Scaffold(
         backgroundColor: AppColors.bgColor,
-        appBar: AppBar(
-          title: Text(l10n.vcuControlTitle),
-          bottom: TabBar(
-            tabs: [
-              Tab(text: l10n.vcuControlTab),
-              Tab(text: l10n.vcuHistoryTab),
-            ],
-          ),
-        ),
-        body: TabBarView(
+        appBar: AppBar(title: Text(l10n.vcuControlTitle)),
+        body: Column(
           children: [
-            _buildControlTab(context, state, notifier),
-            _buildHistoryTab(context, state, notifier),
+            _buildTopHeader(),
+            Container(
+              color: Colors.white,
+              margin: const EdgeInsets.symmetric(horizontal: 10),
+              child: TabBar(
+                indicatorColor: AppColors.primaryColor,
+                indicatorWeight: 2,
+                indicatorSize: TabBarIndicatorSize.label,
+                labelColor: const Color(0xE6000000),
+                unselectedLabelColor: const Color(0x66000000),
+                tabs: [
+                  Tab(text: l10n.vcuControlTab),
+                  Tab(text: l10n.vcuHistoryTab),
+                ],
+              ),
+            ),
+            Expanded(
+              child: TabBarView(
+                physics: const NeverScrollableScrollPhysics(),
+                children: [
+                  _buildControlTab(context, state, notifier),
+                  _buildHistoryTab(context, state, notifier),
+                ],
+              ),
+            ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTopHeader() {
+    final ctrlId = _ctrlIdController.text.trim();
+    final deviceInfo = ctrlId.isEmpty ? '-' : 'SN:$ctrlId';
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
+      child: Column(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              image: const DecorationImage(
+                image: AssetImage(
+                  'assets/android/mipmap-xxhdpi/icon_devicedetail_topbg.webp',
+                ),
+                fit: BoxFit.cover,
+              ),
+            ),
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF2F2F2),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  padding: const EdgeInsets.all(2),
+                  child: Image.asset(
+                    'assets/android/mipmap-xxhdpi/img_vcu.png',
+                    fit: BoxFit.fill,
+                    errorBuilder: (_, __, ___) => const Icon(
+                      Icons.memory,
+                      color: Color(0xFF999999),
+                      size: 28,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        deviceInfo,
+                        style: const TextStyle(
+                          fontSize: 19,
+                          color: Color(0xE60C0C0D),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          _buildStatusTag(
+                            text: '4G',
+                            icon: Icons.wifi,
+                            selected: _isOnline4g,
+                          ),
+                          const SizedBox(width: 6),
+                          _buildStatusTag(
+                            text: 'BT',
+                            icon: Icons.bluetooth,
+                            selected: _bleConnected,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatusTag({
+    required String text,
+    required IconData icon,
+    required bool selected,
+  }) {
+    final foreground = selected
+        ? const Color(0xFF08983B)
+        : const Color(0x80FA4332);
+    final border = selected ? const Color(0xFF08983B) : const Color(0xFFFA4332);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: border),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 12, color: foreground),
+          const SizedBox(width: 2),
+          Text(text, style: TextStyle(fontSize: 13, color: foreground)),
+        ],
       ),
     );
   }
@@ -166,6 +300,9 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
     VcuState state,
     VcuNotifier notifier,
   ) {
+    final l10n = context.l10n;
+    final commands = _buildVcuCommands(l10n);
+    final platformOptions = _buildPlatformOptions(l10n);
     return RefreshIndicator(
       onRefresh: () async {
         await notifier.loadVersions();
@@ -178,15 +315,19 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
             child: Column(
               children: [
                 _InfoRow(
-                  title: '车辆 SN',
+                  title: l10n.vcuDeviceSnLabel,
                   value: _snController.text.trim().isEmpty
                       ? '-'
                       : _snController.text.trim(),
                 ),
                 const Divider(height: 1),
                 _InfoRow(
-                  title: '蓝牙',
-                  value: _bleConnected ? '已连接' : '未连接',
+                  title: l10n.vcuBluetoothLabel,
+                  value: _connecting
+                      ? l10n.vcuBleConnecting
+                      : _bleConnected
+                      ? l10n.vcuBleConnected
+                      : l10n.vcuBleDisconnected,
                   trailing: Switch.adaptive(
                     value: _bleEnabled,
                     onChanged: (value) async {
@@ -200,34 +341,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
                       }
                     },
                   ),
-                  subtitle: _adapterState.name,
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _bleEnabled && !_bleConnected && !_connecting
-                            ? _startBleConnect
-                            : null,
-                        child: Text(_connecting ? '连接中...' : '连接设备'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: OutlinedButton(
-                        onPressed: _bleConnected
-                            ? () => _disconnectBle(manual: true)
-                            : null,
-                        child: const Text('断开连接'),
-                      ),
-                    ),
-                  ],
-                ),
-                if (_bleLogs.isNotEmpty) ...[
-                  const SizedBox(height: 8),
-                  ..._bleLogs.take(2).map((line) => Text(line)),
-                ],
               ],
             ),
           ),
@@ -236,10 +350,10 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const _CardTitle(title: 'VCU 控制'),
+                _CardTitle(title: l10n.vcuControlSectionTitle),
                 const SizedBox(height: 8),
                 _CommandGrid(
-                  commands: _commands,
+                  commands: commands,
                   onTap: (command) => _sendQuick(context, notifier, command),
                   disabled: state.sending,
                 ),
@@ -250,35 +364,38 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
           _CardSection(
             child: Column(
               children: [
-                const _CardTitle(title: 'VCU 配置'),
+                _CardTitle(title: l10n.vcuConfigSectionTitle),
                 _ActionRow(
-                  title: '平台地址',
-                  value: _platformLabel ?? '请选择',
+                  title: l10n.vcuPlatformAddressLabel,
+                  value: _platformLabel ?? l10n.vcuPleaseSelect,
                   onTap: !_bleEnabled || !_bleConnected || state.sending
                       ? null
-                      : () =>
-                            _confirmPlatform(_platformOptions.first, notifier),
+                      : () => _confirmPlatform(platformOptions.first, notifier),
                 ),
                 const Divider(height: 1),
                 _ActionRow(
                   title: 'APN',
-                  value: _apnValue ?? '未设置',
+                  value: _apnValue ?? l10n.vcuNotSet,
                   onTap: !_bleEnabled || !_bleConnected || state.sending
                       ? null
                       : () => _confirmApn(notifier),
                 ),
                 const Divider(height: 1),
                 _ActionRow(
-                  title: 'GPS 查询频率',
-                  value: _gpsValue == null ? '未设置' : '${_gpsValue!} 秒',
+                  title: l10n.vcuGpsFrequencyLabel,
+                  value: _gpsValue == null
+                      ? l10n.vcuNotSet
+                      : '${_gpsValue!} ${l10n.vcuSecondUnit}',
                   onTap: !_bleEnabled || !_bleConnected || state.sending
                       ? null
                       : () => _confirmGpsFrequency(notifier),
                 ),
                 const Divider(height: 1),
                 _ActionRow(
-                  title: '车辆上传频率',
-                  value: _dataValue == null ? '未设置' : '${_dataValue!} 秒',
+                  title: l10n.vcuVehicleUploadFrequencyLabel,
+                  value: _dataValue == null
+                      ? l10n.vcuNotSet
+                      : '${_dataValue!} ${l10n.vcuSecondUnit}',
                   onTap: !_bleEnabled || !_bleConnected || state.sending
                       ? null
                       : () => _confirmDataFrequency(notifier),
@@ -311,11 +428,17 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
                   const SizedBox(height: 6),
                   if (_otaDownloading)
                     Text(
-                      '下载中 ${(100 * _otaDownloadProgress).toStringAsFixed(0)}%',
+                      l10n.vcuOtaDownloadingProgress(
+                        (100 * _otaDownloadProgress).toStringAsFixed(0),
+                      ),
                     )
                   else if (_otaInProgress)
                     Text(
-                      '升级中 $_otaCurrentSegment/$_otaTotalSegments ${_otaVersionName ?? ''}',
+                      l10n.vcuOtaUpgradingProgress(
+                        _otaCurrentSegment,
+                        _otaTotalSegments,
+                        _otaVersionName ?? '',
+                      ),
                     )
                   else if (_otaStatus != null)
                     Text(_otaStatus!),
@@ -337,28 +460,35 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
     final filtered = _filterHistory(state);
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-          child: Wrap(
-            spacing: 8,
+        Container(
+          color: Colors.white,
+          padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
+          child: Row(
             children: [
-              ChoiceChip(
-                label: Text(l10n.vcuHistoryFilterAll),
-                selected: state.historyFilter == VcuHistoryFilter.all,
-                onSelected: (_) =>
-                    notifier.setHistoryFilter(VcuHistoryFilter.all),
+              Expanded(
+                child: _buildHistoryFilterButton(
+                  label: l10n.vcuHistoryFilterAll,
+                  selected: state.historyFilter == VcuHistoryFilter.all,
+                  onTap: () => notifier.setHistoryFilter(VcuHistoryFilter.all),
+                ),
               ),
-              ChoiceChip(
-                label: Text(l10n.vcuHistoryFilterRequest),
-                selected: state.historyFilter == VcuHistoryFilter.request,
-                onSelected: (_) =>
-                    notifier.setHistoryFilter(VcuHistoryFilter.request),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildHistoryFilterButton(
+                  label: l10n.vcuHistoryFilterRequest,
+                  selected: state.historyFilter == VcuHistoryFilter.request,
+                  onTap: () =>
+                      notifier.setHistoryFilter(VcuHistoryFilter.request),
+                ),
               ),
-              ChoiceChip(
-                label: Text(l10n.vcuHistoryFilterResponse),
-                selected: state.historyFilter == VcuHistoryFilter.response,
-                onSelected: (_) =>
-                    notifier.setHistoryFilter(VcuHistoryFilter.response),
+              const SizedBox(width: 8),
+              Expanded(
+                child: _buildHistoryFilterButton(
+                  label: l10n.vcuHistoryFilterResponse,
+                  selected: state.historyFilter == VcuHistoryFilter.response,
+                  onTap: () =>
+                      notifier.setHistoryFilter(VcuHistoryFilter.response),
+                ),
               ),
             ],
           ),
@@ -368,105 +498,162 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
           child: filtered.isEmpty
               ? Center(child: Text(l10n.vcuHistoryEmpty))
               : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 16),
                   itemCount: filtered.length,
-                  separatorBuilder: (_, __) => Divider(
-                    height: 12,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.outline.withOpacity(0.15),
-                  ),
-                  itemBuilder: (context, index) {
-                    final item = filtered[index];
-                    final isRequest = item.type == VcuHistoryType.request;
-                    final channel = _historyChannel(item.command);
-                    final displayCommand = _historyCommand(item.command);
-                    final statusText = item.type == VcuHistoryType.response
-                        ? (item.success == true
-                              ? l10n.vcuHistoryStatusSuccess
-                              : l10n.vcuHistoryStatusFailed)
-                        : null;
-                    final info = [
-                      item.vin,
-                      if (item.version != null && item.version!.isNotEmpty)
-                        item.version!,
-                    ].join(' · ');
-                    final payload = (item.data ?? '').trim();
-                    return Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        leading: CircleAvatar(
-                          radius: 18,
-                          backgroundColor:
-                              (isRequest
-                                      ? Theme.of(context).colorScheme.primary
-                                      : Theme.of(context).colorScheme.tertiary)
-                                  .withOpacity(0.12),
-                          child: Icon(
-                            isRequest
-                                ? Icons.upload_rounded
-                                : Icons.download_rounded,
-                            color: isRequest
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.tertiary,
-                            size: 18,
-                          ),
-                        ),
-                        title: Text(displayCommand),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Wrap(
-                              spacing: 6,
-                              runSpacing: 4,
-                              children: [
-                                if (channel != null)
-                                  _HistoryBadge(
-                                    text: channel,
-                                    color: channel == 'BLE'
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(
-                                            context,
-                                          ).colorScheme.secondary,
-                                  ),
-                                if (statusText != null)
-                                  _HistoryBadge(
-                                    text: statusText,
-                                    color:
-                                        statusText ==
-                                            l10n.vcuHistoryStatusSuccess
-                                        ? AppColors.primaryColor
-                                        : Colors.redAccent,
-                                  ),
-                              ],
-                            ),
-                            const SizedBox(height: 4),
-                            Text(info),
-                            if (payload.isNotEmpty) ...[
-                              const SizedBox(height: 4),
-                              Text(
-                                payload,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
-                          ],
-                        ),
-                        trailing: Text(
-                          DateFormatUtils.formatTimestamp(
-                            item.timestamp,
-                            pattern: 'yyyy-MM-dd HH:mm:ss',
-                          ),
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ),
-                    );
-                  },
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) =>
+                      _buildHistoryItemCard(context, filtered[index]),
                 ),
         ),
       ],
+    );
+  }
+
+  Widget _buildHistoryFilterButton({
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(4),
+      child: Container(
+        height: 34,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: selected ? AppColors.primaryColor : const Color(0xFFE6E6E6),
+          ),
+          color: selected ? AppColors.primaryColor : Colors.white,
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: selected ? Colors.white : const Color(0xCC000000),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHistoryItemCard(BuildContext context, VcuHistoryItem item) {
+    final l10n = context.l10n;
+    final isRequest = item.type == VcuHistoryType.request;
+    final channel = _historyChannel(item.command);
+    final isBle = channel == 'BLE';
+    final payload = (item.data ?? '').trim();
+    final statusText = item.type == VcuHistoryType.response
+        ? (item.success == true
+              ? l10n.vcuHistoryStatusSuccess
+              : l10n.vcuHistoryStatusFailed)
+        : null;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.all(10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Image.asset(
+                isRequest
+                    ? 'assets/android/mipmap-xxhdpi/icon_request.png'
+                    : 'assets/android/mipmap-xxhdpi/icon_response.png',
+                width: 14,
+                height: 14,
+                errorBuilder: (_, __, ___) => Icon(
+                  isRequest
+                      ? Icons.call_made_rounded
+                      : Icons.call_received_rounded,
+                  size: 16,
+                  color: isRequest
+                      ? AppColors.primaryColor
+                      : const Color(0xFFFA4332),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                isRequest
+                    ? l10n.vcuHistoryFilterRequest
+                    : l10n.vcuHistoryFilterResponse,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isRequest
+                      ? AppColors.primaryColor
+                      : const Color(0xFFFA4332),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Image.asset(
+                isBle
+                    ? 'assets/android/mipmap-xxhdpi/icon_ble.png'
+                    : 'assets/android/mipmap-xxhdpi/icon_wifi.png',
+                width: 14,
+                height: 14,
+                errorBuilder: (_, __, ___) => Icon(
+                  isBle ? Icons.bluetooth : Icons.wifi,
+                  size: 14,
+                  color: const Color(0x99000000),
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                channel ?? 'NET',
+                style: const TextStyle(fontSize: 12, color: Color(0x99000000)),
+              ),
+              const Spacer(),
+              Text(
+                DateFormatUtils.formatTimestamp(
+                  item.timestamp,
+                  pattern: 'yyyy-MM-dd HH:mm:ss',
+                ),
+                style: const TextStyle(fontSize: 11, color: Color(0x66000000)),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            _historyCommand(item.command),
+            style: const TextStyle(
+              fontSize: 14,
+              color: Color(0xE6000000),
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            item.vin,
+            style: const TextStyle(fontSize: 12, color: Color(0x99000000)),
+          ),
+          if (statusText != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              statusText,
+              style: TextStyle(
+                fontSize: 12,
+                color: statusText == l10n.vcuHistoryStatusSuccess
+                    ? AppColors.primaryColor
+                    : const Color(0xFFFA4332),
+              ),
+            ),
+          ],
+          if (payload.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              payload,
+              style: const TextStyle(fontSize: 12, color: Color(0xCC000000)),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ],
+      ),
     );
   }
 
@@ -533,19 +720,19 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
     _manualDisconnect = false;
     final permission = await ensureBluetoothPermission();
     if (!permission.granted) {
-      showToast('蓝牙权限未开启');
+      showToast(l10n.vcuBlePermissionNotGranted);
       return;
     }
     if (_adapterState != BluetoothAdapterState.on) {
       await FlutterBluePlus.turnOn();
     }
     setState(() => _connecting = true);
-    showToast('开始扫描');
+    showToast(l10n.vcuBleScanStarted);
     await FlutterBluePlus.startScan(timeout: const Duration(seconds: 30));
     _scanTimeoutTimer?.cancel();
     _scanTimeoutTimer = Timer(const Duration(seconds: 31), () {
       if (!_bleConnected && _bleEnabled) {
-        showToast('扫描超时');
+        showToast(l10n.vcuBleScanTimeout);
         _scheduleReconnect();
       }
     });
@@ -566,8 +753,9 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   }
 
   Future<void> _connectDevice(BluetoothDevice device) async {
+    final l10n = context.l10n;
     try {
-      showToast('开始连接');
+      showToast(l10n.vcuBleConnecting);
       await device.connect(timeout: const Duration(seconds: 12));
       _connectionSub?.cancel();
       _connectionSub = device.connectionState.listen((state) {
@@ -600,16 +788,16 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
         _writeChar = writeChar;
         _bleConnected = true;
         _connecting = false;
-        _bleLogs.insert(0, '已连接 BLE: ${device.remoteId}');
+        _bleLogs.insert(0, l10n.vcuBleConnectedWithId(device.remoteId.str));
       });
-      showToast('已连接');
+      showToast(l10n.vcuBleConnected);
       _getNewData(ref.read(vcuProvider.notifier));
     } catch (e) {
       setState(() {
         _bleConnected = false;
         _connecting = false;
       });
-      showToast('BLE 连接失败');
+      showToast(l10n.vcuBleConnectFailed);
       _scheduleReconnect();
     }
   }
@@ -636,6 +824,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   }
 
   void _handleBleDisconnected() {
+    final l10n = context.l10n;
     if (!mounted) return;
     _notifySub?.cancel();
     _connectionSub?.cancel();
@@ -646,11 +835,11 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
       _bleSending = false;
       _bleQueue.clear();
       _connecting = false;
-      _bleLogs.insert(0, 'BLE 已断开');
+      _bleLogs.insert(0, l10n.vcuBleDisconnectedLog);
     });
-    showToast('已断开');
+    showToast(l10n.vcuBleDisconnected);
     if (_otaInProgress) {
-      _resetOtaState('BLE 断开，OTA 已停止');
+      _resetOtaState(l10n.vcuOtaStoppedByBleDisconnect);
     }
     _scheduleReconnect();
   }
@@ -672,6 +861,9 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
     final enabled = prefs.getBool(StorageKeys.vcuBleEnabled) ?? true;
     if (!mounted) return;
     setState(() => _bleEnabled = enabled);
+    if (enabled && _ctrlIdController.text.trim().isNotEmpty) {
+      _startBleConnect();
+    }
   }
 
   Future<void> _persistBleSwitch(bool enabled) async {
@@ -723,8 +915,9 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   }
 
   void _handleBleNotify(String data, VcuNotifier notifier) {
+    final l10n = context.l10n;
     if (data.trim().isEmpty) return;
-    _bleLogs.insert(0, 'BLE 收到: $data');
+    _bleLogs.insert(0, l10n.vcuBleReceivedData(data));
     Map<String, dynamic>? json;
     try {
       json = jsonDecode(data) as Map<String, dynamic>;
@@ -743,7 +936,8 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
       notifier.addHistory(
         VcuHistoryItem(
           vin: _bleHistoryVin(),
-          command: label ?? 'BLE 响应',
+          command:
+              label ?? '${l10n.vcuBleChannel} ${l10n.vcuHistoryFilterResponse}',
           data: data,
           type: VcuHistoryType.response,
           timestamp: DateTime.now().millisecondsSinceEpoch,
@@ -754,7 +948,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
     }
     final isCommonAck = json?['result'] is num && json?['attrList'] == null;
     if (isCommonAck == true && success == true) {
-      showToast('设置成功');
+      showToast(l10n.vcuSettingSuccess);
     }
     _handleOtaAck(json, txnNo, notifier);
     _handleAttrAck(json);
@@ -768,17 +962,20 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
     int? txnNo,
     VcuNotifier notifier,
   ) {
+    final l10n = context.l10n;
     if (txnNo != null && txnNo == _otaVerifyTxnNo) {
       final resultValue = json?['b_result'] ?? json?['result'];
       final result = resultValue is num ? resultValue.toInt() : null;
       if (result == 1) {
         setState(() {
-          _otaStatus = '校验通过，开始升级';
+          _otaStatus = l10n.vcuOtaVerifyPassAndStart;
           _otaInProgress = true;
         });
         _sendNextOtaData(notifier);
       } else {
-        final msg = result == 2 ? '版本过低，拒绝升级' : '校验失败';
+        final msg = result == 2
+            ? l10n.vcuOtaRejectVersionTooLow
+            : l10n.vcuOtaVerifyFailed;
         showToast(msg);
         _resetOtaState(msg);
       }
@@ -790,13 +987,14 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
       if (result == 1) {
         _sendNextOtaData(notifier);
       } else {
-        showToast('OTA 数据发送失败');
-        _resetOtaState('OTA 失败');
+        showToast(l10n.vcuOtaDataSendFailed);
+        _resetOtaState(l10n.vcuOtaFailed);
       }
     }
   }
 
   void _handleAttrAck(Map<String, dynamic>? json) {
+    final l10n = context.l10n;
     final attrList = json?['attrList'];
     if (attrList is! List) return;
     for (final item in attrList) {
@@ -805,18 +1003,18 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
       final value = item['value'];
       if (id == VcuBleUpDataIds.otaResult) {
         final ok = value is num ? value.toInt() == 1 : false;
-        showToast(ok ? 'OTA 升级完成' : 'OTA 升级失败');
+        showToast(ok ? l10n.vcuOtaUpgradeSuccess : l10n.vcuOtaUpgradeFailed);
         if (ok) {
-          _finishOta('OTA 升级完成');
+          _finishOta(l10n.vcuOtaUpgradeSuccess);
         } else {
-          _resetOtaState('OTA 升级失败');
+          _resetOtaState(l10n.vcuOtaUpgradeFailed);
         }
       }
       if (id == VcuBleUpDataIds.verifyResult) {
         final ok = value is num ? value.toInt() == 1 : false;
         if (!ok) {
-          showToast('OTA 校验失败');
-          _resetOtaState('OTA 校验失败');
+          showToast(l10n.vcuOtaVerifyFailed);
+          _resetOtaState(l10n.vcuOtaVerifyFailed);
         }
       }
       if (id == VcuBleUpDataIds.mcuVersion) {
@@ -886,8 +1084,9 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   }
 
   Future<void> _startBleOta(VcuVersion version, VcuNotifier notifier) async {
+    final l10n = context.l10n;
     if (!_bleConnected) {
-      showToast('请先连接 BLE');
+      showToast(l10n.vcuPleaseConnectBleFirst);
       return;
     }
     final versionName = version.name ?? version.version ?? version.url ?? 'OTA';
@@ -896,7 +1095,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
 
     final segments = await VcuOtaUtil.buildOtaSegments(file);
     if (segments.isEmpty) {
-      showToast('OTA 文件为空');
+      showToast(l10n.vcuOtaFileEmpty);
       return;
     }
     setState(() {
@@ -905,7 +1104,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
       _otaCurrentSegment = 0;
       _otaInProgress = true;
       _otaVersionName = versionName;
-      _otaStatus = '版本校验中';
+      _otaStatus = l10n.vcuOtaVerifying;
     });
     final txnNo = DateTime.now().millisecondsSinceEpoch;
     _otaVerifyTxnNo = txnNo;
@@ -920,21 +1119,22 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   }
 
   Future<File?> _downloadOtaFile(String name, String? url) async {
+    final l10n = context.l10n;
     if (url == null || url.isEmpty) {
-      showToast('OTA 地址为空');
+      showToast(l10n.vcuOtaUrlEmpty);
       return null;
     }
     final dir = await getTemporaryDirectory();
     final safeName = name.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
     final file = File('${dir.path}/$safeName.bin');
     if (await file.exists()) {
-      setState(() => _otaStatus = '已使用缓存包');
+      setState(() => _otaStatus = l10n.vcuOtaUsingCachedPackage);
       return file;
     }
     setState(() {
       _otaDownloading = true;
       _otaDownloadProgress = 0;
-      _otaStatus = '开始下载 OTA';
+      _otaStatus = l10n.vcuOtaStartDownload;
     });
     try {
       final dio = Dio();
@@ -950,11 +1150,11 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
         },
       );
       if (mounted) {
-        setState(() => _otaStatus = '下载完成');
+        setState(() => _otaStatus = l10n.vcuOtaDownloadCompleted);
       }
       return file;
     } catch (_) {
-      showToast('OTA 下载失败');
+      showToast(l10n.vcuOtaDownloadFailed);
       return null;
     } finally {
       if (mounted) {
@@ -966,14 +1166,15 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   }
 
   void _sendNextOtaData(VcuNotifier notifier) {
+    final l10n = context.l10n;
     if (!_bleConnected) {
-      _resetOtaState('BLE 断开，OTA 已停止');
+      _resetOtaState(l10n.vcuOtaStoppedByBleDisconnect);
       return;
     }
     if (_otaSegments.isEmpty) return;
     if (_otaCurrentSegment >= _otaSegments.length) {
       setState(() {
-        _otaStatus = 'OTA 数据发送完成，等待结果';
+        _otaStatus = l10n.vcuOtaDataSentWaitingResult;
       });
       return;
     }
@@ -987,7 +1188,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
     );
     _sendBle(cmd, notifier);
     setState(() {
-      _otaStatus = '发送 OTA 数据中';
+      _otaStatus = l10n.vcuOtaSendingData;
     });
   }
 
@@ -1020,6 +1221,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
     required bool canBle,
     required bool canNet,
   }) async {
+    final l10n = context.l10n;
     return showModalBottomSheet<_CtrlChannel>(
       context: context,
       isScrollControlled: true,
@@ -1041,7 +1243,11 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _DialogTitle(icon: icon, title: title, subtitle: '请选择下发方式'),
+                  _DialogTitle(
+                    icon: icon,
+                    title: title,
+                    subtitle: l10n.vcuChooseSendMethod,
+                  ),
                   const SizedBox(height: 12),
                   Wrap(
                     spacing: 8,
@@ -1059,7 +1265,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
                             : null,
                       ),
                       ChoiceChip(
-                        label: const Text('4G/网络'),
+                        label: Text(l10n.vcuChannel4gNetwork),
                         selected: selected == _CtrlChannel.network,
                         onSelected: canNet
                             ? (value) {
@@ -1078,14 +1284,14 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('取消'),
+                          child: Text(l10n.cancel),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
                         child: FilledButton(
                           onPressed: () => Navigator.pop(context, selected),
-                          child: const Text('发送'),
+                          child: Text(l10n.vcuSendButton),
                         ),
                       ),
                     ],
@@ -1107,6 +1313,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
     String? Function(T item)? subtitleBuilder,
     int initialIndex = 0,
   }) async {
+    final l10n = context.l10n;
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: true,
@@ -1166,7 +1373,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('取消'),
+                          child: Text(l10n.cancel),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -1174,7 +1381,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
                         child: FilledButton(
                           onPressed: () =>
                               Navigator.pop(context, items[selectedIndex]),
-                          child: const Text('发送'),
+                          child: Text(l10n.vcuSendButton),
                         ),
                       ),
                     ],
@@ -1195,6 +1402,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
     String? unit,
     bool numeric = false,
   }) async {
+    final l10n = context.l10n;
     final controller = TextEditingController();
     final result = await showModalBottomSheet<String>(
       context: context,
@@ -1247,7 +1455,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => Navigator.pop(context),
-                          child: const Text('取消'),
+                          child: Text(l10n.cancel),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -1256,7 +1464,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
                           onPressed: () {
                             final value = controller.text.trim();
                             if (value.isEmpty) {
-                              showToast('请输入有效数据');
+                              showToast(l10n.vcuPleaseEnterValidValue);
                               return;
                             }
                             if (numeric) {
@@ -1264,13 +1472,13 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
                               if (numValue == null ||
                                   numValue <= 0 ||
                                   numValue > 65535) {
-                                showToast('请输入 1-65535');
+                                showToast(l10n.vcuPleaseEnterRange1To65535);
                                 return;
                               }
                             }
                             Navigator.pop(context, value);
                           },
-                          child: const Text('发送'),
+                          child: Text(l10n.vcuSendButton),
                         ),
                       ),
                     ],
@@ -1290,12 +1498,14 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
     _VcuPlatformOption option,
     VcuNotifier notifier,
   ) async {
+    final l10n = context.l10n;
+    final platformOptions = _buildPlatformOptions(l10n);
     if (!(_bleEnabled && _bleConnected)) return;
-    final selectedIndex = _platformOptions.indexOf(option);
+    final selectedIndex = platformOptions.indexOf(option);
     final selected = await _showListSheet<_VcuPlatformOption>(
-      title: '设置平台',
+      title: l10n.vcuSetPlatformTitle,
       icon: Icons.cloud_done_outlined,
-      items: _platformOptions,
+      items: platformOptions,
       initialIndex: selectedIndex < 0 ? 0 : selectedIndex,
       titleBuilder: (item) => item.label,
       subtitleBuilder: (item) => '${item.host}:${item.port}',
@@ -1305,10 +1515,11 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   }
 
   Future<void> _confirmApn(VcuNotifier notifier) async {
+    final l10n = context.l10n;
     final value = await _showInputSheet(
-      title: '设置 APN',
+      title: l10n.vcuSetApnTitle,
       icon: Icons.settings_input_antenna,
-      hint: '请输入 APN',
+      hint: l10n.vcuInputApnHint,
     );
     if (value == null) return;
     _apnController.text = value;
@@ -1316,11 +1527,12 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   }
 
   Future<void> _confirmGpsFrequency(VcuNotifier notifier) async {
+    final l10n = context.l10n;
     final value = await _showInputSheet(
-      title: '设置 GPS 频率',
+      title: l10n.vcuSetGpsFrequencyTitle,
       icon: Icons.gps_fixed,
-      hint: '请输入 GPS 频率',
-      unit: '秒',
+      hint: l10n.vcuInputGpsFrequencyHint,
+      unit: l10n.vcuSecondUnit,
       numeric: true,
     );
     if (value == null) return;
@@ -1329,11 +1541,12 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   }
 
   Future<void> _confirmDataFrequency(VcuNotifier notifier) async {
+    final l10n = context.l10n;
     final value = await _showInputSheet(
-      title: '设置车辆上传频率',
+      title: l10n.vcuSetVehicleUploadFrequencyTitle,
       icon: Icons.cloud_upload_outlined,
-      hint: '请输入车辆上传频率',
-      unit: '秒',
+      hint: l10n.vcuInputVehicleUploadFrequencyHint,
+      unit: l10n.vcuSecondUnit,
       numeric: true,
     );
     if (value == null) return;
@@ -1342,9 +1555,10 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   }
 
   Future<void> _confirmBleOta(VcuVersion version, VcuNotifier notifier) async {
+    final l10n = context.l10n;
     final versions = ref.read(vcuProvider).versions;
     if (versions.isEmpty) {
-      showToast('请先获取版本列表');
+      showToast(l10n.vcuPleaseLoadVersionsFirst);
       return;
     }
     final selectedIndex = versions.indexOf(version);
@@ -1367,13 +1581,57 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   }
 
   String _buildBleLabel(VcuBleCommand command) {
+    final l10n = context.l10n;
     if (command.params.isNotEmpty) {
-      final base = vcuBleIdToLabel[command.params.first.id];
+      final base = _bleCommandNameById(command.params.first.id);
       if (base != null && base.isNotEmpty) {
-        return 'BLE $base';
+        return '${l10n.vcuBleChannel} $base';
       }
     }
-    return 'BLE 指令';
+    return '${l10n.vcuBleChannel} ${l10n.vcuBleCommandGeneric}';
+  }
+
+  String? _bleCommandNameById(String id) {
+    final l10n = context.l10n;
+    switch (id) {
+      case VcuBleCommandIds.lock:
+        return l10n.vcuCmdLock;
+      case VcuBleCommandIds.launch:
+        return l10n.vcuCmdLaunch;
+      case VcuBleCommandIds.antiTheft:
+        return l10n.vcuCmdAntiTheft;
+      case VcuBleCommandIds.find:
+        return l10n.vcuCmdFind;
+      case VcuBleCommandIds.remoteLock:
+        return l10n.vcuCmdRemoteLock;
+      case VcuBleCommandIds.remoteUnlock:
+        return l10n.vcuCmdRemoteUnlock;
+      case VcuBleCommandIds.queryStatus:
+        return l10n.vcuCmdQueryVehicleStatus;
+      case VcuBleCommandIds.queryMcuVersion:
+        return l10n.vcuCmdQueryMcuVersion;
+      case VcuBleCommandIds.otaVerifyVersion:
+        return l10n.vcuCmdOtaVerifyVersion;
+      case VcuBleCommandIds.otaUpgrade:
+        return l10n.vcuCmdOtaUpgrade;
+      case VcuBleCommandIds.otaData:
+        return l10n.vcuCmdOtaDataPacket;
+      case VcuBleCommandIds.queryIccid:
+        return l10n.vcuCmdQueryIccid;
+      case VcuBleCommandIds.editUrl:
+        return l10n.vcuCmdSetPlatformUrl;
+      case VcuBleCommandIds.editPort:
+        return l10n.vcuCmdSetPlatformPort;
+      case VcuBleCommandIds.editApn:
+        return l10n.vcuCmdSetApn;
+      case VcuBleCommandIds.editFrequencyVehicle:
+      case VcuBleCommandIds.editFrequencyVehicle1:
+        return l10n.vcuCmdSetVehicleUploadFrequency;
+      case VcuBleCommandIds.editFrequencyGps:
+        return l10n.vcuCmdSetGpsFrequency;
+      default:
+        return null;
+    }
   }
 
   String? _extractBleVersion(VcuBleCommand command) {
@@ -1386,8 +1644,9 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage> {
   }
 
   String? _historyChannel(String command) {
-    if (command.startsWith('BLE ')) return 'BLE';
-    if (command.startsWith('NET ')) return '网络';
+    final l10n = context.l10n;
+    if (command.startsWith('BLE ')) return l10n.vcuBleChannel;
+    if (command.startsWith('NET ')) return l10n.vcuNetworkChannel;
     return null;
   }
 
@@ -1446,16 +1705,10 @@ class _CardTitle extends StatelessWidget {
 }
 
 class _InfoRow extends StatelessWidget {
-  const _InfoRow({
-    required this.title,
-    required this.value,
-    this.subtitle,
-    this.trailing,
-  });
+  const _InfoRow({required this.title, required this.value, this.trailing});
 
   final String title;
   final String value;
-  final String? subtitle;
   final Widget? trailing;
 
   @override
@@ -1477,8 +1730,6 @@ class _InfoRow extends StatelessWidget {
                     color: const Color(0xE60C0C0D),
                   ),
                 ),
-                if (subtitle != null)
-                  Text(subtitle!, style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
           ),
@@ -1579,29 +1830,6 @@ class _DialogTitle extends StatelessWidget {
   }
 }
 
-class _HistoryBadge extends StatelessWidget {
-  const _HistoryBadge({required this.text, required this.color});
-
-  final String text;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: color.withOpacity(0.3)),
-      ),
-      child: Text(
-        text,
-        style: Theme.of(context).textTheme.labelSmall?.copyWith(color: color),
-      ),
-    );
-  }
-}
-
 class _CommandGrid extends StatelessWidget {
   const _CommandGrid({
     required this.commands,
@@ -1675,45 +1903,45 @@ class _VcuCommand {
   });
 }
 
-const List<_VcuCommand> _commands = [
+List<_VcuCommand> _buildVcuCommands(AppLocalizations l10n) => [
   _VcuCommand(
     2,
-    '一键启动',
+    l10n.vcuCmdLaunch,
     bleId: VcuBleCommandIds.launch,
     bleValue: 1,
     icon: Icons.flash_on,
   ),
   _VcuCommand(
     1,
-    '一键锁车',
+    l10n.vcuCmdLock,
     bleId: VcuBleCommandIds.lock,
     bleValue: 1,
     icon: Icons.lock,
   ),
   _VcuCommand(
     3,
-    '防盗模式',
+    l10n.vcuCmdAntiTheft,
     bleId: VcuBleCommandIds.antiTheft,
     bleValue: 1,
     icon: Icons.security,
   ),
   _VcuCommand(
     4,
-    '一键找车',
+    l10n.vcuCmdFind,
     bleId: VcuBleCommandIds.find,
     bleValue: 1,
     icon: Icons.search,
   ),
   _VcuCommand(
     5,
-    '远程锁车',
+    l10n.vcuCmdRemoteLock,
     bleId: VcuBleCommandIds.remoteLock,
     bleValue: 1,
     icon: Icons.lock_clock,
   ),
   _VcuCommand(
     7,
-    '远程解锁',
+    l10n.vcuCmdRemoteUnlock,
     bleId: VcuBleCommandIds.remoteUnlock,
     bleValue: 1,
     icon: Icons.lock_open,
@@ -1732,14 +1960,14 @@ class _VcuPlatformOption {
   });
 }
 
-const List<_VcuPlatformOption> _platformOptions = [
+List<_VcuPlatformOption> _buildPlatformOptions(AppLocalizations l10n) => [
   _VcuPlatformOption(
-    label: '生产环境',
+    label: l10n.vcuPlatformProduction,
     host: 'okla-irontower-controller-netty.esquare-global.com',
     port: 9401,
   ),
   _VcuPlatformOption(
-    label: '测试环境',
+    label: l10n.vcuPlatformTesting,
     host: 't-ov-irontower-controller-netty2.esquare-global.com',
     port: 9001,
   ),

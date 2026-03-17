@@ -714,12 +714,12 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
   Future<String> _handleContinuousTransportScan(String value) async {
     final sn = value.trim();
     if (sn.isEmpty) {
-      return '无效二维码';
+      return context.l10n.scanInvalidQr;
     }
 
     final currentState = ref.read(transportCreateProvider);
     if (currentState.sns.contains(sn)) {
-      return '已扫过';
+      return context.l10n.scanAlreadyScanned;
     }
 
     final notifier = ref.read(transportCreateProvider.notifier);
@@ -728,7 +728,7 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
     if (updatedState.sns.contains(sn)) {
       return context.l10n.scanSuccessEntry;
     }
-    return '录入失败';
+    return context.l10n.scanEntryFailed;
   }
 
   Future<void> _submit(

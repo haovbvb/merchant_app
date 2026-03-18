@@ -166,6 +166,10 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
         baseInfo: initialBaseInfo,
         swapThreshold: initialBaseInfo.swapThreshold ?? 100,
         cabins: cabins,
+        softwareVersion: _nonEmptyOrNull(initialBaseInfo.softwareVersion) ?? '',
+        backupPowerStatus:
+            _nonEmptyOrNull(initialBaseInfo.backupPowerStatus) ?? '',
+        batteryInSlot: initialBaseInfo.batteryInSlot,
       );
     } else {
       unawaited(_loadBaseInfo(normalizedSn, currentLoadVersion));
@@ -190,18 +194,74 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
 
       if (loadVersion != _loadVersion) return;
 
-      final baseInfo = baseResponse.result;
-      final cabins = _buildPlaceholderCabins(baseInfo?.storeNum ?? 0);
+      final apiBaseInfo = baseResponse.result;
+      final mergedBaseInfo = _mergeBaseInfo(apiBaseInfo, state.baseInfo);
+      final cabins = _buildPlaceholderCabins(mergedBaseInfo?.storeNum ?? 0);
       state = state.copyWith(
         loading: false,
-        baseInfo: baseInfo,
-        swapThreshold: baseInfo?.swapThreshold ?? 100,
+        baseInfo: mergedBaseInfo,
+        swapThreshold: mergedBaseInfo?.swapThreshold ?? state.swapThreshold,
         cabins: cabins,
+        softwareVersion:
+            _nonEmptyOrNull(mergedBaseInfo?.softwareVersion) ??
+            (_nonEmptyOrNull(state.softwareVersion) ?? ''),
+        backupPowerStatus:
+            _nonEmptyOrNull(mergedBaseInfo?.backupPowerStatus) ??
+            (_nonEmptyOrNull(state.backupPowerStatus) ?? ''),
+        batteryInSlot: mergedBaseInfo?.batteryInSlot ?? state.batteryInSlot,
       );
     } catch (_) {
       if (loadVersion != _loadVersion) return;
       state = state.copyWith(loading: false, cabins: const []);
     }
+  }
+
+  CabinetDetailBaseInfoBean? _mergeBaseInfo(
+    CabinetDetailBaseInfoBean? remote,
+    CabinetDetailBaseInfoBean? local,
+  ) {
+    if (remote == null) return local;
+    if (local == null) return remote;
+
+    final remoteMap = remote.toJson();
+    final localMap = local.toJson();
+
+    // Keep BLE-updated values if backend response is missing/empty.
+    for (final key in const <String>[
+      'softwareVersion',
+      'apn',
+      'platformUrl',
+      'backupPowerStatus',
+    ]) {
+      final remoteValue = _nonEmptyOrNull(remoteMap[key]?.toString());
+      final localValue = _nonEmptyOrNull(localMap[key]?.toString());
+      if (remoteValue == null && localValue != null) {
+        remoteMap[key] = localValue;
+      } else {
+        remoteMap[key] = remoteValue;
+      }
+    }
+
+    final remoteBatteryInSlot = remoteMap['batteryInSlot'];
+    final localBatteryInSlot = localMap['batteryInSlot'];
+    if (remoteBatteryInSlot == null && localBatteryInSlot != null) {
+      remoteMap['batteryInSlot'] = localBatteryInSlot;
+    }
+
+    return CabinetDetailBaseInfoBean.fromJson(remoteMap);
+  }
+
+  String? _nonEmptyOrNull(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) return null;
+    final normalized = text.toLowerCase();
+    if (text == '-' ||
+        text == '--' ||
+        normalized == 'null' ||
+        normalized == '(null)') {
+      return null;
+    }
+    return text;
   }
 
   Future<void> _loadSecretKey(String sn, int loadVersion) async {
@@ -332,11 +392,11 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
   }
 
   void updateSoftwareVersion(String? value) {
-    state = state.copyWith(softwareVersion: value);
+    state = state.copyWith(softwareVersion: _nonEmptyOrNull(value) ?? '');
   }
 
   void updateBackupPowerStatus(String? value) {
-    state = state.copyWith(backupPowerStatus: value);
+    state = state.copyWith(backupPowerStatus: _nonEmptyOrNull(value) ?? '');
   }
 
   void updateBatteryInSlot(int value) {
@@ -376,24 +436,58 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
     String? apn,
     int? volume,
     String? platformUrl,
+    String? softwareVersion,
+    String? backupPowerStatus,
+    int? batteryInSlot,
   }) {
     final current = state.baseInfo;
-    if (current == null) return;
-    final map = current.toJson();
+    final map = Map<String, dynamic>.from(
+      current?.toJson() ?? const <String, dynamic>{},
+    );
+    final normalizedApn = apn == null ? null : _nonEmptyOrNull(apn);
+    final normalizedPlatformUrl = platformUrl == null
+        ? null
+        : _nonEmptyOrNull(platformUrl);
+    final normalizedSoftwareVersion = softwareVersion == null
+        ? null
+        : _nonEmptyOrNull(softwareVersion);
+    final normalizedBackupPowerStatus = backupPowerStatus == null
+        ? null
+        : _nonEmptyOrNull(backupPowerStatus);
     if (swapThreshold != null) {
       map['swapThreshold'] = swapThreshold;
       updateSwapThreshold(swapThreshold);
     }
     if (apn != null) {
-      map['apn'] = apn;
+      map['apn'] = normalizedApn;
     }
     if (volume != null) {
       map['volume'] = volume;
     }
     if (platformUrl != null) {
-      map['platformUrl'] = platformUrl;
+      map['platformUrl'] = normalizedPlatformUrl;
     }
-    state = state.copyWith(baseInfo: CabinetDetailBaseInfoBean.fromJson(map));
+    if (softwareVersion != null) {
+      map['softwareVersion'] = normalizedSoftwareVersion;
+    }
+    if (backupPowerStatus != null) {
+      map['backupPowerStatus'] = normalizedBackupPowerStatus;
+    }
+    if (batteryInSlot != null) {
+      map['batteryInSlot'] = batteryInSlot;
+    }
+    state = state.copyWith(
+      baseInfo: CabinetDetailBaseInfoBean.fromJson(map),
+      softwareVersion:
+          normalizedSoftwareVersion == null && softwareVersion != null
+          ? ''
+          : normalizedSoftwareVersion ?? state.softwareVersion,
+      backupPowerStatus:
+          normalizedBackupPowerStatus == null && backupPowerStatus != null
+          ? ''
+          : normalizedBackupPowerStatus ?? state.backupPowerStatus,
+      batteryInSlot: batteryInSlot ?? state.batteryInSlot,
+    );
   }
 
   Future<bool> restartCabinet({required String pId}) async {

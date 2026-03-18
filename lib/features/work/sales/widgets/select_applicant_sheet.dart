@@ -91,13 +91,14 @@ class _SelectApplicantSheetState extends State<SelectApplicantSheet> {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                child: Row(
-                  children: [
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: const Icon(Icons.arrow_back_ios, size: 20),
-                    ),
-                    const Spacer(),
+                child:
+                // Row(
+                //   children: [
+                //     GestureDetector(
+                //       onTap: () => Navigator.of(context).pop(),
+                //       child: const Icon(Icons.arrow_back_ios, size: 20),
+                //     ),
+                //     const Spacer(),
                     Text(
                       widget.title,
                       style: const TextStyle(
@@ -106,13 +107,13 @@ class _SelectApplicantSheetState extends State<SelectApplicantSheet> {
                         color: AppColors.black06Text,
                       ),
                     ),
-                    const Spacer(),
-                    GestureDetector(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: const Icon(Icons.close, color: Color(0xFF999999)),
-                    ),
-                  ],
-                ),
+                    // const Spacer(),
+                    // GestureDetector(
+                    //   onTap: () => Navigator.of(context).pop(),
+                    //   child: const Icon(Icons.close, color: Color(0xFF999999)),
+                    // ),
+                  // ],
+                // ),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),

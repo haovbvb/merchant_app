@@ -358,9 +358,9 @@ class _BasicInfoTab extends StatelessWidget {
               Text(
                 detail?.remark?.isNotEmpty == true ? detail!.remark! : '-',
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: FontWeight.w400,
-                  color: AppColors.black06Text,
+                  color: AppColors.black09Text,
                 ),
               ),
             ],
@@ -2866,8 +2866,8 @@ Widget _swapRecordInfoRow(String label, String value) {
           value,
           textAlign: TextAlign.right,
           style: const TextStyle(
-            fontSize: 17,
-            fontWeight: FontWeight.w500,
+            fontSize: 16,
+            fontWeight: FontWeight.w400,
             color: AppColors.black09Text,
           ),
         ),

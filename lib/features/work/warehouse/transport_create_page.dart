@@ -138,8 +138,7 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
                   // 物流单号
                   _SectionCard(
                     child: _InputField(
-                      icon:
-                          'assets/android/mipmap-xxhdpi/icon_tacking.png',
+                      icon: 'assets/android/mipmap-xxhdpi/icon_tacking.png',
                       label: l10n.deviceIssueTrackingNumber,
                       hintText: l10n.deviceIssuePleaseEnterTracking,
                       value: state.trackingNumber,
@@ -847,7 +846,10 @@ class _InputField extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               label,
-              style: const TextStyle(fontSize: 14, color: AppColors.black06Text),
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.black06Text,
+              ),
             ),
           ],
         ),
@@ -914,7 +916,9 @@ class _ActionButton extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 14,
-                color: outlined ? const Color(0xE60C0C0D) : const Color(0xFF56B327),
+                color: outlined
+                    ? const Color(0xE60C0C0D)
+                    : const Color(0xFF56B327),
               ),
             ),
           ],
@@ -925,10 +929,7 @@ class _ActionButton extends StatelessWidget {
 }
 
 class _WarehousePickerSheet extends ConsumerStatefulWidget {
-  const _WarehousePickerSheet({
-    required this.l10n,
-    required this.notifier,
-  });
+  const _WarehousePickerSheet({required this.l10n, required this.notifier});
 
   final AppLocalizations l10n;
   final TransportCreateNotifier notifier;
@@ -949,10 +950,7 @@ class _WarehousePickerSheetState extends ConsumerState<_WarehousePickerSheet> {
     // Reset filters on each open to align with Android behavior.
     _selectedCityCode = '';
     _selectedCityName = '';
-    widget.notifier.loadInWarehouseList(
-      keyword: '',
-      cityCode: '',
-    );
+    widget.notifier.loadInWarehouseList(keyword: '', cityCode: '');
   }
 
   @override
@@ -966,7 +964,6 @@ class _WarehousePickerSheetState extends ConsumerState<_WarehousePickerSheet> {
     final state = ref.watch(transportCreateProvider);
     final warehouses = state.inWarehouses;
     final selectedWarehouse = state.selectedInWarehouse;
-    final cities = state.cities;
 
     return Container(
       height: MediaQuery.of(context).size.height * 0.7,
@@ -1044,7 +1041,7 @@ class _WarehousePickerSheetState extends ConsumerState<_WarehousePickerSheet> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
-              onTap: () => _showCitySheet(cities),
+              onTap: _showCitySheet,
               child: SizedBox(
                 height: 32,
                 child: Row(
@@ -1088,16 +1085,6 @@ class _WarehousePickerSheetState extends ConsumerState<_WarehousePickerSheet> {
     required WarehouseInfo? selectedWarehouse,
     required bool loading,
   }) {
-    if (loading) {
-      return const Center(
-        child: SizedBox(
-          width: 18,
-          height: 18,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-      );
-    }
-
     if (warehouses.isEmpty) {
       return Center(
         child: Column(
@@ -1111,10 +1098,7 @@ class _WarehousePickerSheetState extends ConsumerState<_WarehousePickerSheet> {
             const SizedBox(height: 10),
             Text(
               widget.l10n.deviceIssueSearchEmpty,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF999999),
-              ),
+              style: const TextStyle(fontSize: 14, color: Color(0xFF999999)),
             ),
           ],
         ),
@@ -1133,23 +1117,14 @@ class _WarehousePickerSheetState extends ConsumerState<_WarehousePickerSheet> {
           tileColor: isSelected ? const Color(0xFFF5FCF2) : null,
           title: Text(
             warehouse.inWarehouseName ?? warehouse.warehouseName ?? '-',
-            style: const TextStyle(
-              fontSize: 15,
-              color: Color(0xFF1A1A1A),
-            ),
+            style: const TextStyle(fontSize: 15, color: Color(0xFF1A1A1A)),
           ),
           subtitle: Text(
             warehouse.cityName ?? '',
-            style: const TextStyle(
-              fontSize: 13,
-              color: Color(0xFF999999),
-            ),
+            style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
           ),
           trailing: isSelected
-              ? Icon(
-                  Icons.check,
-                  color: Theme.of(context).colorScheme.primary,
-                )
+              ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
               : null,
           onTap: () {
             widget.notifier.selectInWarehouse(warehouse);
@@ -1160,7 +1135,18 @@ class _WarehousePickerSheetState extends ConsumerState<_WarehousePickerSheet> {
     );
   }
 
-  Future<void> _showCitySheet(List<City> cities) async {
+  Future<void> _showCitySheet() async {
+    // Trigger one query as if the user typed a single blank in the search box.
+    await widget.notifier.loadInWarehouseList(
+      keyword: ' ',
+      cityCode: _selectedCityCode,
+      preserveKeyword: true,
+    );
+    await widget.notifier.loadCities();
+    if (!mounted) return;
+    final cities = ref.read(transportCreateProvider).cities;
+    final sheetHeight = MediaQuery.of(context).size.height * 0.7;
+
     final selected = await showModalBottomSheet<_CityPickerResult>(
       context: context,
       backgroundColor: Colors.white,
@@ -1169,49 +1155,65 @@ class _WarehousePickerSheetState extends ConsumerState<_WarehousePickerSheet> {
       ),
       builder: (ctx) {
         return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                title: Text(widget.l10n.deviceIssueAllCity),
-                trailing: _selectedCityCode.isEmpty
-                    ? Icon(
-                        Icons.check,
-                        color: Theme.of(context).colorScheme.primary,
-                      )
-                    : null,
-                onTap: () => Navigator.of(ctx).pop(
-                  const _CityPickerResult(cityCode: '', cityName: ''),
+          child: SizedBox(
+            height: sheetHeight,
+            child: Column(
+              children: [
+                ListTile(
+                  title: Text(widget.l10n.deviceIssueAllCity),
+                  trailing: _selectedCityCode.isEmpty
+                      ? Icon(
+                          Icons.check,
+                          color: Theme.of(context).colorScheme.primary,
+                        )
+                      : null,
+                  onTap: () => Navigator.of(
+                    ctx,
+                  ).pop(const _CityPickerResult(cityCode: '', cityName: '')),
                 ),
-              ),
-              const Divider(height: 1),
-              Flexible(
-                child: ListView.separated(
-                  shrinkWrap: true,
-                  itemCount: cities.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1),
-                  itemBuilder: (_, index) {
-                    final city = cities[index];
-                    final selected = city.code == _selectedCityCode;
-                    return ListTile(
-                      title: Text(city.name),
-                      trailing: selected
-                          ? Icon(
-                              Icons.check,
-                              color: Theme.of(context).colorScheme.primary,
-                            )
-                          : null,
-                      onTap: () => Navigator.of(ctx).pop(
-                        _CityPickerResult(
-                          cityCode: city.code,
-                          cityName: city.name,
+                const Divider(height: 1),
+                Expanded(
+                  child: cities.isEmpty
+                      ? Center(
+                          child: Text(
+                            widget.l10n.deviceIssueSearchEmpty,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF999999),
+                            ),
+                          ),
+                        )
+                      : ListView.separated(
+                          itemCount: cities.length,
+                          separatorBuilder: (_, __) => const Divider(height: 1),
+                          itemBuilder: (_, index) {
+                            final city = cities[index];
+                            final cityTitle = city.name.trim().isNotEmpty
+                                ? city.name
+                                : city.code;
+                            final selected = city.code == _selectedCityCode;
+                            return ListTile(
+                              title: Text(cityTitle),
+                              trailing: selected
+                                  ? Icon(
+                                      Icons.check,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                    )
+                                  : null,
+                              onTap: () => Navigator.of(ctx).pop(
+                                _CityPickerResult(
+                                  cityCode: city.code,
+                                  cityName: cityTitle,
+                                ),
+                              ),
+                            );
+                          },
                         ),
-                      ),
-                    );
-                  },
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         );
       },

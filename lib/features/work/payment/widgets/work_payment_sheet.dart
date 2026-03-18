@@ -55,7 +55,9 @@ Future<bool?> showWorkPaymentSheet({
           final fee = feeController.text.trim();
           final meaningful = _isAmountMeaningful(fee);
           final attachmentsOk =
-              !requireAttachmentsForCash || payType == 2 || attachmentUrls.isNotEmpty;
+              !requireAttachmentsForCash ||
+              payType == 2 ||
+              attachmentUrls.isNotEmpty;
           final canConfirm = !paying && meaningful && attachmentsOk;
 
           return AnimatedPadding(
@@ -82,178 +84,213 @@ Future<bool?> showWorkPaymentSheet({
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Text(
-                            title,
-                            style: const TextStyle(
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xE6000000),
-                            ),
-                          ),
-                          Positioned(
-                            right: 0,
-                            child: IconButton(
-                              onPressed: () => Navigator.of(sheetContext).pop(),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints.tightFor(
-                                width: 50,
-                                height: 50,
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Text(
+                                title,
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xE6000000),
+                                ),
                               ),
-                              icon: const Icon(
-                                Icons.close,
-                                color: Color(0x99000000),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            totalLabel,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Color(0x99000000),
-                            ),
-                          ),
-                          TextField(
-                            controller: feeController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            inputFormatters: const [_AmountInputFormatter()],
-                            onChanged: (_) => setState(() {}),
-                            style: const TextStyle(
-                              fontSize: 17,
-                              color: Color(0xFFFA7D00),
-                            ),
-                            decoration: InputDecoration(
-                              border: InputBorder.none,
-                              hintText: amountHint,
-                              hintStyle: const TextStyle(
-                                fontSize: 17,
-                                color: Color(0x40000000),
-                              ),
-                              contentPadding: EdgeInsets.zero,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
-                            child: Text(
-                              paymentMethodsLabel,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Color(0x99000000),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: _PayMethodRow(
-                              text: payTypeCashText,
-                              selected: payType == 1,
-                              onTap: () => setState(() => payType = 1),
-                            ),
-                          ),
-                          const Divider(height: 1, color: Color(0xFFE6E6E6)),
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8),
-                            child: _PayMethodRow(
-                              text: payTypeOnlineText,
-                              selected: payType == 2,
-                              onTap: () => setState(() => payType = 2),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (payType == 1) ...[
-                      const SizedBox(height: 12),
-                      Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              showUploadCount
-                                  ? '$uploadVoucherText (${attachmentUrls.length}/$maxAttachments)'
-                                  : uploadVoucherText,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: Color(0x99000000),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Wrap(
-                              spacing: 12,
-                              runSpacing: 12,
-                              children: [
-                                ...attachmentUrls.map(
-                                  (url) => _ImageTile(
-                                    url: url,
-                                    onRemove: () =>
-                                        setState(() => attachmentUrls.remove(url)),
+                              Positioned(
+                                right: 0,
+                                child: IconButton(
+                                  onPressed: () =>
+                                      Navigator.of(sheetContext).pop(),
+                                  padding: EdgeInsets.zero,
+                                  constraints: const BoxConstraints.tightFor(
+                                    width: 50,
+                                    height: 50,
+                                  ),
+                                  icon: const Icon(
+                                    Icons.close,
+                                    color: Color(0x99000000),
                                   ),
                                 ),
-                                if (attachmentUrls.length < maxAttachments)
-                                  _AddImageTile(
-                                    onTap: () async {
-                                      final source = await _pickSource(
-                                        sheetContext,
-                                        l10n,
-                                      );
-                                      if (source == null) return;
-                                      final picked =
-                                          await picker.pickImage(source: source);
-                                      if (picked == null) return;
-                                      final uploaded =
-                                          await onUploadImage(picked.path);
-                                      if (uploaded != null &&
-                                          uploaded.trim().isNotEmpty) {
-                                        setState(
-                                          () => attachmentUrls.add(uploaded),
-                                        );
-                                      }
-                                    },
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          padding: const EdgeInsets.fromLTRB(16, 10, 16, 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                totalLabel,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0x99000000),
+                                ),
+                              ),
+                              TextField(
+                                controller: feeController,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                inputFormatters: const [
+                                  _AmountInputFormatter(),
+                                ],
+                                onChanged: (_) => setState(() {}),
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  color: Color(0xFFFA7D00),
+                                ),
+                                decoration: InputDecoration(
+                                  border: InputBorder.none,
+                                  hintText: amountHint,
+                                  hintStyle: const TextStyle(
+                                    fontSize: 17,
+                                    color: Color(0x40000000),
                                   ),
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  16,
+                                  10,
+                                  16,
+                                  0,
+                                ),
+                                child: Text(
+                                  paymentMethodsLabel,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0x99000000),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: _PayMethodRow(
+                                  text: payTypeCashText,
+                                  selected: payType == 1,
+                                  onTap: () => setState(() => payType = 1),
+                                ),
+                              ),
+                              const Divider(
+                                height: 1,
+                                color: Color(0xFFE6E6E6),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: _PayMethodRow(
+                                  text: payTypeOnlineText,
+                                  selected: payType == 2,
+                                  onTap: () => setState(() => payType = 2),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (payType == 1) ...[
+                          const SizedBox(height: 12),
+                          Container(
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            padding: const EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  showUploadCount
+                                      ? '$uploadVoucherText (${attachmentUrls.length}/$maxAttachments)'
+                                      : uploadVoucherText,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0x99000000),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Wrap(
+                                  spacing: 12,
+                                  runSpacing: 12,
+                                  children: [
+                                    ...attachmentUrls.map(
+                                      (url) => _ImageTile(
+                                        url: url,
+                                        onRemove: () => setState(
+                                          () => attachmentUrls.remove(url),
+                                        ),
+                                      ),
+                                    ),
+                                    if (attachmentUrls.length < maxAttachments)
+                                      _AddImageTile(
+                                        onTap: () async {
+                                          final source = await _pickSource(
+                                            sheetContext,
+                                            l10n,
+                                          );
+                                          if (source == null) return;
+                                          final picked = await picker.pickImage(
+                                            source: source,
+                                          );
+                                          if (picked == null) return;
+                                          try {
+                                            final uploaded =
+                                                await onUploadImage(
+                                                  picked.path,
+                                                );
+                                            if (!sheetContext.mounted) return;
+                                            if (uploaded != null &&
+                                                uploaded.trim().isNotEmpty) {
+                                              setState(
+                                                () => attachmentUrls.add(
+                                                  uploaded,
+                                                ),
+                                              );
+                                            }
+                                          } catch (_) {
+                                            if (!sheetContext.mounted) return;
+                                            if (failureMessage != null &&
+                                                failureMessage.isNotEmpty) {
+                                              final messenger =
+                                                  ScaffoldMessenger.maybeOf(
+                                                    sheetContext,
+                                                  );
+                                              messenger?.showSnackBar(
+                                                SnackBar(
+                                                  content: Text(failureMessage),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        },
+                                      ),
+                                  ],
+                                ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-                    ],
+                          ),
+                        ],
                         const SizedBox(height: 22),
                         SizedBox(
                           width: double.infinity,
@@ -262,13 +299,18 @@ Future<bool?> showWorkPaymentSheet({
                             onPressed: canConfirm
                                 ? () async {
                                     setState(() => paying = true);
-                                    final ok = await onConfirmPayment(
-                                      WorkPaymentSubmit(
-                                        fee: fee,
-                                        payType: payType,
-                                        attachments: List.of(attachmentUrls),
-                                      ),
-                                    );
+                                    var ok = false;
+                                    try {
+                                      ok = await onConfirmPayment(
+                                        WorkPaymentSubmit(
+                                          fee: fee,
+                                          payType: payType,
+                                          attachments: List.of(attachmentUrls),
+                                        ),
+                                      );
+                                    } catch (_) {
+                                      ok = false;
+                                    }
                                     if (!sheetContext.mounted) return;
                                     setState(() => paying = false);
                                     if (ok) {
@@ -276,8 +318,14 @@ Future<bool?> showWorkPaymentSheet({
                                     } else {
                                       if (failureMessage != null &&
                                           failureMessage.isNotEmpty) {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text(failureMessage)),
+                                        final messenger =
+                                            ScaffoldMessenger.maybeOf(
+                                              sheetContext,
+                                            );
+                                        messenger?.showSnackBar(
+                                          SnackBar(
+                                            content: Text(failureMessage),
+                                          ),
                                         );
                                       }
                                       if (closeOnFailure) {
@@ -288,8 +336,8 @@ Future<bool?> showWorkPaymentSheet({
                                 : null,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primaryColor,
-                              disabledBackgroundColor:
-                                  AppColors.primaryColor.withValues(alpha: 0.45),
+                              disabledBackgroundColor: AppColors.primaryColor
+                                  .withValues(alpha: 0.45),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
                               ),
@@ -315,12 +363,16 @@ Future<bool?> showWorkPaymentSheet({
     },
   );
 
+  // Avoid disposing while the sheet is still in its pop transition.
+  await Future<void>.delayed(kThemeAnimationDuration);
   feeController.dispose();
 
-  if (result == true && successMessage != null && successMessage.isNotEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(successMessage)),
-    );
+  if (result == true &&
+      context.mounted &&
+      successMessage != null &&
+      successMessage.isNotEmpty) {
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    messenger?.showSnackBar(SnackBar(content: Text(successMessage)));
   }
 
   return result;
@@ -356,10 +408,7 @@ class _PayMethodRow extends StatelessWidget {
             children: [
               Text(
                 text,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Color(0xE60C0C0D),
-                ),
+                style: const TextStyle(fontSize: 16, color: Color(0xE60C0C0D)),
               ),
               const Spacer(),
               Image.asset(

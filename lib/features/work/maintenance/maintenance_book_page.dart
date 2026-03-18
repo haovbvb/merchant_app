@@ -70,7 +70,8 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
     final state = ref.watch(maintenanceBookProvider);
     final notifier = ref.read(maintenanceBookProvider.notifier);
 
-    final canConfirm = state.appointment != null && state.note.trim().isNotEmpty;
+    final canConfirm =
+        state.appointment != null && state.note.trim().isNotEmpty;
 
     return Scaffold(
       backgroundColor: AppColors.bgColor,
@@ -213,8 +214,9 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
                       : null,
                   style: FilledButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
-                    disabledBackgroundColor:
-                        AppColors.primaryColor.withOpacity(0.5),
+                    disabledBackgroundColor: AppColors.primaryColor.withOpacity(
+                      0.5,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                     ),
@@ -250,10 +252,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xE6000000),
-            ),
+            style: const TextStyle(fontSize: 14, color: Color(0xE6000000)),
           ),
           const SizedBox(height: 8),
           Row(
@@ -286,10 +285,7 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
               if (onScan != null)
                 GestureDetector(
                   onTap: onScan,
-                  child: AppIcons.scanIcon(
-                    size: 24,
-                    color: Colors.black54,
-                  ),
+                  child: AppIcons.scanIcon(size: 24, color: Colors.black54),
                 ),
             ],
           ),
@@ -343,29 +339,34 @@ class _MaintenanceBookPageState extends ConsumerState<MaintenanceBookPage> {
     MaintenanceBookNotifier notifier,
   ) async {
     notifier.clearCostDialog();
-    final result = await showWorkPaymentSheet(
-      context: context,
-      l10n: l10n,
-      title: l10n.maintenanceCostsTitle,
-      totalLabel: l10n.maintenanceTotalLabel,
-      amountHint: l10n.maintenanceTotalHint,
-      paymentMethodsLabel: l10n.maintenancePaymentMethods,
-      payTypeCashText: l10n.maintenancePayCash,
-      payTypeOnlineText: l10n.maintenancePayOnline,
-      uploadVoucherText: l10n.maintenanceUploadVoucher,
-      confirmButtonText: l10n.maintenanceSubmit,
-      initialPayType: 2,
-      maxAttachments: 5,
-      showUploadCount: true,
-      requireAttachmentsForCash: false,
-      onUploadImage: notifier.uploadVoucher,
-      onConfirmPayment: (submit) async {
-        notifier.updateAmount(submit.fee);
-        notifier.updatePaySource(submit.payType);
-        notifier.replaceVoucherImages(submit.attachments);
-        return true;
-      },
-    );
+    bool? result;
+    try {
+      result = await showWorkPaymentSheet(
+        context: context,
+        l10n: l10n,
+        title: l10n.maintenanceCostsTitle,
+        totalLabel: l10n.maintenanceTotalLabel,
+        amountHint: l10n.maintenanceTotalHint,
+        paymentMethodsLabel: l10n.maintenancePaymentMethods,
+        payTypeCashText: l10n.maintenancePayCash,
+        payTypeOnlineText: l10n.maintenancePayOnline,
+        uploadVoucherText: l10n.maintenanceUploadVoucher,
+        confirmButtonText: l10n.maintenanceSubmit,
+        initialPayType: 2,
+        maxAttachments: 5,
+        showUploadCount: true,
+        requireAttachmentsForCash: false,
+        onUploadImage: notifier.uploadVoucher,
+        onConfirmPayment: (submit) async {
+          notifier.updateAmount(submit.fee);
+          notifier.updatePaySource(submit.payType);
+          notifier.replaceVoucherImages(submit.attachments);
+          return true;
+        },
+      );
+    } catch (_) {
+      result = false;
+    }
     if (!mounted || result != true) return;
 
     final success = await notifier.submitMaintenance();
@@ -398,10 +399,7 @@ class _EmptyInfoCard extends StatelessWidget {
         child: Center(
           child: Text(
             text,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.grey,
-            ),
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
           ),
         ),
       ),
@@ -425,7 +423,8 @@ class _VehicleInfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final username = (appointment.username ?? '').trim();
-    final fullName = '${appointment.firstName ?? ''} ${appointment.lastName ?? ''}'.trim();
+    final fullName =
+        '${appointment.firstName ?? ''} ${appointment.lastName ?? ''}'.trim();
     final displayName = username.isNotEmpty
         ? username
         : (fullName.isNotEmpty ? fullName : '-');
@@ -454,12 +453,21 @@ class _VehicleInfoCard extends StatelessWidget {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: appointment.img != null && appointment.img!.isNotEmpty
+                        child:
+                            appointment.img != null &&
+                                appointment.img!.isNotEmpty
                             ? ClipRRect(
                                 borderRadius: BorderRadius.circular(8),
-                                child: Image.network(appointment.img!, fit: BoxFit.contain),
+                                child: Image.network(
+                                  appointment.img!,
+                                  fit: BoxFit.contain,
+                                ),
                               )
-                            : const Icon(Icons.electric_moped, size: 32, color: Colors.grey),
+                            : const Icon(
+                                Icons.electric_moped,
+                                size: 32,
+                                color: Colors.grey,
+                              ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -511,11 +519,13 @@ class _VehicleInfoCard extends StatelessWidget {
                             CircleAvatar(
                               radius: 20,
                               backgroundColor: Colors.grey.shade200,
-                              backgroundImage: appointment.avatar != null &&
+                              backgroundImage:
+                                  appointment.avatar != null &&
                                       appointment.avatar!.isNotEmpty
                                   ? NetworkImage(appointment.avatar!)
                                   : null,
-                              child: appointment.avatar == null ||
+                              child:
+                                  appointment.avatar == null ||
                                       appointment.avatar!.isEmpty
                                   ? const Icon(Icons.person, color: Colors.grey)
                                   : null,
@@ -551,7 +561,9 @@ class _VehicleInfoCard extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   shape: BoxShape.circle,
-                                  border: Border.all(color: AppColors.primaryColor),
+                                  border: Border.all(
+                                    color: AppColors.primaryColor,
+                                  ),
                                 ),
                                 child: Icon(
                                   Icons.phone,
@@ -590,10 +602,7 @@ class _VehicleInfoCard extends StatelessWidget {
                             color: Colors.black,
                           ),
                         ),
-                        const Icon(
-                          Icons.chevron_right,
-                          color: Colors.grey,
-                        ),
+                        const Icon(Icons.chevron_right, color: Colors.grey),
                       ],
                     ),
                   ),
@@ -636,11 +645,17 @@ class _VehicleInfoCard extends StatelessWidget {
                     Expanded(
                       child: _StatItem(
                         label: l10n.maintenanceAvgMileage,
-                        value: _formatTwoDecimals(appointment.day30AvgMilePerDay),
+                        value: _formatTwoDecimals(
+                          appointment.day30AvgMilePerDay,
+                        ),
                         unit: 'km',
                       ),
                     ),
-                    Container(width: 1, height: 40, color: Colors.grey.shade300),
+                    Container(
+                      width: 1,
+                      height: 40,
+                      color: Colors.grey.shade300,
+                    ),
                     Expanded(
                       child: _StatItem(
                         label: l10n.maintenanceAvgSpeed,
@@ -648,11 +663,17 @@ class _VehicleInfoCard extends StatelessWidget {
                         unit: 'km/hr',
                       ),
                     ),
-                    Container(width: 1, height: 40, color: Colors.grey.shade300),
+                    Container(
+                      width: 1,
+                      height: 40,
+                      color: Colors.grey.shade300,
+                    ),
                     Expanded(
                       child: _StatItem(
                         label: l10n.maintenanceAvgSwapCount,
-                        value: _formatTwoDecimals(appointment.day30AvgSwapCount),
+                        value: _formatTwoDecimals(
+                          appointment.day30AvgSwapCount,
+                        ),
                         unit: '',
                       ),
                     ),
@@ -681,9 +702,9 @@ class _VehicleInfoCard extends StatelessWidget {
 }
 
 String _maintenanceRecordsText(BuildContext context, AppLocalizations l10n) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
+  final isZh = Localizations.localeOf(
+    context,
+  ).languageCode.toLowerCase().startsWith('zh');
   return isZh ? '保养记录' : l10n.maintenanceRecords;
 }
 
@@ -720,10 +741,7 @@ class _InfoRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: const TextStyle(fontSize: 14, color: Colors.grey),
-        ),
+        Text(label, style: const TextStyle(fontSize: 14, color: Colors.grey)),
         Text(
           value,
           style: const TextStyle(
@@ -772,10 +790,7 @@ class _StatItem extends StatelessWidget {
               if (unit.isNotEmpty)
                 TextSpan(
                   text: ' $unit',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                  ),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
             ],
           ),
@@ -970,8 +985,8 @@ class _MaintenanceCostSheetState extends ConsumerState<_MaintenanceCostSheet> {
                           : null,
                       style: FilledButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
-                        disabledBackgroundColor:
-                            AppColors.primaryColor.withOpacity(0.5),
+                        disabledBackgroundColor: AppColors.primaryColor
+                            .withOpacity(0.5),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
                         ),
@@ -1049,10 +1064,7 @@ class _PaymentOption extends StatelessWidget {
           children: [
             Text(
               label,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.black,
-              ),
+              style: const TextStyle(fontSize: 16, color: Colors.black),
             ),
             Icon(
               selected ? Icons.check_circle : Icons.radio_button_unchecked,
@@ -1110,7 +1122,11 @@ class _VoucherGrid extends StatelessWidget {
                       color: Colors.black54,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.close, size: 14, color: Colors.white),
+                    child: const Icon(
+                      Icons.close,
+                      size: 14,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),

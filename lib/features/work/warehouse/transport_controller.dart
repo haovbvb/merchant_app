@@ -91,7 +91,8 @@ class TransportListNotifier extends Notifier<TransportListState> {
         'pageNum': 1,
         'pageSize': _pageSize,
         if (effectiveStatus != null) 'status': effectiveStatus,
-        if (effectiveKeyword.trim().isNotEmpty) 'keyword': effectiveKeyword.trim(),
+        if (effectiveKeyword.trim().isNotEmpty)
+          'keyword': effectiveKeyword.trim(),
       },
       parser: (json) =>
           DeviceTransportResp.fromJson(Map<String, dynamic>.from(json as Map)),
@@ -248,7 +249,8 @@ class TransportDetailNotifier extends Notifier<TransportDetailState> {
     );
 
     final detail = response.result;
-    final pageList = detail?.detailPage?.list ?? const <DeviceTransportDetailPageData>[];
+    final pageList =
+        detail?.detailPage?.list ?? const <DeviceTransportDetailPageData>[];
 
     state = state.copyWith(
       loadingMore: false,
@@ -394,60 +396,113 @@ class TransportCreateNotifier extends Notifier<TransportCreateState> {
   Future<void> loadInWarehouseList({
     String? keyword,
     String? cityCode,
+    bool preserveKeyword = false,
   }) async {
-    final nextKeyword = (keyword ?? state.warehouseKeyword).trim();
+    final rawKeyword = keyword ?? state.warehouseKeyword;
+    final nextKeyword = preserveKeyword ? rawKeyword : rawKeyword.trim();
     final nextCityCode = (cityCode ?? state.warehouseCityCode).trim();
     final requestId = ++_warehouseListRequestId;
 
-    // Clear stale list immediately so UI shows loading state on city switch.
     state = state.copyWith(
       loading: true,
-      inWarehouses: const <WarehouseInfo>[],
       selectedInWarehouse: null,
       warehouseKeyword: nextKeyword,
       warehouseCityCode: nextCityCode,
     );
-    final response = await _api.get<List<WarehouseInfo>>(
-      ApiPath.transportQueryInWarehouseList,
-      queryParameters: {'cityCode': nextCityCode, 'name': nextKeyword},
-      parser: (json) =>
-          (json as List<dynamic>?)
-              ?.map(
-                (item) => WarehouseInfo.fromJson(
-                  Map<String, dynamic>.from(item as Map),
-                ),
-              )
-              .toList() ??
-          const <WarehouseInfo>[],
-    );
+    try {
+      final response = await _api.get<List<WarehouseInfo>>(
+        ApiPath.transportQueryInWarehouseList,
+        queryParameters: {'cityCode': nextCityCode, 'name': nextKeyword},
+        parser: _parseWarehouseListPayload,
+        showHud: false,
+      );
 
-    // Ignore outdated response when newer filter request has been sent.
-    if (requestId != _warehouseListRequestId) {
-      return;
+      // Ignore outdated response when newer filter request has been sent.
+      if (requestId != _warehouseListRequestId) {
+        return;
+      }
+
+      state = state.copyWith(
+        loading: false,
+        inWarehouses: response.result ?? const <WarehouseInfo>[],
+        warehouseKeyword: nextKeyword,
+        warehouseCityCode: nextCityCode,
+      );
+    } catch (_) {
+      if (requestId != _warehouseListRequestId) {
+        return;
+      }
+      state = state.copyWith(
+        loading: false,
+        inWarehouses: const <WarehouseInfo>[],
+        warehouseKeyword: nextKeyword,
+        warehouseCityCode: nextCityCode,
+      );
+    }
+  }
+
+  List<WarehouseInfo> _parseWarehouseListPayload(dynamic json) {
+    List<dynamic> rawList = const <dynamic>[];
+    if (json is List<dynamic>) {
+      rawList = json;
+    } else if (json is Map) {
+      final map = Map<String, dynamic>.from(json as Map);
+      final list = map['list'] ?? map['rows'] ?? map['data'];
+      if (list is List<dynamic>) {
+        rawList = list;
+      }
     }
 
-    state = state.copyWith(
-      loading: false,
-      inWarehouses: response.result ?? const <WarehouseInfo>[],
-      warehouseKeyword: nextKeyword,
-      warehouseCityCode: nextCityCode,
-    );
+    return rawList
+        .whereType<Map>()
+        .map((item) => WarehouseInfo.fromJson(Map<String, dynamic>.from(item)))
+        .toList();
   }
 
   Future<void> loadCities() async {
-    final response = await _api.get<List<City>>(
+    final primaryResponse = await _api.get<List<dynamic>>(
       ApiPath.cityList,
-      parser: (json) =>
-          (json as List<dynamic>?)
-              ?.map(
-                (item) => City.fromJson(Map<String, dynamic>.from(item as Map)),
-              )
-              .toList() ??
-          const <City>[],
+      parser: _parseListPayload,
       showHud: false,
       notifyOnError: false,
     );
-    state = state.copyWith(cities: response.result ?? const []);
+
+    var rawItems = primaryResponse.result ?? const <dynamic>[];
+
+    // Fallback for environments where cityList has no data.
+    if (rawItems.isEmpty) {
+      final fallbackResponse = await _api.get<List<dynamic>>(
+        ApiPath.cityCodes,
+        parser: _parseListPayload,
+        showHud: false,
+        notifyOnError: false,
+      );
+      rawItems = fallbackResponse.result ?? const <dynamic>[];
+    }
+
+    final cities = rawItems
+        .whereType<Map>()
+        .map((item) => City.fromJson(Map<String, dynamic>.from(item)))
+        .where(
+          (city) => city.name.trim().isNotEmpty || city.code.trim().isNotEmpty,
+        )
+        .toList();
+
+    state = state.copyWith(cities: cities);
+  }
+
+  List<dynamic> _parseListPayload(dynamic json) {
+    if (json is List<dynamic>) {
+      return json;
+    }
+    if (json is Map) {
+      final map = Map<String, dynamic>.from(json as Map);
+      final list = map['list'] ?? map['rows'] ?? map['data'];
+      if (list is List<dynamic>) {
+        return list;
+      }
+    }
+    return const <dynamic>[];
   }
 
   void selectInWarehouse(WarehouseInfo warehouse) {

@@ -933,7 +933,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get afterSaleBindSelectableOrders => '售后订单';
 
   @override
-  String get afterSaleBindNoOrders => '选择售后订单进行绑定';
+  String get afterSaleBindNoOrders => '没有可绑定的订单';
 
   @override
   String get afterSaleBindSelectOrder => '选择售后订单';
@@ -2535,7 +2535,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sellBindPaymentPeriod => '支付期限';
 
   @override
-  String get sellBindFinancial => '财务信息';
+  String get sellBindFinancial => '金融方案';
 
   @override
   String get sellBindPrincipal => '本金';
@@ -3889,7 +3889,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vcuSearchTitle => 'VCU 搜索';
 
   @override
-  String get vcuControlTitle => 'VCU 控制';
+  String get vcuControlTitle => 'VCU 测试';
 
   @override
   String get vcuVinLabel => 'VIN';
@@ -3913,10 +3913,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vcuVersionLabel => '版本';
 
   @override
-  String get vcuControlTab => '控制';
+  String get vcuControlTab => '测试操作';
 
   @override
-  String get vcuHistoryTab => '历史';
+  String get vcuHistoryTab => '请求历史';
 
   @override
   String get vcuHistoryFilterAll => '全部';
@@ -3949,10 +3949,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vcuBleDisconnected => '未连接';
 
   @override
-  String get vcuControlSectionTitle => 'VCU 控制';
+  String get vcuControlSectionTitle => 'VCU 测试';
 
   @override
-  String get vcuConfigSectionTitle => 'VCU 配置';
+  String get vcuConfigSectionTitle => 'VCU 配置(通过蓝牙)';
 
   @override
   String get vcuPlatformAddressLabel => '平台地址';
@@ -4116,16 +4116,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vcuBleCommandGeneric => '指令';
 
   @override
-  String get vcuCmdLaunch => '一键启动';
+  String get vcuCmdLaunch => '启动';
 
   @override
-  String get vcuCmdLock => '一键锁车';
+  String get vcuCmdLock => '锁车';
 
   @override
-  String get vcuCmdAntiTheft => '防盗模式';
+  String get vcuCmdAntiTheft => '防盗';
 
   @override
-  String get vcuCmdFind => '一键找车';
+  String get vcuCmdFind => '找车';
 
   @override
   String get vcuCmdRemoteLock => '远程锁车';

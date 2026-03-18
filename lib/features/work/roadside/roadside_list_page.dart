@@ -120,6 +120,7 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage>
                       child: GestureDetector(
                         onTap: () {
                           setState(() => _selectedTabIndex = index);
+                          _refreshController.resetNoData();
                           notifier.refresh(status: _statusForTab(index));
                         },
                         child: Container(
@@ -160,14 +161,16 @@ class _RoadSideListPageState extends ConsumerState<RoadSideListPage>
               enablePullDown: true,
               enablePullUp: state.hasMore,
               onRefresh: () async {
-                await notifier.refresh(status: state.status);
+                final status = _statusForTab(_selectedTabIndex);
+                await notifier.refresh(status: status);
                 _refreshController.refreshCompleted();
                 if (!ref.read(roadSideListProvider).hasMore) {
                   _refreshController.loadNoData();
                 }
               },
               onLoading: () async {
-                await notifier.loadMore();
+                final status = _statusForTab(_selectedTabIndex);
+                await notifier.loadMore(status: status);
                 if (ref.read(roadSideListProvider).hasMore) {
                   _refreshController.loadComplete();
                 } else {

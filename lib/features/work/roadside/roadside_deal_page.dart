@@ -253,33 +253,41 @@ class _RoadSideDealPageState extends ConsumerState<RoadSideDealPage> {
     AppLocalizations l10n,
     RoadSideDealNotifier notifier,
   ) async {
-    final result = await showWorkPaymentSheet(
-      context: context,
-      l10n: l10n,
-      title: l10n.roadsideCostsTitle,
-      totalLabel: l10n.roadsideTotalLabel,
-      amountHint: Localizations.localeOf(context).languageCode
-              .toLowerCase()
-              .startsWith('zh')
-          ? '请输入金额（无费用填 0）'
-          : 'Please enter amount  (No fee, fill in 0)',
-      paymentMethodsLabel: l10n.roadsidePaymentMethodLabel,
-      payTypeCashText: l10n.roadsidePayTypeCash,
-      payTypeOnlineText: l10n.roadsidePayTypeOnline,
-      uploadVoucherText: l10n.roadsideUploadVoucherLabel,
-      confirmButtonText: l10n.roadsideConfirmPayment,
-      initialPayType: 2,
-      failureMessage: l10n.roadsidePayFailed,
-      onUploadImage: notifier.uploadImage,
-      onConfirmPayment: (submit) {
-        return ref.read(roadSideDetailProvider.notifier).payRoadSide(
-              recordNo: widget.recordNo,
-              fee: submit.fee,
-              payType: submit.payType,
-              attachment: submit.attachments.join(','),
-            );
-      },
-    );
+    bool? result;
+    try {
+      result = await showWorkPaymentSheet(
+        context: context,
+        l10n: l10n,
+        title: l10n.roadsideCostsTitle,
+        totalLabel: l10n.roadsideTotalLabel,
+        amountHint:
+            Localizations.localeOf(
+              context,
+            ).languageCode.toLowerCase().startsWith('zh')
+            ? '请输入金额（无费用填 0）'
+            : 'Please enter amount  (No fee, fill in 0)',
+        paymentMethodsLabel: l10n.roadsidePaymentMethodLabel,
+        payTypeCashText: l10n.roadsidePayTypeCash,
+        payTypeOnlineText: l10n.roadsidePayTypeOnline,
+        uploadVoucherText: l10n.roadsideUploadVoucherLabel,
+        confirmButtonText: l10n.roadsideConfirmPayment,
+        initialPayType: 2,
+        failureMessage: l10n.roadsidePayFailed,
+        onUploadImage: notifier.uploadImage,
+        onConfirmPayment: (submit) {
+          return ref
+              .read(roadSideDetailProvider.notifier)
+              .payRoadSide(
+                recordNo: widget.recordNo,
+                fee: submit.fee,
+                payType: submit.payType,
+                attachment: submit.attachments.join(','),
+              );
+        },
+      );
+    } catch (_) {
+      result = false;
+    }
 
     if (result == true && mounted) {
       Navigator.of(this.context).pop(true);
@@ -429,23 +437,22 @@ class _AddImageTile extends StatelessWidget {
 }
 
 String _processingResultTitle(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
+  final isZh = Localizations.localeOf(
+    context,
+  ).languageCode.toLowerCase().startsWith('zh');
   return isZh ? '处理结果' : 'Processing Result';
 }
 
 String _dealSuccessToast(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
+  final isZh = Localizations.localeOf(
+    context,
+  ).languageCode.toLowerCase().startsWith('zh');
   return isZh ? '救援结果提交成功' : 'The rescue result was submitted successfully';
 }
 
 String _descHint(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
+  final isZh = Localizations.localeOf(
+    context,
+  ).languageCode.toLowerCase().startsWith('zh');
   return isZh ? '请输入描述' : 'Please enter your description';
 }
-

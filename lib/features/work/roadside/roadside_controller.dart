@@ -52,59 +52,76 @@ class RoadSideListState {
 
 final roadSideListProvider =
     NotifierProvider<RoadSideListNotifier, RoadSideListState>(
-  RoadSideListNotifier.new,
-);
+      RoadSideListNotifier.new,
+    );
 
 class RoadSideListNotifier extends Notifier<RoadSideListState> {
   final ApiService _api = ApiService();
+  int _refreshRequestId = 0;
 
   @override
   RoadSideListState build() => const RoadSideListState();
 
   Future<void> refresh({int? status, bool showHud = true}) async {
-    state = state.copyWith(loading: true, page: 1, status: status);
-    final response = await _api.get<RoadSideListResp>(
-      ApiPath.roadSaveQueryPage,
-      queryParameters: {
-        if (status != null) 'status': status,
-        'pageNum': 1,
-        'pageSize': _pageSize,
-      },
-      showHud: showHud,
-      parser: (json) => RoadSideListResp.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
-    );
-    final result = response.result;
-    state = state.copyWith(
-      loading: false,
-      items: result?.list ?? const [],
-      total: result?.total ?? 0,
-    );
+    final targetStatus = status;
+    final requestId = ++_refreshRequestId;
+    state = state.copyWith(loading: true, page: 1, status: targetStatus);
+    try {
+      final response = await _api.get<RoadSideListResp>(
+        ApiPath.roadSaveQueryPage,
+        queryParameters: {
+          if (targetStatus != null) 'status': targetStatus,
+          'pageNum': 1,
+          'pageSize': _pageSize,
+        },
+        showHud: showHud,
+        parser: (json) =>
+            RoadSideListResp.fromJson(Map<String, dynamic>.from(json as Map)),
+      );
+      if (requestId != _refreshRequestId) {
+        return;
+      }
+      final result = response.result;
+      state = state.copyWith(
+        loading: false,
+        items: result?.list ?? const [],
+        total: result?.total ?? 0,
+      );
+    } catch (_) {
+      if (requestId != _refreshRequestId) {
+        return;
+      }
+      state = state.copyWith(loading: false, items: const [], total: 0);
+    }
   }
 
-  Future<void> loadMore() async {
+  Future<void> loadMore({int? status}) async {
     if (state.loadingMore || state.loading || !state.hasMore) return;
+    final targetStatus = status ?? state.status;
     final nextPage = state.page + 1;
     state = state.copyWith(loadingMore: true);
-    final response = await _api.get<RoadSideListResp>(
-      ApiPath.roadSaveQueryPage,
-      queryParameters: {
-        if (state.status != null) 'status': state.status,
-        'pageNum': nextPage,
-        'pageSize': _pageSize,
-      },
-      parser: (json) => RoadSideListResp.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
-    );
-    final result = response.result;
-    state = state.copyWith(
-      loadingMore: false,
-      page: nextPage,
-      items: [...state.items, ...?result?.list],
-      total: result?.total ?? state.total,
-    );
+    try {
+      final response = await _api.get<RoadSideListResp>(
+        ApiPath.roadSaveQueryPage,
+        queryParameters: {
+          if (targetStatus != null) 'status': targetStatus,
+          'pageNum': nextPage,
+          'pageSize': _pageSize,
+        },
+        parser: (json) =>
+            RoadSideListResp.fromJson(Map<String, dynamic>.from(json as Map)),
+      );
+      final result = response.result;
+      state = state.copyWith(
+        loadingMore: false,
+        status: targetStatus,
+        page: nextPage,
+        items: [...state.items, ...?result?.list],
+        total: result?.total ?? state.total,
+      );
+    } catch (_) {
+      state = state.copyWith(loadingMore: false);
+    }
   }
 }
 
@@ -112,15 +129,9 @@ class RoadSideDetailState {
   final bool loading;
   final RoadSideOrderDetail? detail;
 
-  const RoadSideDetailState({
-    this.loading = false,
-    this.detail,
-  });
+  const RoadSideDetailState({this.loading = false, this.detail});
 
-  RoadSideDetailState copyWith({
-    bool? loading,
-    RoadSideOrderDetail? detail,
-  }) {
+  RoadSideDetailState copyWith({bool? loading, RoadSideOrderDetail? detail}) {
     return RoadSideDetailState(
       loading: loading ?? this.loading,
       detail: detail ?? this.detail,
@@ -130,8 +141,8 @@ class RoadSideDetailState {
 
 final roadSideDetailProvider =
     NotifierProvider<RoadSideDetailNotifier, RoadSideDetailState>(
-  RoadSideDetailNotifier.new,
-);
+      RoadSideDetailNotifier.new,
+    );
 
 class RoadSideDetailNotifier extends Notifier<RoadSideDetailState> {
   final ApiService _api = ApiService();
@@ -145,9 +156,8 @@ class RoadSideDetailNotifier extends Notifier<RoadSideDetailState> {
     final response = await _api.get<RoadSideOrderDetail>(
       ApiPath.roadSaveQueryInfo,
       queryParameters: {'recordNo': recordNo.trim()},
-      parser: (json) => RoadSideOrderDetail.fromJson(
-        Map<String, dynamic>.from(json as Map),
-      ),
+      parser: (json) =>
+          RoadSideOrderDetail.fromJson(Map<String, dynamic>.from(json as Map)),
     );
     state = state.copyWith(loading: false, detail: response.result);
   }
@@ -158,17 +168,21 @@ class RoadSideDetailNotifier extends Notifier<RoadSideDetailState> {
     required int payType,
     required String attachment,
   }) async {
-    final response = await _api.post<Object>(
-      ApiPath.roadSavePay,
-      data: {
-        'recordNo': recordNo,
-        'fee': fee,
-        'payType': payType,
-        'attachment': attachment,
-      },
-      parser: (json) => json ?? Object(),
-    );
-    return response.isSuccess;
+    try {
+      final response = await _api.post<Object>(
+        ApiPath.roadSavePay,
+        data: {
+          'recordNo': recordNo,
+          'fee': fee,
+          'payType': payType,
+          'attachment': attachment,
+        },
+        parser: (json) => json ?? Object(),
+      );
+      return response.isSuccess;
+    } catch (_) {
+      return false;
+    }
   }
 }
 
@@ -176,15 +190,9 @@ class RoadSideDealState {
   final bool submitting;
   final List<String> imageUrls;
 
-  const RoadSideDealState({
-    this.submitting = false,
-    this.imageUrls = const [],
-  });
+  const RoadSideDealState({this.submitting = false, this.imageUrls = const []});
 
-  RoadSideDealState copyWith({
-    bool? submitting,
-    List<String>? imageUrls,
-  }) {
+  RoadSideDealState copyWith({bool? submitting, List<String>? imageUrls}) {
     return RoadSideDealState(
       submitting: submitting ?? this.submitting,
       imageUrls: imageUrls ?? this.imageUrls,
@@ -194,8 +202,8 @@ class RoadSideDealState {
 
 final roadSideDealProvider =
     NotifierProvider<RoadSideDealNotifier, RoadSideDealState>(
-  RoadSideDealNotifier.new,
-);
+      RoadSideDealNotifier.new,
+    );
 
 class RoadSideDealNotifier extends Notifier<RoadSideDealState> {
   final ApiService _api = ApiService();
@@ -214,15 +222,19 @@ class RoadSideDealNotifier extends Notifier<RoadSideDealState> {
     final formData = FormData.fromMap({
       'file': MultipartFile.fromBytes(data, filename: fileName),
     });
-    final response = await _api.postForm<String>(
-      ApiPath.roadSaveUploadImg,
-      data: formData,
-      parser: (json) => json?.toString() ?? '',
-    );
-    final url = response.result ?? '';
-    if (response.isSuccess && url.isNotEmpty) {
-      state = state.copyWith(imageUrls: [...state.imageUrls, url]);
-      return url;
+    try {
+      final response = await _api.postForm<String>(
+        ApiPath.roadSaveUploadImg,
+        data: formData,
+        parser: (json) => json?.toString() ?? '',
+      );
+      final url = response.result ?? '';
+      if (response.isSuccess && url.isNotEmpty) {
+        state = state.copyWith(imageUrls: [...state.imageUrls, url]);
+        return url;
+      }
+    } catch (_) {
+      return null;
     }
     return null;
   }
@@ -238,19 +250,24 @@ class RoadSideDealNotifier extends Notifier<RoadSideDealState> {
     required String desc,
   }) async {
     state = state.copyWith(submitting: true);
-    final response = await _api.post<Object>(
-      ApiPath.roadSaveDeal,
-      data: {
-        'imgList': state.imageUrls.join(','),
-        'opResponse': desc,
-        'result': result,
-        'recordNo': recordNo,
-        'payFlag': 0,
-      },
-      parser: (json) => json ?? Object(),
-    );
-    state = state.copyWith(submitting: false);
-    return response.isSuccess;
+    try {
+      final response = await _api.post<Object>(
+        ApiPath.roadSaveDeal,
+        data: {
+          'imgList': state.imageUrls.join(','),
+          'opResponse': desc,
+          'result': result,
+          'recordNo': recordNo,
+          'payFlag': 0,
+        },
+        parser: (json) => json ?? Object(),
+      );
+      return response.isSuccess;
+    } catch (_) {
+      return false;
+    } finally {
+      state = state.copyWith(submitting: false);
+    }
   }
 
   Future<Uint8List?> _compressImage(String path) async {

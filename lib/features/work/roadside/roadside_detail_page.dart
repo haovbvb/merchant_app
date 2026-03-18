@@ -67,34 +67,35 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
       body: state.loading && detail == null
           ? const Center(child: SizedBox.shrink())
           : detail == null
-              ? _EmptyView(text: l10n.roadsideDetailEmpty)
-              : Column(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            _StatusHeader(l10n: l10n, detail: detail),
-                            _ContactCard(
-                              detail: detail,
-                              addressText: _resolvedAddress,
-                              onCallPhone: () => _callPhone(detail.riderPhone),
-                              onNavigate: () => _openNavigation(detail),
-                            ),
-                            const SizedBox(height: 12),
-                            _DescriptionAndMetaCard(l10n: l10n, detail: detail),
-                            if (detail.status != 0 && detail.opResponse != null) ...[
-                              const SizedBox(height: 12),
-                              _ProcessingResultCard(l10n: l10n, detail: detail),
-                            ],
-                            const SizedBox(height: 20),
-                          ],
+          ? _EmptyView(text: l10n.roadsideDetailEmpty)
+          : Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        _StatusHeader(l10n: l10n, detail: detail),
+                        _ContactCard(
+                          detail: detail,
+                          addressText: _resolvedAddress,
+                          onCallPhone: () => _callPhone(detail.riderPhone),
+                          onNavigate: () => _openNavigation(detail),
                         ),
-                      ),
+                        const SizedBox(height: 12),
+                        _DescriptionAndMetaCard(l10n: l10n, detail: detail),
+                        if (detail.status != 0 &&
+                            detail.opResponse != null) ...[
+                          const SizedBox(height: 12),
+                          _ProcessingResultCard(l10n: l10n, detail: detail),
+                        ],
+                        const SizedBox(height: 20),
+                      ],
                     ),
-                    _buildBottomButton(context, l10n, detail, notifier),
-                  ],
+                  ),
                 ),
+                _buildBottomButton(context, l10n, detail, notifier),
+              ],
+            ),
     );
   }
 
@@ -162,7 +163,8 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
 
     if (!mounted) return;
 
-    final canApple = defaultTargetPlatform == TargetPlatform.iOS && appleAvailable;
+    final canApple =
+        defaultTargetPlatform == TargetPlatform.iOS && appleAvailable;
     final canGoogle = googleMapSchemeAvailable || googleNavigationAvailable;
 
     if (!canApple && !canGoogle) {
@@ -225,7 +227,10 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
                       final target = googleMapSchemeAvailable
                           ? googleMapScheme
                           : googleNavigation;
-                      await launchUrl(target, mode: LaunchMode.externalApplication);
+                      await launchUrl(
+                        target,
+                        mode: LaunchMode.externalApplication,
+                      );
                     },
                   ),
                 Padding(
@@ -321,41 +326,51 @@ class _RoadSideDetailPageState extends ConsumerState<RoadSideDetailPage> {
     AppLocalizations l10n,
     RoadSideOrderDetail detail,
   ) async {
-    final result = await showWorkPaymentSheet(
-      context: context,
-      l10n: l10n,
-      title: l10n.roadsideCostsTitle,
-      totalLabel: l10n.roadsideTotalLabel,
-      amountHint: Localizations.localeOf(context).languageCode
-              .toLowerCase()
-              .startsWith('zh')
-          ? '请输入金额（无费用填 0）'
-          : 'Please enter amount  (No fee, fill in 0)',
-      paymentMethodsLabel: l10n.roadsidePaymentMethodLabel,
-      payTypeCashText: l10n.roadsidePayTypeCash,
-      payTypeOnlineText: l10n.roadsidePayTypeOnline,
-      uploadVoucherText: l10n.roadsideUploadVoucherLabel,
-      confirmButtonText: l10n.roadsideConfirmPayment,
-      initialPayType: 1,
-      maxAttachments: 5,
-      showUploadCount: true,
-      closeOnFailure: true,
-      successMessage: l10n.roadsidePaySuccess,
-      failureMessage: l10n.roadsidePayFailed,
-      onUploadImage: (path) =>
-          ref.read(roadSideDealProvider.notifier).uploadImage(path),
-      onConfirmPayment: (submit) {
-        return ref.read(roadSideDetailProvider.notifier).payRoadSide(
-              recordNo: detail.recordNo ?? '',
-              fee: submit.fee,
-              payType: submit.payType,
-              attachment: submit.attachments.join(','),
-            );
-      },
-    );
+    bool? result;
+    try {
+      result = await showWorkPaymentSheet(
+        context: context,
+        l10n: l10n,
+        title: l10n.roadsideCostsTitle,
+        totalLabel: l10n.roadsideTotalLabel,
+        amountHint:
+            Localizations.localeOf(
+              context,
+            ).languageCode.toLowerCase().startsWith('zh')
+            ? '请输入金额（无费用填 0）'
+            : 'Please enter amount  (No fee, fill in 0)',
+        paymentMethodsLabel: l10n.roadsidePaymentMethodLabel,
+        payTypeCashText: l10n.roadsidePayTypeCash,
+        payTypeOnlineText: l10n.roadsidePayTypeOnline,
+        uploadVoucherText: l10n.roadsideUploadVoucherLabel,
+        confirmButtonText: l10n.roadsideConfirmPayment,
+        initialPayType: 1,
+        maxAttachments: 5,
+        showUploadCount: true,
+        closeOnFailure: true,
+        successMessage: l10n.roadsidePaySuccess,
+        failureMessage: l10n.roadsidePayFailed,
+        onUploadImage: (path) =>
+            ref.read(roadSideDealProvider.notifier).uploadImage(path),
+        onConfirmPayment: (submit) {
+          return ref
+              .read(roadSideDetailProvider.notifier)
+              .payRoadSide(
+                recordNo: detail.recordNo ?? '',
+                fee: submit.fee,
+                payType: submit.payType,
+                attachment: submit.attachments.join(','),
+              );
+        },
+      );
+    } catch (_) {
+      result = false;
+    }
 
     if (result == true && mounted) {
-      await ref.read(roadSideDetailProvider.notifier).loadDetail(widget.recordNo);
+      await ref
+          .read(roadSideDetailProvider.notifier)
+          .loadDetail(widget.recordNo);
     }
   }
 }
@@ -401,7 +416,10 @@ class _StatusHeader extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     border: Border.all(color: const Color(0x42262626)),
                     borderRadius: BorderRadius.circular(4),
@@ -451,7 +469,8 @@ class _ContactCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fullName = '${detail.firstName ?? ''} ${detail.lastName ?? ''}'.trim();
+    final fullName = '${detail.firstName ?? ''} ${detail.lastName ?? ''}'
+        .trim();
     final displayName = fullName.isNotEmpty ? fullName : (detail.rider ?? '-');
     final address = addressText.trim().isNotEmpty ? addressText : '-';
 
@@ -594,10 +613,7 @@ class _DescriptionAndMetaCard extends StatelessWidget {
         children: [
           Text(
             l10n.roadsideDescriptionTitle,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Color(0x800C0C0D),
-            ),
+            style: const TextStyle(fontSize: 13, color: Color(0x800C0C0D)),
           ),
           const SizedBox(height: 6),
           Text(
@@ -634,7 +650,10 @@ class _DescriptionAndMetaCard extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           const Divider(height: 1, color: Color(0xFFE6E6E6)),
-          _MetaRow(label: l10n.roadsideFounderLabel, value: detail.creator ?? '-'),
+          _MetaRow(
+            label: l10n.roadsideFounderLabel,
+            value: detail.creator ?? '-',
+          ),
           const Divider(height: 1, color: Color(0xFFE6E6E6)),
           _MetaRow(
             label: l10n.roadsideCreationTimeLabel,
@@ -650,9 +669,9 @@ class _DescriptionAndMetaCard extends StatelessWidget {
   }
 
   String _sourceText(BuildContext context, int? source) {
-    final isZh = Localizations.localeOf(context).languageCode
-        .toLowerCase()
-        .startsWith('zh');
+    final isZh = Localizations.localeOf(
+      context,
+    ).languageCode.toLowerCase().startsWith('zh');
     switch (source) {
       case 1:
         return isZh ? '管理后台' : 'Admin Console';
@@ -690,10 +709,7 @@ class _ProcessingResultCard extends StatelessWidget {
         children: [
           Text(
             _processingButtonText(context),
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0x99000000),
-            ),
+            style: const TextStyle(fontSize: 14, color: Color(0x99000000)),
           ),
           const SizedBox(height: 12),
           const Divider(height: 1, color: Color(0xFFE6E6E6)),
@@ -732,10 +748,7 @@ class _ProcessingResultCard extends StatelessWidget {
               detail.processTime,
               pattern: 'MMM dd, yyyy HH:mm:ss',
             ),
-            style: const TextStyle(
-              fontSize: 12,
-              color: Color(0x66000000),
-            ),
+            style: const TextStyle(fontSize: 12, color: Color(0x66000000)),
           ),
           if (images.isNotEmpty) ...[
             const SizedBox(height: 12),
@@ -799,10 +812,7 @@ class _ProcessingResultCard extends StatelessWidget {
                     padding: EdgeInsets.only(left: 6),
                     child: Text(
                       '|',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0x99000000),
-                      ),
+                      style: TextStyle(fontSize: 13, color: Color(0x99000000)),
                     ),
                   ),
                 if ((detail.attachment ?? '').trim().isNotEmpty)
@@ -877,9 +887,9 @@ class _ProcessingResultCard extends StatelessWidget {
   }
 
   String _payWayText(BuildContext context, int? payWay) {
-    final isZh = Localizations.localeOf(context).languageCode
-        .toLowerCase()
-        .startsWith('zh');
+    final isZh = Localizations.localeOf(
+      context,
+    ).languageCode.toLowerCase().startsWith('zh');
     if (payWay == 1) return isZh ? '现金' : 'Cash';
     if (payWay == 2) return isZh ? '线上' : 'Online';
     return '-';
@@ -900,10 +910,7 @@ class _MetaRow extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 15,
-              color: Color(0xE60C0C0D),
-            ),
+            style: const TextStyle(fontSize: 15, color: Color(0xE60C0C0D)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -912,10 +919,7 @@ class _MetaRow extends StatelessWidget {
               textAlign: TextAlign.end,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 15,
-                color: Color(0x800C0C0D),
-              ),
+              style: const TextStyle(fontSize: 15, color: Color(0x800C0C0D)),
             ),
           ),
         ],
@@ -1035,10 +1039,7 @@ class _EmptyView extends StatelessWidget {
           children: [
             Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
-            Text(
-              text,
-              style: TextStyle(color: Colors.grey[600], fontSize: 14),
-            ),
+            Text(text, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
           ],
         ),
       ),
@@ -1060,50 +1061,50 @@ String _getStatusLabel(AppLocalizations l10n, int? status) {
 }
 
 String _processingButtonText(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
+  final isZh = Localizations.localeOf(
+    context,
+  ).languageCode.toLowerCase().startsWith('zh');
   return isZh ? '处理结果' : 'Processing Result';
 }
 
 String _paymentButtonText(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
+  final isZh = Localizations.localeOf(
+    context,
+  ).languageCode.toLowerCase().startsWith('zh');
   return isZh ? '支付' : 'Payment';
 }
 
 String _paymentMethodsText(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
+  final isZh = Localizations.localeOf(
+    context,
+  ).languageCode.toLowerCase().startsWith('zh');
   return isZh ? '支付方式' : 'Payment Methods';
 }
 
 String _viewVoucherText(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
+  final isZh = Localizations.localeOf(
+    context,
+  ).languageCode.toLowerCase().startsWith('zh');
   return isZh ? '查看凭证' : 'View Voucher';
 }
 
 String _totalText(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
+  final isZh = Localizations.localeOf(
+    context,
+  ).languageCode.toLowerCase().startsWith('zh');
   return isZh ? '总计' : 'Total';
 }
 
 String _occurrenceText(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
+  final isZh = Localizations.localeOf(
+    context,
+  ).languageCode.toLowerCase().startsWith('zh');
   return isZh ? '发生' : 'occurrence';
 }
 
 String _resolvingAddressText(BuildContext context) {
-  final isZh = Localizations.localeOf(context).languageCode
-      .toLowerCase()
-      .startsWith('zh');
+  final isZh = Localizations.localeOf(
+    context,
+  ).languageCode.toLowerCase().startsWith('zh');
   return isZh ? '地址解析中...' : 'Resolving address...';
 }

@@ -112,6 +112,10 @@ class _BaseApplicantSheetState extends State<BaseApplicantSheet> {
   final _birthdayController = TextEditingController();
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
+  final _emailFocusNode = FocusNode();
+  final _addressFocusNode = FocusNode();
+  final _emailFieldKey = GlobalKey();
+  final _addressFieldKey = GlobalKey();
 
   String? _cardImgUrl;
   String? _personImgUrl;
@@ -123,6 +127,8 @@ class _BaseApplicantSheetState extends State<BaseApplicantSheet> {
   void initState() {
     super.initState();
     _userIdFocusNode.addListener(_onUserIdFocusChanged);
+    _emailFocusNode.addListener(_onEmailFocusChanged);
+    _addressFocusNode.addListener(_onAddressFocusChanged);
     final initialCardNum = widget.initialCardNum?.trim() ?? '';
     if (initialCardNum.isNotEmpty) {
       _userIdController.text = initialCardNum;
@@ -139,10 +145,40 @@ class _BaseApplicantSheetState extends State<BaseApplicantSheet> {
     _queryUser(cardNum);
   }
 
+  void _onEmailFocusChanged() {
+    _ensureFieldVisible(_emailFocusNode, _emailFieldKey);
+  }
+
+  void _onAddressFocusChanged() {
+    _ensureFieldVisible(_addressFocusNode, _addressFieldKey);
+  }
+
+  void _ensureFieldVisible(FocusNode focusNode, GlobalKey fieldKey) {
+    if (!focusNode.hasFocus) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final fieldContext = fieldKey.currentContext;
+      if (fieldContext == null) return;
+      Scrollable.ensureVisible(
+        fieldContext,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        alignment: 0.2,
+        alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtEnd,
+      );
+    });
+  }
+
   @override
   void dispose() {
     _userIdFocusNode
       ..removeListener(_onUserIdFocusChanged)
+      ..dispose();
+    _emailFocusNode
+      ..removeListener(_onEmailFocusChanged)
+      ..dispose();
+    _addressFocusNode
+      ..removeListener(_onAddressFocusChanged)
       ..dispose();
     _userIdController.dispose();
     _accountController.dispose();
@@ -173,17 +209,11 @@ class _BaseApplicantSheetState extends State<BaseApplicantSheet> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
         ),
         child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: const Icon(Icons.arrow_back_ios, size: 20),
-                ),
-                const Spacer(),
-                Text(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Center(
+                child: Text(
                   widget.texts.title,
                   style: const TextStyle(
                     fontSize: 16,
@@ -191,195 +221,206 @@ class _BaseApplicantSheetState extends State<BaseApplicantSheet> {
                     color: AppColors.black06Text,
                   ),
                 ),
-                const Spacer(),
-                GestureDetector(
-                  onTap: () => Navigator.of(context).pop(),
-                  child: const Icon(Icons.close, color: Color(0xFF999999)),
-                ),
-              ],
+              ),
             ),
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      border: Border.all(color: const Color(0xFFEEEEEE)),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _userIdController,
-                            focusNode: _userIdFocusNode,
-                            decoration: InputDecoration(
-                              hintText: widget.texts.userIdHint,
-                              hintStyle: const TextStyle(
-                                color: Color(0xFF999999),
+            Expanded(
+              child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        border: Border.all(color: const Color(0xFFEEEEEE)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _userIdController,
+                              focusNode: _userIdFocusNode,
+                              decoration: InputDecoration(
+                                hintText: widget.texts.userIdHint,
+                                hintStyle: const TextStyle(
+                                  color: Color(0xFF999999),
+                                ),
+                                border: InputBorder.none,
                               ),
-                              border: InputBorder.none,
+                              onSubmitted: (value) {
+                                final cardNum = value.trim();
+                                if (cardNum.isNotEmpty) {
+                                  _queryUser(cardNum);
+                                }
+                              },
                             ),
-                            onSubmitted: (value) {
-                              final cardNum = value.trim();
-                              if (cardNum.isNotEmpty) {
-                                _queryUser(cardNum);
-                              }
-                            },
                           ),
-                        ),
-                        GestureDetector(
-                          onTap: _scanUserId,
-                          child: AppIcons.scanIcon(
-                            color: AppColors.black06Text,
+                          GestureDetector(
+                            onTap: _scanUserId,
+                            child: AppIcons.scanIcon(
+                              color: AppColors.black06Text,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  if (_user != null) _buildUserCard(),
-                  if (_user != null) const SizedBox(height: 16),
-
-                  _buildInputField(
-                    label: widget.texts.account,
-                    controller: _accountController,
-                    isRequired: true,
-                    readOnly: true,
-                  ),
-                  _buildDivider(),
-                  _buildInputField(
-                    label: widget.texts.firstName,
-                    controller: _firstNameController,
-                    isRequired: true,
-                    inputFormatters: [LengthLimitingTextInputFormatter(50)],
-                  ),
-                  _buildDivider(),
-                  _buildInputField(
-                    label: widget.texts.lastName,
-                    controller: _lastNameController,
-                    isRequired: true,
-                    inputFormatters: [LengthLimitingTextInputFormatter(50)],
-                  ),
-                  const SizedBox(height: 16),
-
-                  _buildInputField(
-                    label: widget.texts.phone,
-                    controller: _phoneController,
-                    isRequired: true,
-                    keyboardType: TextInputType.phone,
-                    inputFormatters: [
-                      LengthLimitingTextInputFormatter(20),
-                      FilteringTextInputFormatter.deny(_chineseRegex),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-
-                  if (widget.advancedMode) ...[
-                    _buildInputField(
-                      label: widget.texts.nid,
-                      controller: _nidController,
-                      isRequired: true,
-                      inputFormatters: [LengthLimitingTextInputFormatter(30)],
-                    ),
-                    const SizedBox(height: 16),
-                    _buildLabel(widget.texts.uploadNidPhoto, isRequired: true),
-                    const SizedBox(height: 4),
-                    Text(
-                      widget.texts.nidPhotoHint,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF999999),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    _buildCardImageRow(),
                     const SizedBox(height: 16),
-                    _buildLabel(widget.texts.personalPhoto, isRequired: true),
-                    const SizedBox(height: 8),
-                    _buildImageUpload(
-                      imageUrl: _personImgUrl,
-                      onTap: () {
-                        final imageUrl = _personImgUrl;
-                        if (imageUrl == null || imageUrl.isEmpty) {
-                          _pickImageWithSourceChooser(false);
-                          return;
-                        }
-                        _previewImage(imageUrl);
-                      },
-                      showCamera: _personImgUrl == null,
-                      onDelete: () {
-                        setState(() {
-                          _personImgUrl = null;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 16),
-                  ],
+                    if (_user != null) _buildUserCard(),
+                    if (_user != null) const SizedBox(height: 16),
 
-                  _buildInputField(
-                    label: widget.texts.birthday,
-                    controller: _birthdayController,
-                    readOnly: true,
-                    onTap: _pickBirthday,
-                  ),
-                  _buildDivider(),
-                  _buildInputField(
-                    label: widget.texts.email,
-                    controller: _emailController,
-                    hintText: widget.texts.emailHint,
-                    keyboardType: TextInputType.emailAddress,
-                    inputFormatters: [LengthLimitingTextInputFormatter(50)],
-                  ),
-                  if (widget.advancedMode) ...[
+                    _buildInputField(
+                      label: widget.texts.account,
+                      controller: _accountController,
+                      isRequired: true,
+                      readOnly: true,
+                    ),
                     _buildDivider(),
                     _buildInputField(
-                      label: widget.texts.address,
-                      controller: _addressController,
+                      label: widget.texts.firstName,
+                      controller: _firstNameController,
                       isRequired: true,
-                      hintText: widget.texts.addressHint,
-                      inputFormatters: [LengthLimitingTextInputFormatter(200)],
+                      inputFormatters: [LengthLimitingTextInputFormatter(50)],
                     ),
+                    _buildDivider(),
+                    _buildInputField(
+                      label: widget.texts.lastName,
+                      controller: _lastNameController,
+                      isRequired: true,
+                      inputFormatters: [LengthLimitingTextInputFormatter(50)],
+                    ),
+                    const SizedBox(height: 16),
+
+                    _buildInputField(
+                      label: widget.texts.phone,
+                      controller: _phoneController,
+                      isRequired: true,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [
+                        LengthLimitingTextInputFormatter(20),
+                        FilteringTextInputFormatter.deny(_chineseRegex),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+
+                    if (widget.advancedMode) ...[
+                      _buildInputField(
+                        label: widget.texts.nid,
+                        controller: _nidController,
+                        isRequired: true,
+                        inputFormatters: [LengthLimitingTextInputFormatter(30)],
+                      ),
+                      const SizedBox(height: 16),
+                      _buildLabel(
+                        widget.texts.uploadNidPhoto,
+                        isRequired: true,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.texts.nidPhotoHint,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF999999),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildCardImageRow(),
+                      const SizedBox(height: 16),
+                      _buildLabel(widget.texts.personalPhoto, isRequired: true),
+                      const SizedBox(height: 8),
+                      _buildImageUpload(
+                        imageUrl: _personImgUrl,
+                        onTap: () {
+                          final imageUrl = _personImgUrl;
+                          if (imageUrl == null || imageUrl.isEmpty) {
+                            _pickImageWithSourceChooser(false);
+                            return;
+                          }
+                          _previewImage(imageUrl);
+                        },
+                        showCamera: _personImgUrl == null,
+                        onDelete: () {
+                          setState(() {
+                            _personImgUrl = null;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+
+                    _buildInputField(
+                      label: widget.texts.birthday,
+                      controller: _birthdayController,
+                      readOnly: true,
+                      onTap: _pickBirthday,
+                    ),
+                    _buildDivider(),
+                    _buildInputField(
+                      label: widget.texts.email,
+                      controller: _emailController,
+                      hintText: widget.texts.emailHint,
+                      focusNode: _emailFocusNode,
+                      fieldKey: _emailFieldKey,
+                      keyboardType: TextInputType.emailAddress,
+                      textInputAction: widget.advancedMode
+                          ? TextInputAction.next
+                          : TextInputAction.done,
+                      inputFormatters: [LengthLimitingTextInputFormatter(50)],
+                    ),
+                    if (widget.advancedMode) ...[
+                      _buildDivider(),
+                      _buildInputField(
+                        label: widget.texts.address,
+                        controller: _addressController,
+                        isRequired: true,
+                        hintText: widget.texts.addressHint,
+                        focusNode: _addressFocusNode,
+                        fieldKey: _addressFieldKey,
+                        keyboardType: TextInputType.streetAddress,
+                        textInputAction: TextInputAction.done,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(200),
+                        ],
+                      ),
+                    ],
+                    const SizedBox(height: 24),
                   ],
-                  const SizedBox(height: 24),
-                ],
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            child: SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: _canSubmit() ? _submit : null,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primaryColor,
-                  disabledBackgroundColor: const Color(0xFFE8F5E9),
-                  foregroundColor: Colors.white,
-                  disabledForegroundColor: Colors.white.withValues(alpha: 0.6),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  elevation: 0,
-                ),
-                child: Text(
-                  widget.texts.submit,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+              child: SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: _canSubmit() ? _submit : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primaryColor,
+                    disabledBackgroundColor: const Color(0xFFE8F5E9),
+                    foregroundColor: Colors.white,
+                    disabledForegroundColor: Colors.white.withValues(
+                      alpha: 0.6,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    elevation: 0,
+                  ),
+                  child: Text(
+                    widget.texts.submit,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -396,7 +437,9 @@ class _BaseApplicantSheetState extends State<BaseApplicantSheet> {
         children: [
           CircleAvatar(
             radius: 24,
-            backgroundImage: user.avatar != null ? NetworkImage(user.avatar!) : null,
+            backgroundImage: user.avatar != null
+                ? NetworkImage(user.avatar!)
+                : null,
             child: user.avatar == null
                 ? const Icon(Icons.person, color: Colors.grey)
                 : null,
@@ -441,9 +484,13 @@ class _BaseApplicantSheetState extends State<BaseApplicantSheet> {
     List<TextInputFormatter>? inputFormatters,
     bool readOnly = false,
     VoidCallback? onTap,
+    FocusNode? focusNode,
+    Key? fieldKey,
+    TextInputAction? textInputAction,
     Widget? suffixIcon,
   }) {
     return Padding(
+      key: fieldKey,
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -455,10 +502,13 @@ class _BaseApplicantSheetState extends State<BaseApplicantSheet> {
               Expanded(
                 child: TextField(
                   controller: controller,
+                  focusNode: focusNode,
                   keyboardType: keyboardType,
+                  textInputAction: textInputAction,
                   inputFormatters: inputFormatters,
                   readOnly: readOnly,
                   onTap: onTap,
+                  scrollPadding: const EdgeInsets.only(bottom: 180),
                   decoration: InputDecoration(
                     hintText: hintText ?? controller.text,
                     hintStyle: const TextStyle(color: Color(0xFF999999)),
@@ -545,7 +595,11 @@ class _BaseApplicantSheetState extends State<BaseApplicantSheet> {
                       color: Colors.black.withValues(alpha: 0.5),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.close, color: Colors.white, size: 14),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 14,
+                    ),
                   ),
                 ),
               ),
@@ -567,8 +621,9 @@ class _BaseApplicantSheetState extends State<BaseApplicantSheet> {
           onDelete: () {
             setState(() {
               _cardImgUrls.removeAt(index);
-              _cardImgUrl =
-                  _cardImgUrls.isEmpty ? null : _cardImgUrls.join(',');
+              _cardImgUrl = _cardImgUrls.isEmpty
+                  ? null
+                  : _cardImgUrls.join(',');
             });
           },
         ),
@@ -609,11 +664,8 @@ class _BaseApplicantSheetState extends State<BaseApplicantSheet> {
             child: Image.network(
               imageUrl,
               fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const Icon(
-                Icons.broken_image,
-                color: Colors.white,
-                size: 40,
-              ),
+              errorBuilder: (_, __, ___) =>
+                  const Icon(Icons.broken_image, color: Colors.white, size: 40),
             ),
           ),
         ),
@@ -794,8 +846,10 @@ class _BaseApplicantSheetState extends State<BaseApplicantSheet> {
     } catch (_) {}
 
     try {
-      return DateFormat('yyyy-MM-dd', DateFormatUtils.defaultLocale)
-          .parseStrict(value);
+      return DateFormat(
+        'yyyy-MM-dd',
+        DateFormatUtils.defaultLocale,
+      ).parseStrict(value);
     } catch (_) {}
 
     return null;

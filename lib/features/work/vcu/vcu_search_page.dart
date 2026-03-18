@@ -5,6 +5,7 @@ import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/constants/storage_keys.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
+import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/vcu/vcu_control_page.dart';
 import 'package:merchant_app/features/work/vcu/vcu_controller.dart';
@@ -199,17 +200,24 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
     setState(() => _showNoData = false);
     final result = await notifier.searchDeviceBySn(sn);
     if (!mounted) return;
+
+    final type = result?.type;
     final deviceInfo = result?.deviceInfo;
-    if (result?.type != 4 ||
-        deviceInfo == null ||
-        deviceInfo.ctrlId == null ||
-        deviceInfo.ctrlId!.isEmpty) {
+    final isSupportedType = type == 2 || type == 4;
+    if (!isSupportedType || deviceInfo == null) {
       setState(() => _showNoData = true);
       return;
     }
+
+    final ctrlId = deviceInfo.ctrlId?.trim() ?? '';
+    if (ctrlId.isEmpty) {
+      showToast(l10n.deviceSearchEmpty);
+      return;
+    }
+
     await _addHistory(sn);
+    if (!mounted) return;
     final vin = deviceInfo.vin ?? deviceInfo.deviceId ?? sn;
-    final ctrlId = deviceInfo.ctrlId ?? '';
     final deviceSn = deviceInfo.sn ?? deviceInfo.deviceId ?? sn;
     await Navigator.of(context).push(
       MaterialPageRoute(

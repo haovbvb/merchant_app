@@ -13,6 +13,7 @@ import 'package:merchant_app/data/models/cabinet_cabin.dart';
 import 'package:merchant_app/data/models/cabinet_detail_base_info_bean.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_ble_client.dart';
 import 'package:merchant_app/features/work/cabinet/cabinet_offline_controller.dart';
+import 'package:merchant_app/features/work/cabinet/cabinet_remote_controller.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 
@@ -66,6 +67,12 @@ class _CabinetOfflineDetailPageState
     _bleClient = CabinetBleClient(
       onConnectionChanged: (connected) {
         ref.read(cabinetOfflineProvider.notifier).setBleConnected(connected);
+        if (!connected) {
+          _dismissPendingBleHud();
+          _dismissPendingControlHud();
+          _refreshHudTimer?.cancel();
+          _refreshHudTimer = null;
+        }
       },
       onPhaseChanged: (phase) {
         if (!mounted || _blePhase == phase) return;
@@ -272,8 +279,19 @@ class _CabinetOfflineDetailPageState
 
     final notifier = ref.read(cabinetOfflineProvider.notifier);
     final l10n = context.l10n;
-    final msgType = (map['msgType'] as num?)?.toInt();
+    final msgType = _toInt(map['msgType']);
     if (msgType == null) return;
+    final isFull = (_toInt(map['isFull']) ?? 0) == 1;
+    if (isFull) {
+      _parseAllData(jsonText, notifier, l10n);
+      _dismissPendingBleHud();
+      _refreshHudTimer?.cancel();
+      _refreshHudTimer = null;
+      if (_waitingAllDataResponse) {
+        _waitingAllDataResponse = false;
+        Hud.dismiss();
+      }
+    }
     final resultList = map['resultList'];
 
     if (_waitingDeviceInfoResponse &&
@@ -293,22 +311,20 @@ class _CabinetOfflineDetailPageState
     }
 
     if (_waitingAllDataResponse &&
-        (msgType == CabinetDataType.attributeRequest ||
-            msgType == CabinetDataType.alarmRequest ||
-            (msgType == CabinetDataType.queryResponse &&
-                resultList is List &&
-                resultList.any((item) {
-                  if (item is! Map) return false;
-                  final id = item['id']?.toString() ?? '';
-                  return id == CabinetBleSignal.allData;
-                })))) {
+        msgType == CabinetDataType.queryResponse &&
+        resultList is List &&
+        resultList.any((item) {
+          if (item is! Map) return false;
+          final id = item['id']?.toString() ?? '';
+          return id == CabinetBleSignal.allData;
+        })) {
       _waitingAllDataResponse = false;
       Hud.dismiss();
     }
 
     if (msgType == CabinetDataType.controlResponse) {
       _dismissPendingControlHud();
-      final ok = ((map['result'] as num?)?.toInt() ?? 0) == 1;
+      final ok = (_toInt(map['result']) ?? 0) == 1;
       showToast(
         ok
             ? (_pendingSuccessToast ?? l10n.deviceDetailToggleSuccess)
@@ -316,7 +332,6 @@ class _CabinetOfflineDetailPageState
       );
       if (ok) {
         _pendingSuccessAction?.call();
-        _queryAllDataWithHud();
       }
       _pendingSuccessToast = null;
       _pendingFailedToast = null;
@@ -330,14 +345,14 @@ class _CabinetOfflineDetailPageState
         final id = item['id']?.toString() ?? '';
         final value = item['value']?.toString() ?? '';
         if (id == CabinetParamName.softVersion) {
-          notifier.updateSoftwareVersion(value);
+          notifier.patchBaseInfo(softwareVersion: value);
         } else if (id == CabinetParamName.cabSoc) {
-          final threshold = int.tryParse(value);
+          final threshold = _toInt(item['value']);
           if (threshold != null) {
             notifier.patchBaseInfo(swapThreshold: threshold);
           }
         } else if (id == CabinetParamName.cabVolume) {
-          final volume = int.tryParse(value);
+          final volume = _toInt(item['value']);
           if (volume != null) {
             notifier.patchBaseInfo(volume: volume);
           }
@@ -355,7 +370,7 @@ class _CabinetOfflineDetailPageState
       for (final item in alarmList) {
         if (item is! Map) continue;
         final id = item['id']?.toString() ?? '';
-        final alarmFlag = (item['alarmFlag'] as num?)?.toInt();
+        final alarmFlag = _toInt(item['alarmFlag']);
         if (id == CabinetBleSignal.alarmSmoke) {
           notifier.updateRealtimeData(
             smokeAlarmStatus: alarmFlag == 1
@@ -377,8 +392,8 @@ class _CabinetOfflineDetailPageState
             chargerAlarm = true;
           }
         } else if (id == CabinetBleSignal.backupBatteryStatus) {
-          notifier.updateBackupPowerStatus(
-            alarmFlag == 1
+          notifier.patchBaseInfo(
+            backupPowerStatus: alarmFlag == 1
                 ? l10n.cabinetOfflineYes
                 : alarmFlag == 0
                 ? l10n.cabinetOfflineNo
@@ -392,127 +407,153 @@ class _CabinetOfflineDetailPageState
             : l10n.cabinetOfflineYes,
       );
     }
+  }
 
-    if (msgType == CabinetDataType.attributeRequest) {
-      final attrList = map['attrList'];
-      var batteryInSlot = 0;
-      var ctrlSystemStatus = l10n.cabinetOfflineYes;
-      if (attrList is List) {
-        for (final item in attrList) {
-          if (item is! Map) continue;
-          final id = item['id']?.toString() ?? '';
-          final value = item['value']?.toString() ?? '';
-          final doorId = int.tryParse(item['doorId']?.toString() ?? '');
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is num) return value.toInt();
+    final text = value.toString().trim();
+    if (text.isEmpty) return null;
+    return int.tryParse(text) ?? num.tryParse(text)?.toInt();
+  }
 
-          if (id == CabinetBleSignal.gsm) {
-            notifier.updateRealtimeData(gsmSignal: '$value dbm');
-          } else if (id == CabinetBleSignal.cabinetMaintenanceDoor) {
-            final intVal = int.tryParse(value);
-            notifier.updateRealtimeData(
-              omDoorStatus: intVal == 0
-                  ? l10n.cabinetOfflineClose
-                  : intVal == 1
-                  ? l10n.cabinetOfflineOpen
-                  : l10n.cabinetOfflineUnknown,
-            );
-          } else if (id == CabinetBleSignal.cabinetVoltage) {
-            notifier.updateRealtimeData(totalVoltage: '$value V');
-          } else if (id == CabinetBleSignal.cabinetCurrent) {
-            notifier.updateRealtimeData(totalCurrent: '$value A');
-          } else if (id == CabinetBleSignal.cabinetTemperature) {
-            notifier.updateRealtimeData(temperature: '$value ℃');
-          } else if (id == CabinetBleSignal.electricMeter) {
-            notifier.updateRealtimeData(electricityMeter: '$value kWh');
-          } else if (id == CabinetBleSignal.ctrlSystem) {
-            final intVal = int.tryParse(value);
-            if (intVal == 0) {
-              ctrlSystemStatus = l10n.cabinetOfflineException;
-            } else if (intVal == 1) {
-              ctrlSystemStatus = l10n.cabinetOfflineYes;
-            } else {
-              ctrlSystemStatus = l10n.cabinetOfflineUnknown;
+  void _parseAllData(
+    String data,
+    CabinetOfflineNotifier notifier,
+    AppLocalizations l10n,
+  ) {
+    if (data.isEmpty) return;
+    Map<String, dynamic> map;
+    try {
+      final decoded = jsonDecode(data);
+      if (decoded is! Map<String, dynamic>) return;
+      map = decoded;
+    } catch (_) {
+      return;
+    }
+
+    if (_toInt(map['msgType']) != CabinetDataType.attributeRequest) {
+      return;
+    }
+
+    final attrList = map['attrList'];
+    var batteryInSlot = 0;
+    var ctrlSystemStatus = l10n.cabinetOfflineYes;
+    if (attrList is List) {
+      for (final item in attrList) {
+        if (item is! Map) continue;
+        final id = item['id']?.toString() ?? '';
+        final value = item['value']?.toString() ?? '';
+        final doorId = _toInt(item['doorId']);
+
+        if (id == CabinetBleSignal.gsm) {
+          notifier.updateRealtimeData(gsmSignal: '$value dbm');
+        } else if (id == CabinetBleSignal.cabinetMaintenanceDoor) {
+          final intVal = _toInt(item['value']);
+          notifier.updateRealtimeData(
+            omDoorStatus: intVal == 0
+                ? l10n.cabinetOfflineClose
+                : intVal == 1
+                ? l10n.cabinetOfflineOpen
+                : l10n.cabinetOfflineUnknown,
+          );
+        } else if (id == CabinetBleSignal.cabinetVoltage) {
+          notifier.updateRealtimeData(totalVoltage: '$value V');
+        } else if (id == CabinetBleSignal.cabinetCurrent) {
+          notifier.updateRealtimeData(totalCurrent: '$value A');
+        } else if (id == CabinetBleSignal.cabinetTemperature) {
+          notifier.updateRealtimeData(temperature: '$value ℃');
+        } else if (id == CabinetBleSignal.electricMeter) {
+          notifier.updateRealtimeData(electricityMeter: '$value kWh');
+        } else if (id == CabinetBleSignal.ctrlSystem) {
+          final intVal = _toInt(item['value']);
+          if (intVal == 0) {
+            ctrlSystemStatus = l10n.cabinetOfflineException;
+          } else if (intVal == 1) {
+            ctrlSystemStatus = l10n.cabinetOfflineYes;
+          } else {
+            ctrlSystemStatus = l10n.cabinetOfflineUnknown;
+          }
+        } else if (id == CabinetBleSignal.cabinetFanStatus) {
+          final intVal = _toInt(item['value']);
+          notifier.updateRealtimeData(
+            fanStatus: intVal == 0
+                ? l10n.cabinetOfflineClose
+                : intVal == 1
+                ? l10n.cabinetOfflineRunning
+                : intVal == 2
+                ? l10n.cabinetOfflineException
+                : l10n.cabinetOfflineUnknown,
+          );
+        } else if (doorId != null && doorId > 0) {
+          if (id == CabinetBleSignal.batterySn) {
+            notifier.updateCabinBatterySn(doorId, value);
+          } else if (id == CabinetBleSignal.cabinetBatterySwapStatus) {
+            final intVal = _toInt(item['value']) ?? 0;
+            notifier.updateCabinBatteryStatus(doorId, intVal);
+            if (intVal != 0) {
+              batteryInSlot++;
             }
-          } else if (id == CabinetBleSignal.cabinetFanStatus) {
-            final intVal = int.tryParse(value);
-            notifier.updateRealtimeData(
-              fanStatus: intVal == 0
-                  ? l10n.cabinetOfflineClose
-                  : intVal == 1
-                  ? l10n.cabinetOfflineRunning
-                  : intVal == 2
-                  ? l10n.cabinetOfflineException
-                  : l10n.cabinetOfflineUnknown,
-            );
-          } else if (doorId != null && doorId > 0) {
-            if (id == CabinetBleSignal.batterySn) {
-              notifier.updateCabinBatterySn(doorId, value);
-            } else if (id == CabinetBleSignal.cabinetBatterySwapStatus) {
-              final intVal = int.tryParse(value) ?? 0;
-              notifier.updateCabinBatteryStatus(doorId, intVal);
-              if (intVal != 0) {
-                batteryInSlot++;
-              }
-            } else if (id == CabinetBleSignal.batterySoc) {
-              final soc = int.tryParse(value);
-              if (soc != null) {
-                notifier.updateCabinBatterySoc(doorId, soc);
-              }
-            } else if (id == CabinetBleSignal.cabinetDoorStatus) {
-              final intVal = int.tryParse(value);
-              if (intVal != null) {
-                notifier.updateCabinDoorStatus(doorId, intVal);
-              }
-            } else if (id == CabinetBleSignal.cabinetSwapStatus) {
-              final intVal = int.tryParse(value) ?? 0;
-              notifier.updateCabinSwapFlag(doorId, intVal > 0 ? 1 : 0);
+          } else if (id == CabinetBleSignal.batterySoc) {
+            final soc = _toInt(item['value']);
+            if (soc != null) {
+              notifier.updateCabinBatterySoc(doorId, soc);
             }
+          } else if (id == CabinetBleSignal.cabinetDoorStatus) {
+            final intVal = _toInt(item['value']);
+            if (intVal != null) {
+              notifier.updateCabinDoorStatus(doorId, intVal);
+            }
+          } else if (id == CabinetBleSignal.cabinetSwapStatus) {
+            final intVal = _toInt(item['value']) ?? 0;
+            notifier.updateCabinSwapFlag(doorId, intVal > 0 ? 1 : 0);
           }
         }
       }
-      notifier.updateBatteryInSlot(batteryInSlot);
-      notifier.updateRealtimeData(ctrlSystemStatus: ctrlSystemStatus);
+    }
+    notifier.patchBaseInfo(batteryInSlot: batteryInSlot);
+    notifier.updateRealtimeData(ctrlSystemStatus: ctrlSystemStatus);
 
-      final cabList = map['cabList'];
-      if (cabList is List && cabList.isNotEmpty && cabList.first is Map) {
-        final cabinet = cabList.first as Map;
-        final dbm = cabinet['dBM']?.toString();
-        final cabVol = cabinet['cabVol']?.toString();
-        final cabCur = cabinet['cabCur']?.toString();
-        final cabT = cabinet['cabT']?.toString();
-        final cabAlarm = cabinet['cabAlarm'];
-        if (dbm != null && dbm.isNotEmpty) {
-          notifier.updateRealtimeData(gsmSignal: '$dbm dbm');
-        }
-        if (cabVol != null && cabVol.isNotEmpty) {
-          notifier.updateRealtimeData(totalVoltage: '$cabVol V');
-        }
-        if (cabCur != null && cabCur.isNotEmpty) {
-          notifier.updateRealtimeData(totalCurrent: '$cabCur A');
-        }
-        if (cabT != null && cabT.isNotEmpty) {
-          notifier.updateRealtimeData(temperature: '$cabT ℃');
-        }
-        if (cabAlarm is List) {
-          var waterAlarm = false;
-          var smokeAlarm = false;
-          for (final item in cabAlarm) {
-            final code = item?.toString() ?? '';
-            if (code == '03') {
-              waterAlarm = true;
-            } else if (code == '04') {
-              smokeAlarm = true;
-            }
+    final cabList = map['cabList'];
+    if (cabList is List && cabList.isNotEmpty && cabList.first is Map) {
+      final cabinet = cabList.first as Map;
+      final dbm = cabinet['dBM']?.toString();
+      final cabVol = cabinet['cabVol']?.toString();
+      final cabCur = cabinet['cabCur']?.toString();
+      final cabT = cabinet['cabT']?.toString();
+      final cabAlarm = cabinet['cabAlarm'];
+      if (dbm != null && dbm.isNotEmpty) {
+        notifier.updateRealtimeData(gsmSignal: '$dbm dbm');
+      }
+      if (cabVol != null && cabVol.isNotEmpty) {
+        notifier.updateRealtimeData(totalVoltage: '$cabVol V');
+      }
+      if (cabCur != null && cabCur.isNotEmpty) {
+        notifier.updateRealtimeData(totalCurrent: '$cabCur A');
+      }
+      if (cabT != null && cabT.isNotEmpty) {
+        notifier.updateRealtimeData(temperature: '$cabT ℃');
+      }
+      if (cabAlarm is List) {
+        var waterAlarm = false;
+        var smokeAlarm = false;
+        for (final item in cabAlarm) {
+          final code = item?.toString() ?? '';
+          if (code == '03') {
+            waterAlarm = true;
+          } else if (code == '04') {
+            smokeAlarm = true;
           }
-          if (waterAlarm) {
-            notifier.updateRealtimeData(
-              waterAlarmStatus: l10n.cabinetOfflineAlarm,
-            );
-          }
-          if (smokeAlarm) {
-            notifier.updateRealtimeData(
-              smokeAlarmStatus: l10n.cabinetOfflineAlarm,
-            );
-          }
+        }
+        if (waterAlarm) {
+          notifier.updateRealtimeData(
+            waterAlarmStatus: l10n.cabinetOfflineAlarm,
+          );
+        }
+        if (smokeAlarm) {
+          notifier.updateRealtimeData(
+            smokeAlarmStatus: l10n.cabinetOfflineAlarm,
+          );
         }
       }
     }
@@ -1015,6 +1056,18 @@ class _CabinetOfflineDetailPageState
             ref
                 .read(cabinetOfflineProvider.notifier)
                 .patchBaseInfo(swapThreshold: intVal);
+            final stationPid = info.stationPid?.trim() ?? '';
+            if (stationPid.isNotEmpty) {
+              unawaited(
+                ref
+                    .read(cabinetRemoteProvider.notifier)
+                    .configCabinet(
+                      stationPid: stationPid,
+                      type: 1,
+                      value: intVal,
+                    ),
+              );
+            }
           };
           _bleClient.sendSwapThreshold(intVal);
         },
@@ -1095,6 +1148,18 @@ class _CabinetOfflineDetailPageState
             ref
                 .read(cabinetOfflineProvider.notifier)
                 .patchBaseInfo(volume: value);
+            final stationPid = info.stationPid?.trim() ?? '';
+            if (stationPid.isNotEmpty) {
+              unawaited(
+                ref
+                    .read(cabinetRemoteProvider.notifier)
+                    .configCabinet(
+                      stationPid: stationPid,
+                      type: 2,
+                      value: value,
+                    ),
+              );
+            }
           };
           _bleClient.sendVolume(value);
         },
@@ -1167,7 +1232,7 @@ class _CabinetOfflineDetailPageState
 
   Color _bleStatusColor(bool bleConnected) {
     return bleConnected || _blePhase == CabinetBleConnectionPhase.connected
-        ? Color(0x800C0C0D)
+        ? Color.fromARGB(128, 2, 2, 190)
         : _nativeDisconnectColor;
   }
 }
@@ -1194,6 +1259,12 @@ class _DeviceInfoTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final softwareVersion =
+        _trimOrNull(state.softwareVersion) ?? _trimOrNull(info.softwareVersion);
+    final backupPowerStatus =
+        _trimOrNull(state.backupPowerStatus) ??
+        _trimOrNull(info.backupPowerStatus);
+    final batteryInSlot = state.batteryInSlot ?? info.batteryInSlot;
     return ListView(
       padding: const EdgeInsets.only(bottom: 16),
       children: [
@@ -1210,19 +1281,20 @@ class _DeviceInfoTab extends StatelessWidget {
             children: [
               _InfoTile(
                 label: l10n.cabinetOfflineSoftwareVersion,
-                value: isPlaceholder ? '' : state.softwareVersion,
+                value: softwareVersion,
+                emptyPlaceholder: '',
               ),
               _InfoTile(
                 label: l10n.cabinetOfflineBackupPowerStatus,
-                value: isPlaceholder ? '' : state.backupPowerStatus,
+                value: backupPowerStatus,
               ),
               _InfoTile(
                 label: l10n.cabinetOfflineSlotCount,
-                value: isPlaceholder ? '' : info.storeNum?.toString(),
+                value: info.storeNum?.toString(),
               ),
               _InfoTile(
                 label: l10n.cabinetOfflineBatteryInSlot,
-                value: isPlaceholder ? '' : state.batteryInSlot?.toString(),
+                value: batteryInSlot?.toString(),
                 showDivider: false,
               ),
             ],
@@ -1241,25 +1313,27 @@ class _DeviceInfoTab extends StatelessWidget {
             children: [
               _InfoTile(
                 label: l10n.cabinetOfflineSwapThreshold,
-                value: isPlaceholder ? '' : info.swapThreshold?.toString(),
+                value: info.swapThreshold?.toString(),
                 showArrow: !isPlaceholder,
                 onTap: isPlaceholder ? null : onEditSwapThreshold,
               ),
               _InfoTile(
                 label: l10n.cabinetOfflineApn,
-                value: isPlaceholder ? '' : info.apn,
+                value: _trimOrNull(info.apn),
+                emptyPlaceholder: '',
                 showArrow: !isPlaceholder,
                 onTap: isPlaceholder ? null : onEditApn,
               ),
               _InfoTile(
                 label: l10n.cabinetOfflineVolume,
-                value: isPlaceholder ? '' : info.volume?.toString(),
+                value: info.volume?.toString(),
                 showArrow: !isPlaceholder,
                 onTap: isPlaceholder ? null : onEditVolume,
               ),
               _InfoTile(
                 label: l10n.cabinetOfflinePlatformUrl,
-                value: isPlaceholder ? '' : info.platformUrl,
+                value: _trimOrNull(info.platformUrl),
+                emptyPlaceholder: '',
                 showArrow: !isPlaceholder,
                 showDivider: false,
                 onTap: isPlaceholder ? null : onEditPlatformUrl,
@@ -1269,6 +1343,19 @@ class _DeviceInfoTab extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String? _trimOrNull(String? raw) {
+    final value = raw?.trim() ?? '';
+    if (value.isEmpty) return null;
+    final normalized = value.toLowerCase();
+    if (value == '-' ||
+        value == '--' ||
+        normalized == 'null' ||
+        normalized == '(null)') {
+      return null;
+    }
+    return value;
   }
 }
 
@@ -1842,6 +1929,7 @@ class _InfoTile extends StatelessWidget {
   const _InfoTile({
     required this.label,
     this.value,
+    this.emptyPlaceholder = '-',
     this.showArrow = false,
     this.showDivider = true,
     this.onTap,
@@ -1849,12 +1937,22 @@ class _InfoTile extends StatelessWidget {
 
   final String label;
   final String? value;
+  final String emptyPlaceholder;
   final bool showArrow;
   final bool showDivider;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final trimmedValue = value?.trim() ?? '';
+    final normalized = trimmedValue.toLowerCase();
+    final hasValue =
+        trimmedValue.isNotEmpty &&
+        trimmedValue != '-' &&
+        trimmedValue != '--' &&
+        normalized != 'null' &&
+        normalized != '(null)';
+    final displayValue = hasValue ? trimmedValue : emptyPlaceholder;
     final content = Padding(
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: SizedBox(
@@ -1869,7 +1967,7 @@ class _InfoTile extends StatelessWidget {
             ),
             Expanded(
               child: Text(
-                value ?? '-',
+                displayValue,
                 style: const TextStyle(fontSize: 15, color: Color(0x800C0C0D)),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,

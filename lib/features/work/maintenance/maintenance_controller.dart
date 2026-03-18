@@ -157,23 +157,26 @@ class MaintenanceBookNotifier extends Notifier<MaintenanceBookState> {
     final vehicleSn = appointment.sn ?? '';
     if (cardNum.isEmpty || vehicleSn.isEmpty) return false;
     state = state.copyWith(submitting: true);
-
-    final attachment = state.voucherImages.join(',');
-    final response = await _api.post<Object>(
-      ApiPath.maintenanceGenRecord,
-      data: {
-        'cardNum': cardNum,
-        'vehicleSn': vehicleSn,
-        'attachment': attachment,
-        'remark': state.note.trim(),
-        'paySource': state.paySource,
-        'price': state.amount.trim().isEmpty ? '0' : state.amount.trim(),
-      },
-      parser: (json) => json ?? Object(),
-    );
-
-    state = state.copyWith(submitting: false);
-    return response.isSuccess;
+    try {
+      final attachment = state.voucherImages.join(',');
+      final response = await _api.post<Object>(
+        ApiPath.maintenanceGenRecord,
+        data: {
+          'cardNum': cardNum,
+          'vehicleSn': vehicleSn,
+          'attachment': attachment,
+          'remark': state.note.trim(),
+          'paySource': state.paySource,
+          'price': state.amount.trim().isEmpty ? '0' : state.amount.trim(),
+        },
+        parser: (json) => json ?? Object(),
+      );
+      return response.isSuccess;
+    } catch (_) {
+      return false;
+    } finally {
+      state = state.copyWith(submitting: false);
+    }
   }
 
   Future<String?> uploadVoucher(String filePath) async {
@@ -183,13 +186,17 @@ class MaintenanceBookNotifier extends Notifier<MaintenanceBookState> {
     final formData = FormData.fromMap({
       'file': MultipartFile.fromBytes(data, filename: fileName),
     });
-    final response = await _api.postForm<String>(
-      ApiPath.tradeUploadAttachment,
-      data: formData,
-      parser: (json) => json?.toString() ?? '',
-    );
-    if (response.isSuccess && response.result != null) {
-      return response.result;
+    try {
+      final response = await _api.postForm<String>(
+        ApiPath.tradeUploadAttachment,
+        data: formData,
+        parser: (json) => json?.toString() ?? '',
+      );
+      if (response.isSuccess && response.result != null) {
+        return response.result;
+      }
+    } catch (_) {
+      return null;
     }
     return null;
   }

@@ -75,10 +75,10 @@ class VcuBleUpDataIds {
 }
 
 const Map<String, String> vcuBleIdToLabel = {
-  VcuBleCommandIds.lock: '一键锁车',
-  VcuBleCommandIds.launch: '一键启动',
-  VcuBleCommandIds.antiTheft: '防盗模式',
-  VcuBleCommandIds.find: '一键找车',
+  VcuBleCommandIds.lock: '锁车',
+  VcuBleCommandIds.launch: '启动',
+  VcuBleCommandIds.antiTheft: '防盗',
+  VcuBleCommandIds.find: '找车',
   VcuBleCommandIds.remoteLock: '远程锁车',
   VcuBleCommandIds.remoteUnlock: '远程解锁',
   VcuBleCommandIds.queryStatus: '查询车辆状态',

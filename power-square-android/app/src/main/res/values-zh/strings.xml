@@ -1122,7 +1122,7 @@
     <string name="str_req_history">请求历史</string>
     <string name="str_vehicle_sn">车辆 SN</string>
     <string name="str_bluetooth">蓝牙</string>
-    <string name="str_vcu_control">VCU 控制</string>
+    <string name="str_vcu_control">VCU 测试</string>
     <string name="str_vcu_configuration">VCU 配置(通过蓝牙)</string>
     <string name="str_platform_url">平台地址</string>
     <string name="str_apn">APN</string>

@@ -654,7 +654,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
     if (sn == null || sn.trim().isEmpty) return;
     await Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => DeviceDetailPageNew(initialSn: sn, readOnly: true),
+        builder: (_) => DeviceDetailPageNew(initialSn: sn, readOnly: true,showSearchBarInAppBar: false),
       ),
     );
   }

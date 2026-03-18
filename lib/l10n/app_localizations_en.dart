@@ -3889,7 +3889,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vcuSearchTitle => 'VCU Search';
 
   @override
-  String get vcuControlTitle => 'VCU Control';
+  String get vcuControlTitle => 'VCU Testing';
 
   @override
   String get vcuVinLabel => 'VIN';
@@ -3913,10 +3913,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vcuVersionLabel => 'Version';
 
   @override
-  String get vcuControlTab => 'Control';
+  String get vcuControlTab => 'Test Operation';
 
   @override
-  String get vcuHistoryTab => 'History';
+  String get vcuHistoryTab => 'Request History';
 
   @override
   String get vcuHistoryFilterAll => 'All';
@@ -3952,10 +3952,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vcuControlSectionTitle => 'VCU Control';
 
   @override
-  String get vcuConfigSectionTitle => 'VCU Configuration';
+  String get vcuConfigSectionTitle => 'VCU Configuration(via Bluetooth)';
 
   @override
-  String get vcuPlatformAddressLabel => 'Platform Address';
+  String get vcuPlatformAddressLabel => 'Platform Url';
 
   @override
   String get vcuPleaseSelect => 'Please select';
@@ -3967,7 +3967,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vcuGpsFrequencyLabel => 'GPS Query Frequency';
 
   @override
-  String get vcuVehicleUploadFrequencyLabel => 'Vehicle Upload Frequency';
+  String get vcuVehicleUploadFrequencyLabel => 'Vehicle Info Upload Frequency';
 
   @override
   String get vcuSecondUnit => 's';
@@ -4068,10 +4068,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vcuOtaSendingData => 'Sending OTA data';
 
   @override
-  String get vcuChooseSendMethod => 'Choose sending method';
+  String get vcuChooseSendMethod => 'Select The Signaling Method';
 
   @override
-  String get vcuChannel4gNetwork => '4G/Network';
+  String get vcuChannel4gNetwork => '4G';
 
   @override
   String get vcuSendButton => 'Send';
@@ -4083,25 +4083,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vcuPleaseEnterRange1To65535 => 'Please enter 1-65535';
 
   @override
-  String get vcuSetPlatformTitle => 'Set Platform';
+  String get vcuSetPlatformTitle => 'Platform Url';
 
   @override
-  String get vcuSetApnTitle => 'Set APN';
+  String get vcuSetApnTitle => 'APN';
 
   @override
-  String get vcuInputApnHint => 'Enter APN';
+  String get vcuInputApnHint => 'Please enter the APN';
 
   @override
-  String get vcuSetGpsFrequencyTitle => 'Set GPS Frequency';
+  String get vcuSetGpsFrequencyTitle => 'GPS Query Frequency';
 
   @override
-  String get vcuInputGpsFrequencyHint => 'Enter GPS frequency';
+  String get vcuInputGpsFrequencyHint => 'Please enter the GPS Query Frequency';
 
   @override
-  String get vcuSetVehicleUploadFrequencyTitle => 'Set Vehicle Upload Frequency';
+  String get vcuSetVehicleUploadFrequencyTitle => 'Vehicle Info Upload Frequency';
 
   @override
-  String get vcuInputVehicleUploadFrequencyHint => 'Enter vehicle upload frequency';
+  String get vcuInputVehicleUploadFrequencyHint => 'Please enter the Vehicle Info Upload Frequency';
 
   @override
   String get vcuPleaseLoadVersionsFirst => 'Please load versions first';
@@ -4116,13 +4116,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vcuBleCommandGeneric => 'Command';
 
   @override
-  String get vcuCmdLaunch => 'One-Tap Start';
+  String get vcuCmdLaunch => 'On-Click Start';
 
   @override
-  String get vcuCmdLock => 'One-Tap Lock';
+  String get vcuCmdLock => 'Lock';
 
   @override
-  String get vcuCmdAntiTheft => 'Anti-Theft Mode';
+  String get vcuCmdAntiTheft => 'Anti-Theft';
 
   @override
   String get vcuCmdFind => 'Find Vehicle';

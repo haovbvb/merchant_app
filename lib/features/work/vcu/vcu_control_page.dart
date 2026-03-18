@@ -157,7 +157,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
       length: 2,
       child: Scaffold(
         backgroundColor: AppColors.bgColor,
-        appBar: AppBar(title: Text(l10n.vcuControlTitle)),
+        appBar: AppBar(title: Text(l10n.vcuControlTitle), centerTitle: true),
         body: Column(
           children: [
             _buildTopHeader(),
@@ -247,13 +247,16 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
                         children: [
                           _buildStatusTag(
                             text: '4G',
-                            icon: Icons.wifi,
+                            icon: _isOnline4g ? Icons.wifi : Icons.wifi_off,
                             selected: _isOnline4g,
                           ),
                           const SizedBox(width: 6),
                           _buildStatusTag(
                             text: 'BT',
                             icon: Icons.bluetooth,
+                            iconAsset: _bleConnected
+                                ? 'assets/images/icon_vcu_ble_online.png'
+                                : 'assets/images/icon_vcu_ble_offline.png',
                             selected: _bleConnected,
                           ),
                         ],
@@ -272,6 +275,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
   Widget _buildStatusTag({
     required String text,
     required IconData icon,
+    String? iconAsset,
     required bool selected,
   }) {
     final foreground = selected
@@ -287,7 +291,17 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12, color: foreground),
+          if (iconAsset != null)
+            Image.asset(
+              iconAsset,
+              width: 12,
+              height: 12,
+              fit: BoxFit.contain,
+              errorBuilder: (_, __, ___) =>
+                  Icon(icon, size: 12, color: foreground),
+            )
+          else
+            Icon(icon, size: 12, color: foreground),
           const SizedBox(width: 2),
           Text(text, style: TextStyle(fontSize: 13, color: foreground)),
         ],
@@ -323,11 +337,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
                 const Divider(height: 1),
                 _InfoRow(
                   title: l10n.vcuBluetoothLabel,
-                  value: _connecting
-                      ? l10n.vcuBleConnecting
-                      : _bleConnected
-                      ? l10n.vcuBleConnected
-                      : l10n.vcuBleDisconnected,
+                  value: '',
                   trailing: Switch.adaptive(
                     value: _bleEnabled,
                     onChanged: (value) async {
@@ -367,26 +377,24 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
                 _CardTitle(title: l10n.vcuConfigSectionTitle),
                 _ActionRow(
                   title: l10n.vcuPlatformAddressLabel,
-                  value: _platformLabel ?? l10n.vcuPleaseSelect,
-                  onTap: !_bleEnabled || !_bleConnected || state.sending
+                  value: _platformLabel ?? '',
+                  onTap: state.sending
                       ? null
                       : () => _confirmPlatform(platformOptions.first, notifier),
                 ),
                 const Divider(height: 1),
                 _ActionRow(
                   title: 'APN',
-                  value: _apnValue ?? l10n.vcuNotSet,
-                  onTap: !_bleEnabled || !_bleConnected || state.sending
-                      ? null
-                      : () => _confirmApn(notifier),
+                  value: _apnValue ?? '',
+                  onTap: state.sending ? null : () => _confirmApn(notifier),
                 ),
                 const Divider(height: 1),
                 _ActionRow(
                   title: l10n.vcuGpsFrequencyLabel,
                   value: _gpsValue == null
-                      ? l10n.vcuNotSet
+                      ? ''
                       : '${_gpsValue!} ${l10n.vcuSecondUnit}',
-                  onTap: !_bleEnabled || !_bleConnected || state.sending
+                  onTap: state.sending
                       ? null
                       : () => _confirmGpsFrequency(notifier),
                 ),
@@ -394,17 +402,17 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
                 _ActionRow(
                   title: l10n.vcuVehicleUploadFrequencyLabel,
                   value: _dataValue == null
-                      ? l10n.vcuNotSet
+                      ? ''
                       : '${_dataValue!} ${l10n.vcuSecondUnit}',
-                  onTap: !_bleEnabled || !_bleConnected || state.sending
+                  onTap: state.sending
                       ? null
                       : () => _confirmDataFrequency(notifier),
                 ),
                 const Divider(height: 1),
                 _ActionRow(
                   title: 'OTA',
-                  value: _mcuVersion ?? '-',
-                  onTap: !_bleConnected || _otaDownloading || _otaInProgress
+                  value: _mcuVersion ?? '',
+                  onTap: _otaDownloading || _otaInProgress
                       ? null
                       : () => _confirmBleOta(
                           state.versions.isNotEmpty
@@ -461,49 +469,45 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     return Column(
       children: [
         Container(
-          color: Colors.white,
-          padding: const EdgeInsets.fromLTRB(10, 10, 10, 8),
+          color: const Color(0xFFF5F6F7),
+          padding: const EdgeInsets.fromLTRB(12, 16, 12, 12),
           child: Row(
             children: [
-              Expanded(
-                child: _buildHistoryFilterButton(
-                  label: l10n.vcuHistoryFilterAll,
-                  selected: state.historyFilter == VcuHistoryFilter.all,
-                  onTap: () => notifier.setHistoryFilter(VcuHistoryFilter.all),
-                ),
+              _buildHistoryFilterButton(
+                label: l10n.vcuHistoryFilterAll,
+                selected: state.historyFilter == VcuHistoryFilter.all,
+                onTap: () => notifier.setHistoryFilter(VcuHistoryFilter.all),
               ),
               const SizedBox(width: 8),
-              Expanded(
-                child: _buildHistoryFilterButton(
-                  label: l10n.vcuHistoryFilterRequest,
-                  selected: state.historyFilter == VcuHistoryFilter.request,
-                  onTap: () =>
-                      notifier.setHistoryFilter(VcuHistoryFilter.request),
-                ),
+              _buildHistoryFilterButton(
+                label: l10n.vcuHistoryFilterResponse,
+                selected: state.historyFilter == VcuHistoryFilter.response,
+                onTap: () =>
+                    notifier.setHistoryFilter(VcuHistoryFilter.response),
               ),
               const SizedBox(width: 8),
-              Expanded(
-                child: _buildHistoryFilterButton(
-                  label: l10n.vcuHistoryFilterResponse,
-                  selected: state.historyFilter == VcuHistoryFilter.response,
-                  onTap: () =>
-                      notifier.setHistoryFilter(VcuHistoryFilter.response),
-                ),
+              _buildHistoryFilterButton(
+                label: l10n.vcuHistoryFilterRequest,
+                selected: state.historyFilter == VcuHistoryFilter.request,
+                onTap: () =>
+                    notifier.setHistoryFilter(VcuHistoryFilter.request),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 8),
         Expanded(
-          child: filtered.isEmpty
-              ? Center(child: Text(l10n.vcuHistoryEmpty))
-              : ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 16),
-                  itemCount: filtered.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) =>
-                      _buildHistoryItemCard(context, filtered[index]),
-                ),
+          child: Container(
+            color: const Color(0xFFF5F6F7),
+            child: filtered.isEmpty
+                ? Center(child: Text(l10n.vcuHistoryEmpty))
+                : ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(12, 0, 12, 16),
+                    itemCount: filtered.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) =>
+                        _buildHistoryItemCard(context, filtered[index]),
+                  ),
+          ),
         ),
       ],
     );
@@ -516,22 +520,23 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
   }) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(4),
+      borderRadius: BorderRadius.circular(6),
       child: Container(
-        height: 34,
+        height: 28,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: selected ? AppColors.primaryColor : const Color(0xFFE6E6E6),
+            color: selected ? const Color(0xFF08983B) : Colors.transparent,
           ),
-          color: selected ? AppColors.primaryColor : Colors.white,
+          color: Colors.white,
         ),
         alignment: Alignment.center,
         child: Text(
           label,
           style: TextStyle(
-            fontSize: 12,
-            color: selected ? Colors.white : const Color(0xCC000000),
+            fontSize: 14,
+            color: selected ? const Color(0xFF08983B) : const Color(0x99000000),
           ),
         ),
       ),
@@ -544,112 +549,93 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     final channel = _historyChannel(item.command);
     final isBle = channel == 'BLE';
     final payload = (item.data ?? '').trim();
-    final statusText = item.type == VcuHistoryType.response
-        ? (item.success == true
-              ? l10n.vcuHistoryStatusSuccess
-              : l10n.vcuHistoryStatusFailed)
-        : null;
 
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
       ),
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(
+            height: 50,
+            child: Row(
+              children: [
+                Image.asset(
+                  isRequest
+                      ? 'assets/android/mipmap-xxhdpi/icon_request.png'
+                      : 'assets/android/mipmap-xxhdpi/icon_response.png',
+                  width: 20,
+                  height: 20,
+                  errorBuilder: (_, __, ___) => Icon(
+                    isRequest
+                        ? Icons.call_made_rounded
+                        : Icons.call_received_rounded,
+                    size: 20,
+                    color: isRequest
+                        ? const Color(0xFF08983B)
+                        : const Color(0xFFFA4332),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  isRequest
+                      ? l10n.vcuHistoryFilterRequest
+                      : l10n.vcuHistoryFilterResponse,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: Color(0xE60C0C0D),
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  DateFormatUtils.formatTimestamp(
+                    item.timestamp,
+                    pattern: 'M\u6708 dd,yyyy HH:mm:ss',
+                  ),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0x66000000),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 0.5, thickness: 0.5, color: Color(0xFFF0F0F0)),
+          const SizedBox(height: 12),
           Row(
             children: [
-              Image.asset(
-                isRequest
-                    ? 'assets/android/mipmap-xxhdpi/icon_request.png'
-                    : 'assets/android/mipmap-xxhdpi/icon_response.png',
-                width: 14,
-                height: 14,
-                errorBuilder: (_, __, ___) => Icon(
-                  isRequest
-                      ? Icons.call_made_rounded
-                      : Icons.call_received_rounded,
-                  size: 16,
-                  color: isRequest
-                      ? AppColors.primaryColor
-                      : const Color(0xFFFA4332),
-                ),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                isRequest
-                    ? l10n.vcuHistoryFilterRequest
-                    : l10n.vcuHistoryFilterResponse,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isRequest
-                      ? AppColors.primaryColor
-                      : const Color(0xFFFA4332),
-                ),
-              ),
-              const SizedBox(width: 8),
               Image.asset(
                 isBle
                     ? 'assets/android/mipmap-xxhdpi/icon_ble.png'
                     : 'assets/android/mipmap-xxhdpi/icon_wifi.png',
-                width: 14,
-                height: 14,
+                width: 16,
+                height: 16,
                 errorBuilder: (_, __, ___) => Icon(
                   isBle ? Icons.bluetooth : Icons.wifi,
-                  size: 14,
+                  size: 16,
                   color: const Color(0x99000000),
                 ),
               ),
-              const SizedBox(width: 4),
-              Text(
-                channel ?? 'NET',
-                style: const TextStyle(fontSize: 12, color: Color(0x99000000)),
-              ),
-              const Spacer(),
-              Text(
-                DateFormatUtils.formatTimestamp(
-                  item.timestamp,
-                  pattern: 'yyyy-MM-dd HH:mm:ss',
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _historyCommand(item.command),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color(0xE60C0C0D),
+                  ),
                 ),
-                style: const TextStyle(fontSize: 11, color: Color(0x66000000)),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            _historyCommand(item.command),
-            style: const TextStyle(
-              fontSize: 14,
-              color: Color(0xE6000000),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            item.vin,
-            style: const TextStyle(fontSize: 12, color: Color(0x99000000)),
-          ),
-          if (statusText != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              statusText,
-              style: TextStyle(
-                fontSize: 12,
-                color: statusText == l10n.vcuHistoryStatusSuccess
-                    ? AppColors.primaryColor
-                    : const Color(0xFFFA4332),
-              ),
-            ),
-          ],
           if (payload.isNotEmpty) ...[
-            const SizedBox(height: 4),
+            const SizedBox(height: 12),
             Text(
               payload,
-              style: const TextStyle(fontSize: 12, color: Color(0xCC000000)),
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 14, color: Color(0x99000000)),
             ),
           ],
         ],
@@ -683,21 +669,20 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
       showToast(l10n.vcuSendFailed);
       return;
     }
-    final canBle = _bleEnabled && _bleConnected && command.bleId != null;
     final channel = await _showCtrlDialog(
       title: command.label,
-      icon: command.icon,
-      canBle: canBle,
-      canNet: true,
+      iconAsset: command.iconAsset,
     );
     if (channel == null || !context.mounted) return;
     if (channel == _CtrlChannel.ble && command.bleId != null) {
       final cmdData = VcuBleCommandBuilder.build(
         params: [VcuBleCommandParam(command.bleId!, command.bleValue ?? 1)],
       );
-      _sendBle(cmdData, notifier);
+      final ok = _sendBle(cmdData, notifier);
       if (!context.mounted) return;
-      showToast(l10n.vcuSendSuccess);
+      if (!ok) {
+        showToast(l10n.vcuSendFailed);
+      }
       return;
     }
     final ok = await notifier.sendCommand(
@@ -871,7 +856,10 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     await prefs.setBool(StorageKeys.vcuBleEnabled, enabled);
   }
 
-  void _sendBle(VcuBleCommand command, VcuNotifier notifier) {
+  bool _sendBle(VcuBleCommand command, VcuNotifier notifier) {
+    if (!_bleConnected || _writeChar == null) {
+      return false;
+    }
     final label = _buildBleLabel(command);
     final version = _extractBleVersion(command);
     _pendingTxnLabels[command.txnNo] = label;
@@ -887,6 +875,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
       ),
     );
     _enqueueBle(command.payload);
+    return true;
   }
 
   void _enqueueBle(String payload) {
@@ -1026,30 +1015,31 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
   void _sendApn(VcuNotifier notifier) {
     final input = _apnController.text.trim();
     if (input.isEmpty) return;
-    setState(() => _apnValue = input);
     final cmd = VcuBleCommandBuilder.build(
       params: [VcuBleCommandParam(VcuBleCommandIds.editApn, input)],
     );
-    _sendBle(cmd, notifier);
+    if (_sendBle(cmd, notifier)) {
+      setState(() => _apnValue = input);
+    }
   }
 
   void _sendGpsFrequency(VcuNotifier notifier) {
     final input = int.tryParse(_gpsFrequencyController.text.trim());
     if (input == null) return;
-    setState(() => _gpsValue = input.toString());
     final frequency = input * 100;
     final cmd = VcuBleCommandBuilder.build(
       params: [
         VcuBleCommandParam(VcuBleCommandIds.editFrequencyGps, frequency),
       ],
     );
-    _sendBle(cmd, notifier);
+    if (_sendBle(cmd, notifier)) {
+      setState(() => _gpsValue = input.toString());
+    }
   }
 
   void _sendDataFrequency(VcuNotifier notifier) {
     final input = int.tryParse(_dataFrequencyController.text.trim());
     if (input == null) return;
-    setState(() => _dataValue = input.toString());
     final frequency = input * 100;
     final cmd = VcuBleCommandBuilder.build(
       params: [
@@ -1057,18 +1047,21 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
         VcuBleCommandParam(VcuBleCommandIds.editFrequencyVehicle1, frequency),
       ],
     );
-    _sendBle(cmd, notifier);
+    if (_sendBle(cmd, notifier)) {
+      setState(() => _dataValue = input.toString());
+    }
   }
 
   void _sendPlatform(_VcuPlatformOption option, VcuNotifier notifier) {
-    setState(() => _platformLabel = option.label);
     final cmd = VcuBleCommandBuilder.build(
       params: [
         VcuBleCommandParam(VcuBleCommandIds.editUrl, option.host),
         VcuBleCommandParam(VcuBleCommandIds.editPort, option.port),
       ],
     );
-    _sendBle(cmd, notifier);
+    if (_sendBle(cmd, notifier)) {
+      setState(() => _platformLabel = option.label);
+    }
   }
 
   void _getNewData(VcuNotifier notifier) {
@@ -1217,81 +1210,135 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
 
   Future<_CtrlChannel?> _showCtrlDialog({
     required String title,
-    required IconData icon,
-    required bool canBle,
-    required bool canNet,
+    required String iconAsset,
   }) async {
     final l10n = context.l10n;
     return showModalBottomSheet<_CtrlChannel>(
       context: context,
       isScrollControlled: true,
-      showDragHandle: true,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
       ),
       builder: (context) {
-        var selected = canBle ? _CtrlChannel.ble : _CtrlChannel.network;
+        var selected = _CtrlChannel.ble;
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            return Padding(
+            return Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFFF5F6F7),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              ),
               padding: EdgeInsets.fromLTRB(
-                16,
-                16,
-                16,
-                16 + MediaQuery.of(context).viewInsets.bottom,
+                12,
+                24,
+                12,
+                20 + MediaQuery.of(context).viewInsets.bottom,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _DialogTitle(
-                    icon: icon,
-                    title: title,
-                    subtitle: l10n.vcuChooseSendMethod,
+                  Container(
+                    width: 54,
+                    height: 54,
+                    alignment: Alignment.center,
+                    child: Image.asset(
+                      iconAsset,
+                      width: 54,
+                      height: 54,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
                   ),
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    children: [
-                      ChoiceChip(
-                        label: const Text('BLE'),
-                        selected: selected == _CtrlChannel.ble,
-                        onSelected: canBle
-                            ? (value) {
-                                if (!value) return;
-                                setSheetState(() {
-                                  selected = _CtrlChannel.ble;
-                                });
-                              }
-                            : null,
-                      ),
-                      ChoiceChip(
-                        label: Text(l10n.vcuChannel4gNetwork),
-                        selected: selected == _CtrlChannel.network,
-                        onSelected: canNet
-                            ? (value) {
-                                if (!value) return;
-                                setSheetState(() {
-                                  selected = _CtrlChannel.network;
-                                });
-                              }
-                            : null,
-                      ),
-                    ],
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      color: Color(0xE60C0C0D),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    l10n.vcuChooseSendMethod,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color(0x66000000),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      children: [
+                        _buildChannelOption(
+                          text: '4G',
+                          selected: selected == _CtrlChannel.network,
+                          onTap: () {
+                            setSheetState(() {
+                              selected = _CtrlChannel.network;
+                            });
+                          },
+                        ),
+                        const Divider(height: 1, indent: 12, endIndent: 12),
+                        _buildChannelOption(
+                          text: l10n.vcuBluetoothLabel,
+                          selected: selected == _CtrlChannel.ble,
+                          onTap: () {
+                            setSheetState(() {
+                              selected = _CtrlChannel.ble;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(l10n.cancel),
+                        child: SizedBox(
+                          height: 44,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              side: BorderSide.none,
+                            ),
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(
+                              l10n.cancel,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Color(0xE60C0C0D),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       Expanded(
-                        child: FilledButton(
-                          onPressed: () => Navigator.pop(context, selected),
-                          child: Text(l10n.vcuSendButton),
+                        child: SizedBox(
+                          height: 44,
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF12B34B),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () => Navigator.pop(context, selected),
+                            child: Text(
+                              l10n.vcuSendButton,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -1305,9 +1352,38 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     );
   }
 
+  Widget _buildChannelOption({
+    required String text,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: SizedBox(
+        height: 50,
+        child: Row(
+          children: [
+            const SizedBox(width: 12),
+            Icon(
+              selected ? Icons.check_circle : Icons.radio_button_unchecked,
+              size: 24,
+              color: selected
+                  ? const Color(0xFF12B34B)
+                  : const Color(0xFFCCCCCC),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              text,
+              style: const TextStyle(fontSize: 15, color: Color(0xE6000000)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Future<T?> _showListSheet<T>({
     required String title,
-    required IconData icon,
     required List<T> items,
     required String Function(T item) titleBuilder,
     String? Function(T item)? subtitleBuilder,
@@ -1317,71 +1393,179 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     return showModalBottomSheet<T>(
       context: context,
       isScrollControlled: true,
-      showDragHandle: true,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
       ),
       builder: (context) {
         var selectedIndex = initialIndex;
+        if (items.isEmpty) {
+          selectedIndex = -1;
+        } else if (selectedIndex < 0 || selectedIndex >= items.length) {
+          selectedIndex = 0;
+        }
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            return Padding(
+            return Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFFF5F6F7),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              ),
               padding: EdgeInsets.fromLTRB(
-                16,
-                16,
-                16,
-                16 + MediaQuery.of(context).viewInsets.bottom,
+                12,
+                0,
+                12,
+                20 + MediaQuery.of(context).viewInsets.bottom,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _DialogTitle(icon: icon, title: title),
-                  const SizedBox(height: 12),
-                  Flexible(
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: items.length,
-                      separatorBuilder: (_, __) => const Divider(height: 1),
-                      itemBuilder: (context, index) {
-                        final item = items[index];
-                        final subtitle = subtitleBuilder == null
-                            ? null
-                            : subtitleBuilder(item);
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          title: Text(titleBuilder(item)),
-                          subtitle: subtitle == null ? null : Text(subtitle),
-                          selected: selectedIndex == index,
-                          selectedTileColor: Theme.of(
-                            context,
-                          ).colorScheme.primary.withOpacity(0.06),
-                          trailing: Icon(
-                            selectedIndex == index
-                                ? Icons.radio_button_checked
-                                : Icons.radio_button_off,
-                          ),
-                          onTap: () => setSheetState(() {
-                            selectedIndex = index;
-                          }),
-                        );
-                      },
+                  SizedBox(
+                    height: 50,
+                    child: Center(
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          color: Color(0xE60C0C0D),
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: items.isEmpty
+                        ? SizedBox(
+                            height: 50,
+                            child: Center(
+                              child: Text(
+                                l10n.vcuPleaseLoadVersionsFirst,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0x800C0C0D),
+                                ),
+                              ),
+                            ),
+                          )
+                        : ListView.separated(
+                            shrinkWrap: true,
+                            itemCount: items.length,
+                            separatorBuilder: (_, __) => const Divider(
+                              height: 1,
+                              indent: 12,
+                              endIndent: 12,
+                            ),
+                            itemBuilder: (context, index) {
+                              final item = items[index];
+                              final subtitle = subtitleBuilder == null
+                                  ? null
+                                  : subtitleBuilder(item);
+                              final selected = selectedIndex == index;
+                              return InkWell(
+                                onTap: () => setSheetState(() {
+                                  selectedIndex = index;
+                                }),
+                                child: SizedBox(
+                                  height: subtitle == null ? 50 : 60,
+                                  child: Row(
+                                    children: [
+                                      const SizedBox(width: 12),
+                                      Icon(
+                                        selected
+                                            ? Icons.check_circle
+                                            : Icons.radio_button_unchecked,
+                                        size: 24,
+                                        color: selected
+                                            ? const Color(0xFF12B34B)
+                                            : const Color(0xFFCCCCCC),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              titleBuilder(item),
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                color: Color(0xE6000000),
+                                              ),
+                                            ),
+                                            if (subtitle != null)
+                                              Text(
+                                                subtitle,
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                  color: Color(0x800C0C0D),
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                  const SizedBox(height: 20),
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(l10n.cancel),
+                        child: SizedBox(
+                          height: 44,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              side: BorderSide.none,
+                            ),
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(
+                              l10n.cancel,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Color(0xE60C0C0D),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       Expanded(
-                        child: FilledButton(
-                          onPressed: () =>
-                              Navigator.pop(context, items[selectedIndex]),
-                          child: Text(l10n.vcuSendButton),
+                        child: SizedBox(
+                          height: 44,
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF12B34B),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: items.isEmpty
+                                ? null
+                                : () => Navigator.pop(
+                                    context,
+                                    items[selectedIndex],
+                                  ),
+                            child: Text(
+                              l10n.vcuSendButton,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -1397,7 +1581,6 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
 
   Future<String?> _showInputSheet({
     required String title,
-    required IconData icon,
     required String hint,
     String? unit,
     bool numeric = false,
@@ -1407,78 +1590,152 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     final result = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
-      showDragHandle: true,
+      backgroundColor: Colors.transparent,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
       ),
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            return Padding(
+            return Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFFF5F6F7),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              ),
               padding: EdgeInsets.fromLTRB(
-                16,
-                16,
-                16,
-                16 + MediaQuery.of(context).viewInsets.bottom,
+                12,
+                0,
+                12,
+                20 + MediaQuery.of(context).viewInsets.bottom,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _DialogTitle(icon: icon, title: title),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: controller,
-                    keyboardType: numeric
-                        ? TextInputType.number
-                        : TextInputType.text,
-                    decoration: InputDecoration(
-                      hintText: hint,
-                      suffixText: unit,
-                      suffixIcon: controller.text.isEmpty
-                          ? null
-                          : IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                controller.clear();
-                                setSheetState(() {});
-                              },
-                            ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
+                  SizedBox(
+                    height: 50,
+                    child: Center(
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          color: Color(0xE60C0C0D),
+                        ),
                       ),
                     ),
-                    onChanged: (_) => setSheetState(() {}),
                   ),
-                  const SizedBox(height: 16),
+                  Container(
+                    height: 52,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: controller,
+                            keyboardType: numeric
+                                ? TextInputType.number
+                                : TextInputType.text,
+                            decoration: InputDecoration(
+                              hintText: hint,
+                              hintStyle: const TextStyle(
+                                color: Color(0x4D0C0C0D),
+                                fontSize: 15,
+                              ),
+                              border: InputBorder.none,
+                              isDense: true,
+                            ),
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Color(0xE60C0C0D),
+                            ),
+                            onChanged: (_) => setSheetState(() {}),
+                          ),
+                        ),
+                        if (controller.text.isNotEmpty)
+                          IconButton(
+                            icon: const Icon(
+                              Icons.cancel,
+                              size: 20,
+                              color: Color(0xFFBFBFBF),
+                            ),
+                            onPressed: () {
+                              controller.clear();
+                              setSheetState(() {});
+                            },
+                          ),
+                        if (unit != null && unit.isNotEmpty)
+                          Text(
+                            unit,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              color: Color(0xE60C0C0D),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: Text(l10n.cancel),
+                        child: SizedBox(
+                          height: 44,
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              side: BorderSide.none,
+                            ),
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(
+                              l10n.cancel,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                color: Color(0xE60C0C0D),
+                              ),
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      const SizedBox(width: 10),
                       Expanded(
-                        child: FilledButton(
-                          onPressed: () {
-                            final value = controller.text.trim();
-                            if (value.isEmpty) {
-                              showToast(l10n.vcuPleaseEnterValidValue);
-                              return;
-                            }
-                            if (numeric) {
-                              final numValue = int.tryParse(value);
-                              if (numValue == null ||
-                                  numValue <= 0 ||
-                                  numValue > 65535) {
-                                showToast(l10n.vcuPleaseEnterRange1To65535);
+                        child: SizedBox(
+                          height: 44,
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF12B34B),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            onPressed: () {
+                              final value = controller.text.trim();
+                              if (value.isEmpty) {
+                                showToast(l10n.vcuPleaseEnterValidValue);
                                 return;
                               }
-                            }
-                            Navigator.pop(context, value);
-                          },
-                          child: Text(l10n.vcuSendButton),
+                              if (numeric) {
+                                final numValue = int.tryParse(value);
+                                if (numValue == null ||
+                                    numValue <= 0 ||
+                                    numValue > 65535) {
+                                  showToast(l10n.vcuPleaseEnterRange1To65535);
+                                  return;
+                                }
+                              }
+                              Navigator.pop(context, value);
+                            },
+                            child: Text(
+                              l10n.vcuSendButton,
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                          ),
                         ),
                       ),
                     ],
@@ -1500,15 +1757,12 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
   ) async {
     final l10n = context.l10n;
     final platformOptions = _buildPlatformOptions(l10n);
-    if (!(_bleEnabled && _bleConnected)) return;
     final selectedIndex = platformOptions.indexOf(option);
     final selected = await _showListSheet<_VcuPlatformOption>(
       title: l10n.vcuSetPlatformTitle,
-      icon: Icons.cloud_done_outlined,
       items: platformOptions,
       initialIndex: selectedIndex < 0 ? 0 : selectedIndex,
       titleBuilder: (item) => item.label,
-      subtitleBuilder: (item) => '${item.host}:${item.port}',
     );
     if (selected == null) return;
     _sendPlatform(selected, notifier);
@@ -1518,7 +1772,6 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     final l10n = context.l10n;
     final value = await _showInputSheet(
       title: l10n.vcuSetApnTitle,
-      icon: Icons.settings_input_antenna,
       hint: l10n.vcuInputApnHint,
     );
     if (value == null) return;
@@ -1530,7 +1783,6 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     final l10n = context.l10n;
     final value = await _showInputSheet(
       title: l10n.vcuSetGpsFrequencyTitle,
-      icon: Icons.gps_fixed,
       hint: l10n.vcuInputGpsFrequencyHint,
       unit: l10n.vcuSecondUnit,
       numeric: true,
@@ -1544,7 +1796,6 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     final l10n = context.l10n;
     final value = await _showInputSheet(
       title: l10n.vcuSetVehicleUploadFrequencyTitle,
-      icon: Icons.cloud_upload_outlined,
       hint: l10n.vcuInputVehicleUploadFrequencyHint,
       unit: l10n.vcuSecondUnit,
       numeric: true,
@@ -1555,20 +1806,13 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
   }
 
   Future<void> _confirmBleOta(VcuVersion version, VcuNotifier notifier) async {
-    final l10n = context.l10n;
     final versions = ref.read(vcuProvider).versions;
-    if (versions.isEmpty) {
-      showToast(l10n.vcuPleaseLoadVersionsFirst);
-      return;
-    }
     final selectedIndex = versions.indexOf(version);
     final selected = await _showListSheet<VcuVersion>(
       title: 'OTA',
-      icon: Icons.system_update_alt,
       items: versions,
       initialIndex: selectedIndex < 0 ? 0 : selectedIndex,
       titleBuilder: (item) => item.version ?? item.name ?? '-',
-      subtitleBuilder: (item) => item.url,
     );
     if (selected == null) return;
     await _startBleOta(selected, notifier);
@@ -1736,12 +1980,13 @@ class _InfoRow extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                value,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: const Color(0x800C0C0D),
+              if (value.trim().isNotEmpty)
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: const Color(0x800C0C0D),
+                  ),
                 ),
-              ),
               if (trailing != null) ...[const SizedBox(width: 8), trailing!],
             ],
           ),
@@ -1772,60 +2017,20 @@ class _ActionRow extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            value.isEmpty ? '-' : value,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: const Color(0x800C0C0D)),
-            overflow: TextOverflow.ellipsis,
-          ),
+          if (value.trim().isNotEmpty)
+            Text(
+              value,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: const Color(0x800C0C0D)),
+              overflow: TextOverflow.ellipsis,
+            ),
           const SizedBox(width: 6),
           const Icon(Icons.chevron_right),
         ],
       ),
       enabled: onTap != null,
       onTap: onTap,
-    );
-  }
-}
-
-class _DialogTitle extends StatelessWidget {
-  const _DialogTitle({required this.icon, required this.title, this.subtitle});
-
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.primary;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Container(
-          width: 40,
-          height: 40,
-          decoration: BoxDecoration(
-            color: color.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: color),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-              if (subtitle != null) ...[
-                const SizedBox(height: 4),
-                Text(subtitle!, style: Theme.of(context).textTheme.bodySmall),
-              ],
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
@@ -1860,10 +2065,16 @@ class _CommandGrid extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          item.icon,
-                          size: 24,
-                          color: Theme.of(context).colorScheme.primary,
+                        Image.asset(
+                          item.iconAsset,
+                          width: 58,
+                          height: 58,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => Icon(
+                            item.icon,
+                            size: 24,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -1890,6 +2101,7 @@ class _CommandGrid extends StatelessWidget {
 class _VcuCommand {
   final int cmd;
   final String label;
+  final String iconAsset;
   final String? bleId;
   final Object? bleValue;
   final IconData icon;
@@ -1897,6 +2109,7 @@ class _VcuCommand {
   const _VcuCommand(
     this.cmd,
     this.label, {
+    required this.iconAsset,
     this.bleId,
     this.bleValue,
     required this.icon,
@@ -1907,6 +2120,7 @@ List<_VcuCommand> _buildVcuCommands(AppLocalizations l10n) => [
   _VcuCommand(
     2,
     l10n.vcuCmdLaunch,
+    iconAsset: 'assets/images/icon_vcu_start.png',
     bleId: VcuBleCommandIds.launch,
     bleValue: 1,
     icon: Icons.flash_on,
@@ -1914,6 +2128,7 @@ List<_VcuCommand> _buildVcuCommands(AppLocalizations l10n) => [
   _VcuCommand(
     1,
     l10n.vcuCmdLock,
+    iconAsset: 'assets/images/icon_vcu_lock.png',
     bleId: VcuBleCommandIds.lock,
     bleValue: 1,
     icon: Icons.lock,
@@ -1921,6 +2136,7 @@ List<_VcuCommand> _buildVcuCommands(AppLocalizations l10n) => [
   _VcuCommand(
     3,
     l10n.vcuCmdAntiTheft,
+    iconAsset: 'assets/images/icon_vcu_anti.png',
     bleId: VcuBleCommandIds.antiTheft,
     bleValue: 1,
     icon: Icons.security,
@@ -1928,6 +2144,7 @@ List<_VcuCommand> _buildVcuCommands(AppLocalizations l10n) => [
   _VcuCommand(
     4,
     l10n.vcuCmdFind,
+    iconAsset: 'assets/images/icon_vcu_findcar.png',
     bleId: VcuBleCommandIds.find,
     bleValue: 1,
     icon: Icons.search,
@@ -1935,6 +2152,7 @@ List<_VcuCommand> _buildVcuCommands(AppLocalizations l10n) => [
   _VcuCommand(
     5,
     l10n.vcuCmdRemoteLock,
+    iconAsset: 'assets/images/icon_vcu_remotelock.png',
     bleId: VcuBleCommandIds.remoteLock,
     bleValue: 1,
     icon: Icons.lock_clock,
@@ -1942,6 +2160,7 @@ List<_VcuCommand> _buildVcuCommands(AppLocalizations l10n) => [
   _VcuCommand(
     7,
     l10n.vcuCmdRemoteUnlock,
+    iconAsset: 'assets/images/icon_vcu_remoteunlock.png',
     bleId: VcuBleCommandIds.remoteUnlock,
     bleValue: 1,
     icon: Icons.lock_open,

@@ -1032,7 +1032,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
         if (!mounted || singlePick == null) return;
         picks = [singlePick];
       } else {
-        final galleryPicks = await picker.pickMultiImage();
+        final galleryPicks = await picker.pickMultipleMedia(limit: remaining);
         if (!mounted || galleryPicks.isEmpty) return;
         if (galleryPicks.length > remaining) {
           showToast(l10n.installmentPayUploadLimit);

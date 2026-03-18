@@ -491,7 +491,7 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(8),
                     border: Border.all(
                       color: isOnline
                           ? AppColors.primaryColor
@@ -1757,8 +1757,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     required bool isOptDevice,
   }) {
     final state = ref.read(deviceDetailProvider);
-    final hasPermission = state.searchResult?.deviceInfo?.hasPermission;
-    final managerList = state.searchResult?.deviceInfo?.managerList;
+    final hasPermission =
+        state.searchResult?.deviceInfo?.hasPermission ??
+        state.cabinetDetail?.hasPermission;
+    final hasManagerContact = _hasManagerContact(state);
 
     if (hasPermission == null) {
       return false;
@@ -1768,16 +1770,21 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     }
 
     final shouldShowDialog =
-        showDialog &&
-        isOptDevice &&
-        hasPermission == 0 &&
-        managerList != null &&
-        managerList.isNotEmpty;
+        showDialog && isOptDevice && hasPermission == 0 && hasManagerContact;
     if (shouldShowDialog) {
       final (managerName, managerPhone) = _resolveManagerContact(state);
       _showNotManagerDialog(managerName, managerPhone);
     }
     return false;
+  }
+
+  bool _hasManagerContact(DeviceDetailState state) {
+    final managerList = state.searchResult?.deviceInfo?.managerList;
+    if (managerList != null && managerList.isNotEmpty) {
+      return true;
+    }
+    final stationManagers = state.cabinetDetail?.stationManagerList;
+    return stationManagers?.isNotEmpty == true;
   }
 
   (String, String) _resolveManagerContact(DeviceDetailState state) {
@@ -1787,6 +1794,10 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     if (managerList != null && managerList.isNotEmpty) {
       managerName = managerList.first.showName ?? '';
       managerPhone = managerList.first.phone ?? '';
+    } else if (state.cabinetDetail?.stationManagerList.isNotEmpty == true) {
+      final manager = state.cabinetDetail!.stationManagerList.first;
+      managerName = manager['showName']?.toString() ?? '';
+      managerPhone = manager['phone']?.toString() ?? '';
     }
     final areaCode = AuthSession.instance.current?.areaCode ?? '';
     if (areaCode.isNotEmpty && managerPhone.isNotEmpty) {

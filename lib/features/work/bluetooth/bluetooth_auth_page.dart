@@ -1,13 +1,15 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
-import 'package:merchant_app/core/utils/bluetooth_permission.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
+import 'package:merchant_app/core/utils/hud.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/data/models/sn_bean.dart';
 import 'package:merchant_app/features/login/models/auth_session.dart';
@@ -16,6 +18,7 @@ import 'package:merchant_app/features/work/bluetooth/bluetooth_operate_controlle
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/network/api_path.dart';
 import 'package:merchant_app/network/api_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// 蓝牙授权入口页面 - Find Bluetooth key
 class BluetoothAuthPage extends ConsumerStatefulWidget {
@@ -26,46 +29,46 @@ class BluetoothAuthPage extends ConsumerStatefulWidget {
 }
 
 class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
+  static const int _scanTimeoutSeconds = 10;
+
   final List<ScanResult> _devices = [];
   StreamSubscription<List<ScanResult>>? _scanSubscription;
   StreamSubscription<BluetoothAdapterState>? _adapterSubscription;
+  StreamSubscription<BluetoothConnectionState>? _connectionSubscription;
+  Timer? _switchOnDelayTimer;
   BluetoothDevice? _connectingDevice;
+  BluetoothDevice? _connectedDevice;
   bool _bluetoothOn = false;
   bool _systemBluetoothOn = false;
+  bool _deviceConnected = false;
   bool _scanning = false;
 
   @override
   void initState() {
     super.initState();
-    _checkBluetoothState();
+    _initPageData();
   }
 
   @override
   void dispose() {
     _scanSubscription?.cancel();
     _adapterSubscription?.cancel();
+    _connectionSubscription?.cancel();
+    _switchOnDelayTimer?.cancel();
     FlutterBluePlus.stopScan();
+    _disconnectCurrentDevice();
     super.dispose();
   }
 
-  Future<void> _checkBluetoothState() async {
-    final permission = await ensureBluetoothPermission();
-    if (!permission.granted) {
-      if (mounted) {
-        showToast('请授予蓝牙权限');
-      }
-      return;
-    }
-
+  Future<void> _initPageData() async {
     _adapterSubscription = FlutterBluePlus.adapterState.listen((state) {
       if (!mounted) return;
       final isSystemOn = state == BluetoothAdapterState.on;
       setState(() {
         _systemBluetoothOn = isSystemOn;
+        _bluetoothOn = isSystemOn;
         if (!isSystemOn) {
-          _bluetoothOn = false;
-          _devices.clear();
-          _scanning = false;
+          _clearDevicesAndResetScanState();
         }
       });
       if (!isSystemOn) {
@@ -74,33 +77,230 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
     });
 
     final state = await FlutterBluePlus.adapterState.first;
+    if (!mounted) return;
     setState(() {
       _systemBluetoothOn = state == BluetoothAdapterState.on;
+      _bluetoothOn = _systemBluetoothOn;
     });
+    _onRefresh();
+    await _checkPermissions();
   }
 
   Future<void> _toggleBluetooth(bool value) async {
     if (value) {
-      if (!_systemBluetoothOn) {
-        if (mounted) {
-          showToast('请打开手机蓝牙');
-        }
-        return;
-      }
       setState(() => _bluetoothOn = true);
-      await _startScan();
+      if (Platform.isAndroid) {
+        if (_androidSdkInt() >= 31) {
+          final status = await Permission.bluetoothConnect.status;
+          if (status.isGranted) {
+            await FlutterBluePlus.turnOn();
+          }
+        } else {
+          await FlutterBluePlus.turnOn();
+        }
+      }
+      _switchOnDelayTimer?.cancel();
+      _switchOnDelayTimer = Timer(const Duration(seconds: 2), () async {
+        if (!mounted) return;
+        _onRefresh();
+        await _checkPermissions();
+      });
     } else {
       await FlutterBluePlus.stopScan();
+      await _disconnectCurrentDevice();
       setState(() {
         _bluetoothOn = false;
-        _devices.clear();
-        _scanning = false;
+        _clearDevicesAndResetScanState();
       });
     }
   }
 
+  int _androidSdkInt() {
+    if (!Platform.isAndroid) return 0;
+    final version = Platform.operatingSystemVersion;
+    final sdkMatch = RegExp(r'SDK\s*(\d+)').firstMatch(version);
+    if (sdkMatch != null) {
+      return int.tryParse(sdkMatch.group(1) ?? '') ?? 0;
+    }
+    final apiMatch = RegExp(r'API\s*(\d+)').firstMatch(version);
+    if (apiMatch != null) {
+      return int.tryParse(apiMatch.group(1) ?? '') ?? 0;
+    }
+    return 0;
+  }
+
+  Future<void> _checkPermissions() async {
+    final l10n = context.l10n;
+    if (!_systemBluetoothOn) {
+      showToast(l10n.bluetoothAuthPleaseOpenBluetooth);
+      return;
+    }
+
+    if (!Platform.isAndroid) {
+      await _onPermissionGranted();
+      return;
+    }
+
+    if (_androidSdkInt() >= 31) {
+      await _checkBluetoothPermission();
+      return;
+    }
+
+    await _checkLocationPermission();
+  }
+
+  Future<void> _checkBluetoothPermission() async {
+    final permissions = <Permission>[
+      Permission.bluetoothScan,
+      Permission.bluetoothAdvertise,
+      Permission.bluetoothConnect,
+    ];
+    final deniedPermissions = <Permission>[];
+    for (final permission in permissions) {
+      final status = await permission.status;
+      if (status.isGranted) {
+        await _onPermissionGranted();
+      } else {
+        deniedPermissions.add(permission);
+      }
+    }
+
+    if (deniedPermissions.isEmpty) {
+      return;
+    }
+
+    final results = await deniedPermissions.request();
+    var hasReject = false;
+    for (final permission in deniedPermissions) {
+      final status = results[permission] ?? PermissionStatus.denied;
+      if (status.isGranted) {
+        await _onPermissionGranted();
+      } else {
+        hasReject = true;
+      }
+    }
+
+    if (deniedPermissions.length > 1 && hasReject && mounted) {
+      await _showNearbyPermissionDialog();
+    }
+  }
+
+  Future<void> _checkLocationPermission() async {
+    final status = await Permission.locationWhenInUse.status;
+    if (status.isGranted) {
+      await _onPermissionGranted();
+      return;
+    }
+
+    final result = await Permission.locationWhenInUse.request();
+    if (result.isGranted) {
+      await _onPermissionGranted();
+    }
+  }
+
+  Future<void> _onPermissionGranted() async {
+    final sdkInt = _androidSdkInt();
+    final mustCheckGps = !Platform.isAndroid || sdkInt >= 23;
+    if (mustCheckGps && !await _checkGpsIsOpen()) {
+      if (!mounted) return;
+      await _showGpsDialog();
+      return;
+    }
+    _setScanRule();
+    await _startScan();
+  }
+
+  Future<bool> _checkGpsIsOpen() async {
+    try {
+      return await Geolocator.isLocationServiceEnabled();
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _showNearbyPermissionDialog() async {
+    final l10n = context.l10n;
+    final action = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(l10n.bluetoothPermissionTitle),
+          content: Text(l10n.bluetoothPermissionDesc),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(l10n.bluetoothOpenSettings),
+            ),
+          ],
+        );
+      },
+    );
+    if (!mounted) return;
+    if (action == true) {
+      await openAppSettings();
+      if (!mounted) return;
+      await _checkPermissions();
+    } else {
+      Navigator.of(context).maybePop();
+    }
+  }
+
+  Future<void> _showGpsDialog() async {
+    final l10n = context.l10n;
+    final action = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return AlertDialog(
+          title: Text(l10n.bluetoothPermissionTitle),
+          content: const Text('定位服务未开启，请先在系统设置中打开定位服务。'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: Text(l10n.bluetoothOpenSettings),
+            ),
+          ],
+        );
+      },
+    );
+    if (!mounted) return;
+    if (action == true) {
+      await Geolocator.openLocationSettings();
+      if (!mounted) return;
+      if (await _checkGpsIsOpen()) {
+        _setScanRule();
+        await _startScan();
+      }
+    } else {
+      Navigator.of(context).maybePop();
+    }
+  }
+
+  void _setScanRule() {
+    // FlutterBluePlus does not expose a mutable scan rule object; timeout is set in startScan.
+  }
+
+  void _onRefresh() {
+    if (!_bluetoothOn) return;
+    _clearDevicesAndResetScanState();
+  }
+
+  void _clearDevicesAndResetScanState() {
+    _devices.clear();
+    _scanning = false;
+  }
+
   Future<void> _startScan() async {
-    if (_scanning) return;
+    if (_scanning || !_bluetoothOn || !_systemBluetoothOn) return;
     setState(() {
       _scanning = true;
       _devices.clear();
@@ -109,57 +309,99 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
     _scanSubscription?.cancel();
     _scanSubscription = FlutterBluePlus.scanResults.listen((results) {
       if (!mounted) return;
-        // 对齐安卓：显示名称包含 HWK 或 HNT 的设备
-      final filtered = results
-          .where(
-            (r) =>
-                r.device.platformName.isNotEmpty &&
-            (r.device.platformName.contains('HWK') ||
-              r.device.platformName.contains('HNT')),
-          )
-          .toList();
-      setState(() {
-        _devices
-          ..clear()
-          ..addAll(filtered);
-      });
+      var changed = false;
+      for (final item in results) {
+        final name = item.device.platformName;
+        if (name.isEmpty || (!name.contains('HWK') && !name.contains('HNT'))) {
+          continue;
+        }
+        final exists = _devices.any(
+          (d) => d.device.remoteId == item.device.remoteId,
+        );
+        if (!exists) {
+          _devices.add(item);
+          changed = true;
+        }
+      }
+      if (changed) {
+        setState(() {});
+      }
     });
 
-    await FlutterBluePlus.startScan(
-      timeout: const Duration(seconds: 15),
-      androidUsesFineLocation: true,
-    );
+    try {
+      await FlutterBluePlus.startScan(
+        timeout: const Duration(seconds: _scanTimeoutSeconds),
+        androidUsesFineLocation: true,
+      );
+    } catch (_) {}
 
     if (mounted) {
       setState(() => _scanning = false);
     }
   }
 
+  Future<void> _connectOrEnter(BluetoothDevice device) async {
+    if (_deviceConnected && _connectedDevice?.remoteId == device.remoteId) {
+      await _openAuthorizationPage(device);
+      return;
+    }
+    await _connectDevice(device);
+  }
+
   Future<void> _connectDevice(BluetoothDevice device) async {
+    final l10n = context.l10n;
     setState(() => _connectingDevice = device);
+    Hud.show();
 
     try {
-      await device.connect(timeout: const Duration(seconds: 10));
+      await FlutterBluePlus.stopScan();
+      await device.connect(timeout: const Duration(seconds: 20));
+      _connectionSubscription?.cancel();
+      _connectionSubscription = device.connectionState.listen((state) {
+        if (state == BluetoothConnectionState.disconnected) {
+          _handleDeviceDisconnected();
+        }
+      });
       if (!mounted) return;
-
-      // 连接成功，进入授权页面
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => _BluetoothAuthorizationPage(device: device),
-        ),
-      );
-
-      // 返回后断开连接
-      await device.disconnect();
-    } catch (e) {
+      setState(() {
+        _connectedDevice = device;
+        _deviceConnected = true;
+      });
+      await _openAuthorizationPage(device);
+    } catch (_) {
       if (mounted) {
-        showToast('连接失败: $e');
+        showToast(l10n.bluetoothAuthFailed);
       }
     } finally {
-      if (mounted) {
-        setState(() => _connectingDevice = null);
-      }
+      Hud.dismiss();
+      if (!mounted) return;
+      setState(() => _connectingDevice = null);
     }
+  }
+
+  Future<void> _openAuthorizationPage(BluetoothDevice device) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => _BluetoothAuthorizationPage(device: device),
+      ),
+    );
+  }
+
+  void _handleDeviceDisconnected() {
+    if (!mounted) return;
+    setState(() {
+      _connectedDevice = null;
+      _deviceConnected = false;
+      _clearDevicesAndResetScanState();
+    });
+  }
+
+  Future<void> _disconnectCurrentDevice() async {
+    final device = _connectedDevice;
+    if (device == null) return;
+    try {
+      await device.disconnect();
+    } catch (_) {}
   }
 
   @override
@@ -212,7 +454,9 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          l10n.bluetoothAuthAvailableDevices,
+                          _devices.isEmpty
+                              ? l10n.bluetoothAuthNoDevices
+                              : l10n.bluetoothAuthAvailableDevices,
                           style: const TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -265,7 +509,7 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
                                     : null,
                                 onTap: isConnecting
                                     ? null
-                                    : () => _connectDevice(device),
+                                    : () => _connectOrEnter(device),
                               );
                             },
                           ),
@@ -374,7 +618,10 @@ class _BluetoothAuthorizationPageState
 
   Future<void> _scanQRCode() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: false, parseDeviceSn: true)),
+      MaterialPageRoute(
+        builder: (_) =>
+            const QrScanPage(allowManualInput: false, parseDeviceSn: true),
+      ),
     );
     if (result != null && result.isNotEmpty) {
       _snController.text = result;
@@ -580,7 +827,8 @@ class _BluetoothAuthorizationPageState
       final unescaped = BleCommandBuilder.unescapeResponse(raw);
       final signal = BleCommandBuilder.extractSignal(unescaped).toLowerCase();
       final expectedSignal = _pendingSignal;
-      final matched = expectedSignal.isEmpty ||
+      final matched =
+          expectedSignal.isEmpty ||
           signal == expectedSignal ||
           signal == _toResponseSignal(expectedSignal);
       if (!matched) {

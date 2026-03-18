@@ -414,7 +414,7 @@ class DeviceDetailNotifier extends Notifier<DeviceDetailState> {
     if (value.isEmpty) return false;
     final response = await _api.post<Object>(
       ApiPath.cabinetCtrlPort,
-      data: {'sn': value, 'port': port, 'type': type},
+      data: {'stationPid': value, 'portNo': port, 'type': type},
       parser: (json) => json ?? Object(),
     );
     if (response.isSuccess) {

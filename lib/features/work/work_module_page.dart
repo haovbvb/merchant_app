@@ -92,7 +92,7 @@ class WorkModulePage extends StatelessWidget {
       case 'device_search':
         return const DeviceSearchPage();
       case 'station_search':
-        return const DeviceSearchPage(deviceType: 3, readOnly: true);
+        return const DeviceSearchPage(deviceType: 3, readOnly: false);
       case 'maintenance_book':
         return const MaintenanceBookPage();
       case 'repair_record':

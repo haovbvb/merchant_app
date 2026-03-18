@@ -160,6 +160,7 @@ platform :ios do
     install_type = ENV["PGYER_INSTALL_TYPE"] || "1"
     password = ENV["PGYER_PASSWORD"] || ""
     ipa_path = ENV["IPA_PATH"]
+    project_root = File.expand_path("../..", __dir__)
 
     UI.user_error!("APP_IDENTIFIER is required") if app_identifier.to_s.strip.empty?
     UI.user_error!("TEAM_ID is required") if team_id.to_s.strip.empty?
@@ -176,8 +177,8 @@ platform :ios do
     sh "flutter", "build", "ipa", "--release", "--build-number=#{ios_build_number}", "--export-options-plist=#{export_plist_path}"
 
     if ipa_path.to_s.strip.empty?
-      ipa_candidates = Dir["../../build/ios/ipa/*.ipa"]
-      UI.user_error!("IPA not found in build/ios/ipa") if ipa_candidates.empty?
+      ipa_candidates = Dir[File.join(project_root, "build/ios/ipa/*.ipa")]
+      UI.user_error!("IPA not found in #{File.join(project_root, 'build/ios/ipa')}") if ipa_candidates.empty?
       ipa_path = ipa_candidates.first
     end
     upload_to_pgyer(
@@ -202,6 +203,7 @@ platform :ios do
     ipa_path = ENV["IPA_PATH"]
     android_artifact = ENV["ANDROID_ARTIFACT"] || "apk" # apk or aab
     android_artifact_path = ENV["ANDROID_ARTIFACT_PATH"]
+    project_root = File.expand_path("../..", __dir__)
 
     UI.user_error!("APP_IDENTIFIER is required") if app_identifier.to_s.strip.empty?
     UI.user_error!("TEAM_ID is required") if team_id.to_s.strip.empty?
@@ -221,19 +223,19 @@ platform :ios do
     sh "flutter", "build", android_artifact, "--release", "--build-number=#{android_build_number}"
 
     if ipa_path.to_s.strip.empty?
-      ipa_candidates = Dir["../../build/ios/ipa/*.ipa"]
-      UI.user_error!("IPA not found in build/ios/ipa") if ipa_candidates.empty?
+      ipa_candidates = Dir[File.join(project_root, "build/ios/ipa/*.ipa")]
+      UI.user_error!("IPA not found in #{File.join(project_root, 'build/ios/ipa')}") if ipa_candidates.empty?
       ipa_path = ipa_candidates.first
     end
 
     if android_artifact_path.to_s.strip.empty?
       if android_artifact == "aab"
-        candidates = Dir["../../build/app/outputs/bundle/release/*.aab"]
-        UI.user_error!("AAB not found in build/app/outputs/bundle/release") if candidates.empty?
+        candidates = Dir[File.join(project_root, "build/app/outputs/bundle/release/*.aab")]
+        UI.user_error!("AAB not found in #{File.join(project_root, 'build/app/outputs/bundle/release')}") if candidates.empty?
         android_artifact_path = candidates.first
       else
-        candidates = Dir["../../build/app/outputs/flutter-apk/*.apk"]
-        UI.user_error!("APK not found in build/app/outputs/flutter-apk") if candidates.empty?
+        candidates = Dir[File.join(project_root, "build/app/outputs/flutter-apk/*.apk")]
+        UI.user_error!("APK not found in #{File.join(project_root, 'build/app/outputs/flutter-apk')}") if candidates.empty?
         android_artifact_path = candidates.first
       end
     end

@@ -5,27 +5,27 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000748">
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000269">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: flutter build ipa --release --build-number\=202603171112 --export-options-plist\=/Users/ping/Desktop/work/merchant_app/ios/fastlane/ExportOptions.generated.plist" time="254.447042">
+      <testcase classname="fastlane.lanes" name="1: flutter build ipa --release --build-number\=202603181042 --export-options-plist\=/Users/ping/Desktop/work/merchant_app/ios/fastlane/ExportOptions.generated.plist" time="198.20376">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: flutter build apk --release --build-number\=603171112" time="620.757326">
+      <testcase classname="fastlane.lanes" name="2: flutter build apk --release --build-number\=603181042" time="204.034278">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="3: curl -f -X POST https://www.pgyer.com/apiv2/app/upload -F _api_key\=630a6a4d973bda999b5ca54affaebc60 -F file\=@../../build/ios/ipa/OKLA\ CARE.ipa -F buildUpdateDescription\= -F buildInstallType\=1" time="8.988342">
+      <testcase classname="fastlane.lanes" name="3: curl -f -X POST https://www.pgyer.com/apiv2/app/upload -F _api_key\=630a6a4d973bda999b5ca54affaebc60 -F file\=@/Users/ping/Desktop/work/merchant_app/build/ios/ipa/OKLA\ CARE.ipa -F buildUpdateDescription\= -F buildInstallType\=1" time="9.487221">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="4: curl -f -X POST https://www.pgyer.com/apiv2/app/upload -F _api_key\=630a6a4d973bda999b5ca54affaebc60 -F file\=@../../build/app/outputs/flutter-apk/app-release.apk -F buildUpdateDescription\= -F buildInstallType\=1" time="23.895817">
+      <testcase classname="fastlane.lanes" name="4: curl -f -X POST https://www.pgyer.com/apiv2/app/upload -F _api_key\=630a6a4d973bda999b5ca54affaebc60 -F file\=@/Users/ping/Desktop/work/merchant_app/build/app/outputs/flutter-apk/app-release.apk -F buildUpdateDescription\= -F buildInstallType\=1" time="24.541865">
         
       </testcase>
     

@@ -308,7 +308,7 @@ class _ProfileHeader extends StatelessWidget {
                   tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   textStyle: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
                 child: Text(context.l10n.logout),
@@ -392,19 +392,17 @@ class _Avatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sanitized = displayName.trim();
-    final initials = sanitized.isNotEmpty
-        ? sanitized.substring(0, 1).toUpperCase()
-        : '?';
     final avatar = avatarUrl != null && avatarUrl!.isNotEmpty
         ? CircleAvatar(
             radius: 32,
             backgroundImage: NetworkImage(avatarUrl!),
             onBackgroundImageError: (_, __) {},
           )
-        : CircleAvatar(
+        : const CircleAvatar(
             radius: 32,
-            child: Text(initials, style: Theme.of(context).textTheme.titleMedium),
+            backgroundImage: AssetImage(
+              'assets/android/mipmap-xxhdpi/icon_def_avatar.webp',
+            ),
           );
     return GestureDetector(
       onTap: isUpdating ? null : onTap,

@@ -1,6 +1,5 @@
 // ignore: unused_import
 import 'package:intl/intl.dart' as intl;
-
 import 'app_localizations.dart';
 
 // ignore_for_file: type=lint
@@ -487,10 +486,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get userSwapScan => '扫码换电';
 
   @override
-  String get userSwapStatusSuccess => '成功';
+  String get userSwapStatusSuccess => '换电成功';
 
   @override
-  String get userSwapStatusFail => '失败';
+  String get userSwapStatusFail => '换电失败';
 
   @override
   String get userSwapStatusPartSuccess => '部分成功';
@@ -499,19 +498,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get userSwapStatusSystemReject => '系统拒绝';
 
   @override
-  String get userSwapStationSn => '电柜SN';
+  String get userSwapStationSn => '换电站编号';
 
   @override
-  String get userSwapOperator => '操作人';
+  String get userSwapOperator => '操作';
 
   @override
-  String get userSwapInBattery => '放入电池';
+  String get userSwapInBattery => '新电池编号';
 
   @override
-  String get userSwapOutBattery => '取出电池';
+  String get userSwapOutBattery => '原电池编号';
 
   @override
-  String get userSwapError => '异常原因';
+  String get userSwapError => '失败原因';
 
   @override
   String get userDetailCall => '拨打电话';
@@ -934,7 +933,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get afterSaleBindSelectableOrders => '售后订单';
 
   @override
-  String get afterSaleBindNoOrders => '没有可绑定的订单';
+  String get afterSaleBindNoOrders => '选择售后订单进行绑定';
 
   @override
   String get afterSaleBindSelectOrder => '选择售后订单';
@@ -1517,6 +1516,15 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get scanSuccessEntry => '录入成功，继续录入';
+
+  @override
+  String get scanInvalidQr => '无效二维码';
+
+  @override
+  String get scanAlreadyScanned => '已扫过';
+
+  @override
+  String get scanEntryFailed => '录入失败';
 
   @override
   String get scanCameraPermissionTitle => '需要相机权限';
@@ -2497,10 +2505,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sellBindSuccessTitle => '提交成功';
 
   @override
-  String get sellBindSuccessMessageOnline => '套餐绑定成功。\n请提醒用户在App中支付套餐费用。\n支付完成后套餐生效。';
+  String get sellBindSuccessMessageOnline => '请前往用户App完成支付,限时';
 
   @override
-  String get sellBindSuccessMessageCash => '套餐绑定成功。\n请及时将合同凭证提交至后台。';
+  String get sellBindSuccessMessageCash => '请进入订单记录并提交合同凭证,限时';
 
   @override
   String get sellBindDocumentNumber => '单据编号';
@@ -2716,7 +2724,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rentBindSuccessMessageCash => '请进入订单记录并在时限内提交合同凭证';
 
   @override
-  String get rentBindSuccessTimeout => '30分钟';
+  String get rentBindSuccessTimeout => '24小时内';
 
   @override
   String get rentBindDocumentNumber => '单据编号';
@@ -2888,10 +2896,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get swapBindSuccessTitle => '提交成功';
 
   @override
-  String get swapBindSuccessOnlineHint => '请在以下时间内前往用户App完成支付';
+  String get swapBindSuccessOnlineHint => '请前往用户App完成支付,限时';
 
   @override
-  String get swapBindSuccessCashHint => '请在以下时间内进入订单记录并提交合同凭证';
+  String get swapBindSuccessCashHint => '请进入订单记录并提交合同凭证,限时';
 
   @override
   String get swapBindSuccessTimeout => '24小时内';
@@ -3927,6 +3935,242 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vcuHistoryStatusFailed => '失败';
+
+  @override
+  String get vcuDeviceSnLabel => '设备 SN';
+
+  @override
+  String get vcuBluetoothLabel => '蓝牙';
+
+  @override
+  String get vcuBleConnected => '已连接';
+
+  @override
+  String get vcuBleDisconnected => '未连接';
+
+  @override
+  String get vcuControlSectionTitle => 'VCU 控制';
+
+  @override
+  String get vcuConfigSectionTitle => 'VCU 配置';
+
+  @override
+  String get vcuPlatformAddressLabel => '平台地址';
+
+  @override
+  String get vcuPleaseSelect => '请选择';
+
+  @override
+  String get vcuNotSet => '未设置';
+
+  @override
+  String get vcuGpsFrequencyLabel => 'GPS 查询频率';
+
+  @override
+  String get vcuVehicleUploadFrequencyLabel => '车辆上传频率';
+
+  @override
+  String get vcuSecondUnit => '秒';
+
+  @override
+  String vcuOtaDownloadingProgress(Object progress) {
+    return '下载中 $progress%';
+  }
+
+  @override
+  String vcuOtaUpgradingProgress(int current, int total, Object version) {
+    return '升级中 $current/$total $version';
+  }
+
+  @override
+  String get vcuBlePermissionNotGranted => '蓝牙权限未开启';
+
+  @override
+  String get vcuBleScanStarted => '开始扫描';
+
+  @override
+  String get vcuBleScanTimeout => '扫描超时';
+
+  @override
+  String get vcuBleConnecting => '开始连接';
+
+  @override
+  String vcuBleConnectedWithId(Object id) {
+    return '已连接 BLE: $id';
+  }
+
+  @override
+  String get vcuBleConnectFailed => 'BLE 连接失败';
+
+  @override
+  String get vcuBleDisconnectedLog => 'BLE 已断开';
+
+  @override
+  String get vcuOtaStoppedByBleDisconnect => 'BLE 断开，OTA 已停止';
+
+  @override
+  String vcuBleReceivedData(Object data) {
+    return 'BLE 收到: $data';
+  }
+
+  @override
+  String get vcuSettingSuccess => '设置成功';
+
+  @override
+  String get vcuOtaVerifyPassAndStart => '校验通过，开始升级';
+
+  @override
+  String get vcuOtaRejectVersionTooLow => '版本过低，拒绝升级';
+
+  @override
+  String get vcuOtaVerifyFailed => '校验失败';
+
+  @override
+  String get vcuOtaDataSendFailed => 'OTA 数据发送失败';
+
+  @override
+  String get vcuOtaFailed => 'OTA 失败';
+
+  @override
+  String get vcuOtaUpgradeSuccess => 'OTA 升级完成';
+
+  @override
+  String get vcuOtaUpgradeFailed => 'OTA 升级失败';
+
+  @override
+  String get vcuPleaseConnectBleFirst => '请先连接 BLE';
+
+  @override
+  String get vcuOtaFileEmpty => 'OTA 文件为空';
+
+  @override
+  String get vcuOtaVerifying => '版本校验中';
+
+  @override
+  String get vcuOtaUrlEmpty => 'OTA 地址为空';
+
+  @override
+  String get vcuOtaUsingCachedPackage => '已使用缓存包';
+
+  @override
+  String get vcuOtaStartDownload => '开始下载 OTA';
+
+  @override
+  String get vcuOtaDownloadCompleted => '下载完成';
+
+  @override
+  String get vcuOtaDownloadFailed => 'OTA 下载失败';
+
+  @override
+  String get vcuOtaDataSentWaitingResult => 'OTA 数据发送完成，等待结果';
+
+  @override
+  String get vcuOtaSendingData => '发送 OTA 数据中';
+
+  @override
+  String get vcuChooseSendMethod => '请选择下发方式';
+
+  @override
+  String get vcuChannel4gNetwork => '4G/网络';
+
+  @override
+  String get vcuSendButton => '发送';
+
+  @override
+  String get vcuPleaseEnterValidValue => '请输入有效数据';
+
+  @override
+  String get vcuPleaseEnterRange1To65535 => '请输入 1-65535';
+
+  @override
+  String get vcuSetPlatformTitle => '设置平台';
+
+  @override
+  String get vcuSetApnTitle => '设置 APN';
+
+  @override
+  String get vcuInputApnHint => '请输入 APN';
+
+  @override
+  String get vcuSetGpsFrequencyTitle => '设置 GPS 频率';
+
+  @override
+  String get vcuInputGpsFrequencyHint => '请输入 GPS 频率';
+
+  @override
+  String get vcuSetVehicleUploadFrequencyTitle => '设置车辆上传频率';
+
+  @override
+  String get vcuInputVehicleUploadFrequencyHint => '请输入车辆上传频率';
+
+  @override
+  String get vcuPleaseLoadVersionsFirst => '请先获取版本列表';
+
+  @override
+  String get vcuBleChannel => 'BLE';
+
+  @override
+  String get vcuNetworkChannel => '网络';
+
+  @override
+  String get vcuBleCommandGeneric => '指令';
+
+  @override
+  String get vcuCmdLaunch => '一键启动';
+
+  @override
+  String get vcuCmdLock => '一键锁车';
+
+  @override
+  String get vcuCmdAntiTheft => '防盗模式';
+
+  @override
+  String get vcuCmdFind => '一键找车';
+
+  @override
+  String get vcuCmdRemoteLock => '远程锁车';
+
+  @override
+  String get vcuCmdRemoteUnlock => '远程解锁';
+
+  @override
+  String get vcuCmdQueryVehicleStatus => '查询车辆状态';
+
+  @override
+  String get vcuCmdQueryMcuVersion => '查询 MCU 版本';
+
+  @override
+  String get vcuCmdOtaVerifyVersion => 'OTA 校验版本';
+
+  @override
+  String get vcuCmdOtaUpgrade => 'OTA 升级';
+
+  @override
+  String get vcuCmdOtaDataPacket => 'OTA 数据包';
+
+  @override
+  String get vcuCmdQueryIccid => '查询 ICCID';
+
+  @override
+  String get vcuCmdSetPlatformUrl => '设置平台地址';
+
+  @override
+  String get vcuCmdSetPlatformPort => '设置平台端口';
+
+  @override
+  String get vcuCmdSetApn => '设置 APN';
+
+  @override
+  String get vcuCmdSetVehicleUploadFrequency => '设置车辆上传频率';
+
+  @override
+  String get vcuCmdSetGpsFrequency => '设置 GPS 频率';
+
+  @override
+  String get vcuPlatformProduction => '生产环境';
+
+  @override
+  String get vcuPlatformTesting => '测试环境';
 
   @override
   String get promoteWebTitle => '推广页面';

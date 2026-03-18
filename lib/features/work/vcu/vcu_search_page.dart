@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:merchant_app/app/styles/colors.dart';
 import 'package:merchant_app/core/constants/app_icons.dart';
 import 'package:merchant_app/core/constants/storage_keys.dart';
 import 'package:merchant_app/core/utils/context_extensions.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
-import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/vcu/vcu_control_page.dart';
 import 'package:merchant_app/features/work/vcu/vcu_controller.dart';
@@ -19,12 +19,15 @@ class VcuSearchPage extends ConsumerStatefulWidget {
 
 class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
   final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   final List<String> _history = [];
   bool _loadingHistory = true;
+  bool _showNoData = false;
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -36,58 +39,103 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
     final hasHistory = _history.isNotEmpty;
 
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.vcuSearchTitle)),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            TextField(
-              controller: _controller,
-              textInputAction: TextInputAction.search,
-              onSubmitted: (value) => _submit(value, notifier),
-              decoration: InputDecoration(
-                hintText: l10n.deviceSearchHint,
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: AppIcons.scanIcon(),
-                      onPressed: state.searching ? null : _scan,
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black87),
+          onPressed: () => Navigator.of(context).pop(),
+        ),
+        titleSpacing: 0,
+        title: Container(
+          height: 36,
+          margin: const EdgeInsets.only(right: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF2F4F7),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.search, color: Color(0xFF999999), size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (value) => _submit(value, notifier),
+                  onChanged: (_) {
+                    setState(() {
+                      if (_showNoData) {
+                        _showNoData = false;
+                      }
+                    });
+                  },
+                  decoration: InputDecoration(
+                    hintText: l10n.deviceSearchHint,
+                    hintStyle: const TextStyle(
+                      color: Color(0xFF999999),
+                      fontSize: 15,
                     ),
-                    IconButton(
-                      icon: const Icon(Icons.search),
-                      onPressed: state.searching
-                          ? null
-                          : () => _submit(_controller.text, notifier),
-                    ),
-                  ],
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                    border: InputBorder.none,
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  style: const TextStyle(fontSize: 15),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: _loadingHistory
-                  ? const Center(child: SizedBox.shrink())
-                  : hasHistory
-                  ? _VcuSearchHistory(
-                      title: l10n.deviceSearchHistoryTitle,
-                      clearLabel: l10n.deviceSearchHistoryClear,
-                      items: _history,
-                      onClear: _clearHistory,
-                      onSelected: (value) {
-                        _controller.text = value;
-                        _submit(value, notifier);
-                      },
-                    )
-                  : _VcuSearchEmpty(text: l10n.deviceSearchEmpty),
-            ),
-          ],
+              if (_controller.text.isNotEmpty)
+                GestureDetector(
+                  onTap: () {
+                    _controller.clear();
+                    setState(() => _showNoData = false);
+                    _focusNode.requestFocus();
+                  },
+                  child: Container(
+                    width: 20,
+                    height: 20,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFCCCCCC),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                  ),
+                ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: state.searching ? null : _scan,
+                child: AppIcons.scanIcon(
+                  size: 24,
+                  color: AppColors.black06Text,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+      body: _loadingHistory
+          ? const Center(child: SizedBox.shrink())
+          : _showNoData
+          ? _VcuSearchEmpty(text: l10n.deviceSearchEmpty)
+          : Container(
+              color: hasHistory ? const Color(0xFFF3F4F6) : Colors.white,
+              child: _VcuSearchHistory(
+                title: l10n.deviceSearchHistoryTitle,
+                items: _history,
+                onClear: _clearHistory,
+                onSelected: (value) {
+                  _controller.text = value;
+                  setState(() => _showNoData = false);
+                  _submit(value, notifier);
+                },
+              ),
+            ),
     );
   }
 
@@ -95,6 +143,7 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
   void initState() {
     super.initState();
     _loadHistory();
+    _focusNode.requestFocus();
   }
 
   Future<void> _loadHistory() async {
@@ -116,7 +165,10 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
   Future<void> _clearHistory() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(StorageKeys.vcuSearchHistory);
-    setState(() => _history.clear());
+    setState(() {
+      _history.clear();
+      _showNoData = false;
+    });
   }
 
   Future<void> _addHistory(String value) async {
@@ -143,6 +195,8 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
     }
     final sn = ScanUtils.getDeviceSn(input).trim();
     if (sn.isEmpty) return;
+    _controller.text = sn;
+    setState(() => _showNoData = false);
     final result = await notifier.searchDeviceBySn(sn);
     if (!mounted) return;
     final deviceInfo = result?.deviceInfo;
@@ -150,10 +204,10 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
         deviceInfo == null ||
         deviceInfo.ctrlId == null ||
         deviceInfo.ctrlId!.isEmpty) {
-      showToast(l10n.deviceSearchEmpty);
+      setState(() => _showNoData = true);
       return;
     }
-    await _addHistory(input);
+    await _addHistory(sn);
     final vin = deviceInfo.vin ?? deviceInfo.deviceId ?? sn;
     final ctrlId = deviceInfo.ctrlId ?? '';
     final deviceSn = deviceInfo.sn ?? deviceInfo.deviceId ?? sn;
@@ -163,6 +217,7 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
           initialVin: vin,
           initialCtrlId: ctrlId,
           initialSn: deviceSn,
+          initialOnline: (deviceInfo.onlineStatus ?? 0) == 1,
         ),
       ),
     );
@@ -170,7 +225,10 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
 
   Future<void> _scan() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: true, parseDeviceSn: true)),
+      MaterialPageRoute(
+        builder: (_) =>
+            const QrScanPage(allowManualInput: true, parseDeviceSn: true),
+      ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     _controller.text = result;
@@ -204,48 +262,78 @@ class _VcuSearchEmpty extends StatelessWidget {
 class _VcuSearchHistory extends StatelessWidget {
   const _VcuSearchHistory({
     required this.title,
-    required this.clearLabel,
     required this.items,
     required this.onClear,
     required this.onSelected,
   });
 
   final String title;
-  final String clearLabel;
   final List<String> items;
   final VoidCallback onClear;
   final ValueChanged<String> onSelected;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-              ),
-            ),
-            TextButton(onPressed: onClear, child: Text(clearLabel)),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: items
-              .map(
-                (item) => ActionChip(
-                  label: Text(item),
-                  onPressed: () => onSelected(item),
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.black06Text,
+                  ),
                 ),
-              )
-              .toList(),
-        ),
-      ],
+              ),
+              if (items.isNotEmpty)
+                GestureDetector(
+                  onTap: onClear,
+                  child: const Icon(
+                    Icons.delete_outline,
+                    color: Color(0xFF999999),
+                    size: 20,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (items.isNotEmpty)
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: items
+                  .map(
+                    (item) => GestureDetector(
+                      onTap: () => onSelected(item),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 9,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF2F4F7),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Text(
+                          item,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.black06Text,
+                          ),
+                        ),
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+        ],
+      ),
     );
   }
 }

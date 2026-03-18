@@ -1052,25 +1052,25 @@ abstract class AppLocalizations {
   /// No description provided for @userSwapStatusSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Success'**
+  /// **'Swap Successful'**
   String get userSwapStatusSuccess;
 
   /// No description provided for @userSwapStatusFail.
   ///
   /// In en, this message translates to:
-  /// **'Fail'**
+  /// **'Swap Failed'**
   String get userSwapStatusFail;
 
   /// No description provided for @userSwapStatusPartSuccess.
   ///
   /// In en, this message translates to:
-  /// **'Partially successful'**
+  /// **'Partially Successful'**
   String get userSwapStatusPartSuccess;
 
   /// No description provided for @userSwapStatusSystemReject.
   ///
   /// In en, this message translates to:
-  /// **'System reject'**
+  /// **'System Reject'**
   String get userSwapStatusSystemReject;
 
   /// No description provided for @userSwapStationSn.
@@ -1088,19 +1088,19 @@ abstract class AppLocalizations {
   /// No description provided for @userSwapInBattery.
   ///
   /// In en, this message translates to:
-  /// **'In battery'**
+  /// **'New Battery SN'**
   String get userSwapInBattery;
 
   /// No description provided for @userSwapOutBattery.
   ///
   /// In en, this message translates to:
-  /// **'Out battery'**
+  /// **'Old Battery SN'**
   String get userSwapOutBattery;
 
   /// No description provided for @userSwapError.
   ///
   /// In en, this message translates to:
-  /// **'Error'**
+  /// **'Failure Reason'**
   String get userSwapError;
 
   /// No description provided for @userDetailCall.
@@ -1460,7 +1460,7 @@ abstract class AppLocalizations {
   /// No description provided for @orderVoucherMaxCount.
   ///
   /// In en, this message translates to:
-  /// **'Only 5 images can be uploaded'**
+  /// **'Maximum image selection limit reached'**
   String get orderVoucherMaxCount;
 
   /// No description provided for @orderVoucherPickCamera.
@@ -3112,6 +3112,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Successful entry, continue entering'**
   String get scanSuccessEntry;
+
+  /// No description provided for @scanInvalidQr.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid QR code'**
+  String get scanInvalidQr;
+
+  /// No description provided for @scanAlreadyScanned.
+  ///
+  /// In en, this message translates to:
+  /// **'Already scanned'**
+  String get scanAlreadyScanned;
+
+  /// No description provided for @scanEntryFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Entry failed'**
+  String get scanEntryFailed;
 
   /// No description provided for @scanCameraPermissionTitle.
   ///
@@ -7004,19 +7022,19 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetAuthAllPort.
   ///
   /// In en, this message translates to:
-  /// **'All port'**
+  /// **'Slot Count'**
   String get cabinetAuthAllPort;
 
   /// No description provided for @cabinetAuthFaultPort.
   ///
   /// In en, this message translates to:
-  /// **'Fault port'**
+  /// **'Fault Slot Count'**
   String get cabinetAuthFaultPort;
 
   /// No description provided for @cabinetAuthDisablePort.
   ///
   /// In en, this message translates to:
-  /// **'Disable port'**
+  /// **'Offline Slot Count'**
   String get cabinetAuthDisablePort;
 
   /// No description provided for @cabinetAuthSwapStandard.
@@ -7436,7 +7454,7 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetOfflineRestartConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to restart the cabinet?'**
+  /// **'Are you sure to restart the station?'**
   String get cabinetOfflineRestartConfirm;
 
   /// No description provided for @cabinetOfflineOpenDoorTitle.
@@ -7448,7 +7466,7 @@ abstract class AppLocalizations {
   /// No description provided for @cabinetOfflineOpenDoorConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to open the door? Please ensure Bluetooth is connected.'**
+  /// **'Are you sure to open the station door?'**
   String get cabinetOfflineOpenDoorConfirm;
 
   /// No description provided for @cabinetOfflineGsmSignal.
@@ -7912,6 +7930,462 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed'**
   String get vcuHistoryStatusFailed;
+
+  /// No description provided for @vcuDeviceSnLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Device SN'**
+  String get vcuDeviceSnLabel;
+
+  /// No description provided for @vcuBluetoothLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth'**
+  String get vcuBluetoothLabel;
+
+  /// No description provided for @vcuBleConnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Connected'**
+  String get vcuBleConnected;
+
+  /// No description provided for @vcuBleDisconnected.
+  ///
+  /// In en, this message translates to:
+  /// **'Disconnected'**
+  String get vcuBleDisconnected;
+
+  /// No description provided for @vcuControlSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'VCU Control'**
+  String get vcuControlSectionTitle;
+
+  /// No description provided for @vcuConfigSectionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'VCU Configuration'**
+  String get vcuConfigSectionTitle;
+
+  /// No description provided for @vcuPlatformAddressLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Platform Address'**
+  String get vcuPlatformAddressLabel;
+
+  /// No description provided for @vcuPleaseSelect.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select'**
+  String get vcuPleaseSelect;
+
+  /// No description provided for @vcuNotSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get vcuNotSet;
+
+  /// No description provided for @vcuGpsFrequencyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'GPS Query Frequency'**
+  String get vcuGpsFrequencyLabel;
+
+  /// No description provided for @vcuVehicleUploadFrequencyLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle Upload Frequency'**
+  String get vcuVehicleUploadFrequencyLabel;
+
+  /// No description provided for @vcuSecondUnit.
+  ///
+  /// In en, this message translates to:
+  /// **'s'**
+  String get vcuSecondUnit;
+
+  /// No description provided for @vcuOtaDownloadingProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading {progress}%'**
+  String vcuOtaDownloadingProgress(Object progress);
+
+  /// No description provided for @vcuOtaUpgradingProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrading {current}/{total} {version}'**
+  String vcuOtaUpgradingProgress(int current, int total, Object version);
+
+  /// No description provided for @vcuBlePermissionNotGranted.
+  ///
+  /// In en, this message translates to:
+  /// **'Bluetooth permission is not granted'**
+  String get vcuBlePermissionNotGranted;
+
+  /// No description provided for @vcuBleScanStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan started'**
+  String get vcuBleScanStarted;
+
+  /// No description provided for @vcuBleScanTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan timed out'**
+  String get vcuBleScanTimeout;
+
+  /// No description provided for @vcuBleConnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting'**
+  String get vcuBleConnecting;
+
+  /// No description provided for @vcuBleConnectedWithId.
+  ///
+  /// In en, this message translates to:
+  /// **'BLE connected: {id}'**
+  String vcuBleConnectedWithId(Object id);
+
+  /// No description provided for @vcuBleConnectFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'BLE connection failed'**
+  String get vcuBleConnectFailed;
+
+  /// No description provided for @vcuBleDisconnectedLog.
+  ///
+  /// In en, this message translates to:
+  /// **'BLE disconnected'**
+  String get vcuBleDisconnectedLog;
+
+  /// No description provided for @vcuOtaStoppedByBleDisconnect.
+  ///
+  /// In en, this message translates to:
+  /// **'BLE disconnected, OTA stopped'**
+  String get vcuOtaStoppedByBleDisconnect;
+
+  /// No description provided for @vcuBleReceivedData.
+  ///
+  /// In en, this message translates to:
+  /// **'BLE received: {data}'**
+  String vcuBleReceivedData(Object data);
+
+  /// No description provided for @vcuSettingSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Set successfully'**
+  String get vcuSettingSuccess;
+
+  /// No description provided for @vcuOtaVerifyPassAndStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification passed, starting upgrade'**
+  String get vcuOtaVerifyPassAndStart;
+
+  /// No description provided for @vcuOtaRejectVersionTooLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Version is too low, upgrade rejected'**
+  String get vcuOtaRejectVersionTooLow;
+
+  /// No description provided for @vcuOtaVerifyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Verification failed'**
+  String get vcuOtaVerifyFailed;
+
+  /// No description provided for @vcuOtaDataSendFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send OTA data'**
+  String get vcuOtaDataSendFailed;
+
+  /// No description provided for @vcuOtaFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'OTA failed'**
+  String get vcuOtaFailed;
+
+  /// No description provided for @vcuOtaUpgradeSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'OTA upgrade completed'**
+  String get vcuOtaUpgradeSuccess;
+
+  /// No description provided for @vcuOtaUpgradeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'OTA upgrade failed'**
+  String get vcuOtaUpgradeFailed;
+
+  /// No description provided for @vcuPleaseConnectBleFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please connect BLE first'**
+  String get vcuPleaseConnectBleFirst;
+
+  /// No description provided for @vcuOtaFileEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'OTA file is empty'**
+  String get vcuOtaFileEmpty;
+
+  /// No description provided for @vcuOtaVerifying.
+  ///
+  /// In en, this message translates to:
+  /// **'Verifying version'**
+  String get vcuOtaVerifying;
+
+  /// No description provided for @vcuOtaUrlEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'OTA URL is empty'**
+  String get vcuOtaUrlEmpty;
+
+  /// No description provided for @vcuOtaUsingCachedPackage.
+  ///
+  /// In en, this message translates to:
+  /// **'Using cached package'**
+  String get vcuOtaUsingCachedPackage;
+
+  /// No description provided for @vcuOtaStartDownload.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting OTA download'**
+  String get vcuOtaStartDownload;
+
+  /// No description provided for @vcuOtaDownloadCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Download completed'**
+  String get vcuOtaDownloadCompleted;
+
+  /// No description provided for @vcuOtaDownloadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'OTA download failed'**
+  String get vcuOtaDownloadFailed;
+
+  /// No description provided for @vcuOtaDataSentWaitingResult.
+  ///
+  /// In en, this message translates to:
+  /// **'OTA data sent, waiting for result'**
+  String get vcuOtaDataSentWaitingResult;
+
+  /// No description provided for @vcuOtaSendingData.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending OTA data'**
+  String get vcuOtaSendingData;
+
+  /// No description provided for @vcuChooseSendMethod.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose sending method'**
+  String get vcuChooseSendMethod;
+
+  /// No description provided for @vcuChannel4gNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'4G/Network'**
+  String get vcuChannel4gNetwork;
+
+  /// No description provided for @vcuSendButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Send'**
+  String get vcuSendButton;
+
+  /// No description provided for @vcuPleaseEnterValidValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid value'**
+  String get vcuPleaseEnterValidValue;
+
+  /// No description provided for @vcuPleaseEnterRange1To65535.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter 1-65535'**
+  String get vcuPleaseEnterRange1To65535;
+
+  /// No description provided for @vcuSetPlatformTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Platform'**
+  String get vcuSetPlatformTitle;
+
+  /// No description provided for @vcuSetApnTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set APN'**
+  String get vcuSetApnTitle;
+
+  /// No description provided for @vcuInputApnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter APN'**
+  String get vcuInputApnHint;
+
+  /// No description provided for @vcuSetGpsFrequencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set GPS Frequency'**
+  String get vcuSetGpsFrequencyTitle;
+
+  /// No description provided for @vcuInputGpsFrequencyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter GPS frequency'**
+  String get vcuInputGpsFrequencyHint;
+
+  /// No description provided for @vcuSetVehicleUploadFrequencyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Vehicle Upload Frequency'**
+  String get vcuSetVehicleUploadFrequencyTitle;
+
+  /// No description provided for @vcuInputVehicleUploadFrequencyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter vehicle upload frequency'**
+  String get vcuInputVehicleUploadFrequencyHint;
+
+  /// No description provided for @vcuPleaseLoadVersionsFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please load versions first'**
+  String get vcuPleaseLoadVersionsFirst;
+
+  /// No description provided for @vcuBleChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'BLE'**
+  String get vcuBleChannel;
+
+  /// No description provided for @vcuNetworkChannel.
+  ///
+  /// In en, this message translates to:
+  /// **'Network'**
+  String get vcuNetworkChannel;
+
+  /// No description provided for @vcuBleCommandGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Command'**
+  String get vcuBleCommandGeneric;
+
+  /// No description provided for @vcuCmdLaunch.
+  ///
+  /// In en, this message translates to:
+  /// **'One-Tap Start'**
+  String get vcuCmdLaunch;
+
+  /// No description provided for @vcuCmdLock.
+  ///
+  /// In en, this message translates to:
+  /// **'One-Tap Lock'**
+  String get vcuCmdLock;
+
+  /// No description provided for @vcuCmdAntiTheft.
+  ///
+  /// In en, this message translates to:
+  /// **'Anti-Theft Mode'**
+  String get vcuCmdAntiTheft;
+
+  /// No description provided for @vcuCmdFind.
+  ///
+  /// In en, this message translates to:
+  /// **'Find Vehicle'**
+  String get vcuCmdFind;
+
+  /// No description provided for @vcuCmdRemoteLock.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote Lock'**
+  String get vcuCmdRemoteLock;
+
+  /// No description provided for @vcuCmdRemoteUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote Unlock'**
+  String get vcuCmdRemoteUnlock;
+
+  /// No description provided for @vcuCmdQueryVehicleStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Query Vehicle Status'**
+  String get vcuCmdQueryVehicleStatus;
+
+  /// No description provided for @vcuCmdQueryMcuVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Query MCU Version'**
+  String get vcuCmdQueryMcuVersion;
+
+  /// No description provided for @vcuCmdOtaVerifyVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'OTA Verify Version'**
+  String get vcuCmdOtaVerifyVersion;
+
+  /// No description provided for @vcuCmdOtaUpgrade.
+  ///
+  /// In en, this message translates to:
+  /// **'OTA Upgrade'**
+  String get vcuCmdOtaUpgrade;
+
+  /// No description provided for @vcuCmdOtaDataPacket.
+  ///
+  /// In en, this message translates to:
+  /// **'OTA Data Packet'**
+  String get vcuCmdOtaDataPacket;
+
+  /// No description provided for @vcuCmdQueryIccid.
+  ///
+  /// In en, this message translates to:
+  /// **'Query ICCID'**
+  String get vcuCmdQueryIccid;
+
+  /// No description provided for @vcuCmdSetPlatformUrl.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Platform URL'**
+  String get vcuCmdSetPlatformUrl;
+
+  /// No description provided for @vcuCmdSetPlatformPort.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Platform Port'**
+  String get vcuCmdSetPlatformPort;
+
+  /// No description provided for @vcuCmdSetApn.
+  ///
+  /// In en, this message translates to:
+  /// **'Set APN'**
+  String get vcuCmdSetApn;
+
+  /// No description provided for @vcuCmdSetVehicleUploadFrequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Vehicle Upload Frequency'**
+  String get vcuCmdSetVehicleUploadFrequency;
+
+  /// No description provided for @vcuCmdSetGpsFrequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Set GPS Frequency'**
+  String get vcuCmdSetGpsFrequency;
+
+  /// No description provided for @vcuPlatformProduction.
+  ///
+  /// In en, this message translates to:
+  /// **'Production'**
+  String get vcuPlatformProduction;
+
+  /// No description provided for @vcuPlatformTesting.
+  ///
+  /// In en, this message translates to:
+  /// **'Testing'**
+  String get vcuPlatformTesting;
 
   /// No description provided for @promoteWebTitle.
   ///
@@ -8504,19 +8978,19 @@ abstract class AppLocalizations {
   /// No description provided for @deviceDetailPortOpenConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Confirm to open port {portNo} door?'**
+  /// **'Confirm opening slot {portNo}? It can only be closed offline.'**
   String deviceDetailPortOpenConfirm(Object portNo);
 
   /// No description provided for @deviceDetailPortEnableConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Confirm to enable this port?'**
+  /// **'Confirm enable the slot?'**
   String get deviceDetailPortEnableConfirm;
 
   /// No description provided for @deviceDetailPortDisableConfirm.
   ///
   /// In en, this message translates to:
-  /// **'Confirm to disable this port?'**
+  /// **'Confirm to disable the warehouse door?'**
   String get deviceDetailPortDisableConfirm;
 
   /// No description provided for @deviceDetailPortOpenSuccess.

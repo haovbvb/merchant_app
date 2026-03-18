@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:merchant_app/app/app_router.dart';
 import 'package:merchant_app/app/styles/colors.dart';
@@ -241,7 +242,6 @@ class WorkTab extends ConsumerStatefulWidget {
 
 class _WorkTabState extends ConsumerState<WorkTab> {
   WorkRole _currentRole = WorkRole.sale;
-  bool _didInitialRefresh = false;
 
   @override
   void initState() {
@@ -249,7 +249,6 @@ class _WorkTabState extends ConsumerState<WorkTab> {
     final roles = _resolveAvailableRoles();
     _currentRole = _resolveActiveRole(roles);
     if (_currentRole == WorkRole.sale) {
-      _didInitialRefresh = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         ref.read(workbenchProvider.notifier).refresh();
@@ -268,21 +267,28 @@ class _WorkTabState extends ConsumerState<WorkTab> {
     );
     final modules = _resolveModules(activeRole, warehouseRole, serviceTypes);
 
-    return Scaffold(
-      backgroundColor: AppColors.bgColor,
-      body: Column(
-        children: [
-          // 深绿色渐变顶部
-          _buildHeader(context, state, activeRole, availableRoles),
-          // 模块列表区域
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.only(top: 0),
-              decoration: BoxDecoration(color: AppColors.bgColor),
-              child: _buildModuleSection(context, modules, activeRole),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.bgColor,
+        body: Column(
+          children: [
+            // 深绿色渐变顶部
+            _buildHeader(context, state, activeRole, availableRoles),
+            // 模块列表区域
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.only(top: 0),
+                decoration: BoxDecoration(color: AppColors.bgColor),
+                child: _buildModuleSection(context, modules, activeRole),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -672,7 +678,6 @@ class _WorkTabState extends ConsumerState<WorkTab> {
         Navigator.of(context).pop();
         // 切换到销售角色时刷新数据
         if (role == WorkRole.sale) {
-          _didInitialRefresh = true;
           ref.read(workbenchProvider.notifier).refresh();
         }
       },
@@ -746,7 +751,10 @@ class _WorkTabState extends ConsumerState<WorkTab> {
 
   Future<void> _scanAndOpenDetail() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: false, parseDeviceSn: true)),
+      MaterialPageRoute(
+        builder: (_) =>
+            const QrScanPage(allowManualInput: false, parseDeviceSn: true),
+      ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     await Navigator.of(context).push(
@@ -812,9 +820,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
       WorkRole.operations: 1,
       WorkRole.warehouseKeeper: 2,
     };
-    roles.sort(
-      (a, b) => (roleOrder[a] ?? 999).compareTo(roleOrder[b] ?? 999),
-    );
+    roles.sort((a, b) => (roleOrder[a] ?? 999).compareTo(roleOrder[b] ?? 999));
     return roles;
   }
 

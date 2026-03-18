@@ -190,9 +190,7 @@ class _PackageItem extends StatelessWidget {
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected
-                ? AppColors.primaryColor
-                : const Color(0xFFEEEEEE),
+            color: const Color(0xFFEEEEEE),
           ),
         ),
         padding: const EdgeInsets.all(16),
@@ -220,7 +218,7 @@ class _PackageItem extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  const Divider(height: 1),
+                  const Divider(height: 0.5),
                   const SizedBox(height: 8),
                   _buildInfoRow(
                     context,

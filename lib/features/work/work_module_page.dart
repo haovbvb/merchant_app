@@ -34,7 +34,6 @@ import 'package:merchant_app/features/work/sales/sell_bind_page.dart';
 import 'package:merchant_app/features/work/sales/swap_bind_page.dart';
 import 'package:merchant_app/features/work/user/user_detail_page.dart';
 import 'package:merchant_app/features/work/user/user_list_page.dart';
-import 'package:merchant_app/features/work/vcu/vcu_control_page.dart';
 import 'package:merchant_app/features/work/vcu/vcu_search_page.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_detail_page_new.dart';
 import 'package:merchant_app/features/work/warehouse/inventory_list_page_new.dart';
@@ -169,7 +168,7 @@ class WorkModulePage extends StatelessWidget {
       case 'vcu_search':
         return const VcuSearchPage();
       case 'vcu_control':
-        return const VcuControlPage();
+        return const VcuSearchPage();
       case 'promote_web':
         return const PromoteWebPage();
       case 'battery_loc':

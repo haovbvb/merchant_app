@@ -602,6 +602,15 @@ class _StationCard extends StatelessWidget {
                                     size: 12,
                                     color: isOnline ? AppColors.primaryColor : Colors.red,
                                   ),
+                                  Text(
+                                    isOnline
+                                        ? l10n.online
+                                        : l10n.offline,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: isOnline ? AppColors.primaryColor : Colors.red,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),

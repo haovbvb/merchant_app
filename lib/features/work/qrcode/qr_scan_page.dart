@@ -23,10 +23,13 @@ class QrScanPage extends StatefulWidget {
   final bool allowManualInput;
   final bool parseDeviceSn;
   final int? deviceType;
+
   /// When true, return the raw QR / manual-input value without parsing.
   final bool returnRaw;
+
   /// When true, keep scanner page open and handle each result via callback.
   final bool continuousScan;
+
   /// Callback for continuous scan mode. Return a non-empty message to show feedback.
   final FutureOr<String?> Function(String value)? onContinuousScan;
 
@@ -93,14 +96,18 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
     final hasPermission = _permission?.granted ?? false;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
+      value: const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+        systemNavigationBarColor: Colors.black,
+        systemNavigationBarIconBrightness: Brightness.light,
+      ),
       child: Scaffold(
         backgroundColor: Colors.black,
         resizeToAvoidBottomInset: true,
         body: _checkingPermission
-            ? const Center(
-                child: SizedBox.shrink(),
-              )
+            ? const Center(child: SizedBox.shrink())
             : hasPermission
             ? _buildScannerView(context)
             : _buildPermissionView(context),
@@ -118,8 +125,8 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
 
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final torchBottom = widget.allowManualInput
-      ? bottomPadding + _manualInputAreaHeight() + 20
-      : 180.0;
+        ? bottomPadding + _manualInputAreaHeight() + 20
+        : 180.0;
 
     return Stack(
       children: [
@@ -259,12 +266,17 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
     const vehicleExtraInput = 12.0 + 52.0;
     const bottomMargin = 24.0;
     final isVehicle = widget.deviceType == 2;
-    return singleInputAndConfirm + (isVehicle ? vehicleExtraInput : 0) + bottomMargin;
+    return singleInputAndConfirm +
+        (isVehicle ? vehicleExtraInput : 0) +
+        bottomMargin;
   }
 
   Widget _buildInputArea(dynamic l10n) {
     final isVehicle = widget.deviceType == 2;
-    final alwaysShowConfirm = widget.deviceType == 1 || widget.deviceType == 2 || widget.deviceType == 3;
+    final alwaysShowConfirm =
+        widget.deviceType == 1 ||
+        widget.deviceType == 2 ||
+        widget.deviceType == 3;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -284,7 +296,9 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
             onSubmitted: (_) => _confirmManualInput(),
           ),
         ],
-        if (alwaysShowConfirm || _isInputMode || _inputController.text.isNotEmpty) ...[
+        if (alwaysShowConfirm ||
+            _isInputMode ||
+            _inputController.text.isNotEmpty) ...[
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
@@ -327,26 +341,17 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
       child: Row(
         children: [
           const SizedBox(width: 16),
-          const Icon(
-            Icons.edit_outlined,
-            color: Colors.white70,
-            size: 20,
-          ),
+          const Icon(Icons.edit_outlined, color: Colors.white70, size: 20),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
               controller: controller,
               focusNode: focusNode,
-              inputFormatters: [
-                LengthLimitingTextInputFormatter(50),
-              ],
+              inputFormatters: [LengthLimitingTextInputFormatter(50)],
               style: const TextStyle(color: Colors.white, fontSize: 16),
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: const TextStyle(
-                  color: Colors.white60,
-                  fontSize: 16,
-                ),
+                hintStyle: const TextStyle(color: Colors.white60, fontSize: 16),
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.zero,
                 isDense: true,
@@ -363,11 +368,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
               },
               child: const Padding(
                 padding: EdgeInsets.all(8),
-                child: Icon(
-                  Icons.cancel,
-                  color: Colors.white54,
-                  size: 20,
-                ),
+                child: Icon(Icons.cancel, color: Colors.white54, size: 20),
               ),
             ),
           const SizedBox(width: 8),
@@ -487,7 +488,8 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
       final now = DateTime.now();
       if (_lastContinuousValue == resolved &&
           _lastContinuousAt != null &&
-          now.difference(_lastContinuousAt!) < const Duration(milliseconds: 1200)) {
+          now.difference(_lastContinuousAt!) <
+              const Duration(milliseconds: 1200)) {
         return;
       }
       _lastContinuousValue = resolved;
@@ -540,12 +542,14 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
     final text = _inputController.text.trim();
     final isVehicle = widget.deviceType == 2;
     final isEntryDevice =
-        widget.deviceType == 1 || widget.deviceType == 2 || widget.deviceType == 3;
+        widget.deviceType == 1 ||
+        widget.deviceType == 2 ||
+        widget.deviceType == 3;
 
     if (isEntryDevice && text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(context.l10n.entrySnRequired)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(context.l10n.entrySnRequired)));
       return;
     }
     if (!isEntryDevice && text.isEmpty) {
@@ -555,9 +559,9 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
     if (isVehicle) {
       final vin = _vinController.text.trim();
       if (vin.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(context.l10n.entryVinRequired)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(context.l10n.entryVinRequired)));
         return;
       }
     }

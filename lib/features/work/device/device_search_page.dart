@@ -37,7 +37,7 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
   final FocusNode _focusNode = FocusNode();
   final List<String> _history = [];
   bool _loadingHistory = true;
-  bool _showHistory = true;
+  bool _showNoData = false;
 
   String get _historyKey => widget.deviceType == 3
       ? StorageKeys.stationSearchHistory
@@ -50,7 +50,6 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
     final initial = widget.initialKeyword?.trim() ?? '';
     if (initial.isNotEmpty) {
       _controller.text = initial;
-      _showHistory = false;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
         _submit(initial);
@@ -115,7 +114,9 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
                   textInputAction: TextInputAction.search,
                   onChanged: (value) {
                     setState(() {
-                      _showHistory = value.trim().isEmpty;
+                      if (_showNoData) {
+                        _showNoData = false;
+                      }
                     });
                   },
                   onSubmitted: _submit,
@@ -125,9 +126,8 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
                 GestureDetector(
                   onTap: () {
                     _controller.clear();
-                    setState(() {
-                      _showHistory = true;
-                    });
+                    setState(() => _showNoData = false);
+                    _focusNode.requestFocus();
                   },
                   child: Container(
                     width: 20,
@@ -157,9 +157,12 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
       ),
       body: _loadingHistory
           ? const Center(child: SizedBox.shrink())
-          : (_showHistory && hasHistory)
-          ? _buildHistoryView(l10n)
-          : _DeviceSearchEmpty(text: l10n.deviceSearchEmpty),
+          : _showNoData
+          ? _DeviceSearchEmpty(text: l10n.deviceSearchEmpty)
+          : Container(
+              color: hasHistory ? const Color(0xFFF3F4F6) : Colors.white,
+              child: _buildHistoryView(l10n),
+            ),
     );
   }
 
@@ -175,53 +178,55 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
                 child: Text(
                   l10n.deviceSearchHistoryTitle,
                   style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
                     color: AppColors.black06Text,
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: _clearHistory,
-                child: const Icon(
-                  Icons.delete_outline,
-                  color: Color(0xFF999999),
-                  size: 22,
+              if (_history.isNotEmpty)
+                GestureDetector(
+                  onTap: _clearHistory,
+                  child: const Icon(
+                    Icons.delete_outline,
+                    color: Color(0xFF999999),
+                    size: 20,
+                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 16),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: _history.map((item) {
-              return GestureDetector(
-                onTap: () {
-                  _controller.text = item;
-                  _submit(item);
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFEEEEEE)),
-                  ),
-                  child: Text(
-                    item,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: AppColors.black06Text,
+          if (_history.isNotEmpty)
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: _history.map((item) {
+                return GestureDetector(
+                  onTap: () {
+                    _controller.text = item;
+                    setState(() => _showNoData = false);
+                    _submit(item);
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 9,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF2F4F7),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Text(
+                      item,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.black06Text,
+                      ),
                     ),
                   ),
-                ),
-              );
-            }).toList(),
-          ),
+                );
+              }).toList(),
+            ),
         ],
       ),
     );
@@ -248,7 +253,7 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
     await prefs.remove(_historyKey);
     setState(() {
       _history.clear();
-      _showHistory = true;
+      _showNoData = false;
     });
   }
 
@@ -303,7 +308,7 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
       return;
     }
     _controller.text = sn;
-    setState(() => _showHistory = false);
+    setState(() => _showNoData = false);
     if (!mounted) return;
     if (widget.returnResult) {
       await _addHistory(sn);
@@ -323,11 +328,13 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
       ),
     );
     if (!mounted) return;
-    if (hasData == true) {
+    if (hasData != false) {
       await _addHistory(sn);
+      if (!mounted) return;
+      setState(() => _showNoData = false);
       return;
     }
-    setState(() => _showHistory = true);
+    setState(() => _showNoData = true);
   }
 
   Future<void> _scan() async {

@@ -337,14 +337,41 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
       );
 
       final total = response.result?.total ?? 0;
-      final incoming = (response.result?.list ?? const <OrderItem>[])
+      final rawIncoming = (response.result?.list ?? const <OrderItem>[])
           .where((item) => item.orderType == orderType)
           .toList();
+      var incoming = rawIncoming;
+      var fallbackHasMore = incoming.length >= _orderPageSize;
+      if (total <= 0 && rawIncoming.length > _orderPageSize) {
+        final start = (page - 1) * _orderPageSize;
+        if (start >= rawIncoming.length) {
+          incoming = const <OrderItem>[];
+          fallbackHasMore = false;
+        } else {
+          var end = start + _orderPageSize;
+          if (end > rawIncoming.length) {
+            end = rawIncoming.length;
+          }
+          incoming = rawIncoming.sublist(start, end);
+          fallbackHasMore = end < rawIncoming.length;
+        }
+      }
+
       final current = _orderCurrentList(orderType);
-      final merged = page == 1 ? incoming : [...current, ...incoming];
-        final hasMore = total > 0
+      final currentOrderNos = current
+          .map((item) => item.orderNo)
+          .where((orderNo) => orderNo.isNotEmpty)
+          .toSet();
+      final appended = page == 1
+          ? incoming
+          : incoming.where((item) {
+              final orderNo = item.orderNo;
+              return orderNo.isEmpty || !currentOrderNos.contains(orderNo);
+            }).toList();
+      final merged = page == 1 ? appended : [...current, ...appended];
+      final hasMore = total > 0
           ? merged.length < total
-          : incoming.length >= _orderPageSize;
+          : fallbackHasMore && (page == 1 || appended.isNotEmpty);
 
       switch (orderType) {
         case 1:
@@ -374,7 +401,8 @@ class UserDetailNotifier extends Notifier<UserDetailState> {
 
       state = state.copyWith(
         orders: [...state.saleOrders, ...state.rentOrders, ...state.swapOrders],
-        total: state.saleOrders.length +
+        total:
+            state.saleOrders.length +
             state.rentOrders.length +
             state.swapOrders.length,
       );

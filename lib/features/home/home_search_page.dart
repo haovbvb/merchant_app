@@ -101,12 +101,7 @@ class _HomeSearchPageState extends State<HomeSearchPage> {
 
   Future<void> _scan() async {
     final raw = await Navigator.of(context).push<String>(
-      MaterialPageRoute(
-        builder: (_) => const QrScanPage(
-          allowManualInput: true,
-          parseDeviceSn: true,
-        ),
-      ),
+      MaterialPageRoute(builder: (_) => const QrScanPage(parseDeviceSn: true)),
     );
     if (!mounted || raw == null || raw.trim().isEmpty) return;
     final sn = ScanUtils.getDeviceSn(raw).trim();
@@ -139,7 +134,8 @@ class _HomeSearchPageState extends State<HomeSearchPage> {
         'radius': _vehicleRadius,
         'vehicleSn': keyword,
       },
-      parser: (json) => (json as List<dynamic>?)
+      parser: (json) =>
+          (json as List<dynamic>?)
               ?.map(
                 (item) => NearByVehicle.fromJson(
                   Map<String, dynamic>.from(item as Map),
@@ -399,10 +395,7 @@ class _HomeSearchPageState extends State<HomeSearchPage> {
             const SizedBox(height: 12),
             Text(
               l10n.deviceIssueSearchEmpty,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Color(0x800C0C0D),
-              ),
+              style: const TextStyle(fontSize: 16, color: Color(0x800C0C0D)),
             ),
           ],
         ),
@@ -426,6 +419,7 @@ class _HomeSearchPageState extends State<HomeSearchPage> {
                 builder: (_) => DeviceDetailPageNew(
                   initialSn: sn,
                   readOnly: true,
+                  showSearchBarInAppBar: false,
                 ),
               ),
             );
@@ -536,11 +530,13 @@ class _HomeSearchVehicleCard extends StatelessWidget {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              border: Border.all(color: const Color(0x26000000)),
+                              border: Border.all(
+                                color: const Color(0x26000000),
+                              ),
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
-                              'Binding ID: ${item.cardNum ?? '-'}',
+                              '${context.l10n.vehicleSearchBindIdLabel}: ${item.cardNum ?? '-'}',
                               style: const TextStyle(
                                 color: Color(0x99000000),
                                 fontSize: 12,

@@ -22,7 +22,7 @@ import 'package:merchant_app/features/work/user/user_controller.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart' hide RefreshIndicator;
 import 'package:url_launcher/url_launcher.dart';
 
 class UserDetailPage extends ConsumerStatefulWidget {
@@ -120,6 +120,7 @@ class _UserDetailPageState extends ConsumerState<UserDetailPage>
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
+                    physics: const NeverScrollableScrollPhysics(),
                     children: [
                       _BasicInfoTab(detail: state.detail, l10n: l10n),
                       _OrderRecordsTab(l10n: l10n),
@@ -1171,18 +1172,7 @@ class _OrderRecordsTab extends ConsumerStatefulWidget {
 }
 
 class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
-  static const Duration _loadMoreMinDuration = Duration(milliseconds: 380);
-
   int _selectedIndex = 0;
-  final RefreshController _saleRefreshController = RefreshController(
-    initialRefresh: false,
-  );
-  final RefreshController _rentRefreshController = RefreshController(
-    initialRefresh: false,
-  );
-  final RefreshController _swapRefreshController = RefreshController(
-    initialRefresh: false,
-  );
 
   @override
   void initState() {
@@ -1200,21 +1190,7 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
 
   @override
   void dispose() {
-    _saleRefreshController.dispose();
-    _rentRefreshController.dispose();
-    _swapRefreshController.dispose();
     super.dispose();
-  }
-
-  RefreshController get _currentRefreshController {
-    switch (_selectedIndex) {
-      case 1:
-        return _rentRefreshController;
-      case 2:
-        return _swapRefreshController;
-      default:
-        return _saleRefreshController;
-    }
   }
 
   int get _currentOrderType {
@@ -1228,38 +1204,13 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
     }
   }
 
-  void _syncControllerNoDataState({
-    required RefreshController controller,
-    required bool hasMore,
-  }) {
-    if (hasMore) {
-      controller.resetNoData();
-    } else {
-      controller.loadNoData();
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final state = ref.watch(userDetailProvider);
-    final notifier = ref.read(userDetailProvider.notifier);
     final tabs = [
       widget.l10n.userOrderTabSale,
       widget.l10n.userOrderTabRent,
       widget.l10n.userOrderTabSwap,
     ];
-
-    List<OrderItem> current;
-    switch (_selectedIndex) {
-      case 1:
-        current = state.rentOrders;
-        break;
-      case 2:
-        current = state.swapOrders;
-        break;
-      default:
-        current = state.saleOrders;
-    }
 
     return Column(
       children: [
@@ -1275,19 +1226,8 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
                     right: index < tabs.length - 1 ? 10 : 0,
                   ),
                   child: GestureDetector(
-                    onTap: () async {
+                    onTap: () {
                       setState(() => _selectedIndex = index);
-                      _currentRefreshController.resetNoData();
-                      final nextType = _currentOrderType;
-                      final hasData = nextType == 1
-                          ? state.saleOrders.isNotEmpty
-                          : nextType == 2
-                          ? state.rentOrders.isNotEmpty
-                          : state.swapOrders.isNotEmpty;
-                      if (!hasData) {
-                        await notifier.loadOrders(orderType: nextType, page: 1);
-                      }
-                      _currentRefreshController.resetNoData();
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -1321,72 +1261,10 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
           ),
         ),
         Expanded(
-          child: SmartRefresher(
-            controller: _currentRefreshController,
-            header: _buildRefreshHeader(context),
-            footer: _buildRefreshFooter(context),
-            enablePullDown: true,
-            enablePullUp: true,
-            onRefresh: () async {
-              final controller = _currentRefreshController;
-              final orderType = _currentOrderType;
-              try {
-                await notifier.loadOrders(orderType: orderType, page: 1);
-                controller.refreshCompleted();
-                controller.resetNoData();
-              } catch (_) {
-                controller.refreshFailed();
-              }
-            },
-            onLoading: () async {
-              final controller = _currentRefreshController;
-              final orderType = _currentOrderType;
-              final start = DateTime.now();
-              final before = orderType == 1
-                  ? ref.read(userDetailProvider).saleOrders.length
-                  : orderType == 2
-                  ? ref.read(userDetailProvider).rentOrders.length
-                  : ref.read(userDetailProvider).swapOrders.length;
-              final currentPage = orderType == 1
-                  ? ref.read(userDetailProvider).saleOrdersPage
-                  : orderType == 2
-                  ? ref.read(userDetailProvider).rentOrdersPage
-                  : ref.read(userDetailProvider).swapOrdersPage;
-              try {
-                await notifier.loadOrders(
-                  orderType: orderType,
-                  page: currentPage + 1,
-                );
-                final refreshed = ref.read(userDetailProvider);
-                final refreshedHasMore = orderType == 1
-                    ? refreshed.saleOrdersHasMore
-                    : orderType == 2
-                    ? refreshed.rentOrdersHasMore
-                    : refreshed.swapOrdersHasMore;
-                final after = orderType == 1
-                    ? refreshed.saleOrders.length
-                    : orderType == 2
-                    ? refreshed.rentOrders.length
-                    : refreshed.swapOrders.length;
-                final elapsed = DateTime.now().difference(start);
-                if (elapsed < _loadMoreMinDuration) {
-                  await Future.delayed(_loadMoreMinDuration - elapsed);
-                }
-
-                if (!refreshedHasMore || after <= before) {
-                  controller.loadNoData();
-                } else {
-                  controller.loadComplete();
-                }
-              } catch (_) {
-                controller.loadFailed();
-              }
-            },
-            child: _OrderList(
-              orders: current,
-              l10n: widget.l10n,
-              orderType: _currentOrderType,
-            ),
+          child: _OrderTypeRecordsTab(
+            key: ValueKey(_currentOrderType),
+            orderType: _currentOrderType,
+            l10n: widget.l10n,
           ),
         ),
       ],
@@ -1394,59 +1272,207 @@ class _OrderRecordsTabState extends ConsumerState<_OrderRecordsTab> {
   }
 }
 
-class _OrderList extends StatelessWidget {
-  const _OrderList({
-    required this.orders,
-    required this.l10n,
+class _OrderTypeRecordsTab extends ConsumerStatefulWidget {
+  const _OrderTypeRecordsTab({
+    super.key,
     required this.orderType,
+    required this.l10n,
   });
 
-  final List<OrderItem> orders;
-  final AppLocalizations l10n;
   final int orderType;
+  final AppLocalizations l10n;
+
+  @override
+  ConsumerState<_OrderTypeRecordsTab> createState() =>
+      _OrderTypeRecordsTabState();
+}
+
+class _OrderTypeRecordsTabState extends ConsumerState<_OrderTypeRecordsTab> {
+  static const Duration _loadMoreMinDuration = Duration(milliseconds: 380);
+
+  final RefreshController _refreshController = RefreshController(
+    initialRefresh: false,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final state = ref.read(userDetailProvider);
+      if (state.cardNum.trim().isEmpty) return;
+      if (_ordersByType(state).isEmpty) {
+        await ref
+            .read(userDetailProvider.notifier)
+            .loadOrders(orderType: widget.orderType, page: 1);
+      }
+      if (!mounted) return;
+      final refreshed = ref.read(userDetailProvider);
+      if (_hasMoreByType(refreshed)) {
+        _refreshController.resetNoData();
+      } else {
+        _refreshController.loadNoData();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _refreshController.dispose();
+    super.dispose();
+  }
+
+  List<OrderItem> _ordersByType(UserDetailState state) {
+    switch (widget.orderType) {
+      case 1:
+        return state.saleOrders;
+      case 2:
+        return state.rentOrders;
+      case 3:
+        return state.swapOrders;
+      default:
+        return const <OrderItem>[];
+    }
+  }
+
+  int _currentPageByType(UserDetailState state) {
+    switch (widget.orderType) {
+      case 1:
+        return state.saleOrdersPage;
+      case 2:
+        return state.rentOrdersPage;
+      case 3:
+        return state.swapOrdersPage;
+      default:
+        return 1;
+    }
+  }
+
+  bool _hasMoreByType(UserDetailState state) {
+    switch (widget.orderType) {
+      case 1:
+        return state.saleOrdersHasMore;
+      case 2:
+        return state.rentOrdersHasMore;
+      case 3:
+        return state.swapOrdersHasMore;
+      default:
+        return false;
+    }
+  }
+
+  Future<void> _onRefresh() async {
+    try {
+      await ref
+          .read(userDetailProvider.notifier)
+          .loadOrders(orderType: widget.orderType, page: 1);
+      if (!mounted) return;
+      final refreshed = ref.read(userDetailProvider);
+      if (_hasMoreByType(refreshed)) {
+        _refreshController.resetNoData();
+      } else {
+        _refreshController.loadNoData();
+      }
+    } catch (_) {
+      _refreshController.refreshFailed();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    final current = ref.read(userDetailProvider);
+    if (!_hasMoreByType(current)) {
+      _refreshController.loadNoData();
+      return;
+    }
+
+    final start = DateTime.now();
+    final before = _ordersByType(current).length;
+    final currentPage = _currentPageByType(current);
+    try {
+      await ref
+          .read(userDetailProvider.notifier)
+          .loadOrders(orderType: widget.orderType, page: currentPage + 1);
+      final refreshed = ref.read(userDetailProvider);
+      final after = _ordersByType(refreshed).length;
+      final elapsed = DateTime.now().difference(start);
+      if (elapsed < _loadMoreMinDuration) {
+        await Future.delayed(_loadMoreMinDuration - elapsed);
+      }
+
+      if (!_hasMoreByType(refreshed) || after <= before) {
+        _refreshController.loadNoData();
+      } else {
+        _refreshController.loadComplete();
+      }
+    } catch (_) {
+      _refreshController.loadFailed();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (orders.isEmpty) {
-      return ListView(
-        children: [
-          SizedBox(
-            height: MediaQuery.of(context).size.height * 0.45,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/android/mipmap-xxhdpi/empty_user_orderrecord.png',
-                    width: 120,
-                    height: 120,
-                    errorBuilder: (_, __, ___) => Icon(
-                      Icons.receipt_long_outlined,
-                      size: 64,
-                      color: Colors.grey[400],
+    final state = ref.watch(userDetailProvider);
+    final items = _ordersByType(state);
+
+    return SmartRefresher(
+      controller: _refreshController,
+      header: _buildRefreshHeader(context),
+      footer: _buildRefreshFooter(context),
+      enablePullDown: true,
+      enablePullUp: true,
+      onRefresh: () async {
+        await _onRefresh();
+        if (!mounted) return;
+        _refreshController.refreshCompleted();
+      },
+      onLoading: _loadMore,
+      child: items.isEmpty
+          ? ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.45,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset(
+                          'assets/android/mipmap-xxhdpi/empty_user_orderrecord.png',
+                          width: 120,
+                          height: 120,
+                          errorBuilder: (_, __, ___) => Icon(
+                            Icons.receipt_long_outlined,
+                            size: 64,
+                            color: Colors.grey[400],
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          widget.l10n.userDetailOrderEmpty,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    l10n.userDetailOrderEmpty,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                  ),
-                ],
-              ),
+                ),
+              ],
+            )
+          : ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final order = items[index];
+                return _OrderCard(
+                  order: order,
+                  l10n: widget.l10n,
+                  orderType: widget.orderType,
+                );
+              },
             ),
-          ),
-        ],
-      );
-    }
-
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: orders.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
-      itemBuilder: (context, index) {
-        final order = orders[index];
-        return _OrderCard(order: order, l10n: l10n, orderType: orderType);
-      },
     );
   }
 }
@@ -1940,7 +1966,8 @@ class _PaymentRecordsTabState extends ConsumerState<_PaymentRecordsTab> {
             await Future.delayed(_loadMoreMinDuration - elapsed);
           }
 
-          if (!refreshed.paymentsHasMore || refreshed.payments.length <= before) {
+          if (!refreshed.paymentsHasMore ||
+              refreshed.payments.length <= before) {
             _refreshController.loadNoData();
           } else {
             _refreshController.loadComplete();
@@ -2578,44 +2605,54 @@ class _SwapRecordCard extends StatelessWidget {
     final statusLabel = _swapStatusLabel(l10n, record);
     final statusColor = _swapStatusColor(record.status);
     final timeText = DateFormatUtils.formatString(record.createTime);
-    final operator = _joinNonEmpty([record.handlerName, record.handlerPhone]);
+    final operator = record.handlerName ?? '-';
+    final detailRows = <MapEntry<String, String>>[];
+    if (operator.isNotEmpty) {
+      detailRows.add(MapEntry(l10n.userSwapOperator, operator));
+    }
+    if (record.stationSn?.isNotEmpty ?? false) {
+      detailRows.add(MapEntry(l10n.userSwapStationSn, record.stationSn ?? '-'));
+    }
+    if (record.outBattery?.isNotEmpty ?? false) {
+      detailRows.add(
+        MapEntry(l10n.userSwapOutBattery, record.outBattery ?? '-'),
+      );
+    }
+    if (record.inBattery?.isNotEmpty ?? false) {
+      detailRows.add(MapEntry(l10n.userSwapInBattery, record.inBattery ?? '-'));
+    }
+    if (record.error?.isNotEmpty ?? false) {
+      detailRows.add(MapEntry(l10n.userSwapError, record.error ?? '-'));
+    }
 
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
       ),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(14, 14, 14, 12),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF5F6F8),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                alignment: Alignment.center,
-                child: Image.asset(
-                  typeInfo.iconPath,
-                  width: 24,
-                  height: 24,
-                  errorBuilder: (_, __, ___) => const Icon(
-                    Icons.swap_horiz_outlined,
-                    size: 24,
-                    color: Color(0xFF999999),
-                  ),
+              Image.asset(
+                typeInfo.iconPath,
+                width: 24,
+                height: 24,
+                errorBuilder: (_, __, ___) => const Icon(
+                  Icons.swap_horiz_outlined,
+                  size: 22,
+                  color: Color(0xFF999999),
                 ),
               ),
-              const SizedBox(width: 12),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   typeInfo.label,
                   style: const TextStyle(
-                    fontSize: 14,
+                    fontSize: 17,
                     fontWeight: FontWeight.w600,
                     color: AppColors.black09Text,
                   ),
@@ -2627,13 +2664,13 @@ class _SwapRecordCard extends StatelessWidget {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.12),
-                  borderRadius: BorderRadius.circular(12),
+                  color: statusColor.withOpacity(0.16),
+                  borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
                   statusLabel,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: record.status == 1 ? 14 : 12,
                     color: statusColor,
                     fontWeight: FontWeight.w500,
                   ),
@@ -2641,18 +2678,22 @@ class _SwapRecordCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
-          _recordInfoRow(l10n.userSwapTime, timeText),
-          if (record.stationSn?.isNotEmpty ?? false)
-            _recordInfoRow(l10n.userSwapStationSn, record.stationSn ?? '-'),
-          if (operator.isNotEmpty)
-            _recordInfoRow(l10n.userSwapOperator, operator),
-          if (record.outBattery?.isNotEmpty ?? false)
-            _recordInfoRow(l10n.userSwapOutBattery, record.outBattery ?? '-'),
-          if (record.inBattery?.isNotEmpty ?? false)
-            _recordInfoRow(l10n.userSwapInBattery, record.inBattery ?? '-'),
-          if (record.error?.isNotEmpty ?? false)
-            _recordInfoRow(l10n.userSwapError, record.error ?? '-'),
+          const SizedBox(height: 8),
+          Text(
+            timeText,
+            style: const TextStyle(fontSize: 13, color: Color(0xFF6E7681)),
+          ),
+          if (detailRows.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Divider(height: 1, color: const Color(0xFFEFF2F5)),
+            const SizedBox(height: 12),
+            ...detailRows.map(
+              (row) => Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: _swapRecordInfoRow(row.key, row.value),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -2668,43 +2709,135 @@ class _SwapTypeInfo {
 
 Widget _buildRefreshHeader(BuildContext context) {
   final isZh = Localizations.localeOf(context).languageCode == 'zh';
-  return ClassicHeader(
-    spacing: 10,
-    idleText: isZh ? '下拉刷新' : 'Pull down to refresh',
-    releaseText: isZh ? '松开刷新' : 'Release to refresh',
-    refreshingText: isZh ? '正在刷新...' : 'Refreshing...',
-    completeText: isZh ? '刷新成功' : 'Refresh completed',
-    failedText: isZh ? '刷新失败' : 'Refresh failed',
-    textStyle: const TextStyle(fontSize: 12, color: AppColors.black06Text),
-    refreshingIcon: const SizedBox(
-      width: 16,
-      height: 16,
-      child: CircularProgressIndicator(
-        strokeWidth: 2,
-        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
-      ),
-    ),
+  return CustomHeader(
+    height: 56,
+    builder: (context, mode) {
+      final status = mode ?? RefreshStatus.idle;
+      String text;
+      Widget icon;
+      switch (status) {
+        case RefreshStatus.canRefresh:
+          text = isZh ? '松开刷新' : 'Release to refresh';
+          icon = const Icon(
+            Icons.arrow_downward,
+            size: 16,
+            color: AppColors.black06Text,
+          );
+          break;
+        case RefreshStatus.refreshing:
+          text = isZh ? '正在刷新...' : 'Refreshing...';
+          icon = const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
+            ),
+          );
+          break;
+        case RefreshStatus.completed:
+          text = isZh ? '刷新成功' : 'Refresh completed';
+          icon = const Icon(Icons.check_circle, size: 16, color: Colors.green);
+          break;
+        case RefreshStatus.failed:
+          text = isZh ? '刷新失败' : 'Refresh failed';
+          icon = const Icon(Icons.error, size: 16, color: Colors.redAccent);
+          break;
+        default:
+          text = isZh ? '下拉刷新' : 'Pull down to refresh';
+          icon = const Icon(
+            Icons.arrow_downward,
+            size: 16,
+            color: AppColors.black06Text,
+          );
+      }
+
+      return Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            icon,
+            const SizedBox(width: 8),
+            Text(
+              text,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.black06Text,
+              ),
+            ),
+          ],
+        ),
+      );
+    },
   );
 }
 
 Widget _buildRefreshFooter(BuildContext context) {
   final isZh = Localizations.localeOf(context).languageCode == 'zh';
-  return ClassicFooter(
-    spacing: 10,
-    idleText: isZh ? '上拉加载更多' : 'Pull up to load more',
-    canLoadingText: isZh ? '松开加载' : 'Release to load',
-    loadingText: isZh ? '正在加载...' : 'Loading...',
-    noDataText: isZh ? '没有更多数据' : 'No more data',
-    failedText: isZh ? '加载失败，点击重试' : 'Load failed, tap to retry',
-    textStyle: const TextStyle(fontSize: 12, color: AppColors.black06Text),
-    loadingIcon: const SizedBox(
-      width: 16,
-      height: 16,
-      child: CircularProgressIndicator(
-        strokeWidth: 2,
-        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
-      ),
-    ),
+  return CustomFooter(
+    height: 56,
+    builder: (context, mode) {
+      final status = mode ?? LoadStatus.idle;
+      String text;
+      Widget icon;
+      switch (status) {
+        case LoadStatus.canLoading:
+          text = isZh ? '松开加载' : 'Release to load';
+          icon = const Icon(
+            Icons.arrow_upward,
+            size: 16,
+            color: AppColors.black06Text,
+          );
+          break;
+        case LoadStatus.loading:
+          text = isZh ? '正在加载...' : 'Loading...';
+          icon = const SizedBox(
+            width: 16,
+            height: 16,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              valueColor: AlwaysStoppedAnimation<Color>(AppColors.primaryColor),
+            ),
+          );
+          break;
+        case LoadStatus.noMore:
+          text = isZh ? '没有更多数据' : 'No more data';
+          icon = const Icon(
+            Icons.info_outline,
+            size: 16,
+            color: AppColors.black05Text,
+          );
+          break;
+        case LoadStatus.failed:
+          text = isZh ? '加载失败，点击重试' : 'Load failed, tap to retry';
+          icon = const Icon(Icons.error, size: 16, color: Colors.redAccent);
+          break;
+        default:
+          text = isZh ? '上拉加载更多' : 'Pull up to load more';
+          icon = const Icon(
+            Icons.arrow_upward,
+            size: 16,
+            color: AppColors.black06Text,
+          );
+      }
+
+      return Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            icon,
+            const SizedBox(width: 8),
+            Text(
+              text,
+              style: const TextStyle(
+                fontSize: 12,
+                color: AppColors.black06Text,
+              ),
+            ),
+          ],
+        ),
+      );
+    },
   );
 }
 
@@ -2712,35 +2845,34 @@ Widget _buildRefreshFooter(BuildContext context) {
 // Helper Functions
 // =============================================================================
 
-Widget _recordInfoRow(String label, String value) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 6),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 110,
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: AppColors.black09Text,
-            ),
+Widget _swapRecordInfoRow(String label, String value) {
+  return Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      SizedBox(
+        width: 92,
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w400,
+            color: Color(0xFF6E7681),
           ),
         ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w400,
-              color: AppColors.black06Text,
-            ),
+      ),
+      const SizedBox(width: 10),
+      Expanded(
+        child: Text(
+          value,
+          textAlign: TextAlign.right,
+          style: const TextStyle(
+            fontSize: 17,
+            fontWeight: FontWeight.w500,
+            color: AppColors.black09Text,
           ),
         ),
-      ],
-    ),
+      ),
+    ],
   );
 }
 
@@ -2885,9 +3017,9 @@ _SwapTypeInfo _swapTypeInfo(AppLocalizations l10n, PowerChangeItem record) {
 }
 
 String _swapStatusLabel(AppLocalizations l10n, PowerChangeItem record) {
-  if (record.showStatusName?.isNotEmpty == true) {
-    return record.showStatusName!;
-  }
+  // if (record.showStatusName?.isNotEmpty == true) {
+  //   return record.showStatusName!;
+  // }
   switch (record.status) {
     case 1:
       return l10n.userSwapStatusSuccess;
@@ -2915,13 +3047,6 @@ Color _swapStatusColor(int? status) {
     default:
       return const Color(0xFF909399);
   }
-}
-
-String _joinNonEmpty(List<String?> values) {
-  return values
-      .where((value) => value != null && value.trim().isNotEmpty)
-      .map((value) => value!.trim())
-      .join(' / ');
 }
 
 Widget? _buildVoucherAction(

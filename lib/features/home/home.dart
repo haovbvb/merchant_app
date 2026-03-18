@@ -816,6 +816,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
                     isSelected: _maintainFlag == null,
                   ),
                 ),
+                Divider(height: 0.5, color: Colors.white.withOpacity(0.2)),
                 _FilterActionItem(
                   onTap: () => unawaited(_applyFilter(0)),
                   child: _FilterMenuItem(
@@ -824,6 +825,7 @@ class _HomeTabState extends ConsumerState<HomeTab> with WidgetsBindingObserver {
                     isSelected: _maintainFlag == 0,
                   ),
                 ),
+                Divider(height: 0.5, color: Colors.white.withOpacity(0.2)),
                 _FilterActionItem(
                   onTap: () => unawaited(_applyFilter(1)),
                   child: _FilterMenuItem(

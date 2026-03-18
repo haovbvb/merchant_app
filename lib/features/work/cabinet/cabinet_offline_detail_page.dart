@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:merchant_app/app/styles/colors.dart';
@@ -57,6 +58,7 @@ class _CabinetOfflineDetailPageState
   bool _waitingControlResponse = false;
   bool _waitingQueryLoadResponse = false;
   String _pendingQuerySn = '';
+  Timer? _refreshHudTimer;
 
   @override
   void initState() {
@@ -546,6 +548,30 @@ class _CabinetOfflineDetailPageState
     await _bleClient.queryAllData();
   }
 
+  void _onRefreshPressed() {
+    // Match native behavior: tapping refresh always gives immediate loading feedback.
+    Hud.show();
+    _refreshHudTimer?.cancel();
+    _refreshHudTimer = Timer(const Duration(seconds: 10), () {
+      if (!mounted) return;
+      Hud.dismiss();
+      _refreshHudTimer = null;
+    });
+
+    if (!ref.read(cabinetOfflineProvider).bleConnected) {
+      return;
+    }
+
+    _queryAllDataWithHudWithoutShow();
+  }
+
+  Future<void> _queryAllDataWithHudWithoutShow() async {
+    if (!_waitingAllDataResponse) {
+      _waitingAllDataResponse = true;
+    }
+    await _bleClient.queryAllData();
+  }
+
   void _showControlHud() {
     if (_waitingControlResponse) return;
     _waitingControlResponse = true;
@@ -560,6 +586,8 @@ class _CabinetOfflineDetailPageState
 
   @override
   void dispose() {
+    _refreshHudTimer?.cancel();
+    _refreshHudTimer = null;
     _dismissPendingQueryHud();
     _dismissPendingControlHud();
     _dismissPendingBleHud();
@@ -622,9 +650,7 @@ class _CabinetOfflineDetailPageState
                     const Icon(Icons.bolt_outlined, size: 20),
               ),
               onPressed: () {
-                if (state.bleConnected) {
-                  _queryAllDataWithHud();
-                }
+                _onRefreshPressed();
               },
             ),
         ],
@@ -893,9 +919,8 @@ class _CabinetOfflineDetailPageState
                           'assets/android/mipmap-xxhdpi/icon_restart.png',
                           width: 24,
                           height: 24,
-                        
                         ),
-        
+
                         label: l10n.cabinetOfflineRestart,
                         enabled: canOperate && !state.operating,
                         onTap: _showRestartDialog,
@@ -904,11 +929,10 @@ class _CabinetOfflineDetailPageState
                     const SizedBox(width: 8),
                     Expanded(
                       child: _HeaderActionButton(
-                         icon: Image.asset(
+                        icon: Image.asset(
                           'assets/android/mipmap-xxhdpi/icon_open_door.png',
                           width: 24,
                           height: 24,
-                        
                         ),
                         label: l10n.cabinetOfflineOpenDoor,
                         enabled: canOperate && !state.operating,
@@ -1143,7 +1167,7 @@ class _CabinetOfflineDetailPageState
 
   Color _bleStatusColor(bool bleConnected) {
     return bleConnected || _blePhase == CabinetBleConnectionPhase.connected
-        ? _nativeMainBlue
+        ? Color(0x800C0C0D)
         : _nativeDisconnectColor;
   }
 }
@@ -1521,7 +1545,7 @@ class _HeaderActionButton extends StatelessWidget {
     required this.onTap,
   });
 
-  final Widget  icon;
+  final Widget icon;
   final String label;
   final bool enabled;
   final VoidCallback onTap;
@@ -1568,7 +1592,7 @@ class _WarehouseCabinCard extends StatelessWidget {
         : const Color(0x330C0C0D);
     final socColor = isDisabled
         ? const Color(0x330C0C0D)
-        : (swapFlag == 0 ? const Color(0xFFFA4B51) : const Color(0xFF0B61D9));
+        : (swapFlag == 0 ? const Color(0xFFFA4B51) : AppColors.primaryColor);
 
     final statusVisible =
         isDisabled || (!isDisabled && hasBattery && swapFlag == 1);
@@ -1580,7 +1604,7 @@ class _WarehouseCabinCard extends StatelessWidget {
         : l10n.deviceDetailPortReplaceable;
     final statusColor = isDisabled
         ? const Color(0xE60C0C0D)
-        : const Color(0xFF0B61D9);
+        : AppColors.primaryColor;
 
     return Container(
       constraints: const BoxConstraints(minHeight: 194),

@@ -65,10 +65,12 @@ class InstallmentPayState {
 
 final installmentPayProvider =
     NotifierProvider<InstallmentPayNotifier, InstallmentPayState>(
-  InstallmentPayNotifier.new,
-);
+      InstallmentPayNotifier.new,
+    );
 
 class InstallmentPayNotifier extends Notifier<InstallmentPayState> {
+  static const int _maxAttachments = 5;
+
   final ApiService _api = ApiService();
 
   @override
@@ -126,6 +128,8 @@ class InstallmentPayNotifier extends Notifier<InstallmentPayState> {
   }
 
   void addAttachment(String url) {
+    if (url.trim().isEmpty) return;
+    if (state.attachments.length >= _maxAttachments) return;
     final updated = List<String>.from(state.attachments)..add(url);
     state = state.copyWith(attachments: updated);
   }

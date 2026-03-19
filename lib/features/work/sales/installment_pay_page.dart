@@ -11,6 +11,7 @@ import 'package:merchant_app/core/utils/date_format_utils.dart';
 import 'package:merchant_app/core/utils/scan_utils.dart';
 import 'package:merchant_app/core/utils/toast.dart';
 import 'package:merchant_app/core/widgets/image_source_action_sheet.dart';
+import 'package:merchant_app/core/widgets/photo_gallery_viewer.dart';
 import 'package:merchant_app/data/models/installment_payment_response.dart';
 import 'package:merchant_app/features/work/qrcode/qr_scan_page.dart';
 import 'package:merchant_app/features/work/sales/installment_pay_controller.dart';
@@ -25,9 +26,12 @@ class InstallmentPayPage extends ConsumerStatefulWidget {
 }
 
 class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
+  static const int _maxAttachments = 5;
+
   final _userIdController = TextEditingController();
   final _userIdFocusNode = FocusNode();
   String _lastQueriedUserId = '';
+  final List<String> _localImages = [];
 
   @override
   void initState() {
@@ -37,6 +41,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
       ref.read(installmentPayProvider.notifier).reset();
       _userIdController.clear();
       _lastQueriedUserId = '';
+      _localImages.clear();
     });
     _userIdFocusNode.addListener(_onUserIdFocusChanged);
   }
@@ -176,6 +181,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
                     if (value.trim().isEmpty) {
                       _lastQueriedUserId = '';
                       ref.read(installmentPayProvider.notifier).reset();
+                      setState(() => _localImages.clear());
                     }
                   },
                   onSubmitted: (_) => _searchUser(notifier),
@@ -800,7 +806,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '${l10n.installmentPayVoucher} (${state.attachments.length}/5)',
+            '${l10n.installmentPayVoucher} (${state.attachments.length + _localImages.length}/$_maxAttachments)',
             style: const TextStyle(
               fontSize: 14,
               color: AppColors.black06Text,
@@ -810,22 +816,48 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                ...state.attachments.map(
-                  (url) => _buildImagePreview(
-                    url,
-                    () => notifier.removeAttachment(url),
-                  ),
-                ),
-                if (state.attachments.length < 5)
-                  _buildAddButton(
-                    state.uploading,
-                    () => _pickAttachments(context, notifier, state),
-                  ),
-              ],
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                const spacing = 12.0;
+                final itemSize = (constraints.maxWidth - spacing * 2) / 3;
+                return Wrap(
+                  spacing: spacing,
+                  runSpacing: spacing,
+                  children: [
+                    ...state.attachments.indexed.map(
+                      (entry) => _VoucherImageItem(
+                        key: ValueKey('uploaded_${entry.$1}_${entry.$2}'),
+                        size: itemSize,
+                        imageUrl: entry.$2,
+                        onTap: () => PhotoGalleryViewer.show(
+                          context,
+                          state.attachments,
+                          initialIndex: entry.$1,
+                        ),
+                        onDelete: () => notifier.removeAttachment(entry.$2),
+                      ),
+                    ),
+                    ..._localImages.map(
+                      (path) => _VoucherImageItem(
+                        key: ValueKey('local_$path'),
+                        size: itemSize,
+                        localPath: path,
+                        onTap: () => _showLocalImagePreview(path),
+                        onDelete: () {
+                          setState(() => _localImages.remove(path));
+                        },
+                      ),
+                    ),
+                    if (state.attachments.length + _localImages.length <
+                        _maxAttachments)
+                      _buildVoucherAddButton(
+                        itemSize,
+                        state.uploading,
+                        () => _pickAttachments(context, notifier),
+                      ),
+                  ],
+                );
+              },
             ),
           ),
         ],
@@ -833,64 +865,31 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
     );
   }
 
-  Widget _buildImagePreview(String url, VoidCallback onRemove) {
-    return Stack(
-      children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            image: DecorationImage(
-              image: url.startsWith('http')
-                  ? NetworkImage(url) as ImageProvider
-                  : FileImage(File(url)),
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        Positioned(
-          top: 4,
-          right: 4,
-          child: GestureDetector(
-            onTap: onRemove,
-            child: Container(
-              width: 20,
-              height: 20,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.black54,
-              ),
-              child: const Icon(Icons.close, size: 14, color: Colors.white),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAddButton(bool uploading, VoidCallback onTap) {
+  Widget _buildVoucherAddButton(
+    double itemSize,
+    bool uploading,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: uploading ? null : onTap,
       child: Container(
-        width: 80,
-        height: 80,
+        width: itemSize,
+        height: itemSize,
         decoration: BoxDecoration(
-          color: const Color(0xFFF5F7FA),
+          color: const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: const Color(0xFFEEEEEE)),
         ),
         child: uploading
             ? const Center(
                 child: SizedBox(
-                  width: 24,
-                  height: 24,
+                  width: 20,
+                  height: 20,
                   child: SizedBox.shrink(),
                 ),
               )
             : const Icon(
                 Icons.camera_alt_outlined,
-                size: 28,
+                size: 32,
                 color: Color(0xFF999999),
               ),
       ),
@@ -965,6 +964,7 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
     if (userId.isEmpty) {
       _lastQueriedUserId = '';
       notifier.reset();
+      setState(() => _localImages.clear());
       return;
     }
     if (userId == _lastQueriedUserId) {
@@ -1008,54 +1008,67 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
   Future<void> _pickAttachments(
     BuildContext context,
     InstallmentPayNotifier notifier,
-    InstallmentPayState state,
   ) async {
     final l10n = context.l10n;
-    final picker = ImagePicker();
-    final remaining = 5 - state.attachments.length;
-    if (remaining <= 0) {
+    final totalCount =
+        ref.read(installmentPayProvider).attachments.length +
+        _localImages.length;
+    if (totalCount >= _maxAttachments) {
       showToast(l10n.installmentPayUploadLimit);
       return;
     }
 
     final source = await ImageSourceActionSheet.show(context);
     if (!mounted || source == null) return;
+    await _pickSingleAttachment(source, notifier);
+  }
 
-    List<XFile> picks;
-    if (source == ImageSource.camera) {
-      final cameraPick = await picker.pickImage(source: ImageSource.camera);
-      if (!mounted || cameraPick == null) return;
-      picks = [cameraPick];
-    } else {
-      if (remaining == 1) {
-        final singlePick = await picker.pickImage(source: ImageSource.gallery);
-        if (!mounted || singlePick == null) return;
-        picks = [singlePick];
-      } else {
-        final galleryPicks = await picker.pickMultipleMedia(limit: remaining);
-        if (!mounted || galleryPicks.isEmpty) return;
-        if (galleryPicks.length > remaining) {
-          showToast(l10n.installmentPayUploadLimit);
-        }
-        picks = galleryPicks.take(remaining).toList();
-      }
+  Future<void> _pickSingleAttachment(
+    ImageSource source,
+    InstallmentPayNotifier notifier,
+  ) async {
+    final l10n = context.l10n;
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: source);
+    if (!mounted || picked == null) return;
+
+    final totalCount =
+        ref.read(installmentPayProvider).attachments.length +
+        _localImages.length;
+    if (totalCount >= _maxAttachments) {
+      showToast(l10n.installmentPayUploadLimit);
+      return;
     }
 
-    var failed = 0;
-    for (final item in picks) {
-      final url = await notifier.uploadAttachment(item.path);
-      if (url == null || url.isEmpty) {
-        failed += 1;
-        continue;
-      }
-      notifier.addAttachment(url);
-    }
+    final path = picked.path;
+    setState(() => _localImages.add(path));
+    final url = await notifier.uploadAttachment(path);
     if (!mounted) return;
-    if (failed == picks.length) {
+    setState(() => _localImages.remove(path));
+
+    if (url == null || url.isEmpty) {
       showToast(l10n.installmentPayUploadFailed);
-    } else if (failed > 0) {
-      showToast(l10n.installmentPayUploadPartialFailed);
+      return;
     }
+    notifier.addAttachment(url);
+  }
+
+  Future<void> _showLocalImagePreview(String path) async {
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(backgroundColor: Colors.black),
+          body: Center(
+            child: InteractiveViewer(
+              minScale: 1,
+              maxScale: 3,
+              child: Image.file(File(path)),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _submit(
@@ -1068,6 +1081,67 @@ class _InstallmentPayPageState extends ConsumerState<InstallmentPayPage> {
     if (!ok) {
       showToast(l10n.installmentPayFailed);
     }
+  }
+}
+
+class _VoucherImageItem extends StatelessWidget {
+  const _VoucherImageItem({
+    super.key,
+    required this.size,
+    this.imageUrl,
+    this.localPath,
+    this.onTap,
+    required this.onDelete,
+  });
+
+  final double size;
+  final String? imageUrl;
+  final String? localPath;
+  final VoidCallback? onTap;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: const Color(0xFFF5F5F5),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: localPath != null
+                ? Image.file(File(localPath!), fit: BoxFit.cover)
+                : Image.network(
+                    imageUrl ?? '',
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) =>
+                        const Icon(Icons.image, color: Color(0xFF999999)),
+                  ),
+          ),
+        ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: GestureDetector(
+            onTap: onDelete,
+            child: Container(
+              width: 20,
+              height: 20,
+              decoration: const BoxDecoration(
+                color: Colors.black54,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.close, color: Colors.white, size: 14),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 

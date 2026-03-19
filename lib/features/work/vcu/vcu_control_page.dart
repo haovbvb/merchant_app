@@ -281,7 +281,9 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     final foreground = selected
         ? const Color(0xFF08983B)
         : AppColors.secondaryColor;
-    final border = selected ? const Color(0xFF08983B) : AppColors.secondaryColor;
+    final border = selected
+        ? const Color(0xFF08983B)
+        : AppColors.secondaryColor;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
@@ -708,12 +710,30 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
       showToast(l10n.vcuBlePermissionNotGranted);
       return;
     }
-    if (_adapterState != BluetoothAdapterState.on) {
-      await FlutterBluePlus.turnOn();
+    if (_adapterState != BluetoothAdapterState.on && Platform.isAndroid) {
+      try {
+        await FlutterBluePlus.turnOn();
+      } catch (_) {
+        showToast(l10n.vcuBleConnectFailed);
+        _scheduleReconnect();
+        return;
+      }
     }
     setState(() => _connecting = true);
     showToast(l10n.vcuBleScanStarted);
-    await FlutterBluePlus.startScan(timeout: const Duration(seconds: 30));
+    try {
+      await FlutterBluePlus.startScan(
+        withNames: <String>[ctrlId],
+        timeout: const Duration(seconds: 30),
+        androidUsesFineLocation: true,
+      );
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _connecting = false);
+      showToast(l10n.vcuBleConnectFailed);
+      _scheduleReconnect();
+      return;
+    }
     _scanTimeoutTimer?.cancel();
     _scanTimeoutTimer = Timer(const Duration(seconds: 31), () {
       if (!_bleConnected && _bleEnabled) {
@@ -728,8 +748,15 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     final ctrlId = _ctrlIdController.text.trim();
     if (ctrlId.isEmpty) return;
     for (final result in results) {
-      final name = result.device.name;
-      if (name == ctrlId) {
+      final platformName = result.device.platformName.trim();
+      final advName = result.advertisementData.advName.trim();
+      final remoteId = result.device.remoteId.str.trim();
+      if (_isTargetBleDevice(
+        targetCtrlId: ctrlId,
+        platformName: platformName,
+        advName: advName,
+        remoteId: remoteId,
+      )) {
         FlutterBluePlus.stopScan();
         _connectDevice(result.device);
         break;
@@ -737,11 +764,24 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     }
   }
 
+  bool _isTargetBleDevice({
+    required String targetCtrlId,
+    required String platformName,
+    required String advName,
+    required String remoteId,
+  }) {
+    final expected = targetCtrlId.trim().toLowerCase();
+    if (expected.isEmpty) return false;
+    return platformName.trim().toLowerCase() == expected ||
+        advName.trim().toLowerCase() == expected ||
+        remoteId.trim().toLowerCase() == expected;
+  }
+
   Future<void> _connectDevice(BluetoothDevice device) async {
     final l10n = context.l10n;
     try {
       showToast(l10n.vcuBleConnecting);
-      await device.connect(timeout: const Duration(seconds: 12));
+      await device.connect(timeout: const Duration(seconds: 30));
       _connectionSub?.cancel();
       _connectionSub = device.connectionState.listen((state) {
         if (state == BluetoothConnectionState.disconnected) {
@@ -1438,18 +1478,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: items.isEmpty
-                        ? SizedBox(
-                            height: 50,
-                            child: Center(
-                              child: Text(
-                                l10n.vcuPleaseLoadVersionsFirst,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  color: Color(0x800C0C0D),
-                                ),
-                              ),
-                            ),
-                          )
+                        ? const SizedBox(height: 50)
                         : ListView.separated(
                             shrinkWrap: true,
                             itemCount: items.length,
@@ -1872,6 +1901,8 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
         return l10n.vcuCmdSetVehicleUploadFrequency;
       case VcuBleCommandIds.editFrequencyGps:
         return l10n.vcuCmdSetGpsFrequency;
+      case VcuBleCommandIds.reset:
+        return l10n.vcuCmdReset;
       default:
         return null;
     }
@@ -2163,6 +2194,14 @@ List<_VcuCommand> _buildVcuCommands(AppLocalizations l10n) => [
     bleId: VcuBleCommandIds.remoteUnlock,
     bleValue: 1,
     icon: Icons.lock_open,
+  ),
+  _VcuCommand(
+    16,
+    l10n.vcuCmdReset,
+    iconAsset: 'assets/android/mipmap-xxhdpi/icon_flash.png',
+    bleId: VcuBleCommandIds.reset,
+    bleValue: 1,
+    icon: Icons.restart_alt,
   ),
 ];
 

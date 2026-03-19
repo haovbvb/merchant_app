@@ -100,7 +100,7 @@ public class BluetoothAuthorizationActivityNew extends BaseNormalListVActivity<B
         BleManager.getInstance()
                 .enableLog(true)
                 .setReConnectCount(10, 10000)
-                .setConnectOverTime(20000)
+            .setConnectOverTime(30000)
                 .setOperateTimeout(20000);
     }
 

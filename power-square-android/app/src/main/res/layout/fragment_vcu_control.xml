@@ -142,7 +142,6 @@
                             android:text="@string/str_find_vehicle"
                             android:textColor="@color/color_800c0c0d"
                             android:textSize="13sp"
-                            app:layout_constraintBottom_toBottomOf="parent"
                             app:layout_constraintEnd_toStartOf="@id/btnRemoteLock"
                             app:layout_constraintStart_toStartOf="parent"
                             app:layout_constraintTop_toBottomOf="@id/btnStart" />
@@ -174,6 +173,23 @@
                             app:layout_constraintEnd_toEndOf="parent"
                             app:layout_constraintStart_toEndOf="@id/btnRemoteLock"
                             app:layout_constraintTop_toTopOf="@id/btnFindVehicle" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/btnReset"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="30dp"
+                            android:layout_marginBottom="30dp"
+                            android:drawableTop="@drawable/icon_vcu_reset"
+                            android:drawablePadding="10dp"
+                            android:gravity="center_horizontal"
+                            android:text="@string/str_reset"
+                            android:textColor="@color/color_800c0c0d"
+                            android:textSize="13sp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toStartOf="@id/btnRemoteLock"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@id/btnFindVehicle" />
 
                     </androidx.constraintlayout.widget.ConstraintLayout>
 

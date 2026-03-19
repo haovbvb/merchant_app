@@ -1493,6 +1493,7 @@
   "vcuCmdSetApn": "Set APN",
   "vcuCmdSetVehicleUploadFrequency": "Set Vehicle Upload Frequency",
   "vcuCmdSetGpsFrequency": "Set GPS Frequency",
+  "vcuCmdReset": "Reset",
   "vcuPlatformProduction": "Production",
   "vcuPlatformTesting": "Testing",
   "promoteWebTitle": "Promote Web",

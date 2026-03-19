@@ -1491,6 +1491,7 @@
   "vcuCmdSetApn": "设置 APN",
   "vcuCmdSetVehicleUploadFrequency": "设置车辆上传频率",
   "vcuCmdSetGpsFrequency": "设置 GPS 频率",
+  "vcuCmdReset": "复位",
   "vcuPlatformProduction": "生产环境",
   "vcuPlatformTesting": "测试环境",
   "promoteWebTitle": "推广页面",

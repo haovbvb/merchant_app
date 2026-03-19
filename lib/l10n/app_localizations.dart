@@ -8375,6 +8375,12 @@ abstract class AppLocalizations {
   /// **'Set GPS Frequency'**
   String get vcuCmdSetGpsFrequency;
 
+  /// No description provided for @vcuCmdReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get vcuCmdReset;
+
   /// No description provided for @vcuPlatformProduction.
   ///
   /// In en, this message translates to:

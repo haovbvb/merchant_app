@@ -13,19 +13,19 @@ public enum CommandEnum {
     FIND_4("一键找车(4轮车）", "043010006", 10),
     GOLF_UNLOCK("高尔夫解锁电门", "043010007", 14),
     GOLF_LOCK("高尔夫锁电门", "043010007", 15),
-    RESET("复位", "043110004", 16),
-    QUERY_MCU_VERSION("查询MCU版本号", "043130001", 101, "Query Mcu version"),
-    OTA_VERIFY_VERSION("下发OTA升级版本", "043130003", 102, "Verify OTA version"),
-    OTA_UPGRADE("强制升级(1)，非强制升级(0)", "043130004", 102),
-    OTA_DATA("升级数据（最大58字节）", "043130005", 103, "OTA data"),
-    EDIT_URL("设置服务器域名", "043110016", 106, "Edit server url and port"),
-    EDIT_PORT("设置服务器端口", "043110017", 106, "Edit server url and port"),
-    EDIT_APN("修改APN", "043110018", 105, "Edit APN"),
-    EDIT_FREQUENCY_VEHICLE("修改主电池车辆上报频率", "043110019", 107, "Edit vehicle data upload frequency"),
-    EDIT_FREQUENCY_VEHICLE_1("修改锂电池车辆上报频率", "043110020", 107, "Edit vehicle data upload frequency"),
-    EDIT_FREQUENCY_GPS("修改主电池GPS上报频率", "043110021", 108, "Edit gps upload frequency"),
-    QUERY_STATUS("查询当前车辆状态", "043110015", 109, "Query vehicle status"),
-    QUERY_ICCID("查询ICCID", "043110023", 104, "Query Iccid"),
+    RESET("复位", "043110014", 16),
+    QUERY_MCU_VERSION("查询MCU版本号", "043130001", 1, "Query Mcu version"),
+    OTA_VERIFY_VERSION("下发OTA升级版本", "043130003", 2, "Verify OTA version"),
+    OTA_UPGRADE("强制升级(1)，非强制升级(0)", "043130004", 2),
+    OTA_DATA("升级数据（最大58字节）", "043130005", 3, "OTA data"),
+    EDIT_URL("设置服务器域名", "043110016", 6, "Edit server url and port"),
+    EDIT_PORT("设置服务器端口", "043110017", 6, "Edit server url and port"),
+    EDIT_APN("修改APN", "043110018", 5, "Edit APN"),
+    EDIT_FREQUENCY_VEHICLE("修改主电池车辆上报频率", "043110019", 7, "Edit vehicle data upload frequency"),
+    EDIT_FREQUENCY_VEHICLE_1("修改锂电池车辆上报频率", "043110020", 7, "Edit vehicle data upload frequency"),
+    EDIT_FREQUENCY_GPS("修改主电池GPS上报频率", "043110021", 8, "Edit gps upload frequency"),
+    QUERY_STATUS("查询当前车辆状态", "043110015", 9, "Query vehicle status"),
+    QUERY_ICCID("查询ICCID", "043110023", 4, "Query Iccid"),
     ;
     private String desc;
     private String id;
@@ -79,6 +79,9 @@ public enum CommandEnum {
         }
         if (REMOTE_UNLOCK.id.equals(id)) {
             return REMOTE_UNLOCK.command;
+        }
+        if (RESET.id.equals(id)) {
+            return RESET.command;
         }
         if (QUERY_MCU_VERSION.id.equals(id)) {
             return QUERY_MCU_VERSION.command;

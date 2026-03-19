@@ -43,33 +43,26 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
     // Android 接收详情页始终展示扫码入口；具体操作按钮仍按 item 状态控制
     const canReceive = true;
 
-    return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop && _hasChanged) {
-          Navigator.of(context).pop(true);
-        }
-      },
-      child: Scaffold(
-        backgroundColor: AppColors.bgColor,
-        appBar: AppBar(
-          title: Text(l10n.deviceReceiveDetailTitle),
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.of(context).pop(_hasChanged),
-          ),
+    return Scaffold(
+      backgroundColor: AppColors.bgColor,
+      appBar: AppBar(
+        title: Text(l10n.deviceReceiveDetailTitle),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(_hasChanged),
         ),
-        body: state.loading
-            ? const Center(child: SizedBox.shrink())
-            : NotificationListener<ScrollNotification>(
-                onNotification: (notification) {
-                  if (notification.metrics.pixels >=
-                      notification.metrics.maxScrollExtent - 120) {
-                    notifier.loadMoreDetail();
-                  }
-                  return false;
-                },
-                child: SingleChildScrollView(
+      ),
+      body: state.loading
+          ? const Center(child: SizedBox.shrink())
+          : NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification.metrics.pixels >=
+                    notification.metrics.maxScrollExtent - 120) {
+                  notifier.loadMoreDetail();
+                }
+                return false;
+              },
+              child: SingleChildScrollView(
                 child: Column(
                   children: [
                     // 订单头部卡片
@@ -138,8 +131,7 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
                   ],
                 ),
               ),
-              ),
-      ),
+            ),
     );
   }
 
@@ -176,7 +168,9 @@ class _ReceiveDetailPageState extends ConsumerState<ReceiveDetailPage> {
 
       if (result.success) {
         final listState = ref.read(receiveListProvider);
-        ref.read(receiveListProvider.notifier).refresh(
+        ref
+            .read(receiveListProvider.notifier)
+            .refresh(
               status: listState.status,
               resetStatus: listState.status == null,
               keyword: listState.keyword,
@@ -260,10 +254,7 @@ class _OrderHeaderCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.end,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Colors.white70,
-                    ),
+                    style: const TextStyle(fontSize: 13, color: Colors.white70),
                   ),
                 ),
               ],

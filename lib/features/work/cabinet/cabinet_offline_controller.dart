@@ -29,6 +29,12 @@ class CabinetOfflineState {
   /// 软件版本 (蓝牙获取)
   final String? softwareVersion;
 
+  /// APN (蓝牙获取)
+  final String? apn;
+
+  /// 平台地址 (蓝牙获取)
+  final String? platformUrl;
+
   /// 备电状态 (蓝牙获取)
   final String? backupPowerStatus;
 
@@ -59,6 +65,8 @@ class CabinetOfflineState {
     this.cabins = const [],
     this.swapThreshold = 100,
     this.softwareVersion,
+    this.apn,
+    this.platformUrl,
     this.backupPowerStatus,
     this.batteryInSlot,
     this.gsmSignal,
@@ -85,6 +93,8 @@ class CabinetOfflineState {
     List<CabinetCabin>? cabins,
     int? swapThreshold,
     String? softwareVersion,
+    String? apn,
+    String? platformUrl,
     String? backupPowerStatus,
     int? batteryInSlot,
     String? gsmSignal,
@@ -110,6 +120,8 @@ class CabinetOfflineState {
       cabins: cabins ?? this.cabins,
       swapThreshold: swapThreshold ?? this.swapThreshold,
       softwareVersion: softwareVersion ?? this.softwareVersion,
+      apn: apn ?? this.apn,
+      platformUrl: platformUrl ?? this.platformUrl,
       backupPowerStatus: backupPowerStatus ?? this.backupPowerStatus,
       batteryInSlot: batteryInSlot ?? this.batteryInSlot,
       gsmSignal: gsmSignal ?? this.gsmSignal,
@@ -167,6 +179,8 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
         swapThreshold: initialBaseInfo.swapThreshold ?? 100,
         cabins: cabins,
         softwareVersion: _nonEmptyOrNull(initialBaseInfo.softwareVersion) ?? '',
+        apn: _nonEmptyOrNull(initialBaseInfo.apn) ?? '',
+        platformUrl: _nonEmptyOrNull(initialBaseInfo.platformUrl) ?? '',
         backupPowerStatus:
             _nonEmptyOrNull(initialBaseInfo.backupPowerStatus) ?? '',
         batteryInSlot: initialBaseInfo.batteryInSlot,
@@ -205,6 +219,12 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
         softwareVersion:
             _nonEmptyOrNull(mergedBaseInfo?.softwareVersion) ??
             (_nonEmptyOrNull(state.softwareVersion) ?? ''),
+        apn:
+            _nonEmptyOrNull(mergedBaseInfo?.apn) ??
+            (_nonEmptyOrNull(state.apn) ?? ''),
+        platformUrl:
+            _nonEmptyOrNull(mergedBaseInfo?.platformUrl) ??
+            (_nonEmptyOrNull(state.platformUrl) ?? ''),
         backupPowerStatus:
             _nonEmptyOrNull(mergedBaseInfo?.backupPowerStatus) ??
             (_nonEmptyOrNull(state.backupPowerStatus) ?? ''),
@@ -482,6 +502,12 @@ class CabinetOfflineNotifier extends Notifier<CabinetOfflineState> {
           normalizedSoftwareVersion == null && softwareVersion != null
           ? ''
           : normalizedSoftwareVersion ?? state.softwareVersion,
+      apn: normalizedApn == null && apn != null
+          ? ''
+          : normalizedApn ?? state.apn,
+      platformUrl: normalizedPlatformUrl == null && platformUrl != null
+          ? ''
+          : normalizedPlatformUrl ?? state.platformUrl,
       backupPowerStatus:
           normalizedBackupPowerStatus == null && backupPowerStatus != null
           ? ''

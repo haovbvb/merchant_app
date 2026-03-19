@@ -331,7 +331,7 @@ class CabinetBleClient {
     );
     onPhaseChanged(CabinetBleConnectionPhase.connecting);
     try {
-      await device.connect(timeout: const Duration(seconds: 12));
+      await device.connect(timeout: const Duration(seconds: 30));
       final services = await device.discoverServices();
       _log('discoverServices count=${services.length}');
       BluetoothService? service;
@@ -445,12 +445,13 @@ class CabinetBleClient {
       onError('not-authorized');
       return;
     }
-    final data = <String, Object?>{
+    final compactParams = params.map(_compactJsonMap).toList(growable: false);
+    final data = _compactJsonMap(<String, Object?>{
       'msgType': msgType,
       'devId': _deviceSn,
-      'paramList': params,
+      'paramList': compactParams,
       'txnNo': '${DateTime.now().millisecondsSinceEpoch}',
-    };
+    });
     final jsonText = jsonEncode(data);
     final signSource = '$jsonText$_dataFixedKey$_secretKey';
     final sign = md5.convert(utf8.encode(signSource)).toString().toUpperCase();
@@ -460,6 +461,16 @@ class CabinetBleClient {
       'send business cmd=0x03, msgType=$msgType, paramCount=${params.length}',
     );
     await _write(packet);
+  }
+
+  Map<String, Object> _compactJsonMap(Map<String, Object?> source) {
+    final result = <String, Object>{};
+    for (final entry in source.entries) {
+      final value = entry.value;
+      if (value == null) continue;
+      result[entry.key] = value;
+    }
+    return result;
   }
 
   Future<void> _write(List<int> packet) async {

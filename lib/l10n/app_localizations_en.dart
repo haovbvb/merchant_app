@@ -4167,6 +4167,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vcuCmdSetGpsFrequency => 'Set GPS Frequency';
 
   @override
+  String get vcuCmdReset => 'Reset';
+
+  @override
   String get vcuPlatformProduction => 'Production';
 
   @override

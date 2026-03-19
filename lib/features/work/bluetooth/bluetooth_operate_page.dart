@@ -30,6 +30,10 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
   static final Guid _serviceUuid = Guid(BleCommandBuilder.serviceId);
   static final Guid _readUuid = Guid(BleCommandBuilder.readUuid);
   static final Guid _writeUuid = Guid(BleCommandBuilder.writeUuid);
+  static const int _bleChunkSize = 20;
+  static const int _authTypeNone = 0;
+  static const int _authTypeNormal = 1;
+  static const int _authTypeFactory = 2;
 
   final List<ScanResult> _scanResults = [];
   final List<String> _logs = [];
@@ -62,6 +66,7 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
   String _lastSetKeyTime = '';
   int _lastAuthBegin = 0;
   int _lastAuthEnd = 0;
+  int _authType = _authTypeNone;
 
   @override
   void initState() {
@@ -69,7 +74,8 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
     _scanSub = FlutterBluePlus.scanResults.listen((results) {
       final filtered = results.where((r) {
         final name = r.device.platformName;
-        return name.isNotEmpty && (name.contains('HWK') || name.contains('HNT'));
+        return name.isNotEmpty &&
+            (name.contains('HWK') || name.contains('HNT'));
       }).toList();
       setState(() {
         _scanResults
@@ -374,7 +380,10 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
 
   Future<void> _scanSn() async {
     final result = await Navigator.of(context).push<String>(
-      MaterialPageRoute(builder: (_) => const QrScanPage(allowManualInput: false, parseDeviceSn: true)),
+      MaterialPageRoute(
+        builder: (_) =>
+            const QrScanPage(allowManualInput: false, parseDeviceSn: true),
+      ),
     );
     if (!mounted || result == null || result.isEmpty) return;
     setState(() {
@@ -404,7 +413,7 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
     try {
       await _stopScan();
       await _disconnect();
-      await device.connect(timeout: const Duration(seconds: 12));
+      await device.connect(timeout: const Duration(seconds: 30));
       final services = await device.discoverServices();
       final service = services.firstWhere(
         (s) => s.uuid == _serviceUuid,
@@ -429,6 +438,8 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
         _writeChar = writeChar;
         _logs.add('已连接：${device.remoteId}');
       });
+      // Native flow triggers reading key id after notify is ready.
+      await _readKeyId();
     } catch (e) {
       showToast('连接失败');
     }
@@ -459,7 +470,7 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
       return;
     }
     _pendingSignal = '';
-    await writeChar.write(bytes, withoutResponse: false);
+    await _writeWithNativeLikeFallback(writeChar, bytes);
     setState(() => _logs.add('→ ${_bytesToHex(bytes)}'));
   }
 
@@ -502,6 +513,7 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
       message: '确认执行开柜授权？',
     );
     if (!confirmed) return;
+    _authType = _authTypeNormal;
     _setAuthTime(days);
     final payload = BleCommandBuilder.buildAddAuthorizationData(
       keyId: keyId,
@@ -519,6 +531,7 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
       showToast('请先读取钥匙ID');
       return;
     }
+    _authType = _authTypeFactory;
     _setAuthTime(days);
     final payload = BleCommandBuilder.buildFactoryAuthorizationData(
       keyId: keyId,
@@ -551,8 +564,60 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
       return;
     }
     _pendingSignal = signal.toLowerCase();
-    await _writeChar?.write(bytes, withoutResponse: false);
+    _notifyBuffer = '';
+    final writeChar = _writeChar;
+    if (writeChar == null) {
+      showToast('未找到写入通道');
+      return;
+    }
+    await _writeWithNativeLikeFallback(writeChar, bytes);
     setState(() => _logs.add('→ ${_bytesToHex(bytes)}'));
+  }
+
+  Future<void> _writeWithNativeLikeFallback(
+    BluetoothCharacteristic writeChar,
+    List<int> bytes,
+  ) async {
+    try {
+      // Match native FastBle behavior for larger frames.
+      await writeChar.write(
+        bytes,
+        withoutResponse: false,
+        allowLongWrite: true,
+      );
+      return;
+    } catch (_) {}
+
+    try {
+      await _writeInChunks(writeChar, bytes, withoutResponse: false);
+      return;
+    } catch (_) {}
+
+    try {
+      await writeChar.write(bytes, withoutResponse: true);
+      return;
+    } catch (_) {}
+
+    await _writeInChunks(writeChar, bytes, withoutResponse: true);
+  }
+
+  Future<void> _writeInChunks(
+    BluetoothCharacteristic writeChar,
+    List<int> bytes, {
+    required bool withoutResponse,
+  }) async {
+    var offset = 0;
+    while (offset < bytes.length) {
+      final end = (offset + _bleChunkSize < bytes.length)
+          ? offset + _bleChunkSize
+          : bytes.length;
+      final chunk = bytes.sublist(offset, end);
+      await writeChar.write(chunk, withoutResponse: withoutResponse);
+      offset = end;
+      if (offset < bytes.length) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
+    }
   }
 
   Future<void> _queryLockId() async {
@@ -609,8 +674,8 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
       final raw = _notifyBuffer.substring(0, index + endFlag.length);
       _notifyBuffer = _notifyBuffer.substring(index + endFlag.length);
 
+      final signal = BleCommandBuilder.extractSignal(raw).toLowerCase();
       final unescaped = BleCommandBuilder.unescapeResponse(raw);
-      final signal = BleCommandBuilder.extractSignal(unescaped).toLowerCase();
       if (_pendingSignal.isNotEmpty && signal != _pendingSignal) {
         _handleSignalMismatch(signal);
         continue;
@@ -622,8 +687,9 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
           setState(() => _logs.add('← 解密失败'));
           return;
         }
+        _pendingSignal = '';
         setState(() => _logs.add('← $value'));
-        _handleDecryptedResponse(signal: _pendingSignal, data: value);
+        _handleDecryptedResponse(signal: signal, data: value);
       });
     }
   }
@@ -631,9 +697,9 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
   void _handleSignalMismatch(String signal) {
     if (signal == '010d') {
       showToast('重复授权');
-    } else {
-      showToast('指令不匹配($signal)');
     }
+    _pendingSignal = '';
+    _notifyBuffer = '';
     setState(() => _logs.add('← 异常指令:$signal'));
   }
 
@@ -667,9 +733,12 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
       final backKeyId = data.substring(0, 8);
       final keyId = _keyIdController.text.trim();
       if (backKeyId == keyId) {
-        _uploadAuthorization();
+        _uploadAuthorization(
+          isFactoryAuthorization: _authType == _authTypeFactory,
+        );
       } else {
         showToast('授权失败：钥匙ID不匹配');
+        _authType = _authTypeNone;
       }
     }
   }
@@ -703,25 +772,31 @@ class _BluetoothOperatePageState extends ConsumerState<BluetoothOperatePage> {
         dateTime.minute.toString().padLeft(2, '0');
   }
 
-  Future<void> _uploadAuthorization() async {
+  Future<void> _uploadAuthorization({
+    required bool isFactoryAuthorization,
+  }) async {
     final phone = _phoneController.text.trim();
     if (phone.isEmpty) {
       showToast('请填写手机号');
+      _authType = _authTypeNone;
       return;
     }
     final notifier = ref.read(bluetoothOperateProvider.notifier);
-    final lockIcId = _lockIcIdController.text.trim();
-    final lockDevId = _lockDevIdController.text.trim();
-    final sn = _snController.text.trim();
+    final lockDevId = isFactoryAuthorization
+        ? '0'
+        : _lockDevIdController.text.trim();
+    final sn = isFactoryAuthorization ? '0' : _snController.text.trim();
     final ok = await notifier.authAdd(
       phone: phone,
       keyId: _keyIdController.text.trim(),
-      lockIcId: lockIcId,
+      // Native flow always uploads 0 for lockIcId in this page.
+      lockIcId: '0',
       lockDevId: lockDevId,
       sn: sn.isEmpty ? '0' : sn,
       authBegTime: _lastAuthBegin,
       authEndTime: _lastAuthEnd,
     );
+    _authType = _authTypeNone;
     if (!mounted) return;
     showToast(ok ? '授权记录已上传' : '授权记录上传失败');
   }

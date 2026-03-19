@@ -65,7 +65,7 @@ class VcuBleCommandIds {
   static const String golfCommand = '043010007';
   // 其他命令
   static const String electronicFence = '044010013';
-  static const String reset = '043110004';
+  static const String reset = '043110014';
 }
 
 class VcuBleUpDataIds {

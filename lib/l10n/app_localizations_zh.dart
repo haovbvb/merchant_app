@@ -4167,6 +4167,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vcuCmdSetGpsFrequency => '设置 GPS 频率';
 
   @override
+  String get vcuCmdReset => '复位';
+
+  @override
   String get vcuPlatformProduction => '生产环境';
 
   @override

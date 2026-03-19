@@ -147,6 +147,7 @@ class VcuControlFragment :
         mBinding.btnFindVehicle.setOnClickListener(this)
         mBinding.btnRemoteLock.setOnClickListener(this)
         mBinding.btnRemoteUnlock.setOnClickListener(this)
+        mBinding.btnReset.setOnClickListener(this)
         mBinding.invPlatformUrl.setOnClickListener(this)
         mBinding.invAPN.setOnClickListener(this)
         mBinding.invGpsFrequency.setOnClickListener(this)
@@ -218,6 +219,17 @@ class VcuControlFragment :
                     R.string.str_remote_unlock,
                     command,
                     CommandEnum.REMOTE_UNLOCK.cmd
+                )
+            }
+
+            R.id.btnReset -> {
+                val command =
+                    VehicleCommandUtil.buildCommand(CommandEnum.RESET.id, 1)
+                showCtrlDialog(
+                    R.drawable.icon_vcu_reset_fff,
+                    R.string.str_reset,
+                    command,
+                    CommandEnum.RESET.cmd
                 )
             }
 

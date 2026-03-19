@@ -362,162 +362,12 @@ class _TransportCreatePageState extends ConsumerState<TransportCreatePage> {
     AppLocalizations l10n,
     TransportCreateNotifier notifier,
   ) async {
-    final controller = TextEditingController();
     final result = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Padding(
-              padding: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                ),
-                child: SafeArea(
-                  top: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(
-                          height: 50,
-                          child: Center(
-                            child: Text(
-                              l10n.deviceIssueEnterDeviceSn,
-                              style: const TextStyle(
-                                fontSize: 17,
-                                color: Color(0xE60C0C0D),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        SizedBox(
-                          height: 40,
-                          child: Stack(
-                            alignment: Alignment.centerRight,
-                            children: [
-                              TextField(
-                                controller: controller,
-                                autofocus: true,
-                                inputFormatters: [
-                                  LengthLimitingTextInputFormatter(50),
-                                ],
-                                onChanged: (_) => setModalState(() {}),
-                                decoration: InputDecoration(
-                                  hintText: l10n.deviceIssueEnterDeviceSn,
-                                  hintStyle: const TextStyle(
-                                    color: Color(0x4D0C0C0D),
-                                    fontSize: 15,
-                                  ),
-                                  filled: true,
-                                  fillColor: const Color(0xFFF2F4F7),
-                                  contentPadding: const EdgeInsets.fromLTRB(
-                                    12,
-                                    8,
-                                    40,
-                                    8,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  counterText: '',
-                                ),
-                                style: const TextStyle(
-                                  color: Color(0xE60C0C0D),
-                                  fontSize: 15,
-                                ),
-                              ),
-                              if (controller.text.isNotEmpty)
-                                GestureDetector(
-                                  onTap: () {
-                                    controller.clear();
-                                    setModalState(() {});
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                    ),
-                                    child: Image.asset(
-                                      'assets/android/mipmap-xxhdpi/icon_clear.webp',
-                                      width: 20,
-                                      height: 20,
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 25),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: SizedBox(
-                                height: 44,
-                                child: TextButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  style: TextButton.styleFrom(
-                                    backgroundColor: const Color(0xFFF2F4F7),
-                                    foregroundColor: const Color(0xE6000000),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: Text(l10n.cancel),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: SizedBox(
-                                height: 44,
-                                child: FilledButton(
-                                  onPressed: () {
-                                    Navigator.of(
-                                      context,
-                                    ).pop(controller.text.trim());
-                                  },
-                                  style: FilledButton.styleFrom(
-                                    backgroundColor: AppColors.primaryColor,
-                                    foregroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
-                                  child: Text(l10n.confirm),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      },
+      builder: (context) => _SnInputSheet(l10n: l10n),
     );
-    controller.dispose();
     if (result != null && result.isNotEmpty) {
       await notifier.addSn(result);
     }
@@ -755,6 +605,167 @@ class _SectionCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       color: Colors.white,
       child: child,
+    );
+  }
+}
+
+class _SnInputSheet extends StatefulWidget {
+  const _SnInputSheet({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  State<_SnInputSheet> createState() => _SnInputSheetState();
+}
+
+class _SnInputSheetState extends State<_SnInputSheet> {
+  final TextEditingController _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 50,
+                  child: Center(
+                    child: Text(
+                      l10n.deviceIssueEnterDeviceSn,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        color: Color(0xE60C0C0D),
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                SizedBox(
+                  height: 40,
+                  child: Stack(
+                    alignment: Alignment.centerRight,
+                    children: [
+                      TextField(
+                        controller: _controller,
+                        autofocus: true,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(50),
+                        ],
+                        onChanged: (_) => setState(() {}),
+                        decoration: InputDecoration(
+                          hintText: l10n.deviceIssueEnterDeviceSn,
+                          hintStyle: const TextStyle(
+                            color: Color(0x4D0C0C0D),
+                            fontSize: 15,
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFFF2F4F7),
+                          contentPadding: const EdgeInsets.fromLTRB(
+                            12,
+                            8,
+                            40,
+                            8,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide.none,
+                          ),
+                          counterText: '',
+                        ),
+                        style: const TextStyle(
+                          color: Color(0xE60C0C0D),
+                          fontSize: 15,
+                        ),
+                      ),
+                      if (_controller.text.isNotEmpty)
+                        GestureDetector(
+                          onTap: () {
+                            _controller.clear();
+                            setState(() {});
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 10),
+                            child: Image.asset(
+                              'assets/android/mipmap-xxhdpi/icon_clear.webp',
+                              width: 20,
+                              height: 20,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 25),
+                Row(
+                  children: [
+                    Expanded(
+                      child: SizedBox(
+                        height: 44,
+                        child: TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          style: TextButton.styleFrom(
+                            backgroundColor: const Color(0xFFF2F4F7),
+                            foregroundColor: const Color(0xE6000000),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(l10n.cancel),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: SizedBox(
+                        height: 44,
+                        child: FilledButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(_controller.text.trim());
+                          },
+                          style: FilledButton.styleFrom(
+                            backgroundColor: AppColors.primaryColor,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(l10n.confirm),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

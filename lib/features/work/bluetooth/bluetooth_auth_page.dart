@@ -350,12 +350,13 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
 
   Future<void> _connectDevice(BluetoothDevice device) async {
     final l10n = context.l10n;
+    var connected = false;
     setState(() => _connectingDevice = device);
     Hud.show();
 
     try {
       await FlutterBluePlus.stopScan();
-      await device.connect(timeout: const Duration(seconds: 20));
+      await device.connect(timeout: const Duration(seconds: 30), mtu: null);
       _connectionSubscription?.cancel();
       _connectionSubscription = device.connectionState.listen((state) {
         if (state == BluetoothConnectionState.disconnected) {
@@ -367,7 +368,7 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
         _connectedDevice = device;
         _deviceConnected = true;
       });
-      await _openAuthorizationPage(device);
+      connected = true;
     } catch (_) {
       if (mounted) {
         showToast(l10n.bluetoothAuthFailed);
@@ -377,6 +378,9 @@ class _BluetoothAuthPageState extends ConsumerState<BluetoothAuthPage> {
       if (!mounted) return;
       setState(() => _connectingDevice = null);
     }
+
+    if (!mounted || !connected) return;
+    await _openAuthorizationPage(device);
   }
 
   Future<void> _openAuthorizationPage(BluetoothDevice device) async {
@@ -541,75 +545,140 @@ class _BluetoothAuthorizationPageState
   static final Guid _serviceUuid = Guid(BleCommandBuilder.serviceId);
   static final Guid _readUuid = Guid(BleCommandBuilder.readUuid);
   static final Guid _writeUuid = Guid(BleCommandBuilder.writeUuid);
+  static const int _bleChunkSize = 20;
 
   final _snController = TextEditingController();
   final ApiService _api = ApiService();
   BluetoothCharacteristic? _writeChar;
+  final List<BluetoothCharacteristic> _writeCandidates = [];
   StreamSubscription<List<int>>? _notifySub;
   String _pendingSignal = '';
   String _notifyBuffer = '';
   Completer<String>? _pendingResponse;
-  String _lastKeyId = '';
   bool _authorizing = false;
   bool _clearing = false;
+  bool _hasSnInput = false;
+  String _currentKeyId = '';
+  Future<String?>? _initialKeyIdTask;
+  Future<void> _commandQueue = Future<void>.value();
 
   @override
   void initState() {
     super.initState();
-    _prepareGatt();
+    _snController.addListener(_handleSnChanged);
+    _handleSnChanged();
+    _initBleSession();
+  }
+
+  Future<void> _initBleSession() async {
+    await _prepareGatt();
+    if (!mounted) return;
+    // Native flow reads key-id right after notify is ready.
+    await Future<void>.delayed(const Duration(milliseconds: 1200));
+    _initialKeyIdTask = _readKeyId();
   }
 
   @override
   void dispose() {
     _notifySub?.cancel();
+    _snController.removeListener(_handleSnChanged);
     _snController.dispose();
     super.dispose();
+  }
+
+  void _handleSnChanged() {
+    final hasValue = _snController.text.trim().isNotEmpty;
+    if (hasValue == _hasSnInput) return;
+    setState(() {
+      _hasSnInput = hasValue;
+    });
   }
 
   Future<void> _prepareGatt() async {
     try {
       final services = await widget.device.discoverServices();
-      // 查找目标服务 serviceId=0000FFE0
-      BluetoothService? targetService;
+      BluetoothService? notifyService;
       for (final s in services) {
-        if (s.uuid == _serviceUuid) {
-          targetService = s;
+        if (s.uuid != _serviceUuid) continue;
+        final hasRead = s.characteristics.any((c) => c.uuid == _readUuid);
+        if (hasRead) {
+          notifyService = s;
           break;
         }
       }
-      if (targetService == null) {
-        // 回退：遍历所有服务找含有 readUuid / writeUuid 特征的服务
+      if (notifyService == null) {
         for (final s in services) {
           final hasRead = s.characteristics.any((c) => c.uuid == _readUuid);
-          final hasWrite = s.characteristics.any((c) => c.uuid == _writeUuid);
-          if (hasRead || hasWrite) {
-            targetService = s;
+          if (hasRead) {
+            notifyService = s;
             break;
           }
         }
       }
-      if (targetService == null) {
+      if (notifyService == null) {
         if (mounted) showToast(context.l10n.bluetoothAuthFailed);
         return;
       }
-      BluetoothCharacteristic? writeChar;
+
       BluetoothCharacteristic? notifyChar;
-      for (final c in targetService.characteristics) {
-        if (c.uuid == _writeUuid) writeChar = c;
-        if (c.uuid == _readUuid) notifyChar = c;
+      for (final c in notifyService.characteristics) {
+        if (notifyChar == null && c.uuid == _readUuid) {
+          notifyChar = c;
+        }
       }
-      if (writeChar == null || notifyChar == null) {
+      if (notifyChar == null) {
         if (mounted) showToast(context.l10n.bluetoothAuthFailed);
         return;
       }
+
+      final sameServiceCandidates = <BluetoothCharacteristic>[];
+      final sameServiceWeakCandidates = <BluetoothCharacteristic>[];
+      final otherServiceCandidates = <BluetoothCharacteristic>[];
+      final otherServiceWeakCandidates = <BluetoothCharacteristic>[];
+
+      for (final s in services) {
+        for (final c in s.characteristics) {
+          if (c.uuid != _writeUuid) continue;
+          final writable =
+              c.properties.write || c.properties.writeWithoutResponse;
+          final sameService = identical(s, notifyService);
+          if (sameService && writable) {
+            sameServiceCandidates.add(c);
+          } else if (sameService) {
+            sameServiceWeakCandidates.add(c);
+          } else if (writable) {
+            otherServiceCandidates.add(c);
+          } else {
+            otherServiceWeakCandidates.add(c);
+          }
+        }
+      }
+
+      _writeCandidates
+        ..clear()
+        ..addAll(sameServiceCandidates)
+        ..addAll(otherServiceCandidates)
+        ..addAll(sameServiceWeakCandidates)
+        ..addAll(otherServiceWeakCandidates);
+
+      if (_writeCandidates.isEmpty) {
+        if (mounted) showToast(context.l10n.bluetoothAuthFailed);
+        return;
+      }
+
+      final selectedWrite = _writeCandidates.first;
       await notifyChar.setNotifyValue(true);
       _notifySub?.cancel();
       _notifySub = notifyChar.onValueReceived.listen((data) {
         _handleNotify(_bytesToHex(data));
       });
-      _writeChar = writeChar;
-      // 对齐安卓：GATT 准备好后立即读取钥匙 ID
-      _readKeyId();
+      _writeChar = selectedWrite;
+      debugPrint(
+        '[BLE_AUTH_NATIVE] gatt ready notify=${notifyChar.uuid.str128} '
+        'writeCandidates=${_writeCandidates.length} '
+        'selectedWrite.write=${selectedWrite.properties.write} '
+        'selectedWrite.wnr=${selectedWrite.properties.writeWithoutResponse}',
+      );
     } catch (e) {
       if (!mounted) return;
       showToast(context.l10n.bluetoothAuthFailed);
@@ -649,6 +718,7 @@ class _BluetoothAuthorizationPageState
     if (confirmed != true) return;
 
     setState(() => _authorizing = true);
+    Hud.show();
 
     try {
       final sn = _snController.text.trim();
@@ -665,7 +735,7 @@ class _BluetoothAuthorizationPageState
       final phone = AuthSession.instance.current?.phone ?? '';
       // 对齐安卓新版（BluetoothOperateActivityNew）：userNum 硬编码为 "00000001"
       const userNum = '00000001';
-      final keyId = await _readKeyId();
+      final keyId = await _ensureKeyId();
       if (keyId == null || keyId.isEmpty) {
         throw Exception('key id missing');
       }
@@ -682,7 +752,7 @@ class _BluetoothAuthorizationPageState
         days: days,
       );
       final ack = await _sendEncryptedCommand(signal: '000D', payload: payload);
-      if (!_isValidAckForKeyId(ack, keyId)) {
+      if (!_isValidAckForKeyId(ack, _currentKeyId)) {
         throw Exception('authorize ack invalid');
       }
       final uploaded = await ref
@@ -690,7 +760,8 @@ class _BluetoothAuthorizationPageState
           .authAdd(
             phone: phone,
             keyId: keyId,
-            lockIcId: lockInfo.lockIcId,
+            // Native flow always uploads lockIcId as 0 for this scene.
+            lockIcId: '',
             lockDevId: lockInfo.lockDevId,
             sn: sn,
             authBegTime: authBegTime,
@@ -707,6 +778,7 @@ class _BluetoothAuthorizationPageState
         showToast(l10n.bluetoothAuthFailed);
       }
     } finally {
+      Hud.dismiss();
       if (mounted) {
         setState(() => _authorizing = false);
       }
@@ -729,15 +801,18 @@ class _BluetoothAuthorizationPageState
     if (confirmed != true) return;
 
     setState(() => _clearing = true);
+    Hud.show();
 
     try {
-      final keyId = await _readKeyId();
+      // Keep native behavior: mSendData = userPwd + keyId + bleKeyBlock.
+      final keyId = await _ensureKeyId();
       if (keyId == null || keyId.isEmpty) {
         throw Exception('key id missing');
       }
-      final payload = BleCommandBuilder.buildClearAuthorizationData(keyId);
+      final payload =
+          BleCommandBuilder.userPwd + keyId + BleCommandBuilder.bleKeyBlock;
       final ack = await _sendEncryptedCommand(signal: '000c', payload: payload);
-      if (!_isValidAckForKeyId(ack, keyId)) {
+      if (!_isValidAckForKeyId(ack, _currentKeyId)) {
         throw Exception('clear ack invalid');
       }
       if (mounted) {
@@ -748,6 +823,7 @@ class _BluetoothAuthorizationPageState
         showToast(l10n.bluetoothAuthClearFailed);
       }
     } finally {
+      Hud.dismiss();
       if (mounted) {
         setState(() => _clearing = false);
       }
@@ -766,34 +842,66 @@ class _BluetoothAuthorizationPageState
   }
 
   Future<String?> _readKeyId() async {
-    if (_lastKeyId.length == 8) return _lastKeyId;
     final response = await _sendEncryptedCommand(
       signal: '0031',
       payload: BleCommandBuilder.buildReadKeyIdData(),
     );
-    if (response == null || response.length < 8) return null;
-    _lastKeyId = response.substring(0, 8).toLowerCase();
-    return _lastKeyId;
+    final normalized = _normalizeHex(response);
+    if (normalized.length < 8) return null;
+    _currentKeyId = normalized.substring(0, 8).toLowerCase();
+    return _currentKeyId;
+  }
+
+  Future<String?> _ensureKeyId() async {
+    final key = _normalizeHex(_currentKeyId);
+    if (key.length >= 8) return key.substring(0, 8);
+
+    final bootTask = _initialKeyIdTask;
+    if (bootTask != null) {
+      final bootKey = _normalizeHex(await bootTask);
+      if (bootKey.length >= 8) return bootKey.substring(0, 8);
+    }
+
+    final retryKey = _normalizeHex(await _readKeyId());
+    if (retryKey.length >= 8) return retryKey.substring(0, 8);
+    return null;
   }
 
   bool _isValidAckForKeyId(String? ack, String keyId) {
-    if (ack == null || ack.length < 8) return false;
-    final ackPrefix = ack.substring(0, 8).toLowerCase();
-    final key = keyId.trim().toLowerCase();
+    final ackText = _normalizeHex(ack);
+    if (ackText.length < 8) return false;
+    final ackPrefix = ackText.substring(0, 8).toLowerCase();
+    final effectiveKey = keyId.isEmpty ? _currentKeyId : keyId;
+    final key = _normalizeHex(effectiveKey).toLowerCase();
     if (key.isEmpty) return false;
     return ackPrefix == key;
+  }
+
+  String _normalizeHex(String? value) {
+    return (value ?? '')
+        .replaceAll('0x', '')
+        .replaceAll('0X', '')
+        .replaceAll(RegExp(r'\s+'), '')
+        .toLowerCase();
   }
 
   Future<String?> _sendEncryptedCommand({
     required String signal,
     required String payload,
   }) async {
-    final writeChar = _writeChar;
-    if (writeChar == null) {
+    return _runCommandSerially(() async {
+      return _sendEncryptedCommandInner(signal: signal, payload: payload);
+    });
+  }
+
+  Future<String?> _sendEncryptedCommandInner({
+    required String signal,
+    required String payload,
+  }) async {
+    if (_writeChar == null && _writeCandidates.isEmpty) {
       await _prepareGatt();
     }
-    final activeWrite = _writeChar;
-    if (activeWrite == null) return null;
+    if (_writeChar == null && _writeCandidates.isEmpty) return null;
     final encrypted = await ref
         .read(bluetoothOperateProvider.notifier)
         .enOrDecrypt(payload: payload, isEncrypt: true);
@@ -805,51 +913,233 @@ class _BluetoothAuthorizationPageState
     );
     final bytes = _hexToBytes(command);
     if (bytes == null) return null;
-    _pendingSignal = signal.toLowerCase();
-    _pendingResponse = Completer<String>();
-    await activeWrite.write(bytes, withoutResponse: false);
+    final responseCompleter = Completer<String>();
+    _pendingSignal = signal;
+    _notifyBuffer = '';
+    _pendingResponse = responseCompleter;
     try {
-      return await _pendingResponse!.future.timeout(const Duration(seconds: 8));
+      final writeMode = await _writeWithCandidates(bytes);
+      debugPrint(
+        '[BLE_AUTH_NATIVE] send signal=$signal mode=$writeMode len=${bytes.length}',
+      );
+    } catch (e) {
+      debugPrint('[BLE_AUTH_NATIVE] send signal=$signal write failed err=$e');
+      if (identical(_pendingResponse, responseCompleter)) {
+        _pendingResponse = null;
+        _pendingSignal = '';
+      }
+      return null;
+    }
+    try {
+      final ack = await responseCompleter.future.timeout(
+        const Duration(seconds: 20),
+      );
+      debugPrint(
+        '[BLE_AUTH_NATIVE] ack signal=$signal len=${_normalizeHex(ack).length}',
+      );
+      return ack;
     } catch (_) {
+      debugPrint('[BLE_AUTH_NATIVE] ack timeout signal=$signal');
       return null;
     } finally {
-      _pendingResponse = null;
+      if (identical(_pendingResponse, responseCompleter)) {
+        _pendingResponse = null;
+        _pendingSignal = '';
+      }
+    }
+  }
+
+  Future<T> _runCommandSerially<T>(Future<T> Function() action) {
+    final completer = Completer<T>();
+    _commandQueue = _commandQueue.catchError((_) {}).then((_) async {
+      try {
+        completer.complete(await action());
+      } catch (e, st) {
+        completer.completeError(e, st);
+      }
+    });
+    return completer.future;
+  }
+
+  bool _isBusyWriteError(Object error) {
+    final text = error.toString().toLowerCase();
+    return text.contains('error_gatt_write_request_busy') ||
+        text.contains('gatt_busy');
+  }
+
+  Future<String> _writeWithCandidates(List<int> bytes) async {
+    final ordered = <BluetoothCharacteristic>[];
+    final current = _writeChar;
+    if (current != null) {
+      ordered.add(current);
+    }
+    for (final c in _writeCandidates) {
+      if (!ordered.contains(c)) {
+        ordered.add(c);
+      }
+    }
+    if (ordered.isEmpty) {
+      throw Exception('no write candidates');
+    }
+
+    Object? lastError;
+    for (var i = 0; i < ordered.length; i++) {
+      final candidate = ordered[i];
+      try {
+        final mode = await _writeNativeLike(candidate, bytes);
+        _writeChar = candidate;
+        return '$mode#candidate_$i';
+      } catch (e) {
+        if (_isBusyWriteError(e)) {
+          rethrow;
+        }
+        lastError = e;
+        debugPrint(
+          '[BLE_AUTH_NATIVE] write candidate=$i '
+          'write=${candidate.properties.write} '
+          'wnr=${candidate.properties.writeWithoutResponse} '
+          'err=$e',
+        );
+      }
+    }
+    throw Exception('all candidates failed, last=$lastError');
+  }
+
+  Future<String> _writeNativeLike(
+    BluetoothCharacteristic writeChar,
+    List<int> bytes,
+  ) async {
+    final supportsWrite = writeChar.properties.write;
+    final supportsWriteNoResp = writeChar.properties.writeWithoutResponse;
+
+    // For this lock, write-with-response often hangs waiting callback.
+    // Prefer no-response with chunking to keep GATT pipeline unblocked.
+    if (supportsWriteNoResp) {
+      await _writeInChunksWithBusyRetry(
+        writeChar,
+        bytes,
+        withoutResponse: true,
+      );
+      return 'chunks_without_response';
+    }
+
+    if (supportsWrite) {
+      await _writeInChunksWithBusyRetry(
+        writeChar,
+        bytes,
+        withoutResponse: false,
+      );
+      return 'chunks_with_response';
+    }
+
+    throw Exception(
+      'no write mode available '
+      '(write=$supportsWrite, wnr=$supportsWriteNoResp)',
+    );
+  }
+
+  Future<void> _writeWithBusyRetry(
+    BluetoothCharacteristic writeChar,
+    List<int> bytes, {
+    required bool withoutResponse,
+    required bool allowLongWrite,
+  }) async {
+    const maxRetries = 8;
+    for (var attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        await writeChar.write(
+          bytes,
+          withoutResponse: withoutResponse,
+          allowLongWrite: allowLongWrite,
+        );
+        return;
+      } catch (e) {
+        final isBusy = _isBusyWriteError(e);
+        if (!isBusy || attempt == maxRetries) {
+          rethrow;
+        }
+        debugPrint(
+          '[BLE_AUTH_NATIVE] write busy retry=$attempt '
+          'mode=${withoutResponse ? 'without_response' : 'with_response'}',
+        );
+        await Future<void>.delayed(const Duration(milliseconds: 220));
+      }
+    }
+  }
+
+  Future<void> _writeInChunksWithBusyRetry(
+    BluetoothCharacteristic writeChar,
+    List<int> bytes, {
+    required bool withoutResponse,
+  }) async {
+    var offset = 0;
+    while (offset < bytes.length) {
+      final end = (offset + _bleChunkSize < bytes.length)
+          ? offset + _bleChunkSize
+          : bytes.length;
+      final chunk = bytes.sublist(offset, end);
+      await _writeWithBusyRetry(
+        writeChar,
+        chunk,
+        withoutResponse: withoutResponse,
+        allowLongWrite: false,
+      );
+      offset = end;
+      if (offset < bytes.length) {
+        await Future<void>.delayed(const Duration(milliseconds: 35));
+      }
     }
   }
 
   void _handleNotify(String hex) {
     _notifyBuffer += hex.toLowerCase();
     final endFlag = BleCommandBuilder.commandEnd.toLowerCase();
-    while (_notifyBuffer.contains(endFlag)) {
-      final index = _notifyBuffer.indexOf(endFlag);
-      final raw = _notifyBuffer.substring(0, index + endFlag.length);
-      _notifyBuffer = _notifyBuffer.substring(index + endFlag.length);
-      final unescaped = BleCommandBuilder.unescapeResponse(raw);
-      final signal = BleCommandBuilder.extractSignal(unescaped).toLowerCase();
-      final expectedSignal = _pendingSignal;
-      final matched =
-          expectedSignal.isEmpty ||
-          signal == expectedSignal ||
-          signal == _toResponseSignal(expectedSignal);
-      if (!matched) {
-        // 对齐安卓：如果收到 010d 表示重复授权
-        if (signal == '010d' && mounted) {
-          showToast(context.l10n.bluetoothAuthRepeatAuthorization);
-        }
-        continue;
-      }
-      final decryptStr = BleCommandBuilder.extractDecryptStr(unescaped);
-      ref
-          .read(bluetoothOperateProvider.notifier)
-          .enOrDecrypt(payload: decryptStr, isEncrypt: false)
-          .then((value) {
-            if (value == null || value.isEmpty) return;
-            final completer = _pendingResponse;
-            if (completer != null && !completer.isCompleted) {
-              completer.complete(value);
-            }
-          });
+    if (!_notifyBuffer.contains(endFlag)) {
+      return;
     }
+
+    final signalBack = BleCommandBuilder.extractSignal(_notifyBuffer);
+    final expectedSignal = _pendingSignal;
+    debugPrint(
+      '[BLE_AUTH_NATIVE] notify signal=$signalBack expected=$expectedSignal rawLen=${_notifyBuffer.length}',
+    );
+    final matched =
+        expectedSignal.isEmpty ||
+        signalBack.toUpperCase() == expectedSignal.toUpperCase();
+    if (!matched) {
+      _notifyBuffer = '';
+      // 对齐原生：010d 表示重复授权
+      if (signalBack.toLowerCase() == '010d' && mounted) {
+        showToast(context.l10n.bluetoothAuthRepeatAuthorization);
+        final completer = _pendingResponse;
+        if (completer != null && !completer.isCompleted) {
+          completer.complete('');
+        }
+      }
+      return;
+    }
+
+    final unescaped = BleCommandBuilder.unescapeResponse(_notifyBuffer);
+    final decryptStr = BleCommandBuilder.extractDecryptStr(unescaped);
+    ref
+        .read(bluetoothOperateProvider.notifier)
+        .enOrDecrypt(payload: decryptStr, isEncrypt: false)
+        .then((value) {
+          _notifyBuffer = '';
+          final normalized = _normalizeHex(value);
+          debugPrint(
+            '[BLE_AUTH_NATIVE] decrypt signal=$expectedSignal len=${normalized.length}',
+          );
+          if (expectedSignal.toLowerCase() == '0031' &&
+              normalized.length >= 8) {
+            _currentKeyId = normalized.substring(0, 8).toLowerCase();
+            debugPrint('[BLE_AUTH_NATIVE] keyId=$_currentKeyId');
+          }
+          final completer = _pendingResponse;
+          if (completer != null && !completer.isCompleted) {
+            completer.complete(value ?? '');
+          }
+        });
   }
 
   List<int>? _hexToBytes(String input) {
@@ -877,16 +1167,11 @@ class _BluetoothAuthorizationPageState
     return buffer.toString();
   }
 
-  String _toResponseSignal(String requestSignal) {
-    if (requestSignal.length != 4) return requestSignal;
-    final value = int.tryParse(requestSignal, radix: 16);
-    if (value == null) return requestSignal;
-    return (value + 0x0100).toRadixString(16).padLeft(4, '0');
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = context.l10n;
+    final canOpen = _hasSnInput && !_authorizing;
+    final canClear = _hasSnInput && !_clearing;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.bluetoothAuthTitle)),
@@ -944,23 +1229,20 @@ class _BluetoothAuthorizationPageState
                   width: double.infinity,
                   height: 48,
                   child: FilledButton(
-                    onPressed: _authorizing ? null : _openAuthorization,
+                    onPressed: canOpen ? _openAuthorization : null,
                     style: FilledButton.styleFrom(
                       backgroundColor: AppColors.primaryColor,
+                      disabledBackgroundColor: const Color(0xFFD0D0D0),
+                      foregroundColor: Colors.white,
+                      disabledForegroundColor: Colors.white70,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: _authorizing
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: SizedBox.shrink(),
-                          )
-                        : Text(
-                            l10n.bluetoothAuthOpenButton,
-                            style: const TextStyle(fontSize: 16),
-                          ),
+                    child: _buildLoadingButtonChild(
+                      text: l10n.bluetoothAuthOpenButton,
+                      textColor: canOpen ? Colors.white : Colors.white70,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -970,26 +1252,21 @@ class _BluetoothAuthorizationPageState
                   width: double.infinity,
                   height: 48,
                   child: OutlinedButton(
-                    onPressed: _clearing ? null : _clearAuthorization,
+                    onPressed: canClear ? _clearAuthorization : null,
                     style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.black87,
+                      disabledForegroundColor: Colors.black38,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      side: const BorderSide(color: Colors.black26),
+                      side: BorderSide(
+                        color: canClear ? Colors.black26 : Colors.black12,
+                      ),
                     ),
-                    child: _clearing
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: SizedBox.shrink(),
-                          )
-                        : Text(
-                            l10n.bluetoothAuthClearButton,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black87,
-                            ),
-                          ),
+                    child: _buildLoadingButtonChild(
+                      text: l10n.bluetoothAuthClearButton,
+                      textColor: canClear ? Colors.black87 : Colors.black38,
+                    ),
                   ),
                 ),
               ],
@@ -1002,6 +1279,13 @@ class _BluetoothAuthorizationPageState
         ],
       ),
     );
+  }
+
+  Widget _buildLoadingButtonChild({
+    required String text,
+    required Color textColor,
+  }) {
+    return Text(text, style: TextStyle(fontSize: 16, color: textColor));
   }
 }
 

@@ -234,8 +234,11 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
   Future<void> _scan() async {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) =>
-            const QrScanPage(allowManualInput: true, parseDeviceSn: true),
+        builder: (_) => const QrScanPage(
+          allowManualInput: true,
+          hideManualInputArea: true,
+          parseDeviceSn: true,
+        ),
       ),
     );
     if (!mounted || result == null || result.isEmpty) return;

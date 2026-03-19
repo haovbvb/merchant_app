@@ -361,59 +361,71 @@ class _CabinetPutawayPageState extends ConsumerState<CabinetPutawayPage> {
                         ],
                       ),
                       const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 12,
-                        runSpacing: 12,
-                        children: [
-                          // 已上传的图片
-                          ...state.images.indexed.map(
-                            (entry) => _ImageItem(
-                              key: ValueKey('uploaded_${entry.$1}_${entry.$2}'),
-                              imageUrl: entry.$2,
-                              onTap: () => PhotoGalleryViewer.show(
-                                context,
-                                state.images,
-                                initialIndex: entry.$1,
+                      LayoutBuilder(
+                        builder: (context, constraints) {
+                          const spacing = 12.0;
+                          final itemSize =
+                              (constraints.maxWidth - spacing * 2) / 3;
+                          return Wrap(
+                            spacing: spacing,
+                            runSpacing: spacing,
+                            children: [
+                              // 已上传的图片
+                              ...state.images.indexed.map(
+                                (entry) => _ImageItem(
+                                  key: ValueKey(
+                                    'uploaded_${entry.$1}_${entry.$2}',
+                                  ),
+                                  size: itemSize,
+                                  imageUrl: entry.$2,
+                                  onTap: () => PhotoGalleryViewer.show(
+                                    context,
+                                    state.images,
+                                    initialIndex: entry.$1,
+                                  ),
+                                  onDelete: () =>
+                                      notifier.removeImage(entry.$2),
+                                ),
                               ),
-                              onDelete: () => notifier.removeImage(entry.$2),
-                            ),
-                          ),
-                          // 本地待上传图片
-                          ..._localImages.map(
-                            (path) => _ImageItem(
-                              key: ValueKey('local_$path'),
-                              localPath: path,
-                              onTap: () => _showLocalImagePreview(path),
-                              onDelete: () {
-                                setState(() => _localImages.remove(path));
-                              },
-                            ),
-                          ),
-                          // 添加按钮
-                          if (state.images.length + _localImages.length <
-                              _maxImages)
-                            GestureDetector(
-                              onTap: state.uploading
-                                  ? null
-                                  : () => _showImageSourceSheet(
-                                      context,
-                                      notifier,
+                              // 本地待上传图片
+                              ..._localImages.map(
+                                (path) => _ImageItem(
+                                  key: ValueKey('local_$path'),
+                                  size: itemSize,
+                                  localPath: path,
+                                  onTap: () => _showLocalImagePreview(path),
+                                  onDelete: () {
+                                    setState(() => _localImages.remove(path));
+                                  },
+                                ),
+                              ),
+                              // 添加按钮
+                              if (state.images.length + _localImages.length <
+                                  _maxImages)
+                                GestureDetector(
+                                  onTap: state.uploading
+                                      ? null
+                                      : () => _showImageSourceSheet(
+                                          context,
+                                          notifier,
+                                        ),
+                                  child: Container(
+                                    width: itemSize,
+                                    height: itemSize,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFF5F5F5),
+                                      borderRadius: BorderRadius.circular(8),
                                     ),
-                              child: Container(
-                                width: 100,
-                                height: 100,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFF5F5F5),
-                                  borderRadius: BorderRadius.circular(8),
+                                    child: const Icon(
+                                      Icons.camera_alt_outlined,
+                                      color: Color(0xFF999999),
+                                      size: 32,
+                                    ),
+                                  ),
                                 ),
-                                child: const Icon(
-                                  Icons.camera_alt_outlined,
-                                  color: Color(0xFF999999),
-                                  size: 32,
-                                ),
-                              ),
-                            ),
-                        ],
+                            ],
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -830,12 +842,14 @@ class _StationSimpleInfoWidget extends StatelessWidget {
 class _ImageItem extends StatelessWidget {
   const _ImageItem({
     super.key,
+    required this.size,
     this.imageUrl,
     this.localPath,
     this.onTap,
     required this.onDelete,
   });
 
+  final double size;
   final String? imageUrl;
   final String? localPath;
   final VoidCallback? onTap;
@@ -848,8 +862,8 @@ class _ImageItem extends StatelessWidget {
         GestureDetector(
           onTap: onTap,
           child: Container(
-            width: 100,
-            height: 100,
+            width: size,
+            height: size,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               color: const Color(0xFFF5F5F5),

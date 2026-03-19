@@ -299,12 +299,8 @@ class _CabinetOfflineDetailPageState
         resultList is List &&
         resultList.any((item) {
           if (item is! Map) return false;
-          final id = item['id']?.toString() ?? '';
-          return id == CabinetParamName.softVersion ||
-              id == CabinetParamName.cabVolume ||
-              id == CabinetParamName.cabSoc ||
-              id == CabinetParamName.cabTcpPort ||
-              id == CabinetParamName.apn;
+          final id = _readExactParamId(item);
+          return _isNativeDeviceInfoParamId(id);
         })) {
       _waitingDeviceInfoResponse = false;
       Hud.dismiss();
@@ -340,28 +336,11 @@ class _CabinetOfflineDetailPageState
     }
 
     if (msgType == CabinetDataType.queryResponse && resultList is List) {
-      for (final item in resultList) {
-        if (item is! Map) continue;
-        final id = item['id']?.toString() ?? '';
-        final value = item['value']?.toString() ?? '';
-        if (id == CabinetParamName.softVersion) {
-          notifier.patchBaseInfo(softwareVersion: value);
-        } else if (id == CabinetParamName.cabSoc) {
-          final threshold = _toInt(item['value']);
-          if (threshold != null) {
-            notifier.patchBaseInfo(swapThreshold: threshold);
-          }
-        } else if (id == CabinetParamName.cabVolume) {
-          final volume = _toInt(item['value']);
-          if (volume != null) {
-            notifier.patchBaseInfo(volume: volume);
-          }
-        } else if (id == CabinetParamName.apn) {
-          notifier.patchBaseInfo(apn: value);
-        } else if (id == CabinetParamName.cabTcpPort) {
-          notifier.patchBaseInfo(platformUrl: value.replaceAll(',', ':'));
-        }
-      }
+      _applyNativeDeviceInfoQueryResponse(
+        jsonText: jsonText,
+        resultList: resultList,
+        notifier: notifier,
+      );
     }
 
     final alarmList = map['alarmList'];
@@ -415,6 +394,197 @@ class _CabinetOfflineDetailPageState
     final text = value.toString().trim();
     if (text.isEmpty) return null;
     return int.tryParse(text) ?? num.tryParse(text)?.toInt();
+  }
+
+  String _normalizeParamId(String rawId) {
+    return rawId.trim().toLowerCase();
+  }
+
+  bool _isNativeDeviceInfoParamId(String id) {
+    return id == CabinetParamName.softVersion ||
+        id == CabinetParamName.cabVolume ||
+        id == CabinetParamName.cabSoc ||
+        id == CabinetParamName.cabTcpPort ||
+        id == CabinetParamName.apn;
+  }
+
+  String _readExactParamId(Map<dynamic, dynamic> item) {
+    return item['id']?.toString().trim() ?? '';
+  }
+
+  String _readParamId(Map<dynamic, dynamic> item) {
+    final candidates = <dynamic>[
+      item['id'],
+      item['paramId'],
+      item['param'],
+      item['name'],
+      item['paramName'],
+      item['key'],
+    ];
+    for (final candidate in candidates) {
+      if (candidate == null) continue;
+      final text = candidate.toString().trim();
+      if (text.isNotEmpty) return text;
+    }
+    return '';
+  }
+
+  bool _isSoftVersionParamId(String rawId) {
+    final id = _normalizeParamId(rawId);
+    if (id.isEmpty) return false;
+    return id == CabinetParamName.softVersion.toLowerCase() ||
+        id == 'softwareversion' ||
+        id == 'softver' ||
+        id == 'swversion' ||
+        id == 'apkver' ||
+        id == 'version' ||
+        (id.contains('soft') && id.contains('ver')) ||
+        (id.contains('software') && id.contains('version'));
+  }
+
+  bool _isSwapThresholdParamId(String rawId) {
+    final id = _normalizeParamId(rawId);
+    return id == CabinetParamName.cabSoc.toLowerCase() || id == 'cabsoc';
+  }
+
+  bool _isVolumeParamId(String rawId) {
+    final id = _normalizeParamId(rawId);
+    return id == CabinetParamName.cabVolume.toLowerCase() ||
+        id == 'cabvolume' ||
+        id == 'swcabvolume';
+  }
+
+  bool _isApnParamId(String rawId) {
+    final id = _normalizeParamId(rawId);
+    if (id.isEmpty) return false;
+    return id == CabinetParamName.apn.toLowerCase() ||
+        id == 'cabapn' ||
+        id == 'swcabapn' ||
+        id == 'cab_apn' ||
+        id.contains('apn');
+  }
+
+  bool _isPlatformUrlParamId(String rawId) {
+    final id = _normalizeParamId(rawId);
+    if (id.isEmpty) return false;
+    return id == CabinetParamName.cabTcpPort.toLowerCase() ||
+        id == 'cabtcpport' ||
+        id == 'cab_tcp_port' ||
+        id == 'swcabtcpport' ||
+        id == 'tcpport' ||
+        id == 'platformurl' ||
+        id.contains('tcp') ||
+        id.contains('platform') ||
+        id.contains('url') ||
+        (id.contains('port') && id.contains('cab'));
+  }
+
+  String _readParamValue(Map<dynamic, dynamic> item) {
+    dynamic raw = item['value'] ?? item['val'] ?? item['resultValue'];
+    if (raw is Map) {
+      raw = raw['value'] ?? raw['val'] ?? raw['resultValue'];
+    }
+    return raw?.toString() ?? '';
+  }
+
+  void _applyNativeDeviceInfoQueryResponse({
+    required String jsonText,
+    required List<dynamic> resultList,
+    required CabinetOfflineNotifier notifier,
+  }) {
+    String? softwareVersion;
+    int? swapThreshold;
+    int? volume;
+    String? apn;
+    String? platformUrl;
+
+    for (final item in resultList) {
+      if (item is! Map) continue;
+      final id = _readExactParamId(item);
+      if (!_isNativeDeviceInfoParamId(id)) continue;
+      final value = _readParamValue(item);
+      if (id == CabinetParamName.softVersion) {
+        softwareVersion = value;
+      } else if (id == CabinetParamName.cabSoc) {
+        swapThreshold = _toInt(value);
+      } else if (id == CabinetParamName.cabVolume) {
+        volume = _toInt(value);
+      } else if (id == CabinetParamName.cabTcpPort) {
+        platformUrl = value.replaceAll(',', ':');
+      } else if (id == CabinetParamName.apn) {
+        apn = value;
+      }
+    }
+
+    final rawFallback = _readNativeDeviceInfoValuesFromJsonText(jsonText);
+    softwareVersion ??= rawFallback.softwareVersion;
+    swapThreshold ??= rawFallback.swapThreshold;
+    volume ??= rawFallback.volume;
+    apn ??= rawFallback.apn;
+    platformUrl ??= rawFallback.platformUrl;
+
+    if (softwareVersion == null &&
+        swapThreshold == null &&
+        volume == null &&
+        apn == null &&
+        platformUrl == null) {
+      return;
+    }
+
+    notifier.patchBaseInfo(
+      softwareVersion: softwareVersion,
+      swapThreshold: swapThreshold,
+      volume: volume,
+      apn: apn,
+      platformUrl: platformUrl,
+    );
+  }
+
+  _NativeDeviceInfoValues _readNativeDeviceInfoValuesFromJsonText(
+    String jsonText,
+  ) {
+    return _NativeDeviceInfoValues(
+      softwareVersion: _extractNativeStringValueFromJsonText(
+        jsonText,
+        CabinetParamName.softVersion,
+      ),
+      swapThreshold: _extractNativeIntValueFromJsonText(
+        jsonText,
+        CabinetParamName.cabSoc,
+      ),
+      volume: _extractNativeIntValueFromJsonText(
+        jsonText,
+        CabinetParamName.cabVolume,
+      ),
+      apn: _extractNativeStringValueFromJsonText(
+        jsonText,
+        CabinetParamName.apn,
+      ),
+      platformUrl: _extractNativeStringValueFromJsonText(
+        jsonText,
+        CabinetParamName.cabTcpPort,
+      )?.replaceAll(',', ':'),
+    );
+  }
+
+  String? _extractNativeStringValueFromJsonText(String jsonText, String id) {
+    final match = RegExp(
+      '"id"\\s*:\\s*"${RegExp.escape(id)}"\\s*,\\s*"value"\\s*:\\s*("(?:[^"\\\\]|\\\\.)*"|null)',
+    ).firstMatch(jsonText);
+    if (match == null) return null;
+    final token = match.group(1);
+    if (token == null || token == 'null') return '';
+    try {
+      final decoded = jsonDecode(token);
+      return decoded?.toString() ?? '';
+    } catch (_) {
+      return token.replaceAll('"', '');
+    }
+  }
+
+  int? _extractNativeIntValueFromJsonText(String jsonText, String id) {
+    final value = _extractNativeStringValueFromJsonText(jsonText, id);
+    return _toInt(value);
   }
 
   void _parseAllData(
@@ -1237,6 +1407,22 @@ class _CabinetOfflineDetailPageState
   }
 }
 
+class _NativeDeviceInfoValues {
+  const _NativeDeviceInfoValues({
+    this.softwareVersion,
+    this.swapThreshold,
+    this.volume,
+    this.apn,
+    this.platformUrl,
+  });
+
+  final String? softwareVersion;
+  final int? swapThreshold;
+  final int? volume;
+  final String? apn;
+  final String? platformUrl;
+}
+
 class _DeviceInfoTab extends StatelessWidget {
   const _DeviceInfoTab({
     required this.info,
@@ -1261,6 +1447,9 @@ class _DeviceInfoTab extends StatelessWidget {
     final l10n = context.l10n;
     final softwareVersion =
         _trimOrNull(state.softwareVersion) ?? _trimOrNull(info.softwareVersion);
+    final apn = _trimOrNull(state.apn) ?? _trimOrNull(info.apn);
+    final platformUrl =
+        _trimOrNull(state.platformUrl) ?? _trimOrNull(info.platformUrl);
     final backupPowerStatus =
         _trimOrNull(state.backupPowerStatus) ??
         _trimOrNull(info.backupPowerStatus);
@@ -1319,7 +1508,7 @@ class _DeviceInfoTab extends StatelessWidget {
               ),
               _InfoTile(
                 label: l10n.cabinetOfflineApn,
-                value: _trimOrNull(info.apn),
+                value: apn,
                 emptyPlaceholder: '',
                 showArrow: !isPlaceholder,
                 onTap: isPlaceholder ? null : onEditApn,
@@ -1332,7 +1521,7 @@ class _DeviceInfoTab extends StatelessWidget {
               ),
               _InfoTile(
                 label: l10n.cabinetOfflinePlatformUrl,
-                value: _trimOrNull(info.platformUrl),
+                value: platformUrl,
                 emptyPlaceholder: '',
                 showArrow: !isPlaceholder,
                 rowHeight: 40,

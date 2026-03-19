@@ -13,6 +13,8 @@ class QrScanPage extends StatefulWidget {
   const QrScanPage({
     super.key,
     this.allowManualInput = false,
+    this.forceScanOnly = false,
+    this.hideManualInputArea = false,
     this.parseDeviceSn = false,
     this.deviceType,
     this.returnRaw = false,
@@ -21,6 +23,12 @@ class QrScanPage extends StatefulWidget {
   });
 
   final bool allowManualInput;
+
+  /// When true, hide manual input UI even if allowManualInput is true.
+  final bool forceScanOnly;
+
+  /// When true, always hide manual input UI for this scan session.
+  final bool hideManualInputArea;
   final bool parseDeviceSn;
   final int? deviceType;
 
@@ -53,6 +61,11 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
   String? _successMessage;
   String? _lastContinuousValue;
   DateTime? _lastContinuousAt;
+
+  bool get _showManualInput =>
+      widget.allowManualInput &&
+      !widget.forceScanOnly &&
+      !widget.hideManualInputArea;
 
   late AnimationController _scanLineController;
 
@@ -124,7 +137,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
     final scanAreaSize = size.width * 0.65;
 
     final bottomPadding = MediaQuery.of(context).padding.bottom;
-    final torchBottom = widget.allowManualInput
+    final torchBottom = _showManualInput
         ? bottomPadding + _manualInputAreaHeight() + 20
         : 180.0;
 
@@ -249,7 +262,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
         ),
 
         // 底部输入区域
-        if (widget.allowManualInput)
+        if (_showManualInput)
           Positioned(
             left: 24,
             right: 24,
@@ -444,7 +457,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
             ),
           ),
           // 底部手动输入
-          if (widget.allowManualInput)
+          if (_showManualInput)
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
               child: _buildInputArea(l10n),

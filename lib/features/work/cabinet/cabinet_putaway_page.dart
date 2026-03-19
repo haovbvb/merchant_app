@@ -709,17 +709,28 @@ class _InputRow extends StatelessWidget {
       children: [
         Row(
           children: [
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 15,
-                color: AppColors.black06Text,
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 15,
+                  color: AppColors.black06Text,
+                ),
               ),
             ),
             if (labelSuffix != null)
-              Text(
-                labelSuffix!,
-                style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
+              Flexible(
+                child: Text(
+                  labelSuffix!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF999999),
+                  ),
+                ),
               ),
           ],
         ),

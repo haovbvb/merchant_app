@@ -100,11 +100,15 @@ class _TransportListPageState extends ConsumerState<TransportListPage> {
                       size: 20,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      l10n.deviceIssueSearchHint,
-                      style: TextStyle(
-                        color: Colors.grey.shade400,
-                        fontSize: 14,
+                    Expanded(
+                      child: Text(
+                        l10n.deviceIssueSearchHint,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.grey.shade400,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ],

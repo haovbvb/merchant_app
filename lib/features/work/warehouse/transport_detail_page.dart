@@ -224,11 +224,13 @@ class _TransportDetailPageState extends ConsumerState<TransportDetailPage> {
                         const SizedBox(height: 16),
                         // 设备列表
                         if (state.items.isEmpty)
-                          Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(24),
+                          Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: SizedBox(
+                              width: double.infinity,
                               child: Text(
                                 l10n.deviceIssueEmpty,
+                                textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   color: Color(0xFF999999),
                                   fontSize: 14,
@@ -607,21 +609,30 @@ class _OrderHeaderCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  detail?.transferNo ?? transferNo,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                Expanded(
+                  child: Text(
+                    detail?.transferNo ?? transferNo,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-                Text(
-                  _formatTimestamp(detail?.sendTime),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.white70,
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    _formatTimestamp(detail?.sendTime),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.white70,
+                    ),
                   ),
                 ),
               ],

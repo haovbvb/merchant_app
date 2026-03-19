@@ -342,6 +342,8 @@ class _DeviceSearchPageState extends State<DeviceSearchPage> {
       MaterialPageRoute(
         builder: (_) => QrScanPage(
           allowManualInput: false,
+          forceScanOnly: true,
+          hideManualInputArea: true,
           parseDeviceSn: true,
           deviceType: widget.deviceType,
         ),

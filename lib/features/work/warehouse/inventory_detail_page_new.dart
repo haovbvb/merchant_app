@@ -174,19 +174,31 @@ class _InventoryDetailPageNewState extends ConsumerState<InventoryDetailPageNew>
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    detail.inventoryNo ?? '-',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                  Expanded(
+                    child: Text(
+                      detail.inventoryNo ?? '-',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                  Text(
-                    _inventoryDateText(detail),
-                    style: const TextStyle(fontSize: 14, color: Colors.white70),
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      _inventoryDateText(detail),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.end,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
+                      ),
+                    ),
                   ),
                 ],
               ),

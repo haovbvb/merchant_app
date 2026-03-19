@@ -1127,13 +1127,17 @@ class _HomeOverlays extends StatelessWidget {
                               size: 20,
                             ),
                             const SizedBox(width: 8),
-                            Text(
-                              searchHint,
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: AppColors.black05Text,
-                                    fontSize: 14,
-                                  ),
+                            Expanded(
+                              child: Text(
+                                searchHint,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: AppColors.black05Text,
+                                      fontSize: 14,
+                                    ),
+                              ),
                             ),
                           ],
                         ),

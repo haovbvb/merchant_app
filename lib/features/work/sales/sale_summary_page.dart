@@ -228,9 +228,13 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
       children: [
         Row(
           children: [
-            Text(
-              label,
-              style: const TextStyle(fontSize: 13, color: Colors.white70),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontSize: 13, color: Colors.white70),
+              ),
             ),
             const SizedBox(width: 4),
             GestureDetector(
@@ -355,11 +359,15 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Text(
-                          l10n.saleSummaryOrderSigningRate,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF999999),
+                        Expanded(
+                          child: Text(
+                            l10n.saleSummaryOrderSigningRate,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF999999),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 4),
@@ -394,11 +402,15 @@ class _SaleSummaryPageState extends ConsumerState<SaleSummaryPage>
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Text(
-                          l10n.saleSummaryAverageOrderPrice,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF999999),
+                        Expanded(
+                          child: Text(
+                            l10n.saleSummaryAverageOrderPrice,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Color(0xFF999999),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 4),

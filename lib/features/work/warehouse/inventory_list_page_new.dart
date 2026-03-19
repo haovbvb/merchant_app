@@ -123,11 +123,15 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew>
                       size: 20,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      l10n.inventorySearchHint,
-                      style: const TextStyle(
-                        color: Color(0xFF999999),
-                        fontSize: 14,
+                    Expanded(
+                      child: Text(
+                        l10n.inventorySearchHint,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Color(0xFF999999),
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ],
@@ -140,16 +144,19 @@ class _InventoryListPageNewState extends ConsumerState<InventoryListPageNew>
           Container(
             color: Colors.white,
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-            child: Row(
-              children: [
-                _buildTabChip(0, l10n.warehouseTabAll),
-                const SizedBox(width: 8),
-                _buildTabChip(1, l10n.warehouseTabCompleted),
-                const SizedBox(width: 8),
-                _buildTabChip(2, l10n.warehouseTabUnfinished),
-                const SizedBox(width: 8),
-                _buildTabChip(3, l10n.warehouseTabRevoked),
-              ],
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _buildTabChip(0, l10n.warehouseTabAll),
+                  const SizedBox(width: 8),
+                  _buildTabChip(1, l10n.warehouseTabCompleted),
+                  const SizedBox(width: 8),
+                  _buildTabChip(2, l10n.warehouseTabUnfinished),
+                  const SizedBox(width: 8),
+                  _buildTabChip(3, l10n.warehouseTabRevoked),
+                ],
+              ),
             ),
           ),
 

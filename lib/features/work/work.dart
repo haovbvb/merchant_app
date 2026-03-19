@@ -405,15 +405,19 @@ class _WorkTabState extends ConsumerState<WorkTab> {
                 height: 16,
               ),
               const SizedBox(width: 8),
-              Text(
-                l10n.workbenchThisMonthSales,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.black06Text,
+              Expanded(
+                child: Text(
+                  l10n.workbenchThisMonthSales,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.black06Text,
+                  ),
                 ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Text(
                 dateStr,
                 style: const TextStyle(fontSize: 12, color: Color(0xFF999999)),
@@ -683,7 +687,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
       },
       child: Container(
         width: 108,
-        height: 130,
+        constraints: const BoxConstraints(minHeight: 130),
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFEAF2FF) : const Color(0xFFF5F8FB),
@@ -693,6 +697,7 @@ class _WorkTabState extends ConsumerState<WorkTab> {
               : null,
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
               iconPath,
@@ -704,6 +709,8 @@ class _WorkTabState extends ConsumerState<WorkTab> {
             Text(
               displayName,
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: 14,
                 color: const Color(0xFF606166),
@@ -752,8 +759,12 @@ class _WorkTabState extends ConsumerState<WorkTab> {
   Future<void> _scanAndOpenDetail() async {
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
-        builder: (_) =>
-            const QrScanPage(allowManualInput: false, parseDeviceSn: true),
+        builder: (_) => const QrScanPage(
+          allowManualInput: false,
+          forceScanOnly: true,
+          hideManualInputArea: true,
+          parseDeviceSn: true,
+        ),
       ),
     );
     if (!mounted || result == null || result.isEmpty) return;

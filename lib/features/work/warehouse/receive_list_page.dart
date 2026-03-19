@@ -86,11 +86,15 @@ class _ReceiveListPageState extends ConsumerState<ReceiveListPage> {
                       size: 20,
                     ),
                     const SizedBox(width: 8),
-                    Text(
-                      l10n.deviceReceiveSearchHint,
-                      style: TextStyle(
-                        color: Colors.grey.shade400,
-                        fontSize: 14,
+                    Expanded(
+                      child: Text(
+                        l10n.deviceReceiveSearchHint,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: Colors.grey.shade400,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ],

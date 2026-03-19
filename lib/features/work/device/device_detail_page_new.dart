@@ -30,6 +30,7 @@ class DeviceDetailPageNew extends ConsumerStatefulWidget {
     this.readOnly = false,
     this.popToSearchOnClear = false,
     this.showSearchBarInAppBar = true,
+    this.hideManualInputOnScan = true,
     this.expectedDeviceType,
     this.initialTabIndex,
   });
@@ -38,6 +39,7 @@ class DeviceDetailPageNew extends ConsumerStatefulWidget {
   final bool readOnly;
   final bool popToSearchOnClear;
   final bool showSearchBarInAppBar;
+  final bool hideManualInputOnScan;
   final int? expectedDeviceType;
   final int? initialTabIndex;
 
@@ -1916,7 +1918,9 @@ class _DeviceDetailPageNewState extends ConsumerState<DeviceDetailPageNew>
     final result = await Navigator.of(context).push<String>(
       MaterialPageRoute(
         builder: (_) => QrScanPage(
-          allowManualInput: true,
+          allowManualInput: false,
+          forceScanOnly: true,
+          hideManualInputArea: true,
           parseDeviceSn: true,
           deviceType: expectedType,
         ),

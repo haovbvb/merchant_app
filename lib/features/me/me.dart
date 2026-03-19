@@ -414,19 +414,11 @@ class _Avatar extends StatelessWidget {
             Positioned(
               right: 0,
               bottom: 0,
-              child: Container(
+              child: Image.asset(
+                'assets/images/icon_mine_addphoto.png',
                 width: 22,
                 height: 22,
-                decoration: BoxDecoration(
-                  color: AppColors.primaryColor,
-                  borderRadius: BorderRadius.circular(11),
-                  border: Border.all(color: Colors.white, width: 1.5),
-                ),
-                child: const Icon(
-                  Icons.add,
-                  size: 14,
-                  color: Colors.white,
-                ),
+                fit: BoxFit.contain,
               ),
             ),
           if (isUpdating)

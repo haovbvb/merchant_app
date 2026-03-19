@@ -240,19 +240,31 @@ class _OrderHeaderCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  detail?.transferNo ?? transferNo,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                Expanded(
+                  child: Text(
+                    detail?.transferNo ?? transferNo,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-                Text(
-                  _formatTimestamp(detail?.sendTime),
-                  style: const TextStyle(fontSize: 13, color: Colors.white70),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    _formatTimestamp(detail?.sendTime),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.end,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.white70,
+                    ),
+                  ),
                 ),
               ],
             ),

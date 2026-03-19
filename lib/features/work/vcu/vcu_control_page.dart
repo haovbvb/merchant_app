@@ -280,8 +280,8 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
   }) {
     final foreground = selected
         ? const Color(0xFF08983B)
-        : const Color(0x80FA4332);
-    final border = selected ? const Color(0xFF08983B) : const Color(0xFFFA4332);
+        : AppColors.secondaryColor;
+    final border = selected ? const Color(0xFF08983B) : AppColors.secondaryColor;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
@@ -1747,7 +1747,6 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
         );
       },
     );
-    controller.dispose();
     return result;
   }
 

@@ -5,27 +5,27 @@
     
     
       
-      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000286">
+      <testcase classname="fastlane.lanes" name="0: default_platform" time="0.000273">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="1: flutter build ipa --release --build-number\=202603201059 --export-options-plist\=/Users/ping/Desktop/work/merchant_app/ios/fastlane/ExportOptions.generated.plist" time="161.230059">
+      <testcase classname="fastlane.lanes" name="1: flutter build ipa --release --build-number\=202603201346 --export-options-plist\=/Users/ping/Desktop/work/merchant_app/ios/fastlane/ExportOptions.generated.plist" time="151.82133">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="2: flutter build apk --release --build-number\=603201059" time="195.680112">
+      <testcase classname="fastlane.lanes" name="2: flutter build apk --release --build-number\=603201346" time="169.769093">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="3: curl -f -X POST https://www.pgyer.com/apiv2/app/upload -F _api_key\=630a6a4d973bda999b5ca54affaebc60 -F file\=@/Users/ping/Desktop/work/merchant_app/build/ios/ipa/OKLA\ CARE.ipa -F buildUpdateDescription\= -F buildInstallType\=1" time="9.482171">
+      <testcase classname="fastlane.lanes" name="3: curl -f -X POST https://www.pgyer.com/apiv2/app/upload -F _api_key\=630a6a4d973bda999b5ca54affaebc60 -F file\=@/Users/ping/Desktop/work/merchant_app/build/ios/ipa/OKLA\ CARE.ipa -F buildUpdateDescription\= -F buildInstallType\=1" time="9.046454">
         
       </testcase>
     
       
-      <testcase classname="fastlane.lanes" name="4: curl -f -X POST https://www.pgyer.com/apiv2/app/upload -F _api_key\=630a6a4d973bda999b5ca54affaebc60 -F file\=@/Users/ping/Desktop/work/merchant_app/build/app/outputs/flutter-apk/app-release.apk -F buildUpdateDescription\= -F buildInstallType\=1" time="24.988612">
+      <testcase classname="fastlane.lanes" name="4: curl -f -X POST https://www.pgyer.com/apiv2/app/upload -F _api_key\=630a6a4d973bda999b5ca54affaebc60 -F file\=@/Users/ping/Desktop/work/merchant_app/build/app/outputs/flutter-apk/app-release.apk -F buildUpdateDescription\= -F buildInstallType\=1" time="23.429922">
         
       </testcase>
     

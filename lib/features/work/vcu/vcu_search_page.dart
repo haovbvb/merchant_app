@@ -218,7 +218,7 @@ class _VcuSearchPageState extends ConsumerState<VcuSearchPage> {
     await _addHistory(sn);
     if (!mounted) return;
     final vin = deviceInfo.vin ?? deviceInfo.deviceId ?? sn;
-    final deviceSn = deviceInfo.sn ?? deviceInfo.deviceId ?? sn;
+    final deviceSn = deviceInfo.deviceId ?? deviceInfo.sn ?? sn;
     await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => VcuControlPage(

@@ -49,6 +49,13 @@ class VcuState {
 
 final vcuProvider = NotifierProvider<VcuNotifier, VcuState>(VcuNotifier.new);
 
+class VcuSendResult {
+  final bool success;
+  final String message;
+
+  const VcuSendResult({required this.success, this.message = ''});
+}
+
 class VcuNotifier extends Notifier<VcuState> {
   final ApiService _api = ApiService();
 
@@ -84,14 +91,16 @@ class VcuNotifier extends Notifier<VcuState> {
     return response.result;
   }
 
-  Future<bool> sendCommand({
+  Future<VcuSendResult> sendCommand({
     required String devId,
     required int cmd,
     String? label,
     String? deviceSn,
   }) async {
     final trimmedDevId = devId.trim();
-    if (trimmedDevId.isEmpty) return false;
+    if (trimmedDevId.isEmpty) {
+      return const VcuSendResult(success: false);
+    }
     final commandLabel = label?.trim().isNotEmpty == true
         ? label!.trim()
         : 'CMD $cmd';
@@ -108,23 +117,45 @@ class VcuNotifier extends Notifier<VcuState> {
       ),
     );
     state = state.copyWith(sending: true);
-    final response = await _api.post<Object>(
-      ApiPath.vcuSendCommand,
-      data: {'cmd': cmd, 'devId': trimmedDevId},
-      parser: (json) => json ?? Object(),
-    );
-    _appendHistory(
-      VcuHistoryItem(
-        vin: displayId,
-        command: commandLabel,
-        data: response.isSuccess ? 'success' : 'failed',
-        type: VcuHistoryType.response,
-        timestamp: DateTime.now().millisecondsSinceEpoch,
-        success: response.isSuccess,
-      ),
-    );
-    state = state.copyWith(sending: false);
-    return response.isSuccess;
+    try {
+      final response = await _api.post<Object>(
+        ApiPath.vcuSendCommand,
+        data: {'cmd': cmd, 'devId': trimmedDevId},
+        parser: (json) => json ?? Object(),
+        notifyOnError: false,
+        toastOnBusinessError: false,
+      );
+      final success = response.isSuccess;
+      final responseData = success
+          ? 'success'
+          : (response.message.isNotEmpty ? response.message : 'failed');
+      _appendHistory(
+        VcuHistoryItem(
+          vin: displayId,
+          command: commandLabel,
+          data: responseData,
+          type: VcuHistoryType.response,
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+          success: success,
+        ),
+      );
+      return VcuSendResult(success: success, message: response.message);
+    } catch (error) {
+      final message = error.toString().trim();
+      _appendHistory(
+        VcuHistoryItem(
+          vin: displayId,
+          command: commandLabel,
+          data: message.isNotEmpty ? message : 'failed',
+          type: VcuHistoryType.response,
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+          success: false,
+        ),
+      );
+      return VcuSendResult(success: false, message: message);
+    } finally {
+      state = state.copyWith(sending: false);
+    }
   }
 
   void setHistoryFilter(VcuHistoryFilter filter) {

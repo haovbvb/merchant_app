@@ -20,6 +20,7 @@ import 'package:merchant_app/features/work/vcu/vcu_controller.dart';
 import 'package:merchant_app/features/work/vcu/vcu_ota_util.dart';
 import 'package:merchant_app/l10n/app_localizations.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class VcuControlPage extends ConsumerStatefulWidget {
@@ -42,6 +43,7 @@ class VcuControlPage extends ConsumerStatefulWidget {
 
 class _VcuControlPageState extends ConsumerState<VcuControlPage>
     with WidgetsBindingObserver {
+  static const int _bleChunkSize = 20;
   final TextEditingController _vinController = TextEditingController();
   final TextEditingController _ctrlIdController = TextEditingController();
   final TextEditingController _snController = TextEditingController();
@@ -666,8 +668,9 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     _VcuCommand command,
   ) async {
     final l10n = context.l10n;
-    final devId = _snController.text.trim();
-    if (devId.isEmpty) {
+    final networkDevId = _networkDevId();
+    final displayDeviceSn = _displayDeviceSn();
+    if (networkDevId.isEmpty) {
       showToast(l10n.vcuSendFailed);
       return;
     }
@@ -687,14 +690,22 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
       }
       return;
     }
-    final ok = await notifier.sendCommand(
-      devId: devId,
+    final result = await notifier.sendCommand(
+      devId: networkDevId,
       cmd: command.cmd,
-      label: 'NET ${command.label}',
-      deviceSn: _snController.text.trim(),
+      label: command.label,
+      deviceSn: networkDevId,
     );
     if (!context.mounted) return;
-    showToast(ok ? l10n.vcuSendSuccess : l10n.vcuSendFailed);
+    if (result.success) {
+      showToast(l10n.vcuSendSuccess);
+      return;
+    }
+    if (result.message.isNotEmpty) {
+      showToast(result.message);
+      return;
+    }
+    showToast(l10n.vcuSendFailed);
   }
 
   Future<void> _startBleConnect() async {
@@ -707,6 +718,8 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     _manualDisconnect = false;
     final permission = await ensureBluetoothPermission();
     if (!permission.granted) {
+      await _handleBlePermissionDenied(permission.status);
+      if (!mounted) return;
       showToast(l10n.vcuBlePermissionNotGranted);
       return;
     }
@@ -722,11 +735,15 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     setState(() => _connecting = true);
     showToast(l10n.vcuBleScanStarted);
     try {
-      await FlutterBluePlus.startScan(
-        withNames: <String>[ctrlId],
-        timeout: const Duration(seconds: 30),
-        androidUsesFineLocation: true,
-      );
+      if (Platform.isAndroid) {
+        await FlutterBluePlus.startScan(
+          withNames: <String>[ctrlId],
+          timeout: const Duration(seconds: 30),
+          androidUsesFineLocation: true,
+        );
+      } else {
+        await FlutterBluePlus.startScan(timeout: const Duration(seconds: 30));
+      }
     } catch (_) {
       if (!mounted) return;
       setState(() => _connecting = false);
@@ -772,9 +789,45 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
   }) {
     final expected = targetCtrlId.trim().toLowerCase();
     if (expected.isEmpty) return false;
-    return platformName.trim().toLowerCase() == expected ||
-        advName.trim().toLowerCase() == expected ||
-        remoteId.trim().toLowerCase() == expected;
+    final normalizedPlatformName = platformName.trim().toLowerCase();
+    final normalizedAdvName = advName.trim().toLowerCase();
+    final normalizedRemoteId = remoteId.trim().toLowerCase();
+    return normalizedPlatformName == expected ||
+        normalizedAdvName == expected ||
+        normalizedPlatformName.contains(expected) ||
+        normalizedAdvName.contains(expected) ||
+        normalizedRemoteId == expected;
+  }
+
+  Future<void> _handleBlePermissionDenied(
+    BluetoothPermissionStatus status,
+  ) async {
+    final l10n = context.l10n;
+    final needsSettings =
+        status == BluetoothPermissionStatus.deniedForever ||
+        status == BluetoothPermissionStatus.restricted;
+    if (!needsSettings || !mounted) return;
+    final action = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          content: Text(l10n.bluetoothPermissionDesc),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(l10n.bluetoothOpenSettings),
+            ),
+          ],
+        );
+      },
+    );
+    if (action == true) {
+      await openAppSettings();
+    }
   }
 
   Future<void> _connectDevice(BluetoothDevice device) async {
@@ -794,10 +847,10 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
         (s) => s.uuid == _serviceUuid,
         orElse: () => services.first,
       );
-      final writeChar = service.characteristics.firstWhere(
-        (c) => c.uuid == _writeUuid,
-        orElse: () => service.characteristics.first,
-      );
+      final writeChar = _selectWritableCharacteristic(services, service);
+      if (writeChar == null) {
+        throw Exception('no writable characteristic');
+      }
       final notifyChar = service.characteristics.firstWhere(
         (c) => c.uuid == _readUuid,
         orElse: () => service.characteristics.first,
@@ -931,7 +984,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     if (char == null) return;
     _bleSending = true;
     try {
-      await char.write(utf8.encode(payload), withoutResponse: false);
+      await _writeBleWithNativeLikeFallback(char, utf8.encode(payload));
     } catch (_) {
       _bleSending = false;
     }
@@ -940,6 +993,119 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
       await _writeBle(next);
     } else {
       _bleSending = false;
+    }
+  }
+
+  Future<void> _writeBleWithNativeLikeFallback(
+    BluetoothCharacteristic writeChar,
+    List<int> bytes,
+  ) async {
+    final supportsWrite = writeChar.properties.write;
+    final supportsWriteNoResp = writeChar.properties.writeWithoutResponse;
+
+    if (!supportsWrite && !supportsWriteNoResp) {
+      throw Exception('characteristic does not support write');
+    }
+
+    if (supportsWrite) {
+      try {
+        await writeChar.write(
+          bytes,
+          withoutResponse: false,
+          allowLongWrite: true,
+        );
+        return;
+      } catch (_) {}
+
+      try {
+        await _writeBleInChunks(writeChar, bytes, withoutResponse: false);
+        return;
+      } catch (_) {}
+    }
+
+    if (supportsWriteNoResp) {
+      try {
+        await writeChar.write(bytes, withoutResponse: true);
+        return;
+      } catch (_) {}
+
+      await _writeBleInChunks(writeChar, bytes, withoutResponse: true);
+      return;
+    }
+
+    throw Exception('no supported write mode');
+  }
+
+  BluetoothCharacteristic? _selectWritableCharacteristic(
+    List<BluetoothService> services,
+    BluetoothService preferredService,
+  ) {
+    final sameServiceCandidates = <BluetoothCharacteristic>[];
+    final otherServiceCandidates = <BluetoothCharacteristic>[];
+    final sameServiceWeakCandidates = <BluetoothCharacteristic>[];
+    final otherServiceWeakCandidates = <BluetoothCharacteristic>[];
+
+    for (final service in services) {
+      for (final c in service.characteristics) {
+        if (c.uuid != _writeUuid) continue;
+        final writable =
+            c.properties.write || c.properties.writeWithoutResponse;
+        final sameService = identical(service, preferredService);
+        if (sameService && writable) {
+          sameServiceCandidates.add(c);
+        } else if (sameService) {
+          sameServiceWeakCandidates.add(c);
+        } else if (writable) {
+          otherServiceCandidates.add(c);
+        } else {
+          otherServiceWeakCandidates.add(c);
+        }
+      }
+    }
+
+    final ordered = <BluetoothCharacteristic>[
+      ...sameServiceCandidates,
+      ...otherServiceCandidates,
+      ...sameServiceWeakCandidates,
+      ...otherServiceWeakCandidates,
+    ];
+    if (ordered.isNotEmpty) {
+      return ordered.first;
+    }
+
+    for (final c in preferredService.characteristics) {
+      if (c.properties.write || c.properties.writeWithoutResponse) {
+        return c;
+      }
+    }
+
+    for (final service in services) {
+      for (final c in service.characteristics) {
+        if (c.properties.write || c.properties.writeWithoutResponse) {
+          return c;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  Future<void> _writeBleInChunks(
+    BluetoothCharacteristic writeChar,
+    List<int> bytes, {
+    required bool withoutResponse,
+  }) async {
+    var offset = 0;
+    while (offset < bytes.length) {
+      final end = (offset + _bleChunkSize < bytes.length)
+          ? offset + _bleChunkSize
+          : bytes.length;
+      final chunk = bytes.sublist(offset, end);
+      await writeChar.write(chunk, withoutResponse: withoutResponse);
+      offset = end;
+      if (offset < bytes.length) {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+      }
     }
   }
 
@@ -1846,10 +2012,20 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     await _startBleOta(selected, notifier);
   }
 
+  String _networkDevId() {
+    return _snController.text.trim();
+  }
+
+  String _displayDeviceSn() {
+    final deviceSn = _snController.text.trim();
+    if (deviceSn.isNotEmpty) return deviceSn;
+    return _vinController.text.trim();
+  }
+
   String _bleHistoryVin() {
     final ctrlId = _ctrlIdController.text.trim();
     if (ctrlId.isNotEmpty) return ctrlId;
-    return _snController.text.trim();
+    return _displayDeviceSn();
   }
 
   String _buildBleLabel(VcuBleCommand command) {

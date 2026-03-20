@@ -92,13 +92,12 @@ class VcuNotifier extends Notifier<VcuState> {
   }
 
   Future<VcuSendResult> sendCommand({
-    required String devId,
     required int cmd,
     String? label,
     String? deviceSn,
   }) async {
-    final trimmedDevId = devId.trim();
-    if (trimmedDevId.isEmpty) {
+    final ctrlId = state.searchResult?.deviceInfo?.ctrlId?.trim() ?? '';
+    if (ctrlId.isEmpty) {
       return const VcuSendResult(success: false);
     }
     final commandLabel = label?.trim().isNotEmpty == true
@@ -106,12 +105,12 @@ class VcuNotifier extends Notifier<VcuState> {
         : 'CMD $cmd';
     final displayId = (deviceSn ?? '').trim().isNotEmpty
         ? deviceSn!.trim()
-        : trimmedDevId;
+        : ctrlId;
     _appendHistory(
       VcuHistoryItem(
         vin: displayId,
         command: commandLabel,
-        data: jsonEncode({'cmd': cmd, 'devId': trimmedDevId}),
+        data: jsonEncode({'cmd': cmd, 'devId': ctrlId}),
         type: VcuHistoryType.request,
         timestamp: DateTime.now().millisecondsSinceEpoch,
       ),
@@ -120,7 +119,7 @@ class VcuNotifier extends Notifier<VcuState> {
     try {
       final response = await _api.post<Object>(
         ApiPath.vcuSendCommand,
-        data: {'cmd': cmd, 'devId': trimmedDevId},
+        data: {'cmd': cmd, 'devId': ctrlId},
         parser: (json) => json ?? Object(),
         notifyOnError: false,
         toastOnBusinessError: false,

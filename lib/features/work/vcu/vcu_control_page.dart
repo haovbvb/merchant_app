@@ -706,7 +706,6 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
       return;
     }
     final result = await notifier.sendCommand(
-      devId: networkDevId,
       cmd: command.cmd,
       label: command.label,
       deviceSn: displayDeviceSn,

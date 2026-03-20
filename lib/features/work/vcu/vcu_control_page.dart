@@ -50,9 +50,19 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
   final TextEditingController _dataFrequencyController =
       TextEditingController();
 
-  static final Guid _serviceUuid = Guid('00001802-0000-1000-8000-00805F9B34FB');
-  static final Guid _readUuid = Guid('00002a06-0000-1000-8000-00805F9B34FB');
-  static final Guid _writeUuid = Guid('00002a06-0000-1000-8000-00805F9B34FB');
+  static final Guid _serviceUuidAndroid = Guid(
+    '00001802-0000-1000-8000-00805F9B34FB',
+  );
+  static final Guid _readUuidAndroid = Guid('00002a06-0000-1000-8000-00805F9B34FB');
+  static final Guid _writeUuidAndroid = Guid('00002a06-0000-1000-8000-00805F9B34FB');
+
+  static final Guid _serviceUuidIos = Guid('1802');
+  static final Guid _readUuidIos = Guid('2a06');
+  static final Guid _writeUuidIos = Guid('2a06');
+
+  Guid get _serviceUuid => Platform.isIOS ? _serviceUuidIos : _serviceUuidAndroid;
+  Guid get _readUuid => Platform.isIOS ? _readUuidIos : _readUuidAndroid;
+  Guid get _writeUuid => Platform.isIOS ? _writeUuidIos : _writeUuidAndroid;
 
   StreamSubscription<List<ScanResult>>? _scanSub;
   StreamSubscription<bool>? _isScanningSub;
@@ -339,7 +349,7 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
                 const Divider(height: 1),
                 _InfoRow(
                   title: l10n.vcuBluetoothLabel,
-                  value: '',
+                  value: _bluetoothStatusText(l10n),
                   trailing: Switch.adaptive(
                     value: _bleEnabled,
                     onChanged: (value) async {
@@ -347,9 +357,9 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
                       await _persistBleSwitch(value);
                       if (!value) {
                         await _disconnectBle(manual: true);
-                        _stopBleScan();
+                        await _stopBleScan();
                       } else if (_ctrlIdController.text.trim().isNotEmpty) {
-                        _startBleConnect();
+                        await _startBleConnect();
                       }
                     },
                   ),
@@ -710,6 +720,12 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
       showToast(l10n.vcuBlePermissionNotGranted);
       return;
     }
+    final bluetoothEnabled = await _isBluetoothEnabled();
+    if (!bluetoothEnabled) {
+      showToast(l10n.vcuBleConnectFailed);
+      _scheduleReconnect();
+      return;
+    }
     if (_adapterState != BluetoothAdapterState.on && Platform.isAndroid) {
       try {
         await FlutterBluePlus.turnOn();
@@ -722,8 +738,8 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     setState(() => _connecting = true);
     showToast(l10n.vcuBleScanStarted);
     try {
+      await _stopBleScan();
       await FlutterBluePlus.startScan(
-        withNames: <String>[ctrlId],
         timeout: const Duration(seconds: 30),
         androidUsesFineLocation: true,
       );
@@ -743,24 +759,36 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     });
   }
 
-  void _handleScanResults(List<ScanResult> results) {
+  Future<void> _handleScanResults(List<ScanResult> results) async {
     if (!_bleEnabled || _bleConnected) return;
     final ctrlId = _ctrlIdController.text.trim();
     if (ctrlId.isEmpty) return;
     for (final result in results) {
       final platformName = result.device.platformName.trim();
       final advName = result.advertisementData.advName.trim();
+      final deviceName = platformName.isNotEmpty ? platformName : advName;
       final remoteId = result.device.remoteId.str.trim();
       if (_isTargetBleDevice(
         targetCtrlId: ctrlId,
-        platformName: platformName,
+        platformName: deviceName,
         advName: advName,
         remoteId: remoteId,
       )) {
-        FlutterBluePlus.stopScan();
-        _connectDevice(result.device);
+        await _stopBleScan();
+        await _connectDevice(result.device);
         break;
       }
+    }
+  }
+
+  Future<bool> _isBluetoothEnabled() async {
+    try {
+      final state = await FlutterBluePlus.adapterState
+          .firstWhere((s) => s != BluetoothAdapterState.unknown)
+          .timeout(const Duration(seconds: 2));
+      return state == BluetoothAdapterState.on;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -789,19 +817,28 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
         }
       });
       _scanTimeoutTimer?.cancel();
+
+      try {
+        await device.requestMtu(512).timeout(const Duration(seconds: 5));
+      } catch (_) {}
+
       final services = await device.discoverServices();
-      final service = services.firstWhere(
-        (s) => s.uuid == _serviceUuid,
-        orElse: () => services.first,
-      );
-      final writeChar = service.characteristics.firstWhere(
-        (c) => c.uuid == _writeUuid,
-        orElse: () => service.characteristics.first,
-      );
-      final notifyChar = service.characteristics.firstWhere(
-        (c) => c.uuid == _readUuid,
-        orElse: () => service.characteristics.first,
-      );
+      BluetoothCharacteristic? writeChar;
+      BluetoothCharacteristic? notifyChar;
+      for (final service in services) {
+        if (service.uuid != _serviceUuid) continue;
+        for (final char in service.characteristics) {
+          if (char.uuid == _writeUuid) {
+            writeChar ??= char;
+          }
+          if (char.uuid == _readUuid) {
+            notifyChar ??= char;
+          }
+        }
+      }
+      if (writeChar == null || notifyChar == null) {
+        throw StateError('BLE characteristics not found');
+      }
       await notifyChar.setNotifyValue(true);
       _notifySub?.cancel();
       _notifySub = notifyChar.onValueReceived.listen((data) {
@@ -843,9 +880,11 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
     });
   }
 
-  void _stopBleScan() {
+  Future<void> _stopBleScan() async {
     _scanTimeoutTimer?.cancel();
-    FlutterBluePlus.stopScan();
+    try {
+      await FlutterBluePlus.stopScan();
+    } catch (_) {}
   }
 
   void _handleBleDisconnected() {
@@ -894,6 +933,13 @@ class _VcuControlPageState extends ConsumerState<VcuControlPage>
   Future<void> _persistBleSwitch(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(StorageKeys.vcuBleEnabled, enabled);
+  }
+
+  String _bluetoothStatusText(AppLocalizations l10n) {
+    if (!_bleEnabled) return '-';
+    if (_bleConnected) return l10n.vcuBleConnected;
+    if (_connecting) return l10n.vcuBleConnecting;
+    return l10n.vcuBleDisconnected;
   }
 
   bool _sendBle(VcuBleCommand command, VcuNotifier notifier) {

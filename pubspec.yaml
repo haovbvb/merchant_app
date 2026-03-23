@@ -29,7 +29,7 @@ dependencies:
   apple_maps_flutter: 1.4.0 # iOS 原生地图
   geolocator: 13.0.4 # 定位
   geocoding: 3.0.0 # 反向地理编码
-  mobile_scanner: 5.2.3 # 扫码
+  mobile_scanner: 6.0.11 # 扫码
   image_picker: 1.2.1 # 图片选择
   flutter_image_compress: 2.4.0 # 图片压缩
   url_launcher: 6.3.1 # URL 和电话拨打

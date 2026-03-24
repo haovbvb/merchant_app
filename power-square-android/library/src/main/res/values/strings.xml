@@ -1,7 +1,0 @@
-<resources>
-    <string name="app_name">Library</string>
-    <string name="textNoData">no Data</string>
-    <integer name="DEFAULT_TYPE_ERROR">1000</integer>
-    <integer name="NET_TYPE_ERROR">2000</integer>
-    <integer name="API_TYPE_ERROR">3000</integer>
-</resources>

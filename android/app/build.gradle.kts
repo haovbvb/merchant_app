@@ -9,7 +9,7 @@ plugins {
 val autoVersionCode =
     ((System.currentTimeMillis() / 1000L) % 2000000000L).toInt()
 android {
-    namespace = "com.okla.ops"
+    namespace = "com.okla.user"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.okla.ops"
+        applicationId = "com.okla.user"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

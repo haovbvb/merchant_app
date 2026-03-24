@@ -1,3 +1,3 @@
-package com.okla.ops
+package com.okla.user
 
-// migrated to com/okla/ops/MainActivity.kt
+// migrated to com/okla/user/MainActivity.kt

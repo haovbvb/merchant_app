@@ -1,119 +1,74 @@
-# merchant_app
+# Universal Flutter App Template
 
-Flutter 商户侧应用，整合 Riverpod 状态管理、Dio 网络封装以及多语言支持，提供登录、首页、工作台与“我的”等核心模块。
-通用 UI 组件库 jui, 参考文档: https://www.yuque.com/jui_flutter/kb/howistv001f1ghp9
+通用型 Flutter 基础框架模板，提供可运行的 App Shell、基础包分层与最小示例路由，可作为新业务 App 的统一起点。
 
-power-square-android 是商户侧 Android 版本正式发布的应用。
+## 你会得到什么
 
-## 环境要求
+- 可直接启动的模板入口（主工程）
+- 可复用基础包（foundation/networking/design_system/app_shell）
+- 认证模块契约样板（feature_auth）
+- 配套演练与治理文档（docs/）
 
-- Flutter 3.24+（Dart 3.9+）
-- Xcode 15 / Android Studio（编译 iOS/Android）
-- 已配置好基础 Flutter 开发环境（`flutter doctor` 通过）
+## 当前状态
+
+- 主入口已切换到 App Shell（lib/main.dart）
+- 历史业务代码已清理，仅保留模板有效基座
+- 主工程依赖已收敛到模板最小集合
+
+## 项目结构（核心）
+
+- lib/main.dart：模板应用入口
+- packages/app_shell：应用壳与路由装配
+- packages/foundation：基础契约、通用能力
+- packages/networking：通用网络请求能力
+- packages/design_system：主题与组件骨架
+- packages/feature_auth：认证模块契约样板
+- docs/：清单、蓝图、演练与治理规范
 
 ## 快速开始
 
+1. 安装依赖
+
 ```bash
-# 安装依赖
 flutter pub get
-
-# 运行 iOS 模拟器示例
-flutter run -d "iPhone 16 Plus"
-
-# 或指定 Android 设备
-flutter run -d <device-id>
 ```
 
-首次登录前，请向后端申请可用的账号密码。密码会在客户端侧通过 MD5（32 位小写）处理后再发送。
-
-自动打包上传 ios 安卓 需要先安装 fastlane：
+2. 启动模板
 
 ```bash
-cd ios && bundle exec fastlane pgyer_all
-
+flutter run
 ```
 
-## 主要特性
-
-- **Riverpod Notifier**：驱动全局登录状态、底部导航索引等。
-- **Dio 封装**：统一 Accept-Language、AccessToken 头部，自动弹出 HUD、Toast 处理错误。
-- **GoRouter**：控制登录态路由跳转，支持启动时刷新 token。
-- **多语言**：`flutter gen-l10n` 生成中英文文案，网络请求携带当前语言。
-- **自定义底部导航**：资产化图标，选中态与未选中态分离，支持多倍图资源。
-
-## 目录结构
-
-```
-lib/
- ├── main.dart                   # 应用入口
- ├── app/
- │    ├── app.dart               # 顶层 MaterialApp（含 Riverpod）
- │    ├── router.dart            # GoRouter 路由表
- │    └── theme.dart             # 全局主题与颜色
- │
- ├── core/                       # 通用工具与常量
- │    ├── constants/             # 常量（StorageKeys 等）
- │    ├── utils/                 # HUD、日志、加密、Toast
- │    └── widgets/               # 全局可复用组件
- │
- ├── data/                       # 网络层（Dio 封装、请求路径）
- │    └── network/
- │         ├── api_client.dart   # Dio 单例、拦截器
- │         ├── api_service.dart  # GET/POST 封装
- │         ├── api_path.dart     # 后端接口常量
- │         └── base_response.dart# 通用响应解析
- │
- ├── features/                   # 按业务划分模块
- │    ├── login/                 # 登录与鉴权
- │    │    ├── models/           # AuthState / AuthResult / AuthSession
- │    │    └── providers/        # AuthNotifier
- │    ├── home/
- │    ├── work/
- │    └── me/
- │
- ├── l10n/                       # 多语言资源与生成代码
- └── test/                       # Widget / 单元测试样例
-```
-
-## 鉴权流程
-
-1. 登录请求成功后，`AuthNotifier` 会：
-   - 通过 `AuthResult` 解析完整用户信息；
-   - 调用 `AuthSession` 单例缓存会话；
-   - 持久化刷新后的 token 并跳转首页。
-2. 应用启动时若检测到本地 token，会调用 `/admin/sys/account/refreshToken` 接口刷新，成功则继续保留登录态，失败则清空会话并返回登录页。
-3. 登出接口成功后会清除本地 token、Session，并导航回登录页。
-
-## 资源管理
-
-- 底部标签栏图标位于 `assets/images/`，支持 `2.0x/`、`3.0x/` 变体。
-- 如需新增图片，请同步更新 `pubspec.yaml` 的 `assets` 配置后执行 `flutter pub get`。
-
-## 开发建议
-
-- 新增接口：在 `api_path.dart` 定义路径 -> 在 `ApiService` 调用 -> 根据需要新增模型。
-- 新增功能模块：在 `features/` 下建立子目录，包含 `models/providers/views/widgets` 等子结构。
-- 若需调试网络，请关注控制台输出（`ApiClient` 已内置请求/响应日志）。
-
-## 常用命令
+3. 运行检查
 
 ```bash
-# 代码格式化
-flutter format lib test
-
-# 运行测试
+flutter analyze
 flutter test
-
-# 生成多语言文件
-flutter gen-l10n
 ```
 
----
+## 文档导航
 
-## 参考资料
+- docs/workspace_quick_start.md：工作区快速上手
+- docs/foundation_template_checklist.md：模板建设清单与验收状态
+- docs/foundation_template_blueprint.md：目录骨架与契约蓝图
+- docs/foundation_governance_v1.md：治理规范（v1）
 
-- jui 组件库文档：https://www.yuque.com/jui_flutter/kb/howistv001f1ghp9
-- Flutter 官方文档：https://docs.flutter.dev
-- GoRouter 指南：https://pub.dev/packages/go_router
+## Fastlane（根目录）
 
-如需补充 API 列表或迭代计划，请在对应章节追加说明。若发现文档与实现不一致，请以代码为准并及时提交更新。
+- 配置目录：fastlane/
+- Ruby 依赖：Gemfile（仓库根目录）
+
+常用命令（仓库根目录执行）：
+
+```bash
+bundle install
+bundle exec fastlane ios pgyer
+bundle exec fastlane ios pgyer_all
+```
+
+## 扩展到新业务的建议路径
+
+1. 在 packages/ 新建业务 feature 包（如 feature_order、feature_map）
+2. 在 app_shell 注册模块路由与开关
+3. 在主工程完成应用装配（配置、品牌、环境）
+4. 按 docs/foundation_template_checklist.md 阶段推进并验收

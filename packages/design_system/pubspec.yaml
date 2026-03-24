@@ -1,0 +1,22 @@
+name: design_system
+description: Design tokens and reusable UI components.
+version: 0.1.0
+publish_to: none
+
+environment:
+  sdk: ^3.9.0
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  foundation:
+    path: ../foundation
+  image_picker: ^1.2.1
+  photo_view: ^0.15.0
+  webview_flutter: ^4.13.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0

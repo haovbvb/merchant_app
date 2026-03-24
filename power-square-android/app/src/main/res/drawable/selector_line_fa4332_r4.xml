@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/bg_line_fa4332_r4" android:state_selected="false" />
-    <item android:drawable="@drawable/bg_line_ff12b34b_r4" android:state_selected="true" />
-</selector>

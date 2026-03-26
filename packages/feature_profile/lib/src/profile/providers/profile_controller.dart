@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:foundation/foundation.dart';
 import 'package:networking/networking.dart';
 
 import '../models/personal_info.dart';
@@ -120,5 +121,22 @@ class ProfileNotifier extends Notifier<ProfileState> {
 
   Future<void> refresh() async {
     await Future.wait([loadProfile(), loadUnreadMessageCount()]);
+  }
+
+  Future<bool> changePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    final response = await _api.post<Object>(
+      ProfileApiPath.urlOf(ProfileApiPath.changePassword),
+      data: {
+        'existingPassword': HashUtils.md5Lower32(oldPassword),
+        'newPassword': HashUtils.md5Lower32(newPassword),
+        'confirmPassword': HashUtils.md5Lower32(confirmPassword),
+      },
+      parser: (json) => json ?? Object(),
+    );
+    return response.isSuccess;
   }
 }

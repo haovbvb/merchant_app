@@ -223,6 +223,348 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Back to template home'**
   String get backTemplateHome;
+
+  /// No description provided for @commonCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get commonCancel;
+
+  /// No description provided for @commonConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get commonConfirm;
+
+  /// No description provided for @commonRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get commonRetry;
+
+  /// No description provided for @profileDefaultName.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get profileDefaultName;
+
+  /// No description provided for @profileMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'Messages'**
+  String get profileMessages;
+
+  /// No description provided for @profileChangePassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get profileChangePassword;
+
+  /// No description provided for @profileLanguageSetting.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get profileLanguageSetting;
+
+  /// No description provided for @profileServiceAgreement.
+  ///
+  /// In en, this message translates to:
+  /// **'Service Agreement'**
+  String get profileServiceAgreement;
+
+  /// No description provided for @profileAboutApp.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get profileAboutApp;
+
+  /// No description provided for @profileEditNicknameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Nickname'**
+  String get profileEditNicknameTitle;
+
+  /// No description provided for @profileNicknameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter nickname'**
+  String get profileNicknameHint;
+
+  /// No description provided for @profileNicknameEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nickname cannot be empty'**
+  String get profileNicknameEmpty;
+
+  /// No description provided for @profileLogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get profileLogout;
+
+  /// No description provided for @profileLogoutConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out?'**
+  String get profileLogoutConfirm;
+
+  /// No description provided for @profileUserId.
+  ///
+  /// In en, this message translates to:
+  /// **'ID: {id}'**
+  String profileUserId(Object id);
+
+  /// No description provided for @languageSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get languageSettingsTitle;
+
+  /// No description provided for @languageEnglish.
+  ///
+  /// In en, this message translates to:
+  /// **'English'**
+  String get languageEnglish;
+
+  /// No description provided for @languageChineseSimplified.
+  ///
+  /// In en, this message translates to:
+  /// **'Simplified Chinese'**
+  String get languageChineseSimplified;
+
+  /// No description provided for @serviceAgreementAndPrivacyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms & Privacy'**
+  String get serviceAgreementAndPrivacyTitle;
+
+  /// No description provided for @userAgreement.
+  ///
+  /// In en, this message translates to:
+  /// **'User Agreement'**
+  String get userAgreement;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @changePasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePasswordTitle;
+
+  /// No description provided for @changePasswordCurrentAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Current account: {account}'**
+  String changePasswordCurrentAccount(Object account);
+
+  /// No description provided for @changePasswordTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a new password with at least 6 characters, and keep it the same as the confirmation password.'**
+  String get changePasswordTips;
+
+  /// No description provided for @changePasswordOldPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Password'**
+  String get changePasswordOldPassword;
+
+  /// No description provided for @changePasswordOldPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter current password'**
+  String get changePasswordOldPasswordHint;
+
+  /// No description provided for @changePasswordNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get changePasswordNewPassword;
+
+  /// No description provided for @changePasswordNewPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter new password'**
+  String get changePasswordNewPasswordHint;
+
+  /// No description provided for @changePasswordConfirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get changePasswordConfirmPassword;
+
+  /// No description provided for @changePasswordConfirmPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter new password again'**
+  String get changePasswordConfirmPasswordHint;
+
+  /// No description provided for @changePasswordSubmit.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get changePasswordSubmit;
+
+  /// No description provided for @changePasswordMismatch.
+  ///
+  /// In en, this message translates to:
+  /// **'The two new passwords do not match'**
+  String get changePasswordMismatch;
+
+  /// No description provided for @changePasswordSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated successfully'**
+  String get changePasswordSuccess;
+
+  /// No description provided for @changePasswordFieldRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'This field is required'**
+  String get changePasswordFieldRequired;
+
+  /// No description provided for @scanManualInput.
+  ///
+  /// In en, this message translates to:
+  /// **'Manual input'**
+  String get scanManualInput;
+
+  /// No description provided for @scanVehicleVin.
+  ///
+  /// In en, this message translates to:
+  /// **'Vehicle VIN'**
+  String get scanVehicleVin;
+
+  /// No description provided for @scanConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get scanConfirm;
+
+  /// No description provided for @scanRecorded.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded'**
+  String get scanRecorded;
+
+  /// No description provided for @scanCameraPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission required'**
+  String get scanCameraPermissionRequired;
+
+  /// No description provided for @scanCameraPermissionDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Please allow camera access in system settings and try again.'**
+  String get scanCameraPermissionDesc;
+
+  /// No description provided for @scanTakePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get scanTakePhoto;
+
+  /// No description provided for @scanChooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get scanChooseFromGallery;
+
+  /// No description provided for @aboutDebugEntryEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Debug entry enabled'**
+  String get aboutDebugEntryEnabled;
+
+  /// No description provided for @aboutAppName.
+  ///
+  /// In en, this message translates to:
+  /// **'DEMO'**
+  String get aboutAppName;
+
+  /// No description provided for @aboutVersion.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version}'**
+  String aboutVersion(Object version);
+
+  /// No description provided for @messageCenterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Message Center'**
+  String get messageCenterTitle;
+
+  /// No description provided for @messageEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No messages'**
+  String get messageEmpty;
+
+  /// No description provided for @messageDetail.
+  ///
+  /// In en, this message translates to:
+  /// **'Message Detail'**
+  String get messageDetail;
+
+  /// No description provided for @messageNoMore.
+  ///
+  /// In en, this message translates to:
+  /// **'No more'**
+  String get messageNoMore;
+
+  /// No description provided for @showcaseStyleTokens.
+  ///
+  /// In en, this message translates to:
+  /// **'Style Tokens'**
+  String get showcaseStyleTokens;
+
+  /// No description provided for @showcaseToolkit.
+  ///
+  /// In en, this message translates to:
+  /// **'Utilities'**
+  String get showcaseToolkit;
+
+  /// No description provided for @showcaseCurrentTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Current time: {value}'**
+  String showcaseCurrentTime(Object value);
+
+  /// No description provided for @showcaseScanParsed.
+  ///
+  /// In en, this message translates to:
+  /// **'Parsed scan result: {value}'**
+  String showcaseScanParsed(Object value);
+
+  /// No description provided for @showcaseInteractions.
+  ///
+  /// In en, this message translates to:
+  /// **'Common Interactions'**
+  String get showcaseInteractions;
+
+  /// No description provided for @showcaseToastDemo.
+  ///
+  /// In en, this message translates to:
+  /// **'This toast comes from foundation'**
+  String get showcaseToastDemo;
+
+  /// No description provided for @showcaseConfirmDemoMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This is a confirm dialog demo from design_system.'**
+  String get showcaseConfirmDemoMessage;
+
+  /// No description provided for @showcaseMedia.
+  ///
+  /// In en, this message translates to:
+  /// **'Media Widgets'**
+  String get showcaseMedia;
 }
 
 class _AppLocalizationsDelegate

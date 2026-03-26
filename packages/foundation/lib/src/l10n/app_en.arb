@@ -20,5 +20,87 @@
   "login": "Login",
   "agreeTermsFirst": "Please agree to the terms first",
   "exampleFeatureTitle": "Example Feature",
-  "backTemplateHome": "Back to template home"
+  "backTemplateHome": "Back to template home",
+  "commonCancel": "Cancel",
+  "commonConfirm": "Confirm",
+  "commonRetry": "Retry",
+  "profileDefaultName": "Profile",
+  "profileMessages": "Messages",
+  "profileChangePassword": "Change Password",
+  "profileLanguageSetting": "Language",
+  "profileServiceAgreement": "Service Agreement",
+  "profileAboutApp": "About",
+  "profileEditNicknameTitle": "Edit Nickname",
+  "profileNicknameHint": "Please enter nickname",
+  "profileNicknameEmpty": "Nickname cannot be empty",
+  "profileLogout": "Log out",
+  "profileLogoutConfirm": "Are you sure you want to log out?",
+  "profileUserId": "ID: {id}",
+  "@profileUserId": {
+    "placeholders": {
+      "id": {}
+    }
+  },
+  "languageSettingsTitle": "Language",
+  "languageEnglish": "English",
+  "languageChineseSimplified": "Simplified Chinese",
+  "serviceAgreementAndPrivacyTitle": "Terms & Privacy",
+  "userAgreement": "User Agreement",
+  "privacyPolicy": "Privacy Policy",
+  "changePasswordTitle": "Change Password",
+  "changePasswordCurrentAccount": "Current account: {account}",
+  "@changePasswordCurrentAccount": {
+    "placeholders": {
+      "account": {}
+    }
+  },
+  "changePasswordTips": "Enter a new password with at least 6 characters, and keep it the same as the confirmation password.",
+  "changePasswordOldPassword": "Current Password",
+  "changePasswordOldPasswordHint": "Enter current password",
+  "changePasswordNewPassword": "New Password",
+  "changePasswordNewPasswordHint": "Enter new password",
+  "changePasswordConfirmPassword": "Confirm Password",
+  "changePasswordConfirmPasswordHint": "Enter new password again",
+  "changePasswordSubmit": "Confirm",
+  "changePasswordMismatch": "The two new passwords do not match",
+  "changePasswordSuccess": "Password updated successfully",
+  "changePasswordFieldRequired": "This field is required",
+  "scanManualInput": "Manual input",
+  "scanVehicleVin": "Vehicle VIN",
+  "scanConfirm": "Confirm",
+  "scanRecorded": "Recorded",
+  "scanCameraPermissionRequired": "Camera permission required",
+  "scanCameraPermissionDesc": "Please allow camera access in system settings and try again.",
+  "scanTakePhoto": "Take photo",
+  "scanChooseFromGallery": "Choose from gallery",
+  "aboutDebugEntryEnabled": "Debug entry enabled",
+  "aboutAppName": "DEMO",
+  "aboutVersion": "Version {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "messageCenterTitle": "Message Center",
+  "messageEmpty": "No messages",
+  "messageDetail": "Message Detail",
+  "messageNoMore": "No more",
+  "showcaseStyleTokens": "Style Tokens",
+  "showcaseToolkit": "Utilities",
+  "showcaseCurrentTime": "Current time: {value}",
+  "@showcaseCurrentTime": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "showcaseScanParsed": "Parsed scan result: {value}",
+  "@showcaseScanParsed": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "showcaseInteractions": "Common Interactions",
+  "showcaseToastDemo": "This toast comes from foundation",
+  "showcaseConfirmDemoMessage": "This is a confirm dialog demo from design_system.",
+  "showcaseMedia": "Media Widgets"
 }

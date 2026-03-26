@@ -11,6 +11,8 @@ dependencies:
   flutter:
     sdk: flutter
   go_router: ^14.8.1
+  design_system:
+    path: ../design_system
   foundation:
     path: ../foundation
 

@@ -19,9 +19,9 @@
 
 - lib/main.dart：模板应用入口
 - packages/app_shell：应用壳与路由装配
-- packages/foundation：基础契约、通用能力
-- packages/networking：通用网络请求能力
-- packages/design_system：主题与组件骨架
+- packages/foundation：契约 / l10n / 工具类
+- packages/networking：统一网络层
+- packages/design_system：样式 / 主题 / 通用组件
 - packages/feature_auth：认证模块契约样板
 - docs/：清单、蓝图、演练与治理规范
 

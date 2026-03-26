@@ -1,3 +1,4 @@
+import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:foundation/foundation.dart';
@@ -50,14 +51,15 @@ class _AboutPageState extends State<AboutPage> {
     final pressedFor = DateTime.now().difference(pressStart);
     if (pressedFor >= _debugTriggerDuration) {
       NetworkDebugStore.instance.showFloatingEntry();
-      showToast('调试入口已打开');
+      showToast(context.l10n.aboutDebugEntryEnabled);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8F8),
+      backgroundColor: AppColors.surfacePage,
       extendBodyBehindAppBar: true,
       body: Stack(
         children: [
@@ -70,7 +72,7 @@ class _AboutPageState extends State<AboutPage> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0xFF2D3440), Color(0xFF5A6474)],
+                  colors: [AppColors.profileAboutHeroStart, AppColors.profileAboutHeroEnd],
                 ),
               ),
             ),
@@ -90,25 +92,25 @@ class _AboutPageState extends State<AboutPage> {
                 width: 88,
                 height: 88,
                 decoration: BoxDecoration(
-                  color: const Color(0x33FFFFFF),
-                  borderRadius: BorderRadius.circular(12),
+                  color: AppColors.profileAboutIconBg,
+                  borderRadius: BorderRadius.circular(AppDimens.radius12),
                 ),
                 child: const Icon(
                   Icons.apps,
-                  color: Colors.white,
+                  color: AppColors.surfaceCard,
                   size: 44,
                 ),
               ),
-              const SizedBox(height: 16),
-              const Text(
-                'DEMO',
-                style: TextStyle(
-                  color: Colors.white,
+              const SizedBox(height: AppDimens.p16),
+              Text(
+                l10n.aboutAppName,
+                style: const TextStyle(
+                  color: AppColors.surfaceCard,
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: AppDimens.p6),
               FutureBuilder<PackageInfo>(
                 future: PackageInfo.fromPlatform(),
                 builder: (context, snapshot) {
@@ -119,11 +121,14 @@ class _AboutPageState extends State<AboutPage> {
                     onPointerUp: (_) => _onVersionPointerUpOrCancel(),
                     onPointerCancel: (_) => _onVersionPointerUpOrCancel(),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppDimens.p8,
+                        vertical: AppDimens.p4,
+                      ),
                       child: Text(
-                        'Version $version',
+                        l10n.aboutVersion(version),
                         style: const TextStyle(
-                          color: Color(0xFF999999),
+                          color: AppColors.textPlaceholder,
                           fontSize: 18,
                         ),
                       ),
@@ -135,54 +140,54 @@ class _AboutPageState extends State<AboutPage> {
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.surfaceCard,
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(16),
-                      topRight: Radius.circular(16),
+                      topLeft: Radius.circular(AppDimens.radius16),
+                      topRight: Radius.circular(AppDimens.radius16),
                     ),
                   ),
                   child: FutureBuilder<PackageInfo>(
                     future: PackageInfo.fromPlatform(),
                     builder: (context, snapshot) {
                       final version = snapshot.data?.version ?? '-';
-                      const date = 'Oct 30, 2023';
+                      final buildNumber = snapshot.data?.buildNumber ?? '-';
                       return Column(
                         children: [
-                          const SizedBox(height: 20),
+                          const SizedBox(height: AppDimens.p20),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            padding: const EdgeInsets.symmetric(horizontal: AppDimens.p16),
                             child: Row(
                               children: [
                                 Container(
                                   width: 10,
                                   height: 10,
                                   decoration: const BoxDecoration(
-                                    color: Color(0xFFFA4B51),
+                                    color: AppColors.profileAboutVersionDot,
                                     shape: BoxShape.circle,
                                   ),
                                 ),
-                                const SizedBox(width: 14),
+                                const SizedBox(width: AppDimens.p14),
                                 Text(
                                   'V$version',
                                   style: const TextStyle(
-                                    color: Color(0xFF0C0C0D),
+                                    color: AppColors.textPrimary,
                                     fontSize: 16,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                                 const Spacer(),
-                                const Text(
-                                  date,
-                                  style: TextStyle(
-                                    color: Color(0x4D0C0C0D),
+                                Text(
+                                  buildNumber,
+                                  style: const TextStyle(
+                                    color: AppColors.textSubtle,
                                     fontSize: 12,
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                          const SizedBox(height: 20),
-                          const Divider(height: 1, color: Color(0xFFE6E6E6)),
+                          const SizedBox(height: AppDimens.p20),
+                          AppDivider.thin(),
                         ],
                       );
                     },

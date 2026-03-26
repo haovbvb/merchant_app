@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:foundation/foundation.dart';
@@ -167,7 +168,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: const Color(0xCC3C3C3C),
+                  color: AppColors.scanPanelBg,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -188,7 +189,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
                 width: 56,
                 height: 56,
                 decoration: BoxDecoration(
-                  color: _torchOn ? const Color(0xFF0A84FF) : const Color(0x80808080),
+                  color: _torchOn ? AppColors.scanTorchOn : AppColors.scanTorchOff,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Icon(
@@ -219,6 +220,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
   }
 
   Widget _buildInputArea() {
+    final l10n = context.l10n;
     final isVehicle = widget.deviceType == 2;
     final alwaysShowConfirm = widget.deviceType == 1 || widget.deviceType == 2 || widget.deviceType == 3;
 
@@ -228,7 +230,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
         _buildManualInputBox(
           controller: _inputController,
           focusNode: _inputFocusNode,
-          hintText: 'Manual input',
+          hintText: l10n.scanManualInput,
           onSubmitted: (_) => _confirmManualInput(),
         ),
         if (isVehicle) ...[
@@ -236,7 +238,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
           _buildManualInputBox(
             controller: _vinController,
             focusNode: _vinFocusNode,
-            hintText: 'Vehicle VIN',
+            hintText: l10n.scanVehicleVin,
             onSubmitted: (_) => _confirmManualInput(),
           ),
         ],
@@ -248,10 +250,10 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
             child: FilledButton(
               onPressed: _confirmManualInput,
               style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF0A84FF),
+                backgroundColor: AppColors.scanTorchOn,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('Confirm'),
+              child: Text(l10n.scanConfirm),
             ),
           ),
         ],
@@ -268,7 +270,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
     return Container(
       height: 52,
       decoration: BoxDecoration(
-        color: const Color(0xCC3C3C3C),
+        color: AppColors.scanPanelBg,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -311,6 +313,7 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
   }
 
   Widget _buildPermissionView(BuildContext context) {
+    final l10n = context.l10n;
     return SafeArea(
       child: Center(
         child: Padding(
@@ -320,21 +323,21 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
             children: [
               const Icon(Icons.camera_alt_outlined, size: 72, color: Colors.white70),
               const SizedBox(height: 20),
-              const Text(
-                'Camera permission required',
+              Text(
+                l10n.scanCameraPermissionRequired,
                 style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
-              const Text(
-                'Please allow camera access in system settings and try again.',
+              Text(
+                l10n.scanCameraPermissionDesc,
                 style: TextStyle(color: Colors.white70, fontSize: 14),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: _checkPermission,
-                child: const Text('Retry'),
+                child: Text(l10n.commonRetry),
               ),
             ],
           ),
@@ -391,7 +394,8 @@ class _QrScanPageState extends State<QrScanPage> with TickerProviderStateMixin {
       final message = await widget.onContinuousScan?.call(resolved);
       if (!mounted) return;
       setState(() {
-        _feedbackMessage = (message?.trim().isNotEmpty ?? false) ? message!.trim() : 'Recorded';
+        _feedbackMessage =
+            (message?.trim().isNotEmpty ?? false) ? message!.trim() : context.l10n.scanRecorded;
       });
       Future<void>.delayed(const Duration(milliseconds: 800), () {
         if (!mounted) return;
@@ -448,7 +452,7 @@ class _ScanOverlayPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final overlayPaint = Paint()..color = const Color(0x99000000);
+    final overlayPaint = Paint()..color = AppColors.scanMask;
     final center = Offset(size.width / 2, size.height / 2);
     final scanRect = RRect.fromRectAndRadius(
       Rect.fromCenter(center: center, width: scanAreaSize, height: scanAreaSize),
@@ -517,7 +521,7 @@ class _ScanLinePainter extends CustomPainter {
     final y = (size.height - 8) * progress;
     final rect = Rect.fromLTWH(0, y, size.width, 4);
     final gradient = const LinearGradient(
-      colors: [Color(0x0018E0A1), Color(0xAA18E0A1), Color(0x0018E0A1)],
+      colors: [AppColors.scanLineTransparent, AppColors.scanLine, AppColors.scanLineTransparent],
       stops: [0.0, 0.5, 1.0],
     );
     final paint = Paint()..shader = gradient.createShader(rect);

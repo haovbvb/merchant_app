@@ -184,7 +184,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       if (success) {
         await _saveCredentials(name, password);
         if (mounted) {
-          context.go('/');
+          context.go(AppRoutePaths.home);
         }
       }
     } finally {

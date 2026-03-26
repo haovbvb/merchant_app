@@ -3,6 +3,8 @@ class ShellRoutePaths {
 
   static const String home = '/';
   static const String showcase = '/showcase';
+  static const String networkDebug = '/debug/network';
+  static const String networkDebugDetail = '/debug/network/detail';
   static const String webview = '/webview';
   static const String scan = '/scan';
   static const String example = '/example';

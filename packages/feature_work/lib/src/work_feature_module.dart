@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import 'work_feature_contract.dart';
+import 'work_route_paths.dart';
 import 'workbench_tab_page.dart';
 
 class WorkFeatureModule {
@@ -9,7 +10,7 @@ class WorkFeatureModule {
   final WorkFeatureContract contract = WorkFeatureContract(
     routes: [
       GoRoute(
-        path: '/workbench',
+        path: WorkRoutePaths.workbench,
         builder: (context, state) => const WorkbenchTabPage(),
       ),
     ],

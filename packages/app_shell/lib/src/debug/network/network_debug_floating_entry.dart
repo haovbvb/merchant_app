@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:foundation/foundation.dart';
+import 'package:go_router/go_router.dart';
 
-import 'network_debug_page.dart';
+import '../../shell_route_paths.dart';
 
 class NetworkDebugFloatingEntry extends StatefulWidget {
   const NetworkDebugFloatingEntry({super.key});
@@ -39,9 +40,9 @@ class _NetworkDebugFloatingEntryState extends State<NetworkDebugFloatingEntry> {
               });
             },
             onTap: () {
-              AppNavigator.navigatorKey.currentState?.push(
-                MaterialPageRoute(builder: (_) => const NetworkDebugPage()),
-              );
+              final context = AppNavigator.navigatorKey.currentContext;
+              if (context == null) return;
+              context.push(ShellRoutePaths.networkDebug);
             },
             child: Container(
               width: buttonSize,

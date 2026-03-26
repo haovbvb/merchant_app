@@ -2,8 +2,10 @@ import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foundation/foundation.dart';
+import 'package:go_router/go_router.dart';
 
 import '../models/message_list_response.dart';
+import '../profile_route_paths.dart';
 import '../providers/message_controller.dart';
 
 class MessagePage extends ConsumerStatefulWidget {
@@ -43,16 +45,17 @@ class _MessagePageState extends ConsumerState<MessagePage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final state = ref.watch(messageListProvider);
     final notifier = ref.read(messageListProvider.notifier);
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('消息中心')),
+      appBar: AppBar(title: Text(l10n.messageCenterTitle)),
       body: RefreshIndicator(
         onRefresh: notifier.refresh,
         child: state.items.isEmpty && !state.loading
-            ? const _MessageEmptyState(text: '暂无消息')
+            ? _MessageEmptyState(text: l10n.messageEmpty)
             : ListView.separated(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
@@ -94,16 +97,12 @@ class _MessagePageState extends ConsumerState<MessagePage> {
     if (parsed == null || !parsed.hasScheme) return;
     if (!context.mounted) return;
 
-    await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => CommonWebViewPage(
-          initialUrl: url,
-          title: item.title?.trim().isNotEmpty == true
-              ? item.title!.trim()
-              : '消息详情',
-        ),
-      ),
-    );
+    final title = item.title?.trim().isNotEmpty == true
+        ? item.title!.trim()
+        : context.l10n.messageDetail;
+    final target =
+        '${ProfileRoutePaths.messageDetail}?url=${Uri.encodeComponent(url)}&title=${Uri.encodeComponent(title)}';
+    await context.push(target);
   }
 }
 
@@ -168,7 +167,7 @@ class _MessageTile extends StatelessWidget {
                   width: 8,
                   height: 8,
                   decoration: const BoxDecoration(
-                    color: Colors.red,
+                    color: AppColors.danger,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -234,12 +233,12 @@ class _LoadMoreFooter extends StatelessWidget {
       );
     }
     if (!hasMore) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 12),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
         child: Center(
           child: Text(
-            '没有更多了',
-            style: TextStyle(color: Colors.black54),
+            context.l10n.messageNoMore,
+            style: const TextStyle(color: AppColors.iconMuted),
           ),
         ),
       );
@@ -266,10 +265,10 @@ class _MessageEmptyState extends StatelessWidget {
               const Icon(
                 Icons.inbox_outlined,
                 size: 72,
-                color: Color(0xFFB0B8C4),
+                color: AppColors.profileChevron,
               ),
               const SizedBox(height: 16),
-              Text(text, style: const TextStyle(color: Colors.black54)),
+              Text(text, style: const TextStyle(color: AppColors.iconMuted)),
             ],
           ),
         ),

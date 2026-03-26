@@ -1,26 +1,27 @@
 import 'package:flutter/material.dart';
 
 import '../styles/colors.dart';
+import '../styles/design.dart';
 
 class ConfirmDialog extends StatelessWidget {
   const ConfirmDialog({
     super.key,
     required this.message,
+    required this.confirmText,
     this.cancelText,
-    this.confirmText,
     this.singleButton = false,
-  });
+  }) : assert(singleButton || cancelText != null);
 
   final String message;
   final String? cancelText;
-  final String? confirmText;
+  final String confirmText;
   final bool singleButton;
 
   static Future<bool> show({
     required BuildContext context,
     required String message,
-    String? cancelText,
-    String? confirmText,
+    required String cancelText,
+    required String confirmText,
   }) async {
     final result = await showDialog<bool>(
       context: context,
@@ -37,7 +38,7 @@ class ConfirmDialog extends StatelessWidget {
   static Future<void> alert({
     required BuildContext context,
     required String message,
-    String? buttonText,
+    required String buttonText,
   }) async {
     await showDialog<void>(
       context: context,
@@ -52,14 +53,21 @@ class ConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final confirm = confirmText ?? 'OK';
+    final confirm = confirmText;
 
     return Dialog(
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      insetPadding: const EdgeInsets.symmetric(horizontal: 40),
+      backgroundColor: AppColors.surfaceCard,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppDimens.radius16),
+      ),
+      insetPadding: const EdgeInsets.symmetric(horizontal: AppDimens.p24),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+        padding: const EdgeInsets.fromLTRB(
+          AppDimens.p24,
+          32,
+          AppDimens.p24,
+          AppDimens.p24,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -69,7 +77,7 @@ class ConfirmDialog extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                color: AppColors.black09Text,
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 24),
@@ -80,12 +88,12 @@ class ConfirmDialog extends StatelessWidget {
                   onPressed: () => Navigator.of(context).pop(),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primaryColor,
-                    foregroundColor: Colors.white,
+                    foregroundColor: AppColors.surfaceCard,
                     elevation: 0,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(AppDimens.radius8),
                     ),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: AppDimens.p12),
                   ),
                   child: Text(
                     confirm,
@@ -103,15 +111,15 @@ class ConfirmDialog extends StatelessWidget {
                     child: OutlinedButton(
                       onPressed: () => Navigator.of(context).pop(false),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.black06Text,
-                        side: BorderSide(color: AppColors.borderColor),
+                        foregroundColor: AppColors.textQuaternary,
+                        side: BorderSide(color: AppColors.borderSubtle),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppDimens.radius8),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: AppDimens.p12),
                       ),
                       child: Text(
-                        cancelText ?? 'Cancel',
+                        cancelText!,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -125,12 +133,12 @@ class ConfirmDialog extends StatelessWidget {
                       onPressed: () => Navigator.of(context).pop(true),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryColor,
-                        foregroundColor: Colors.white,
+                        foregroundColor: AppColors.surfaceCard,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(AppDimens.radius8),
                         ),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: AppDimens.p12),
                       ),
                       child: Text(
                         confirm,

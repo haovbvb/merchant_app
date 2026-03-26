@@ -1,23 +1,22 @@
 import 'package:design_system/design_system.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foundation/foundation.dart';
-import 'package:networking/networking.dart';
 
-import '../profile_api_path.dart';
+import '../providers/profile_controller.dart';
 
-class ChangePasswordPage extends StatefulWidget {
+class ChangePasswordPage extends ConsumerStatefulWidget {
   const ChangePasswordPage({super.key});
 
   @override
-  State<ChangePasswordPage> createState() => _ChangePasswordPageState();
+  ConsumerState<ChangePasswordPage> createState() => _ChangePasswordPageState();
 }
 
-class _ChangePasswordPageState extends State<ChangePasswordPage> {
+class _ChangePasswordPageState extends ConsumerState<ChangePasswordPage> {
   final _formKey = GlobalKey<FormState>();
   final _oldController = TextEditingController();
   final _newController = TextEditingController();
   final _confirmController = TextEditingController();
-  final ApiService _api = ApiService();
 
   bool _submitting = false;
   bool _obscureOld = true;
@@ -34,47 +33,48 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final session = AuthGatewayRegistry.instance.current.snapshot;
     final account = _formatAccount(session.name, session.emailCode);
 
     return Scaffold(
-      backgroundColor: AppColors.bgColor,
+      backgroundColor: AppColors.surfacePage,
       appBar: AppBar(
-        title: const Text('修改密码'),
+        title: Text(l10n.changePasswordTitle),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.surfaceCard,
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppDimens.p16),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
+                padding: const EdgeInsets.symmetric(vertical: AppDimens.p6),
                 child: Text(
-                  '当前账号: $account',
+                  l10n.changePasswordCurrentAccount(account),
                   style: const TextStyle(
                     fontSize: 16,
-                    color: AppColors.black06Text,
+                    color: AppColors.textQuaternary,
                   ),
                 ),
               ),
-              const SizedBox(height: 16),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 6),
+              const SizedBox(height: AppDimens.p16),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppDimens.p6),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.info_outline, color: Colors.grey, size: 20),
-                    SizedBox(width: 8),
+                    const Icon(Icons.info_outline, color: AppColors.iconMuted, size: 20),
+                    const SizedBox(width: AppDimens.p8),
                     Expanded(
                       child: Text(
-                        '请输入 6 位及以上新密码，并与确认密码保持一致。',
-                        style: TextStyle(
-                          color: Color(0xFF999999),
+                        l10n.changePasswordTips,
+                        style: const TextStyle(
+                          color: AppColors.textPlaceholder,
                           fontSize: 13,
                           height: 1.4,
                         ),
@@ -83,32 +83,41 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppDimens.p16),
               Container(
-                color: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                color: AppColors.surfaceCard,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDimens.p16,
+                  vertical: AppDimens.p16,
+                ),
                 child: Column(
                   children: [
                     _PasswordField(
                       controller: _oldController,
-                      label: '旧密码',
-                      hint: '请输入旧密码',
+                      label: l10n.changePasswordOldPassword,
+                      hint: l10n.changePasswordOldPasswordHint,
+                      requiredMessage: l10n.changePasswordFieldRequired,
+                      tooShortMessage: l10n.passwordTooShort,
                       obscure: _obscureOld,
                       onToggle: () => setState(() => _obscureOld = !_obscureOld),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppDimens.p20),
                     _PasswordField(
                       controller: _newController,
-                      label: '新密码',
-                      hint: '请输入新密码',
+                      label: l10n.changePasswordNewPassword,
+                      hint: l10n.changePasswordNewPasswordHint,
+                      requiredMessage: l10n.changePasswordFieldRequired,
+                      tooShortMessage: l10n.passwordTooShort,
                       obscure: _obscureNew,
                       onToggle: () => setState(() => _obscureNew = !_obscureNew),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: AppDimens.p20),
                     _PasswordField(
                       controller: _confirmController,
-                      label: '确认密码',
-                      hint: '请再次输入新密码',
+                      label: l10n.changePasswordConfirmPassword,
+                      hint: l10n.changePasswordConfirmPasswordHint,
+                      requiredMessage: l10n.changePasswordFieldRequired,
+                      tooShortMessage: l10n.passwordTooShort,
                       obscure: _obscureConfirm,
                       onToggle: () =>
                           setState(() => _obscureConfirm = !_obscureConfirm),
@@ -116,9 +125,9 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: AppDimens.p16),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: AppDimens.p16),
                 child: SizedBox(
                   height: 48,
                   child: ElevatedButton(
@@ -126,10 +135,10 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryColor,
                       disabledBackgroundColor: AppColors.primaryColor,
-                      foregroundColor: Colors.white,
+                      foregroundColor: AppColors.surfaceCard,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(AppDimens.radius8),
                       ),
                     ),
                     child: _submitting
@@ -138,12 +147,12 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: AppColors.surfaceCard,
                             ),
                           )
-                        : const Text(
-                            '确认修改',
-                            style: TextStyle(
+                        : Text(
+                            l10n.changePasswordSubmit,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
                             ),
@@ -167,6 +176,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
   }
 
   Future<void> _submit() async {
+    final l10n = context.l10n;
     if (!_formKey.currentState!.validate()) {
       return;
     }
@@ -176,26 +186,22 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
     final confirmPwd = _confirmController.text.trim();
 
     if (newPwd != confirmPwd) {
-      _showSnack('两次输入的新密码不一致');
+      _showSnack(l10n.changePasswordMismatch);
       return;
     }
 
     setState(() => _submitting = true);
-    final response = await _api.post<Object>(
-      ProfileApiPath.urlOf(ProfileApiPath.changePassword),
-      data: {
-        'existingPassword': HashUtils.md5Lower32(oldPwd),
-        'newPassword': HashUtils.md5Lower32(newPwd),
-        'confirmPassword': HashUtils.md5Lower32(confirmPwd),
-      },
-      parser: (json) => json ?? Object(),
+    final success = await ref.read(profileProvider.notifier).changePassword(
+      oldPassword: oldPwd,
+      newPassword: newPwd,
+      confirmPassword: confirmPwd,
     );
 
     if (!mounted) return;
     setState(() => _submitting = false);
 
-    if (response.isSuccess) {
-      _showSnack('密码修改成功');
+    if (success) {
+      _showSnack(l10n.changePasswordSuccess);
       Navigator.of(context).pop();
     }
   }
@@ -210,6 +216,8 @@ class _PasswordField extends StatelessWidget {
     required this.controller,
     required this.label,
     required this.hint,
+    required this.requiredMessage,
+    required this.tooShortMessage,
     required this.obscure,
     required this.onToggle,
   });
@@ -217,6 +225,8 @@ class _PasswordField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final String hint;
+  final String requiredMessage;
+  final String tooShortMessage;
   final bool obscure;
   final VoidCallback onToggle;
 
@@ -229,39 +239,42 @@ class _PasswordField extends StatelessWidget {
           label,
           style: const TextStyle(
             fontSize: 14,
-            color: AppColors.black06Text,
+            color: AppColors.textQuaternary,
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppDimens.p8),
         TextFormField(
           controller: controller,
           obscureText: obscure,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(color: Color(0xFFCCCCCC), fontSize: 15),
+            hintStyle: const TextStyle(
+              color: AppColors.textDisabled,
+              fontSize: 15,
+            ),
             suffixIcon: IconButton(
               icon: Icon(
                 obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-                color: const Color(0xFF999999),
+                color: AppColors.textPlaceholder,
                 size: 20,
               ),
               onPressed: onToggle,
             ),
-            contentPadding: const EdgeInsets.symmetric(vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(vertical: AppDimens.p12),
             border: const UnderlineInputBorder(),
             enabledBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFE5E5E5)),
+              borderSide: BorderSide(color: AppColors.inputBorderDefault),
             ),
             focusedBorder: const UnderlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFB7E1A8), width: 1.5),
+              borderSide: BorderSide(color: AppColors.inputBorderFocused, width: 1.5),
             ),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return '该项不能为空';
+              return requiredMessage;
             }
             if (value.trim().length < 6) {
-              return '密码长度至少 6 位';
+              return tooShortMessage;
             }
             return null;
           },

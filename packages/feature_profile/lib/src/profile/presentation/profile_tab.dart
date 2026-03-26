@@ -58,12 +58,13 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final authSnapshot = AuthGatewayRegistry.instance.current.snapshot;
     final profileState = ref.watch(profileProvider);
     final profile = profileState.info;
 
     final rawName = profile?.displayName.trim() ?? (authSnapshot.name?.trim() ?? '');
-    final name = rawName.isNotEmpty ? rawName : '我的';
+    final name = rawName.isNotEmpty ? rawName : l10n.profileDefaultName;
     final userId = _formatUserId(profile?.userId);
     final subtitle = userId.isNotEmpty ? userId : '-';
 
@@ -78,40 +79,40 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
     final actions = [
       _ProfileAction(
         icon: Icons.notifications_outlined,
-        iconBg: const Color(0xFFFFD54F),
-        label: '消息',
+        iconBg: AppColors.profileActionMessageBg,
+        label: l10n.profileMessages,
         badgeText: _badgeText(unreadCount),
         onTap: () => context.push(ProfileRoutePaths.messages),
       ),
       _ProfileAction(
         icon: Icons.lock_outline,
-        iconBg: const Color(0xFF9575CD),
-        label: '修改密码',
+        iconBg: AppColors.profileActionPasswordBg,
+        label: l10n.profileChangePassword,
         onTap: () => context.push(ProfileRoutePaths.changePassword),
       ),
       _ProfileAction(
         icon: Icons.language,
-        iconBg: const Color(0xFF64B5F6),
-        label: '语言设置',
-        trailingText: _localeLabel(currentLocale),
+        iconBg: AppColors.profileActionLanguageBg,
+        label: l10n.profileLanguageSetting,
+        trailingText: _localeLabel(context, currentLocale),
         onTap: () => context.push(ProfileRoutePaths.language),
       ),
       _ProfileAction(
         icon: Icons.description_outlined,
-        iconBg: const Color(0xFF66BB6A),
-        label: '服务协议',
+        iconBg: AppColors.profileActionAgreementBg,
+        label: l10n.profileServiceAgreement,
         onTap: () => context.push(ProfileRoutePaths.serviceAgreement),
       ),
       _ProfileAction(
         icon: Icons.info_outline,
-        iconBg: const Color(0xFFFFB74D),
-        label: '关于应用',
+        iconBg: AppColors.profileActionAboutBg,
+        label: l10n.profileAboutApp,
         onTap: () => context.push(ProfileRoutePaths.about),
       ),
     ];
 
     return Scaffold(
-      backgroundColor: AppColors.bgColor,
+      backgroundColor: AppColors.surfacePage,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
@@ -127,7 +128,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                 onLogout: () async {
                   await AuthGatewayRegistry.instance.current.logout();
                   if (!context.mounted) return;
-                  context.go('/auth/login');
+                  context.go(AppRoutePaths.login);
                 },
               ),
               const SizedBox(height: 16),
@@ -148,11 +149,12 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
     return count > 99 ? '99+' : count.toString();
   }
 
-  String _localeLabel(Locale locale) {
+  String _localeLabel(BuildContext context, Locale locale) {
+    final l10n = context.l10n;
     if (locale.languageCode.toLowerCase().startsWith('zh')) {
-      return '简体中文';
+      return l10n.languageChineseSimplified;
     }
-    return 'English';
+    return l10n.languageEnglish;
   }
 
   String _formatUserId(String? value) {
@@ -166,35 +168,57 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
   }
 
   Future<void> _editNickname(BuildContext context, String currentName) async {
+    final l10n = context.l10n;
     final controller = TextEditingController(text: currentName);
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: const Text('修改昵称'),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            maxLength: 15,
-            inputFormatters: [LengthLimitingTextInputFormatter(15)],
-            decoration: const InputDecoration(hintText: '请输入昵称'),
-            textInputAction: TextInputAction.done,
-            onSubmitted: (_) => Navigator.of(ctx).pop(controller.text.trim()),
+        return Dialog(
+          backgroundColor: AppColors.surfaceCard,
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.profileEditNicknameTitle,
+                  style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: controller,
+                  autofocus: true,
+                  maxLength: 15,
+                  inputFormatters: [LengthLimitingTextInputFormatter(15)],
+                  decoration: InputDecoration(hintText: l10n.profileNicknameHint),
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => Navigator.of(ctx).pop(controller.text.trim()),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        style: OutlinedButton.styleFrom(
+                          side: BorderSide(color: AppColors.borderSubtle),
+                        ),
+                        child: Text(l10n.commonCancel),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+                        child: Text(l10n.commonConfirm),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-          actions: [
-            OutlinedButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              style: OutlinedButton.styleFrom(
-                side: BorderSide(color: AppColors.borderColor),
-              ),
-              child: const Text('取消'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
-              child: const Text('确认'),
-            ),
-          ],
         );
       },
     );
@@ -202,7 +226,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
     final trimmed = result?.trim() ?? '';
     if (trimmed.isEmpty) {
       if (result != null) {
-        showToast('昵称不能为空');
+        showToast(l10n.profileNicknameEmpty);
       }
       return;
     }
@@ -210,12 +234,13 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
   }
 
   Future<void> _showAvatarSheet(BuildContext context) async {
+    final l10n = context.l10n;
     if (ref.read(profileProvider).updating) return;
     final source = await ImageSourceActionSheet.show(
       context,
-      cameraLabel: '拍照',
-      galleryLabel: '从相册选择',
-      cancelLabel: '取消',
+      cameraLabel: l10n.scanTakePhoto,
+      galleryLabel: l10n.scanChooseFromGallery,
+      cancelLabel: l10n.commonCancel,
     );
     if (source == null) return;
 
@@ -254,6 +279,7 @@ class _ProfileHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Column(
@@ -265,22 +291,22 @@ class _ProfileHeader extends StatelessWidget {
               onPressed: () async {
                 final confirmed = await ConfirmDialog.show(
                   context: context,
-                  message: '确定退出登录吗？',
-                  cancelText: '取消',
-                  confirmText: '确认',
+                  message: l10n.profileLogoutConfirm,
+                  cancelText: l10n.commonCancel,
+                  confirmText: l10n.commonConfirm,
                 );
                 if (confirmed) {
                   await onLogout();
                 }
               },
               style: TextButton.styleFrom(
-                foregroundColor: AppColors.black06Text,
+                foregroundColor: AppColors.textQuaternary,
                 padding: EdgeInsets.zero,
                 minimumSize: const Size(0, 36),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
-              child: const Text('退出登录'),
+              child: Text(l10n.profileLogout),
             ),
           ),
           const SizedBox(height: 12),
@@ -308,7 +334,7 @@ class _ProfileHeader extends StatelessWidget {
                             child: Text(
                               name,
                               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: AppColors.black09Text,
+                                color: AppColors.textPrimary,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 22,
                               ),
@@ -319,16 +345,16 @@ class _ProfileHeader extends StatelessWidget {
                           Icon(
                             Icons.edit_outlined,
                             size: 18,
-                            color: AppColors.black04Text,
+                            color: AppColors.textHint,
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'ID: $subtitle',
+                      l10n.profileUserId(subtitle),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.black05Text,
+                        color: AppColors.textDisabled,
                       ),
                     ),
                   ],
@@ -367,8 +393,8 @@ class _Avatar extends StatelessWidget {
           )
         : const CircleAvatar(
             radius: 32,
-            backgroundColor: Color(0xFFECEFF3),
-            child: Icon(Icons.person_outline, size: 32, color: Color(0xFF8D95A3)),
+            backgroundColor: AppColors.profileAvatarPlaceholderBg,
+            child: Icon(Icons.person_outline, size: 32, color: AppColors.profileAvatarPlaceholderFg),
           );
 
     return GestureDetector(
@@ -387,12 +413,12 @@ class _Avatar extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(11),
-                  border: Border.all(color: const Color(0xFFDFE3E8)),
+                  border: Border.all(color: AppColors.profileAvatarHintBorder),
                 ),
                 child: const Icon(
                   Icons.add_a_photo_outlined,
                   size: 14,
-                  color: Color(0xFF5B6270),
+                  color: AppColors.profileActionIcon,
                 ),
               ),
             ),
@@ -427,7 +453,7 @@ class _ProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surfaceCard,
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -439,7 +465,7 @@ class _ProfileCard extends StatelessWidget {
                 height: 1,
                 indent: 16,
                 endIndent: 16,
-                color: AppColors.borderColor,
+                color: AppColors.borderSubtle,
               ),
           ],
         ],
@@ -462,13 +488,13 @@ class _ProfileActionTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         child: Row(
           children: [
-            Icon(action.icon, color: const Color(0xFF5B6270), size: 22),
+            Icon(action.icon, color: AppColors.profileActionIcon, size: 22),
             const SizedBox(width: 16),
             Expanded(
               child: Text(
                 action.label,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.black09Text,
+                  color: AppColors.textPrimary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -479,7 +505,7 @@ class _ProfileActionTile extends StatelessWidget {
                 child: Text(
                   action.trailingText!,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.black05Text,
+                    color: AppColors.textDisabled,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -488,7 +514,7 @@ class _ProfileActionTile extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFFF6F61),
+                  color: AppColors.profileBadgeBg,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -501,7 +527,7 @@ class _ProfileActionTile extends StatelessWidget {
                 ),
               ),
             const SizedBox(width: 12),
-            const Icon(Icons.chevron_right, color: Color(0xFFB0B8C4)),
+            const Icon(Icons.chevron_right, color: AppColors.profileChevron),
           ],
         ),
       ),

@@ -20,5 +20,87 @@
   "login": "登录",
   "agreeTermsFirst": "请先勾选协议",
   "exampleFeatureTitle": "示例功能",
-  "backTemplateHome": "返回模板首页"
+  "backTemplateHome": "返回模板首页",
+  "commonCancel": "取消",
+  "commonConfirm": "确认",
+  "commonRetry": "重试",
+  "profileDefaultName": "我的",
+  "profileMessages": "消息",
+  "profileChangePassword": "修改密码",
+  "profileLanguageSetting": "语言设置",
+  "profileServiceAgreement": "服务协议",
+  "profileAboutApp": "关于应用",
+  "profileEditNicknameTitle": "修改昵称",
+  "profileNicknameHint": "请输入昵称",
+  "profileNicknameEmpty": "昵称不能为空",
+  "profileLogout": "退出登录",
+  "profileLogoutConfirm": "确定退出登录吗？",
+  "profileUserId": "ID: {id}",
+  "@profileUserId": {
+    "placeholders": {
+      "id": {}
+    }
+  },
+  "languageSettingsTitle": "语言设置",
+  "languageEnglish": "English",
+  "languageChineseSimplified": "简体中文",
+  "serviceAgreementAndPrivacyTitle": "服务协议与隐私政策",
+  "userAgreement": "用户协议",
+  "privacyPolicy": "隐私政策",
+  "changePasswordTitle": "修改密码",
+  "changePasswordCurrentAccount": "当前账号: {account}",
+  "@changePasswordCurrentAccount": {
+    "placeholders": {
+      "account": {}
+    }
+  },
+  "changePasswordTips": "请输入 6 位及以上新密码，并与确认密码保持一致。",
+  "changePasswordOldPassword": "旧密码",
+  "changePasswordOldPasswordHint": "请输入旧密码",
+  "changePasswordNewPassword": "新密码",
+  "changePasswordNewPasswordHint": "请输入新密码",
+  "changePasswordConfirmPassword": "确认密码",
+  "changePasswordConfirmPasswordHint": "请再次输入新密码",
+  "changePasswordSubmit": "确认修改",
+  "changePasswordMismatch": "两次输入的新密码不一致",
+  "changePasswordSuccess": "密码修改成功",
+  "changePasswordFieldRequired": "该项不能为空",
+  "scanManualInput": "手动输入",
+  "scanVehicleVin": "车辆 VIN",
+  "scanConfirm": "确认",
+  "scanRecorded": "已记录",
+  "scanCameraPermissionRequired": "需要相机权限",
+  "scanCameraPermissionDesc": "请在系统设置中允许相机访问后重试。",
+  "scanTakePhoto": "拍照",
+  "scanChooseFromGallery": "从相册选择",
+  "aboutDebugEntryEnabled": "调试入口已打开",
+  "aboutAppName": "DEMO",
+  "aboutVersion": "Version {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {}
+    }
+  },
+  "messageCenterTitle": "消息中心",
+  "messageEmpty": "暂无消息",
+  "messageDetail": "消息详情",
+  "messageNoMore": "没有更多了",
+  "showcaseStyleTokens": "样式令牌",
+  "showcaseToolkit": "工具能力",
+  "showcaseCurrentTime": "当前时间: {value}",
+  "@showcaseCurrentTime": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "showcaseScanParsed": "扫码解析结果: {value}",
+  "@showcaseScanParsed": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "showcaseInteractions": "通用交互组件",
+  "showcaseToastDemo": "这是来自 foundation 的 Toast",
+  "showcaseConfirmDemoMessage": "这是 design_system 的确认弹窗示例。",
+  "showcaseMedia": "媒体组件"
 }

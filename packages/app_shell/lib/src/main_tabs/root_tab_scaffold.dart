@@ -54,7 +54,7 @@ class RootTabScaffold extends ConsumerWidget {
               ref.read(bottomNavIndexProvider.notifier).setIndex(index),
           type: BottomNavigationBarType.fixed,
           selectedItemColor: AppColors.primaryColor,
-          unselectedItemColor: AppColors.black05Text,
+          unselectedItemColor: AppColors.textDisabled,
           items: tabs
               .map(
                 (tab) => BottomNavigationBarItem(

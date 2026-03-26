@@ -28,7 +28,7 @@ android {
         versionName = "1.0.2"
     }
 
-    val nativeKeystoreFile = rootProject.file("../power-square-android/app/keystore/okla_admin.jks")
+    val nativeKeystoreFile = rootProject.file("app/keystore/okla_admin.jks")
     signingConfigs {
         create("release") {
             check(nativeKeystoreFile.exists()) {

@@ -1,5 +1,6 @@
 export 'src/contracts/app_feature_module.dart';
 export 'src/contracts/app_logger.dart';
+export 'src/contracts/auth_gateway.dart';
 export 'src/contracts/key_value_store.dart';
 export 'src/debug/network/network_debug_store.dart';
 export 'src/l10n/app_l10n.dart';

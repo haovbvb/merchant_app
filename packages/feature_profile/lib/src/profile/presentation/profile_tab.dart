@@ -1,5 +1,4 @@
 import 'package:design_system/design_system.dart';
-import 'package:feature_auth/feature_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,20 +58,18 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
 
   @override
   Widget build(BuildContext context) {
-    ref.watch(authNotifierProvider);
-
-    final session = AuthSession.instance.current;
+    final authSnapshot = AuthGatewayRegistry.instance.current.snapshot;
     final profileState = ref.watch(profileProvider);
     final profile = profileState.info;
 
-    final rawName = profile?.displayName.trim() ?? (session?.name.trim() ?? '');
+    final rawName = profile?.displayName.trim() ?? (authSnapshot.name?.trim() ?? '');
     final name = rawName.isNotEmpty ? rawName : '我的';
     final userId = _formatUserId(profile?.userId);
     final subtitle = userId.isNotEmpty ? userId : '-';
 
     final avatarUrl = (profile?.avatarUrl?.trim().isNotEmpty ?? false)
         ? profile?.avatarUrl?.trim()
-        : session?.avatar.trim();
+      : authSnapshot.avatar?.trim();
 
     final messageState = ref.watch(messageListProvider);
     final unreadCount = messageState.items.where((item) => item.isRead != 1).length;
@@ -128,7 +125,7 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                 onEditNickname: () => _editNickname(context, name),
                 onEditAvatar: () => _showAvatarSheet(context),
                 onLogout: () async {
-                  await ref.read(authNotifierProvider.notifier).logout();
+                  await AuthGatewayRegistry.instance.current.logout();
                   if (!context.mounted) return;
                   context.go('/auth/login');
                 },

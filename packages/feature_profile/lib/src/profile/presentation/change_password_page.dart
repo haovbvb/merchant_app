@@ -1,5 +1,4 @@
 import 'package:design_system/design_system.dart';
-import 'package:feature_auth/feature_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:foundation/foundation.dart';
 import 'package:networking/networking.dart';
@@ -35,8 +34,8 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
 
   @override
   Widget build(BuildContext context) {
-    final user = AuthSession.instance.current;
-    final account = _formatAccount(user?.name, user?.emailCode);
+    final session = AuthGatewayRegistry.instance.current.snapshot;
+    final account = _formatAccount(session.name, session.emailCode);
 
     return Scaffold(
       backgroundColor: AppColors.bgColor,

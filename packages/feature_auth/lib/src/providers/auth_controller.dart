@@ -6,6 +6,7 @@ import 'package:networking/networking.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../auth_api_path.dart';
+import '../auth_gateway_impl.dart';
 import '../constants/storage_keys.dart';
 import '../models/auth_result.dart';
 import '../models/auth_session.dart';
@@ -20,6 +21,8 @@ class AuthNotifier extends Notifier<UserState> {
 
   @override
   UserState build() {
+    AuthGatewayRegistry.instance.register(FeatureAuthGateway.instance);
+    FeatureAuthGateway.instance.bindLogoutAction(logout);
     return const UserState();
   }
 
@@ -68,12 +71,14 @@ class AuthNotifier extends Notifier<UserState> {
   Future<void> updateSession(AuthResult result) async {
     await _persistToken(result.token);
     AuthSession.instance.update(result);
+    FeatureAuthGateway.instance.updateSession(result);
     state = UserState(token: result.token, user: result);
   }
 
   Future<void> clearSession() async {
     await _clearToken();
     AuthSession.instance.clear();
+    FeatureAuthGateway.instance.clearSession();
     state = const UserState();
   }
 

@@ -81,7 +81,7 @@ class NetworkDebugStore extends ChangeNotifier {
   static const int _maxEntries = 200;
   static const bool _envEnabled = bool.fromEnvironment(
     'NETWORK_DEBUG_LOG',
-    defaultValue: true,
+    defaultValue: false,
   );
 
   bool get enabled => _envEnabled;
@@ -188,7 +188,10 @@ class NetworkDebugStore extends ChangeNotifier {
     );
   }
 
-  void _updateEntry(String id, NetworkLogEntry Function(NetworkLogEntry old) f) {
+  void _updateEntry(
+    String id,
+    NetworkLogEntry Function(NetworkLogEntry old) f,
+  ) {
     final index = _entries.indexWhere((item) => item.id == id);
     if (index < 0) return;
     _entries[index] = f(_entries[index]);

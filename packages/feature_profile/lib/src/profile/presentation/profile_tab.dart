@@ -20,7 +20,10 @@ class _ProfileAction {
     this.badgeText,
     this.trailingText,
     this.onTap,
-  }) : assert(icon != null || iconPath != null, 'Either icon or iconPath must be provided');
+  }) : assert(
+         icon != null || iconPath != null,
+         'Either icon or iconPath must be provided',
+       );
 
   final IconData? icon;
   final String? iconPath;
@@ -47,7 +50,6 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(messageListProvider.notifier).refresh();
       ref.read(profileProvider.notifier).refresh();
-      ref.read(languageNotifierProvider.notifier).init();
     });
   }
 
@@ -63,17 +65,20 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
     final profileState = ref.watch(profileProvider);
     final profile = profileState.info;
 
-    final rawName = profile?.displayName.trim() ?? (authSnapshot.name?.trim() ?? '');
+    final rawName =
+        profile?.displayName.trim() ?? (authSnapshot.name?.trim() ?? '');
     final name = rawName.isNotEmpty ? rawName : l10n.profileDefaultName;
     final userId = _formatUserId(profile?.userId);
     final subtitle = userId.isNotEmpty ? userId : '-';
 
     final avatarUrl = (profile?.avatarUrl?.trim().isNotEmpty ?? false)
         ? profile?.avatarUrl?.trim()
-      : authSnapshot.avatar?.trim();
+        : authSnapshot.avatar?.trim();
 
     final messageState = ref.watch(messageListProvider);
-    final unreadCount = messageState.items.where((item) => item.isRead != 1).length;
+    final unreadCount = messageState.items
+        .where((item) => item.isRead != 1)
+        .length;
     final currentLocale = ref.watch(languageNotifierProvider);
 
     final actions = [
@@ -183,7 +188,9 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
               children: [
                 Text(
                   l10n.profileEditNicknameTitle,
-                  style: Theme.of(ctx).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -191,9 +198,12 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                   autofocus: true,
                   maxLength: 15,
                   inputFormatters: [LengthLimitingTextInputFormatter(15)],
-                  decoration: InputDecoration(hintText: l10n.profileNicknameHint),
+                  decoration: InputDecoration(
+                    hintText: l10n.profileNicknameHint,
+                  ),
                   textInputAction: TextInputAction.done,
-                  onSubmitted: (_) => Navigator.of(ctx).pop(controller.text.trim()),
+                  onSubmitted: (_) =>
+                      Navigator.of(ctx).pop(controller.text.trim()),
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -210,7 +220,8 @@ class _ProfileTabState extends ConsumerState<ProfileTab> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: FilledButton(
-                        onPressed: () => Navigator.of(ctx).pop(controller.text.trim()),
+                        onPressed: () =>
+                            Navigator.of(ctx).pop(controller.text.trim()),
                         child: Text(l10n.commonConfirm),
                       ),
                     ),
@@ -304,7 +315,10 @@ class _ProfileHeader extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 minimumSize: const Size(0, 36),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
               child: Text(l10n.profileLogout),
             ),
@@ -333,11 +347,12 @@ class _ProfileHeader extends StatelessWidget {
                           Flexible(
                             child: Text(
                               name,
-                              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: AppColors.textPrimary,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 22,
-                              ),
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 22,
+                                  ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
@@ -394,7 +409,11 @@ class _Avatar extends StatelessWidget {
         : const CircleAvatar(
             radius: 32,
             backgroundColor: AppColors.profileAvatarPlaceholderBg,
-            child: Icon(Icons.person_outline, size: 32, color: AppColors.profileAvatarPlaceholderFg),
+            child: Icon(
+              Icons.person_outline,
+              size: 32,
+              color: AppColors.profileAvatarPlaceholderFg,
+            ),
           );
 
     return GestureDetector(
@@ -434,7 +453,10 @@ class _Avatar extends StatelessWidget {
                 child: SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -512,7 +534,10 @@ class _ProfileActionTile extends StatelessWidget {
               ),
             if (action.badgeText != null)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.profileBadgeBg,
                   borderRadius: BorderRadius.circular(12),

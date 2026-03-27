@@ -1,4 +1,5 @@
 import 'package:design_system/design_system.dart';
+import 'package:feature_profile/feature_profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:foundation/foundation.dart';
@@ -20,23 +21,49 @@ class AppShellApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ProviderScope(
-      child: MaterialApp.router(
-        debugShowCheckedModeBanner: false,
-        title: title,
-        theme: AppTheme.light(),
-        locale: AppL10n.defaultLocale,
-        supportedLocales: AppL10n.supportedLocales,
-        localizationsDelegates: AppL10n.localizationsDelegates,
-        builder: (context, child) {
-          return Stack(
-            children: [
-              if (child != null) child,
-              const NetworkDebugFloatingEntry(),
-            ],
-          );
-        },
-        routerConfig: createAppRouter(featureFlags),
-      ),
+      child: _AppShellRoot(title: title, featureFlags: featureFlags),
+    );
+  }
+}
+
+class _AppShellRoot extends ConsumerStatefulWidget {
+  const _AppShellRoot({required this.title, required this.featureFlags});
+
+  final String title;
+  final AppShellFeatureFlags featureFlags;
+
+  @override
+  ConsumerState<_AppShellRoot> createState() => _AppShellRootState();
+}
+
+class _AppShellRootState extends ConsumerState<_AppShellRoot> {
+  @override
+  void initState() {
+    super.initState();
+    Future<void>(() async {
+      await ref.read(languageNotifierProvider.notifier).init();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = ref.watch(languageNotifierProvider);
+    return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
+      title: widget.title,
+      theme: AppTheme.light(),
+      locale: locale,
+      supportedLocales: AppL10n.supportedLocales,
+      localizationsDelegates: AppL10n.localizationsDelegates,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            const NetworkDebugFloatingEntry(),
+          ],
+        );
+      },
+      routerConfig: createAppRouter(widget.featureFlags),
     );
   }
 }

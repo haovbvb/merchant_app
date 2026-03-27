@@ -31,7 +31,12 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+**/build/
 /coverage/
+app_deps.txt
+javac_check.txt
+javac_check_bg.txt
+javac_check_bg.exit
 
 # Legacy Android source (migrated)
 # /power-square-android/

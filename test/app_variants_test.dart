@@ -19,6 +19,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Foundation / Design Showcase'), findsOneWidget);
-    expect(find.text('样式令牌'), findsOneWidget);
+    final hasChineseStyleLabel = find.text('样式令牌').evaluate().isNotEmpty;
+    final hasEnglishStyleLabel = find
+        .text('Style Tokens')
+        .evaluate()
+        .isNotEmpty;
+    expect(hasChineseStyleLabel || hasEnglishStyleLabel, isTrue);
   });
 }

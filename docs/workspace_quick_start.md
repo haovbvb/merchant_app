@@ -38,6 +38,9 @@ flutter test
 ```bash
 melos run analyze
 melos run test
+melos run verify:deps
+melos run verify:impact
+melos run verify:all
 ```
 
 ## 4. 仓库结构速览
@@ -54,6 +57,12 @@ melos run test
 3. 用 path 依赖逐步替换主工程旧实现
 4. 每阶段执行 analyze + test，确保可回归
 
+如需快速创建新 feature 包：
+
+```bash
+dart run tools/scaffold_feature.dart --name feature_order --description "Order feature module"
+```
+
 ## 6. 文档入口
 
 - docs/foundation_template_checklist.md：建设清单与验收口径
@@ -63,3 +72,4 @@ melos run test
 - docs/config_only_login_example_drill.md：仅改配置验收演练
 - docs/base_upgrade_compatibility_drill.md：基座升级兼容演练
 - docs/two_app_reuse_drill.md：双应用复用演练
+- docs/ai_coding_playbook.md：AI Coding 协作手册

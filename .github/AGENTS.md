@@ -20,3 +20,23 @@
 
 - 负责识别意图、拆任务、分发 agent。
 - 不写代码、不改文件、不直接给业务实现。
+
+## AI 任务入口
+
+- 路由/壳层问题：先看 `packages/app_shell`。
+- 通用契约/工具问题：先看 `packages/foundation`。
+- 网络问题：先看 `packages/networking`。
+- UI 规范问题：先看 `packages/design_system`。
+- 业务改动：定位到对应 `packages/feature_*`。
+
+## 禁止改动区
+
+- 不跨包引用他包 `src/` 私有实现。
+- 不在基座包引入业务包依赖。
+- 不在未确认需求时修改公开 contract 语义。
+
+## PR 最小检查项
+
+- 描述影响范围与风险等级。
+- 提供回滚方式。
+- 提供执行过的验证命令与结果。

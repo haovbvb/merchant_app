@@ -41,6 +41,11 @@
 - [x] 已新增两类应用变体入口与自动化验证：`lib/app_variants.dart`、`test/app_variants_test.dart`
 - [x] 已创建 `tools/` 目录与工具占位说明：`tools/README.md`
 - [x] 已完成治理规范 v1：`docs/foundation_governance_v1.md`（目标边界、包职责、模块契约、依赖分级、脚手架参数）
+- [x] 已升级 CI 为全仓质量门禁：`melos run analyze` + `melos run test` + 依赖边界/覆盖率校验
+- [x] 已补齐 feature 契约测试矩阵：`feature_home`、`feature_profile`、`feature_work`
+- [x] 已新增仓库级自动化脚本：`tools/check_layer_dependencies.dart`、`tools/check_coverage.dart`、`tools/scaffold_feature.dart`
+- [x] 已统一包级分析配置：各 package 新增 `analysis_options.yaml` 继承根配置
+- [x] 已补充发布治理与安全基线文档：`docs/release_versioning_governance.md`、`docs/observability_security_baseline.md`
 
 ## 当前进度（量化）
 

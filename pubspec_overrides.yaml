@@ -1,0 +1,18 @@
+# melos_managed_dependency_overrides: app_shell,design_system,feature_auth,feature_home,feature_profile,feature_work,foundation,networking
+dependency_overrides:
+  app_shell:
+    path: packages/app_shell
+  design_system:
+    path: packages/design_system
+  feature_auth:
+    path: packages/feature_auth
+  feature_home:
+    path: packages/feature_home
+  feature_profile:
+    path: packages/feature_profile
+  feature_work:
+    path: packages/feature_work
+  foundation:
+    path: packages/foundation
+  networking:
+    path: packages/networking

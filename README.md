@@ -52,6 +52,9 @@ flutter test
 - docs/foundation_template_checklist.md：模板建设清单与验收状态
 - docs/foundation_template_blueprint.md：目录骨架与契约蓝图
 - docs/foundation_governance_v1.md：治理规范（v1）
+- docs/release_versioning_governance.md：发布与版本治理
+- docs/observability_security_baseline.md：可观测与安全基线
+- docs/ai_coding_playbook.md：AI Coding 协作手册
 
 ## Fastlane（根目录）
 

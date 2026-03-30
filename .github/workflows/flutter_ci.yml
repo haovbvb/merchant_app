@@ -13,17 +13,41 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
 
-      - name: Install dependencies
+      - name: Set up Dart dependencies
+        run: |
+          dart pub global activate melos
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+
+      - name: Install root dependencies
         run: flutter pub get
 
-      - name: Analyze
-        run: flutter analyze
+      - name: Bootstrap workspace
+        run: melos bootstrap
 
-      - name: Test
-        run: flutter test
+      - name: Analyze workspace
+        run: melos run analyze
+
+      - name: Test workspace
+        run: melos run test
+
+      - name: Enforce dependency boundaries
+        run: dart run tools/check_layer_dependencies.dart
+
+      - name: Enforce impact policy on PR
+        if: github.event_name == 'pull_request'
+        run: dart run tools/check_impact_policy.dart
+
+      - name: Collect coverage
+        run: melos run test:coverage
+
+      - name: Enforce coverage baseline
+        run: dart run tools/check_coverage.dart --min-overall-line=5

@@ -7,12 +7,32 @@ packages:
 scripts:
   bootstrap:
     description: Install dependencies in all workspace packages.
-    run: melos bootstrap
+    run: dart run melos bootstrap
 
   analyze:
     description: Run static analysis in all Flutter packages.
-    run: melos exec -- "flutter analyze"
+    run: dart run melos exec -- "flutter analyze"
 
   test:
     description: Run tests in all packages that include tests.
-    run: melos exec --fail-fast --dir-exists=test -- "flutter test"
+    run: dart run melos exec --fail-fast --dir-exists=test -- "flutter test"
+
+  test:coverage:
+    description: Run tests with coverage in all packages that include tests.
+    run: dart run melos exec --fail-fast --dir-exists=test -- "flutter test --coverage"
+
+  verify:deps:
+    description: Verify internal dependency boundaries.
+    run: dart run tools/check_layer_dependencies.dart
+
+  verify:coverage:
+    description: Verify global line coverage baseline.
+    run: dart run tools/check_coverage.dart --min-overall-line=5
+
+  verify:impact:
+    description: Verify changed-file impact policy for core packages.
+    run: dart run tools/check_impact_policy.dart
+
+  verify:all:
+    description: Run full workspace quality gates.
+    run: dart run melos run analyze && dart run melos run test && dart run melos run verify:deps && dart run melos run test:coverage && dart run melos run verify:coverage
